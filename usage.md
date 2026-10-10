@@ -243,6 +243,8 @@ bash scripts/research/docker.sh sim scripts/research/sim2sim.py \
 
 现已进一步启动**全部629配置**的真实物理扫描：2026-10-10北京时间14:19快照逐项核验16例完成、1例运行中，尚未完成全部扫描。固定计划保存340项运行依赖和1887个输入文件SHA；每例seed42、500策略ticks、10仿真秒、恒定forward command，不回放参考动作。两例预检执行通过，其中一例出现高度/倾斜阈值；原始视频均CPU完整解码通过。首次CPU fixture测试与真实仿真并行被进程门卫拒绝、空闲重跑28/28通过，两轮原始JUnit均保留。[固定计划、运行快照、两例视频与失败记录](usage_assets/reports/sim2sim-all-configs-start/summary.md)。这扩展几何覆盖，不构成629配置技能成功的结论。
 
+629是配置数；其中有580个不同OBJ文件SHA，50个平地配置使用同一OBJ。不同文件SHA也不自动等于不同几何形状，本次没有几何等价性判定。[基于冻结计划的计数](usage_assets/reports/sim2sim-configuration-vs-mesh.json)只核输入身份，没有新增物理运行。
+
 ```bash
 bash scripts/research/docker.sh sim scripts/research/sim2sim_scene_matrix.py \
   --matrix /outputs/motion-matching/matrix.json \

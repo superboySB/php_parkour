@@ -383,7 +383,7 @@ docker exec -e OMP_NUM_THREADS=4 php-parkour-research \
   --seconds 10 --gl egl
 ```
 
-这是17场景、629种几何上每种500次策略控制的有界测试，各例使用恒定forward command；不会按参考轨迹回放，也不把存活10秒视为完成课程。当前后台任务正在使用上述目录和DDS，**不要同时启动第二份扫描或其他原生闭环**。具体启动时间、逐例完成快照和两段真实预检视频见[扫描记录](usage_assets/reports/sim2sim-all-configs-start/summary.md)。
+这是17场景全部629个配置各自几何上的有界测试，每例500次策略控制。配置数不是独立几何数：固定计划有580个不同OBJ文件SHA，50个平地配置共享同一OBJ；没有做几何等价性判定。[计数核验](usage_assets/reports/sim2sim-configuration-vs-mesh.json)。各例使用恒定forward command，不按参考轨迹回放，也不把存活10秒视为完成课程。当前后台任务正在使用上述目录和DDS，**不要同时启动第二份扫描或其他原生闭环**。具体启动时间、逐例完成快照和两段真实预检视频见[扫描记录](usage_assets/reports/sim2sim-all-configs-start/summary.md)。
 
 ## 8. 验收与定位问题
 

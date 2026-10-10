@@ -553,6 +553,8 @@ CPU 测试也保留实际边界：根目录/训练 289 项通过；motion matchi
 
 全629配置扫描使用发布学生ONNX和各配置的实际OBJ，依赖、模型和1887个输入文件均绑定SHA。两例预检各500策略ticks，其中一例有高度/倾斜阈值事件，原片完整解码通过；长扫描仍在运行。[启动与逐例快照](usage_assets/reports/sim2sim-all-configs-start/summary.md)保留当前状态，不能将运动学生成629组或后台启动回执当作629例物理完成。
 
+配置数与网格身份也分开：629配置含580个不同OBJ字节SHA，50个平地配置共享相同OBJ；同一几何的不同序列化也可能有不同SHA，因此未宣称580种独立形状。[输入计数核验](usage_assets/reports/sim2sim-configuration-vs-mesh.json)。
+
 ### 8.3 如何复核本文
 
 算法数值来自当前实际 Python 配置与源码，文件布局另以真实 NPZ/ONNX 和已保存 YAML 核对。以下机读审计记录保留源码 SHA、字段范围与具体行号：
