@@ -1,0 +1,310 @@
+{
+  "schema_version": 1,
+  "status": "reviewed_no_demonstrated_late_stage_blocker",
+  "observed_utc": "2026-10-10T10:23:03.490310+00:00",
+  "completion_verified": false,
+  "quality_verified": false,
+  "official_source_tree": "0093aa40fbae2bcf219d39ace222e0c4d8a71e305551939a5a1b9c0e40c683ab",
+  "image_id": "sha256:631d9e53768a3cc65372b394d0aa266a34ee92004141a9817824001ade30e3bd",
+  "container_id": "f1f079422c8a6927a11a9e4d681ac50bc3abe7db03f2e3ccdbe7e6a07d9702db",
+  "started_at": "2026-10-10T04:01:22.880471283Z",
+  "native_training": [
+    {
+      "pid": 3836908,
+      "start_ticks": 700458622,
+      "pgid": 3836889,
+      "sid": 3836889,
+      "cmdline": [
+        "/bin/bash",
+        "/isaac-sim/python.sh",
+        "-m",
+        "wbt_training.train_agent",
+        "exp:g1-wbt-terrain-ref-noscale",
+        "simulator:isaacsim",
+        "--training.registry-name",
+        "file:///data/assets/motions-locomotion",
+        "logger:disabled",
+        "--logger.video.enabled",
+        "False",
+        "--training.headless",
+        "True",
+        "--training.num-envs",
+        "4096",
+        "--training.name",
+        "teacher-locomotion",
+        "--training.project",
+        "PHP-research",
+        "--logger.base-dir",
+        "/outputs/official-full/official/teacher-locomotion",
+        "--training.seed",
+        "42",
+        "--algo.config.num-learning-iterations",
+        "20000"
+      ]
+    },
+    {
+      "pid": 3836987,
+      "start_ticks": 700458713,
+      "pgid": 3836889,
+      "sid": 3836889,
+      "cmdline": [
+        "/isaac-sim/kit/python/bin/python3",
+        "-m",
+        "wbt_training.train_agent",
+        "exp:g1-wbt-terrain-ref-noscale",
+        "simulator:isaacsim",
+        "--training.registry-name",
+        "file:///data/assets/motions-locomotion",
+        "logger:disabled",
+        "--logger.video.enabled",
+        "False",
+        "--training.headless",
+        "True",
+        "--training.num-envs",
+        "4096",
+        "--training.name",
+        "teacher-locomotion",
+        "--training.project",
+        "PHP-research",
+        "--logger.base-dir",
+        "/outputs/official-full/official/teacher-locomotion",
+        "--training.seed",
+        "42",
+        "--algo.config.num-learning-iterations",
+        "20000"
+      ]
+    }
+  ],
+  "identity_compared_to_prior_saved_observation": {
+    "Id": true,
+    "Image": true,
+    "Pid": true,
+    "StartedAt": true,
+    "Running": true,
+    "Mounts": true,
+    "native_process_pid_birth_pgid_sid_argv": true
+  },
+  "source_recorded_files_unchanged": 1903,
+  "original_pipeline_sha256": "5f85596f40b796b8626e05058d54824d93ba97e3788129e1763ba5c461284adb",
+  "original_eval_helper_sha256": "87a6bb555cf2260b74f878d98c9eb743b8484dff3686478508d01e61a9869d80",
+  "original_driver_sha256": "f2c0eb73772f311487df3e2ccb5b674f34df943abe74a5b41d0e1e6c7b0b0360",
+  "source_current_new_guard_is_not_active": true,
+  "source_current_new_retry_is_not_active": true,
+  "actual_mounts": [
+    {
+      "source": "/diff/dzp_is_sb/php-parkour-research/logs",
+      "destination": "/workspace/php_parkour/logs",
+      "read_write": true
+    },
+    {
+      "source": "/diff/dzp_is_sb/php-parkour-research/assets",
+      "destination": "/data/assets",
+      "read_write": true
+    },
+    {
+      "source": "/diff/dzp_is_sb/php-parkour-research/cache",
+      "destination": "/data/cache",
+      "read_write": true
+    },
+    {
+      "source": "/diff/dzp_is_sb/php-parkour-research/source/0093aa40fbae2bcf219d39ace222e0c4d8a71e305551939a5a1b9c0e40c683ab",
+      "destination": "/workspace/php_parkour",
+      "read_write": true
+    },
+    {
+      "source": "/diff/dzp_is_sb/php-parkour-research/outputs",
+      "destination": "/outputs",
+      "read_write": true
+    },
+    {
+      "source": "/diff/dzp_is_sb/php-parkour-research/outputs",
+      "destination": "/workspace/php_parkour/outputs/research",
+      "read_write": true
+    }
+  ],
+  "active_stage_status": {
+    "teacher-locomotion": "running"
+  },
+  "last_log_iteration_line": "Learning iteration 9308/20000 \u001b[0m                    \u2502",
+  "monitor_status": {
+    "observed_utc": "2026-10-10T10:22:34.543838+00:00",
+    "status": "waiting",
+    "blockers": [
+      "teacher-locomotion: running",
+      "teacher-low-step: missing manifest",
+      "teacher-high-step: missing manifest",
+      "teacher-low-climb-76: missing manifest",
+      "teacher-high-climb-76: missing manifest",
+      "eval-teacher-locomotion: missing manifest",
+      "eval-teacher-low-step: missing manifest",
+      "eval-teacher-high-step: missing manifest",
+      "eval-teacher-low-climb-76: missing manifest",
+      "eval-teacher-high-climb-76: missing manifest",
+      "student-pure: missing manifest",
+      "eval-student-pure: missing manifest",
+      "export-student-pure: missing manifest",
+      "student-finetune: missing manifest",
+      "eval-student-finetune: missing manifest",
+      "export-student-finetune: missing manifest"
+    ],
+    "gpu_started": false
+  },
+  "asset_evidence": {
+    "saved_configuration_sha256": "f582724c0dccb26cd91e27591534020200ce64124fb4138e32fd6bea145afce3",
+    "saved_asset_root": "@holosoma/data/robots",
+    "saved_urdf_file": "g1/main_mesh_arm_collision_halfspherehand.urdf",
+    "saved_usd_file": null,
+    "resolved_asset_root_host": "/diff/dzp_is_sb/php-parkour-research/source/0093aa40fbae2bcf219d39ace222e0c4d8a71e305551939a5a1b9c0e40c683ab/thirdparty/holosoma/src/holosoma/holosoma/data/robots",
+    "asset_directory_mode": "0o775",
+    "actual_generated_directories": 24,
+    "actual_generated_usd_files": 120,
+    "readonly_cache_failure_applies_to_this_mount": false
+  },
+  "findings": [
+    {
+      "id": "actual-rw-source",
+      "severity": "verified_difference",
+      "conclusion": "Formal cloud source is mounted RW, as deployed by cloud.py without :ro. Existing24 converter directories and USD files demonstrate usable default asset path; local RO-source5preset failure does not demonstrate a blocker here.",
+      "sources": [
+        "cloud.py deploy source bind",
+        "original-source/thirdparty/holosoma/src/holosoma/holosoma/simulator/isaacsim/isaacsim.py:296-358",
+        "remote-stdout.json:container_inspect.Mounts, robot_asset_directory"
+      ]
+    },
+    {
+      "id": "old-pipeline-quality-failclosed",
+      "severity": "verified_guard",
+      "conclusion": "Old eval_quality helper alone lacks new exit guard, but old train_pipeline independently requires fresh positive-duration MP4 plus fresh quality schema/sourceSHA/64x3000 dimensions, finite actions/root and4x192000 metric samples. Missing/invalid report after native rc0 changes manifest to failed and exits nonzero; set-e stops shell and16-stage watch waits.",
+      "sources": [
+        "original-source/scripts/research/train_pipeline.py:380-418",
+        "original-source/scripts/research/train_pipeline.py:75-102",
+        "original-source/scripts/research/run_official_acceptance.sh:4-25"
+      ],
+      "manifest_returncode_semantics": "Manifest returncode records native childrc (possibly0). After artifact failure, status becomesfailed and pipeline localreturncode becomes1, so its SystemExit is nonzero even though recordedchildreturncode remains0. Watch keys on statuspassed and actualartifacts, not childrc alone."
+    },
+    {
+      "id": "export-order",
+      "severity": "verified_contract",
+      "conclusion": "All5 defaultteachers must finish before final same-basename trainingONNX validation; then5 teacher evals; then pure train/eval/independentexport+30ORT; then finetune train/eval/independentexport+30ORT. Teacher eval explicitly export-onnxFalse, so1variant eval cannot overwrite64variant finaltraining graphs.",
+      "sources": [
+        "original-source/scripts/research/run_official_acceptance.sh:16-24",
+        "original-source/scripts/research/eval_quality.sh:23-29",
+        "original-source/scripts/research/validate_teacher_exports.py:35-58",
+        "original-source/scripts/research/train_pipeline.py:349-379",
+        "original-source/wbt_training/training_runs/export_distill_onnx.py:110-168"
+      ]
+    },
+    {
+      "id": "execution-vs-quality",
+      "severity": "documented_boundary",
+      "conclusion": "Failed reset counts and tracking magnitudes do not automatically fail execution acceptance. Official20iteration pilot already passed pipeline execution with quality_verifiedfalse; no convergence/coverage conclusion follows.",
+      "sources": [
+        "references.json:official-pilot-quality/pipeline-manifest.json",
+        "original-source/scripts/research/train_pipeline.py:75-102"
+      ]
+    },
+    {
+      "id": "no-auto-retry",
+      "severity": "conditional_recovery_boundary",
+      "conclusion": "Existing shell has set-e and no retry loop. A future failed eval/export/teachergraph check stops downstream stages; watch observes and does not repair training. This is a code-proven recovery boundary, not an observed current failure.",
+      "sources": [
+        "original-source/scripts/research/run_official_acceptance.sh:4-25",
+        "watch inspect_artifacts/stage_status/process_gate"
+      ]
+    },
+    {
+      "id": "old-retry-history",
+      "severity": "conditional_evidence_boundary",
+      "conclusion": "Old pipeline archives previous manifest only. A manually rerun old evaluator writes the samequality.json/TB dir without the later byte-exactquality-history facility. Preserve oldquality/TB first if recovery becomes necessary. No suchrerun was done in this audit.",
+      "sources": [
+        "original-source/scripts/research/train_pipeline.py:308-313",
+        "original-source/scripts/research/eval_quality.py:171-183,187-208"
+      ]
+    },
+    {
+      "id": "teacher-final-graph-recovery",
+      "severity": "documented_limit",
+      "conclusion": "If finalsame-basename teacherONNX is missing/corrupt/mismatched the validator failsclosed; a passedfinalPT is not automatically trained again just to regenerate the graph. The training64variantgraph must not be replaced with1varianteval export. No missingfinalgraph is observed now, since firstteacher is stilltraining.",
+      "sources": [
+        "original-source/scripts/research/validate_teacher_exports.py:35-58",
+        "references.json:official-driver-audit/audit.md"
+      ]
+    }
+  ],
+  "safe_recovery_recommendation": {
+    "now": "Leave originaldriver/source/image/binds/nativeprocess untouched; only observe. No proven need to change the active schedule.",
+    "only_if_later_failure": [
+      "Wait for originalshell andallnativechildren to end, release officiallock, andfixedUUID GPUidle. Do not restart or edit the originaldriver.",
+      "Retain olddriverlog/manifests/quality/TB andallfailed outputs byteexact withSHA; do not replace oldquality before preserving it.",
+      "Prepare an explicit missing-stage continuation in separatefrozen source/receipt. Reuse completedcanonicalPTs andordered5expertSHA; execute only the missing stages. Any partialstudenttrain resumes only its ownverifiedPT with unchangedinputprovenance; no finishedteacherretraining.",
+      "Retain4096/2048native schedules and64x3000eval contract; use reviewedRO-source/RW35fileassetcontract if a newcontainer is selected. Plain pipeline lacks anasset-root option, so newRO continuation needs explicit reviewedasset-awareentrypoint rather than blindlyrerunning it.",
+      "Beforewatch canarm, genuinelyverify all16passed manifests+7canonicalPTs+teachergraphreports+student30caseORTs, no active officialprocess, availablelock andGPUidle. Do not fabricatepassedmanifests or append the canonicalfinalmarker merely to bypasswaiting. A replacementcompletion receipt/process-gate integration requires explicitroot review."
+    ]
+  },
+  "audit_actions": {
+    "ssh_reads": 1,
+    "docker_exec_live_gpu_container": 0,
+    "docker_mutations": 0,
+    "remote_file_mutations": 0,
+    "signals": 0,
+    "gpu_dds_or_simulation_starts": 0,
+    "scientific_model_or_tensorboard_packages_on_host": 0
+  },
+  "references": [
+    {
+      "path": "usage_assets/reports/official-full-start/launch.json",
+      "sha256": "6f4a49617c735e191cf2ab0ffc076e4e32c60c4c4f0fa0d56c8c7910204bcfb8",
+      "bytes": 2154
+    },
+    {
+      "path": "usage_assets/reports/cloud-final-deployment.json",
+      "sha256": "44872292ecf7ccbb67dca1b48a82ef4b8957330380bfc8bd0c2d91bb672f140d",
+      "bytes": 3191
+    },
+    {
+      "path": "usage_assets/reports/official-pilot-quality/pipeline-manifest.json",
+      "sha256": "bbbb9bc2fdba45f5d65b5a1519881888e9172b2815153bffb9fb118e8bb3857d",
+      "bytes": 38664
+    },
+    {
+      "path": "usage_assets/reports/training-cloud-final/manifests/eval-student-pure.json",
+      "sha256": "3075556f2bb7cff3c806ef2ec927331733812ac259a65be3f97b53e552f1c8c8",
+      "bytes": 13288
+    },
+    {
+      "path": "usage_assets/reports/training-cloud-final/manifests/eval-student-finetune.json",
+      "sha256": "596f1e4f01ca18fa07b120295ccb7c24620039c4a60140c4d2d1130085902cb7",
+      "bytes": 13077
+    },
+    {
+      "path": "usage_assets/reports/teacher-presets-reload-ro-failure/review.json",
+      "sha256": "dc75735d4a3fabf9052bd66c8d8fc9a7ba47fb7d6f03957f0384e69187c8b8a9",
+      "bytes": 29623
+    },
+    {
+      "path": "usage_assets/reports/teacher-presets-reload-ro-failure/summary.md",
+      "sha256": "cd12a415e40bd0ee80f4086c650a9b7ef38fe1f957255eb3c8f5bc64ee236839",
+      "bytes": 1140
+    },
+    {
+      "path": "usage_assets/reports/eval-quality-exit-guard/summary.md",
+      "sha256": "04a267bd725b220114f5d5f89e8597c40baa7911a102c566e6b0ad4ee2fc340e",
+      "bytes": 1257
+    },
+    {
+      "path": "usage_assets/reports/eval-quality-retry-integration/summary.md",
+      "sha256": "9806c8fa80d7d2f1b8a357f277573c6a8155d8d25444b54cc09231d04368db1e",
+      "bytes": 2264
+    },
+    {
+      "path": "usage_assets/reports/official-driver-audit/audit.md",
+      "sha256": "fe78645960dfcc9d48bc4e2833144e84d2c3d4f391f292affabadaae2df6d53d",
+      "bytes": 6113
+    },
+    {
+      "path": "usage_assets/reports/posttrain-monitor-ro-assets-v2/summary.md",
+      "sha256": "7c4e2982bc7092d343858964c7a5cb49e95d42012d06a055f1d07a43fc5b5ff1",
+      "bytes": 1724
+    }
+  ]
+}

@@ -1,0 +1,141 @@
+{
+  "schema_version": 1,
+  "status": "passed",
+  "baseline_path": "/home/dzp/projects/php_parkour/outputs/research/posttrain-monitor-upgrade-ro-assets-v2/remote-originals/upgrade/report.json",
+  "baseline_sha256": "4df4cf2d1e3f3a296428f131faa727a1a966df628b1fd1458d2f690471e36ba4",
+  "observed_utc": "2026-10-10T10:23:03.490310+00:00",
+  "comparisons": {
+    "Id": true,
+    "Image": true,
+    "Pid": true,
+    "StartedAt": true,
+    "Running": true,
+    "Mounts": true,
+    "native_process_pid_birth_pgid_sid_argv": true
+  },
+  "current_container": {
+    "Id": "f1f079422c8a6927a11a9e4d681ac50bc3abe7db03f2e3ccdbe7e6a07d9702db",
+    "Image": "sha256:631d9e53768a3cc65372b394d0aa266a34ee92004141a9817824001ade30e3bd",
+    "Pid": 3760878,
+    "StartedAt": "2026-10-10T04:01:22.880471283Z",
+    "Running": true,
+    "Mounts": [
+      {
+        "Type": "bind",
+        "Source": "/diff/dzp_is_sb/php-parkour-research/logs",
+        "Destination": "/workspace/php_parkour/logs",
+        "Mode": "",
+        "RW": true,
+        "Propagation": "rprivate"
+      },
+      {
+        "Type": "bind",
+        "Source": "/diff/dzp_is_sb/php-parkour-research/assets",
+        "Destination": "/data/assets",
+        "Mode": "",
+        "RW": true,
+        "Propagation": "rprivate"
+      },
+      {
+        "Type": "bind",
+        "Source": "/diff/dzp_is_sb/php-parkour-research/cache",
+        "Destination": "/data/cache",
+        "Mode": "",
+        "RW": true,
+        "Propagation": "rprivate"
+      },
+      {
+        "Type": "bind",
+        "Source": "/diff/dzp_is_sb/php-parkour-research/source/0093aa40fbae2bcf219d39ace222e0c4d8a71e305551939a5a1b9c0e40c683ab",
+        "Destination": "/workspace/php_parkour",
+        "Mode": "",
+        "RW": true,
+        "Propagation": "rprivate"
+      },
+      {
+        "Type": "bind",
+        "Source": "/diff/dzp_is_sb/php-parkour-research/outputs",
+        "Destination": "/outputs",
+        "Mode": "",
+        "RW": true,
+        "Propagation": "rprivate"
+      },
+      {
+        "Type": "bind",
+        "Source": "/diff/dzp_is_sb/php-parkour-research/outputs",
+        "Destination": "/workspace/php_parkour/outputs/research",
+        "Mode": "",
+        "RW": true,
+        "Propagation": "rprivate"
+      }
+    ]
+  },
+  "current_native": [
+    {
+      "pid": 3836908,
+      "start_ticks": 700458622,
+      "pgid": 3836889,
+      "sid": 3836889,
+      "cmdline": [
+        "/bin/bash",
+        "/isaac-sim/python.sh",
+        "-m",
+        "wbt_training.train_agent",
+        "exp:g1-wbt-terrain-ref-noscale",
+        "simulator:isaacsim",
+        "--training.registry-name",
+        "file:///data/assets/motions-locomotion",
+        "logger:disabled",
+        "--logger.video.enabled",
+        "False",
+        "--training.headless",
+        "True",
+        "--training.num-envs",
+        "4096",
+        "--training.name",
+        "teacher-locomotion",
+        "--training.project",
+        "PHP-research",
+        "--logger.base-dir",
+        "/outputs/official-full/official/teacher-locomotion",
+        "--training.seed",
+        "42",
+        "--algo.config.num-learning-iterations",
+        "20000"
+      ]
+    },
+    {
+      "pid": 3836987,
+      "start_ticks": 700458713,
+      "pgid": 3836889,
+      "sid": 3836889,
+      "cmdline": [
+        "/isaac-sim/kit/python/bin/python3",
+        "-m",
+        "wbt_training.train_agent",
+        "exp:g1-wbt-terrain-ref-noscale",
+        "simulator:isaacsim",
+        "--training.registry-name",
+        "file:///data/assets/motions-locomotion",
+        "logger:disabled",
+        "--logger.video.enabled",
+        "False",
+        "--training.headless",
+        "True",
+        "--training.num-envs",
+        "4096",
+        "--training.name",
+        "teacher-locomotion",
+        "--training.project",
+        "PHP-research",
+        "--logger.base-dir",
+        "/outputs/official-full/official/teacher-locomotion",
+        "--training.seed",
+        "42",
+        "--algo.config.num-learning-iterations",
+        "20000"
+      ]
+    }
+  ],
+  "scope": "Exact equality between saved10:09 upgrade-after observation and the actual10:23 read-only audit. No continuous-monitoring or future-identity claim."
+}
