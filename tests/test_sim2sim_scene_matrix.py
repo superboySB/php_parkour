@@ -47,6 +47,7 @@ def test_dependency_parent_initializer_side_effect_imports_are_recursively_scann
     holosoma = tmp_path / "thirdparty/holosoma/src/holosoma/holosoma"
     sources = {
         "scripts/research/sim2sim.py": "import holosoma.hidden.deep.leaf\n",
+        "scripts/research/reference_commands.py": "# explicit reference reader dependency\n",
         "docker/bin/train-python": "fixture", "docker/bin/inference-python": "fixture", "docker/bin/activate": "fixture",
         "thirdparty/holosoma/src/holosoma/holosoma/__init__.py": "import wbt_training.root_side_effect\n",
         "thirdparty/holosoma/src/holosoma/holosoma/bridge/__init__.py": "from . import bridge_side_effect\n",
@@ -434,9 +435,139 @@ def test_dependency_list_excludes_motion_gui_and_includes_native_execution():
     paths = {item["path"] for item in matrix.dependencies()}
     assert str(matrix.ROOT / "scripts/research/sim2sim.py") in paths
     assert str(matrix.ROOT / "scripts/research/sim2sim_scene_matrix.py") in paths
+    assert str(matrix.ROOT / "scripts/research/reference_commands.py") in paths
     assert any(path.endswith("simulator/mujoco/mujoco.py") for path in paths)
     assert any(path.endswith("policies/depth_distillation.py") for path in paths)
     assert not any("/motion_matching/" in path or path.endswith("README.md") for path in paths)
+
+
+@pytest.fixture
+def reference_fixture(run_fixture, monkeypatch):
+    import numpy as np
+
+    args, old_plan, helper = run_fixture
+    selections = copy.deepcopy(old_plan["selections"])
+    for selection, frames in zip(selections, (341, 213)):
+        motion = Path(selection["source_files"][0]["path"])
+        labels = np.eye(15, dtype=np.float32)[np.arange(frames) % 12]
+        quats = np.zeros((frames, 1, 4), dtype=np.float32)
+        quats[:, :, 0] = 1
+        np.savez(motion, fps=np.array([50]), vel_cmd=labels,
+                 body_pos_w=np.zeros((frames, 1, 3)), body_quat_w=quats)
+        selection["source_files"][0] = matrix.fingerprint(motion)
+        selection["reference_clip_seconds"] = frames / 50
+    monkeypatch.setattr(matrix, "select", lambda source, all_configs=False: copy.deepcopy(selections))
+    args.reference_commands = True
+    return args, matrix.make_plan(args), helper
+
+
+def test_reference_mode_binds_actual_npz_duration_and_launch(reference_fixture):
+    args, plan, _ = reference_fixture
+    assert plan["seconds_per_configuration"] is plan["seconds_per_scenario"] is None
+    assert plan["estimated_egl_wall_minutes"] is None and plan["total_policy_seconds"] == 554 / 50
+    assert [matrix.policy_ticks(plan, selection) for selection in plan["selections"]] == [341, 213]
+    for selection in plan["selections"]:
+        reference, launch = selection["reference_commands"], selection["launch"]
+        assert reference == matrix.load_reference_commands(reference["path"])
+        assert launch[launch.index("--reference-motion") + 1] == reference["path"]
+        assert "--reference-spawn" in launch and "--record-policy" in launch
+        assert "--commands" not in launch and "--seconds-per-command" not in launch
+
+
+def test_default_plan_remains_constant_forward(run_fixture):
+    args, plan, _ = run_fixture
+    assert not plan.get("reference_commands") and plan["seconds_per_configuration"] == 10
+    for selection in plan["selections"]:
+        assert selection["launch"][selection["launch"].index("--commands") + 1] == str(selection["command"])
+        assert "--reference-motion" not in selection["launch"] and "--record-policy" not in selection["launch"]
+
+
+@pytest.mark.parametrize("fault", ("suffix", "sha", "duration"))
+def test_reference_plan_rejects_source_contract_mismatch(reference_fixture, monkeypatch, fault):
+    args, plan, _ = reference_fixture
+    selections = copy.deepcopy(plan["selections"])
+    if fault == "suffix":
+        item = selections[0]["source_files"][0]
+        renamed = Path(item["path"]).with_name("unpaired.npz")
+        Path(item["path"]).rename(renamed)
+        selections[0]["source_files"][0] = matrix.fingerprint(renamed)
+    elif fault == "duration":
+        selections[0]["reference_clip_seconds"] += .02
+    else:
+        original = matrix.load_reference_commands
+        monkeypatch.setattr(matrix, "load_reference_commands", lambda path: original(path) | {"sha256": "f" * 64})
+    monkeypatch.setattr(matrix, "select", lambda source, all_configs=False: copy.deepcopy(selections))
+    with pytest.raises(ValueError, match="Reference"):
+        matrix.make_plan(args)
+
+
+def reference_output_fixture(output, plan, selection):
+    import numpy as np
+
+    reference = selection["reference_commands"]
+    frames = reference["frames"]
+    native_output_fixture(output, plan, selection, ticks=frames)
+    result = json.loads((output / "result.json").read_text())
+    result["config"].update(commands=reference["codes"], duration=frames / 50, record_policy=True,
+                            reference_motion={key: value for key, value in reference.items() if key != "commands"}, reference_spawn=True)
+    result["simulation"]["policy_simulation_seconds"] = frames / 50 + .018
+    inf = result["inference"]
+    inf["reference_replay"] = dict(sha256=reference["sha256"], frames=frames, fps=50, anchor_physics_step=1010,
+        physics_steps_per_policy_tick=10, all_frames_applied=True, reference_qpos_drives_simulation=False, spatial_alignment="root XY/yaw only")
+    inf["commands"] = [dict(reference_frame=i, code=reference["codes"][i], physics_step=1010 + i * 10,
+                            seconds=(9 + i * 10) / 500) for i in range(frames)]
+    inf["samples"] = [dict(command=reference["codes"][i], reference_frame=i, physics_step=1010 + i * 10,
+        simulation_seconds=(9 + i * 10) / 500, reference_seconds=i / 50, velocity_command=reference["commands"][i],
+        policy_action_enabled=True, get_ready_state=False, wall_seconds=i * .02, target_min=-1., target_max=1., action_l2=1.) for i in range(frames)]
+    (output / "policy-recording").mkdir()
+    qpos = np.zeros((frames, 36)); qpos[:, 0] = 1
+    np.savez(output / "policy-recording/clip.npz", qpos=qpos, vel_cmd=reference["commands"], fps=np.array(50))
+    inf["lifecycle"].update(damping_command_sent=True, damping_kp_max=0., damping_kd_min=1.,
+        recording_toggle_and_stop_autosave=[dict(file="policy-recording/clip.npz", frames=frames, fps=50,
+                                               qpos_shape=[frames, 36], vel_cmd_shape=[frames, 15])])
+    matrix.write(output / "released.json", dict(physics_step=1001, physics_steps_per_policy_tick=10,
+        reference_motion_sha256=reference["sha256"], reference_full_pose_applied=False))
+    matrix.write(output / "run.json", result["config"])
+    matrix.write(output / "inference.json", inf)
+    # The native supervisor deliberately omits samples from result.json.
+    result["inference"] = {key: value for key, value in inf.items() if key != "samples"}
+    matrix.write(output / "result.json", result)
+    return result
+
+
+@pytest.mark.parametrize("fault", (None, "ticks", "label", "clock", "missing_frame", "recording", "metadata", "summary", "raw"))
+def test_reference_result_and_retention_require_every_actual_frame(reference_fixture, fault):
+    import numpy as np
+
+    args, plan, _ = reference_fixture
+    selection = plan["selections"][0]
+    output = args.output / "reference"
+    result = reference_output_fixture(output, plan, selection)
+    assert "samples" not in result["inference"]
+    raw_inference = json.loads((output / "inference.json").read_text())
+    if fault == "ticks": raw_inference["ticks"] = 500
+    elif fault == "label": raw_inference["samples"][100]["velocity_command"] = [0] * 15
+    elif fault == "clock": raw_inference["samples"][100]["physics_step"] += 10
+    elif fault == "missing_frame": raw_inference["commands"].pop()
+    elif fault == "metadata": result["config"]["reference_motion"]["sha256"] = "f" * 64
+    elif fault == "summary": result["inference"]["input"] = "changed only in summary"
+    elif fault == "raw": raw_inference["input"] = "changed only in raw report"
+    elif fault == "recording":
+        clip = output / "policy-recording/clip.npz"
+        with np.load(clip) as archive: arrays = {name: archive[name] for name in archive.files}
+        arrays["vel_cmd"][100] = np.eye(15)[0]
+        np.savez(clip, **arrays)
+    if fault not in ("summary", "raw"):
+        result["inference"] = {key: value for key, value in raw_inference.items() if key != "samples"}
+    matrix.write(output / "inference.json", raw_inference)
+    matrix.write(output / "run.json", result["config"])
+    matrix.write(output / "result.json", result)
+    log = args.output / "parent.log"; log.write_text("Synthetic CPU child output\n")
+    if fault:
+        with pytest.raises(ValueError): matrix.retain_evidence(output, plan, selection, selection["launch"], log)
+    else:
+        retained = matrix.retain_evidence(output, plan, selection, selection["launch"], log)
+        assert json.loads(Path(retained["evidence"]["path"]).read_text())["expected_policy_ticks"] == 341
 
 
 def test_schema3_plan_binds_harness_and_every_case_faulthandler(run_fixture):

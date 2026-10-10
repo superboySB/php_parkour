@@ -3,8 +3,10 @@
 
 Uses deterministic, predeclared configurations, retaining falls and failures.
 Default: one geometry per scenario (17). --all-configs explicitly selects all
-629 configurations. Both use constant forward commands, rather than reference
-motion replay. Run only inside the research Docker; execution is sequential.
+629 configurations. Commands remain constant forward by default. Explicit
+--reference-commands replays every generated 50 Hz label through the physical
+policy, with root XY/yaw alignment and deployment startup stance preserved.
+Run only inside the research Docker; execution is sequential.
 Matrix drivers share a container-wide DDS lock. Manual sim2sim invocations must
 also run sequentially, after all matrix drivers and native workers have exited.
 """
@@ -25,6 +27,11 @@ import time
 import re
 import math
 import importlib.util
+
+if __package__:
+    from .reference_commands import load_reference_commands
+else:
+    from reference_commands import load_reference_commands
 
 ROOT = Path(__file__).resolve().parents[2]
 GLOBAL_LOCK = Path("/tmp/php-parkour-sim2sim-matrix.lock")
@@ -115,7 +122,8 @@ def dependencies() -> list[dict]:
     included merely because they share this checkout. Installed native libraries
     are bound by the externally verified immutable Docker image ID.
     """
-    files = {Path(__file__).resolve(), ROOT / "scripts/research/sim2sim.py"}
+    files = {Path(__file__).resolve(), ROOT / "scripts/research/sim2sim.py",
+             ROOT / "scripts/research/reference_commands.py"}
     packages = {name: ROOT / relative for name, relative in (
         ("holosoma", "thirdparty/holosoma/src/holosoma/holosoma"),
         ("holosoma_inference", "thirdparty/holosoma/src/holosoma_inference/holosoma_inference"),
@@ -249,9 +257,22 @@ def make_plan(args) -> dict:
             name_hash = hashlib.sha256(selection["configuration"].encode()).hexdigest()[:12]
             output /= f"config-{selection['configuration_index']:04d}-{slug}-{name_hash}"
         selection["output"] = str(output)
+        command_args = ["--commands", str(selection["command"]), "--seconds-per-command", str(args.seconds)]
+        if getattr(args, "reference_commands", False):
+            motions = [item for item in selection["source_files"] if item["path"].endswith("_motion.npz")]
+            if len(motions) != 1:
+                raise ValueError("Reference replay requires exactly one generated _motion.npz")
+            reference = load_reference_commands(motions[0]["path"])
+            if reference["sha256"] != motions[0]["sha256"]:
+                raise ValueError("Reference labels differ from the source matrix NPZ")
+            if not math.isclose(reference["frames"] / reference["fps"], selection["reference_clip_seconds"], abs_tol=1e-9):
+                raise ValueError("Reference frame duration differs from the source matrix")
+            selection["reference_commands"] = reference
+            selection["policy_seconds"] = reference["frames"] / reference["fps"]
+            command_args = ["--reference-motion", reference["path"], "--reference-spawn", "--record-policy"]
         selection["launch"] = [sys.executable, str(ROOT / "scripts/research/sim2sim.py"), "--models", str(args.models.resolve()),
-                               "--terrain", "custom", "--mesh", selection["mesh"], "--commands", str(selection["command"]),
-                               "--seconds-per-command", str(args.seconds), "--seed", str(args.seed), "--gl", args.gl,
+                               "--terrain", "custom", "--mesh", selection["mesh"], *command_args,
+                               "--seed", str(args.seed), "--gl", args.gl,
                                "--python-faulthandler",
                                "--sim-python", args.sim_python, "--inference-python", args.inference_python, "--output", str(output)]
     closure = dependencies()
@@ -276,6 +297,11 @@ def make_plan(args) -> dict:
                                if args.all_configs else "First passing forward-named configuration by source index, else first passing configuration; random_locomotion first clutter (>8 vertices) configuration with only high-forward moving segments"),
             "estimated_egl_wall_minutes": [240, 300] if args.all_configs else [8, 12],
             "quality_verified": False, "obstacle_course_completion_verified": False}
+    if getattr(args, "reference_commands", False):
+        plan.update(reference_commands=True, seconds_per_scenario=None, seconds_per_configuration=None,
+                    total_policy_seconds=sum(item["policy_seconds"] for item in selections),
+                    estimated_egl_wall_minutes=None,
+                    scope=f"17 scenarios, {len(selections)} generated configurations; full per-frame reference command replay through the physical policy; root XY/yaw alignment with deployment stance; skill/course success unverified")
     plan["plan_sha256"] = identity(plan)
     return plan
 
@@ -390,22 +416,84 @@ def validate_worker_receipts(directory: Path, plan: dict, result: dict, translat
     return [fingerprint(path) for path in paths]
 
 
+def policy_ticks(plan: dict, selection: dict) -> int:
+    return selection["reference_commands"]["frames"] if plan.get("reference_commands") else round(plan["seconds_per_configuration"] / .02)
+
+
+def validate_reference_replay(directory: Path, selection: dict, cfg: dict, inference: dict) -> None:
+    import numpy as np
+
+    reference = selection["reference_commands"]
+    metadata = {key: value for key, value in reference.items() if key != "commands"}
+    raw_inference = json.loads((directory / "inference.json").read_text())
+    if inference != {key: value for key, value in raw_inference.items() if key != "samples"}:
+        raise ValueError("Reference inference summary differs from the raw native report")
+    inference = raw_inference
+    replay, lifecycle = inference["reference_replay"], inference["lifecycle"]
+    released = json.loads((directory / "released.json").read_text())
+    anchor, decimation = replay["anchor_physics_step"], replay["physics_steps_per_policy_tick"]
+    if (cfg.get("reference_motion") != metadata or cfg.get("reference_spawn") is not True
+            or cfg != json.loads((directory / "run.json").read_text())
+            or replay["sha256"] != reference["sha256"] or replay["frames"] != reference["frames"] or replay["fps"] != 50
+            or replay["all_frames_applied"] is not True or replay["reference_qpos_drives_simulation"] is not False
+            or replay["spatial_alignment"] != "root XY/yaw only" or type(anchor) is not int or decimation != 10
+            or anchor % decimation or not 0 <= anchor - released["physics_step"] < decimation
+            or released["physics_steps_per_policy_tick"] != decimation
+            or released["reference_motion_sha256"] != reference["sha256"] or released["reference_full_pose_applied"] is not False
+            or len(inference["commands"]) != reference["frames"] or len(inference["samples"]) != reference["frames"]):
+        raise ValueError("Reference replay metadata, raw reports or control clock mismatch")
+    for index, (command, sample) in enumerate(zip(inference["commands"], inference["samples"])):
+        step = anchor + index * decimation
+        seconds = (step - released["physics_step"]) / 500
+        if (command["reference_frame"] != index or command["code"] != reference["codes"][index]
+                or command["physics_step"] != step or not math.isclose(command["seconds"], seconds, abs_tol=1e-9)
+                or sample["reference_frame"] != index or sample["physics_step"] != step
+                or sample["reference_seconds"] != index / 50 or sample["command"] != reference["codes"][index]
+                or not math.isclose(sample["simulation_seconds"], seconds, abs_tol=1e-9)
+                or sample["velocity_command"] != reference["commands"][index]
+                or sample["policy_action_enabled"] is not True or sample["get_ready_state"] is not False
+                or any(not math.isfinite(float(sample[key])) for key in ("wall_seconds", "target_min", "target_max", "action_l2"))):
+            raise ValueError("Reference replay skipped, repeated or changed a policy frame/label")
+    clips = lifecycle["recording_toggle_and_stop_autosave"]
+    if (lifecycle.get("damping_command_sent") is not True or lifecycle["damping_kp_max"] != 0
+            or not math.isfinite(lifecycle["damping_kd_min"]) or lifecycle["damping_kd_min"] <= 0 or len(clips) != 1):
+        raise ValueError("Reference replay requires native recording and damping delivery")
+    clip, frames = clips[0], reference["frames"]
+    recording_path = directory / clip["file"]
+    recording = recording_path.resolve()
+    if (not recording.is_relative_to(directory.resolve()) or recording_path.is_symlink() or not recording.is_file()
+            or clip["frames"] != frames or clip["fps"] != 50 or clip["qpos_shape"] != [frames, 36]
+            or clip["vel_cmd_shape"] != [frames, 15]):
+        raise ValueError("Reference recording identity or schema mismatch")
+    with np.load(recording, allow_pickle=False) as archive:
+        qpos, labels, fps = archive["qpos"], archive["vel_cmd"], archive["fps"]
+        if (qpos.shape != (frames, 36) or not np.isfinite(qpos).all()
+                or not np.allclose(np.linalg.norm(qpos[:, :4], axis=1), 1, atol=1e-3)
+                or fps.size != 1 or float(fps.reshape(-1)[0]) != 50
+                or labels.shape != (frames, 15) or not np.array_equal(labels, reference["commands"])):
+            raise ValueError("Reference recording actual frames or labels mismatch")
+
+
 def validate_result(path: Path, plan: dict, selection: dict) -> dict:
     result = json.loads(path.read_text())
     cfg, sim, inference = result["config"], result["simulation"], result["inference"]
-    expected_ticks = round(plan["seconds_per_configuration"] / .02)
+    reference = selection.get("reference_commands") if plan.get("reference_commands") else None
+    expected_ticks = policy_ticks(plan, selection)
+    duration = expected_ticks / 50 if reference else plan["seconds_per_configuration"]
     if (result.get("status") != "completed" or sim.get("status") != "completed" or inference.get("status") != "completed"
             or cfg["model_sha256"] != plan["model_sha256"] or cfg["mesh_sha256"] != selection["mesh_sha256"]
             or cfg["mesh"] != selection["mesh"] or cfg["models"] != str(Path(plan["models"][0]["path"]).parent)
-            or cfg["commands"] != [selection["command"]] or cfg["seed"] != plan["seed"]
+            or cfg["commands"] != (reference["codes"] if reference else [selection["command"]]) or cfg["seed"] != plan["seed"]
             or cfg["gl"] != selection["launch"][selection["launch"].index("--gl") + 1]
-            or cfg["duration"] != plan["seconds_per_configuration"] or cfg["record_policy"] or cfg["course_guide"]
+            or cfg["duration"] != duration or cfg["record_policy"] is not bool(reference) or cfg["course_guide"]
             or cfg.get("python_faulthandler") is not True or "--python-faulthandler" not in selection["launch"]
             or inference["ticks"] != expected_ticks or inference["control_period_simulation_seconds"] != .02
             or not inference["lifecycle"]["damping_mode_active"] or not inference["lifecycle"]["policy_action_disabled"]
             or not sim["gantry_disabled_during_policy"] or sim["policy_simulation_seconds"] < cfg["duration"]
             or result.get("quality_verified") is not False or result.get("obstacle_course_completion_verified") is not False):
         raise ValueError("Native closed-loop result identity, duration, ticks or lifecycle mismatch")
+    if reference:
+        validate_reference_replay(path.parent, selection, cfg, inference)
     validate_worker_receipts(path.parent, plan, result)
     rows = list(csv.DictReader((path.parent / "trajectory.csv").open()))
     if not rows or any(not math.isfinite(float(value)) for row in rows for value in row.values()):
@@ -433,7 +521,7 @@ def retain_evidence(directory: Path, plan: dict, selection: dict, launch: list[s
     evidence = {"schema_version": 1, "case_input": case_input(plan, selection), "files": files,
                 "worker_receipts": validate_worker_receipts(directory, plan, result),
                 "execution": {"output": str(directory), "launch": launch, "log": fingerprint(log_path), "returncode": 0},
-                "result_sha256": digest(directory / "result.json"), "expected_policy_ticks": round(plan["seconds_per_configuration"] / .02),
+                "result_sha256": digest(directory / "result.json"), "expected_policy_ticks": policy_ticks(plan, selection),
                 "scope": "Native closed-loop execution evidence; survival is heuristic and course completion unverified"}
     target = directory / "case-evidence.json"
     write(target, evidence)
@@ -447,6 +535,8 @@ def verify_completed(attempt: dict, plan: dict, selection: dict) -> None:
     evidence = json.loads(Path(item["path"]).read_text())
     if evidence["case_input"] != case_input(plan, selection):
         raise ValueError("Completed case inputs/launch changed")
+    if evidence["expected_policy_ticks"] != policy_ticks(plan, selection):
+        raise ValueError("Completed case expected policy ticks changed")
     expected_execution = {"output": attempt["output"], "launch": attempt_launch(selection, Path(attempt["output"])),
                           "log": attempt["log"], "returncode": 0}
     if (evidence["execution"] != expected_execution or attempt["launch"] != expected_execution["launch"]
@@ -606,11 +696,12 @@ def main() -> None:
     parser.add_argument("--plan", action="store_true", help="Verify exact input hashes and write the plan without simulator/inference")
     parser.add_argument("--plan-output", type=Path)
     parser.add_argument("--all-configs", action="store_true", help="Explicitly select all 629 configurations across 17 scenarios")
+    parser.add_argument("--reference-commands", action="store_true", help="Replay every generated NPZ command frame with root XY/yaw alignment and native policy recording; duration comes from each NPZ")
     parser.add_argument("--resume", action="store_true", help="Verify completed case evidence and retain failed/interrupted attempts")
     parser.add_argument("--case-id", action="append", default=[], help="Run an explicit subset by exact plan case_id")
     parser.add_argument("--case-limit", type=int, help="Run only the first N selected cases; recorded as partial coverage")
     args = parser.parse_args()
-    if not 8 <= args.seconds <= 12:
+    if not args.reference_commands and not 8 <= args.seconds <= 12:
         parser.error("Use 8–12 simulated seconds per selected scenario")
     if args.case_limit is not None and args.case_limit < 1:
         parser.error("--case-limit must be positive")

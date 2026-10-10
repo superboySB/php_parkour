@@ -111,19 +111,20 @@ def test_inference_launcher_resolves_local_models_from_calling_directory(
     assert result.returncode == 0, result.stderr
     cwd, args = recorded(command_log)
     assert cwd == str(holosoma)
-    assert args[:5] == [
+    assert args == [
+        str(ROOT / "scripts/research/run_native_policy.py"),
         str(holosoma / "src/holosoma_inference/holosoma_inference/run_policy.py"),
         "inference:g1-wbt-distillation-d435i",
         "--task.interface",
         "lo",
         "--task.model-path",
+        f"['{models / 'depth_backbone.onnx'}','{models / 'student.onnx'}']",
+        "--task.depth-shm.no-required",
     ]
-    assert args[5] == f"['{models / 'depth_backbone.onnx'}','{models / 'student.onnx'}']"
-    assert args[6] == "--task.depth-shm.no-required"
 
 
 def test_inference_launcher_builds_wandb_pair(fake_runtime, tmp_path):
-    _, command_log, env = fake_runtime
+    holosoma, command_log, env = fake_runtime
     env.update(RUN="wandb://team/project/run-id", STEP="model_29999")
 
     result = subprocess.run(
@@ -137,10 +138,16 @@ def test_inference_launcher_builds_wandb_pair(fake_runtime, tmp_path):
 
     assert result.returncode == 0, result.stderr
     _, args = recorded(command_log)
-    assert args[5] == (
+    assert args == [
+        str(ROOT / "scripts/research/run_native_policy.py"),
+        str(holosoma / "src/holosoma_inference/holosoma_inference/run_policy.py"),
+        "inference:g1-wbt-distillation-d435i",
+        "--task.interface",
+        "lo",
+        "--task.model-path",
         "['wandb://team/project/run-id/model_29999/depth_backbone.onnx',"
-        "'wandb://team/project/run-id/model_29999/student.onnx']"
-    )
+        "'wandb://team/project/run-id/model_29999/student.onnx']",
+    ]
 
 
 @pytest.mark.parametrize("launcher", ["run_php_sim.sh", "run_php_inference.sh"])

@@ -1,0 +1,958 @@
+{
+  "schema_version": 2,
+  "parent": {
+    "pid": 10,
+    "pid_namespace": "current container",
+    "observed_unix": 1791645837.5384822,
+    "proc_status": {
+      "Name": "python",
+      "Tgid": "10",
+      "Pid": "10",
+      "PPid": "0",
+      "NSpid": "10",
+      "Threads": "1"
+    },
+    "state": "R",
+    "process_group_id": 10,
+    "session_id": 10,
+    "start_time_clock_ticks": 107383191,
+    "cmdline": "/opt/php/envs/inference/bin/python /workspace/php_parkour/scripts/research/sim2sim.py --models /data/assets/student --output /outputs/rollout --terrain custom --mesh /reference/run_left_45_0.3s_terrain.obj --reference-motion /reference/run_left_45_0.3s_motion.npz --reference-spawn --record-policy --gl egl --seed 42 --ort-threads 1 --python-faulthandler "
+  },
+  "harness_sha256": "023fed0f9f31f79b506b370a96013c18e8b1c94239e0504eca4bcea6076c3f4d",
+  "python_faulthandler": "1",
+  "events": [
+    {
+      "event": "orchestrator_started",
+      "observed_unix": 1791645837.5385754,
+      "elapsed_seconds": 9.960215538740158e-05,
+      "workers": []
+    },
+    {
+      "event": "worker_spawned",
+      "observed_unix": 1791645837.5391233,
+      "elapsed_seconds": 0.0006475809495896101,
+      "workers": [
+        {
+          "role": "simulator",
+          "launch": [
+            "/opt/php/bin/train-python",
+            "/workspace/php_parkour/scripts/research/sim2sim.py",
+            "--worker",
+            "simulator",
+            "--output",
+            "/outputs/rollout"
+          ],
+          "identity_at_spawn": {
+            "pid": 16,
+            "pid_namespace": "current container",
+            "observed_unix": 1791645837.5388749,
+            "proc_status": {
+              "Name": "train-python",
+              "Tgid": "16",
+              "Pid": "16",
+              "PPid": "10",
+              "NSpid": "16",
+              "Threads": "1"
+            },
+            "state": "R",
+            "process_group_id": 16,
+            "session_id": 16,
+            "start_time_clock_ticks": 107383199,
+            "cmdline": "/usr/bin/env bash /opt/php/bin/train-python /workspace/php_parkour/scripts/research/sim2sim.py --worker simulator --output /outputs/rollout "
+          },
+          "process_group": {
+            "process_group_id": 16,
+            "session_id": 16,
+            "source": "Popen start_new_session=True; private session/group leader PID",
+            "leader_identity": {
+              "pid": 16,
+              "start_time_clock_ticks": 107383199
+            },
+            "known_members": [
+              {
+                "pid": 16,
+                "start_time_clock_ticks": 107383199
+              }
+            ],
+            "retired": false,
+            "ownership_lost": false,
+            "ownership_state": "owned",
+            "ownership_reason": null,
+            "live_members": [
+              {
+                "pid": 16,
+                "state": "R",
+                "parent_pid": 10,
+                "process_group_id": 16,
+                "session_id": 16,
+                "start_time_clock_ticks": 107383199
+              }
+            ],
+            "ownership_verified": true
+          },
+          "returncode": null,
+          "signal_number": null,
+          "signal_name": null,
+          "exit_code": null,
+          "status": "running",
+          "scope": "direct Popen process; wrappers may mask a native child signal"
+        }
+      ],
+      "role": "simulator"
+    },
+    {
+      "event": "worker_entry_observed",
+      "observed_unix": 1791645837.7401607,
+      "elapsed_seconds": 0.2016859061550349,
+      "workers": [
+        {
+          "role": "simulator",
+          "launch": [
+            "/opt/php/bin/train-python",
+            "/workspace/php_parkour/scripts/research/sim2sim.py",
+            "--worker",
+            "simulator",
+            "--output",
+            "/outputs/rollout"
+          ],
+          "identity_at_spawn": {
+            "pid": 16,
+            "pid_namespace": "current container",
+            "observed_unix": 1791645837.5388749,
+            "proc_status": {
+              "Name": "train-python",
+              "Tgid": "16",
+              "Pid": "16",
+              "PPid": "10",
+              "NSpid": "16",
+              "Threads": "1"
+            },
+            "state": "R",
+            "process_group_id": 16,
+            "session_id": 16,
+            "start_time_clock_ticks": 107383199,
+            "cmdline": "/usr/bin/env bash /opt/php/bin/train-python /workspace/php_parkour/scripts/research/sim2sim.py --worker simulator --output /outputs/rollout "
+          },
+          "process_group": {
+            "process_group_id": 16,
+            "session_id": 16,
+            "source": "Popen start_new_session=True; private session/group leader PID",
+            "leader_identity": {
+              "pid": 16,
+              "start_time_clock_ticks": 107383199
+            },
+            "known_members": [
+              {
+                "pid": 16,
+                "start_time_clock_ticks": 107383199
+              },
+              {
+                "pid": 21,
+                "start_time_clock_ticks": 107383199
+              }
+            ],
+            "retired": false,
+            "ownership_lost": false,
+            "ownership_state": "owned",
+            "ownership_reason": null,
+            "live_members": [
+              {
+                "pid": 16,
+                "state": "S",
+                "parent_pid": 10,
+                "process_group_id": 16,
+                "session_id": 16,
+                "start_time_clock_ticks": 107383199
+              },
+              {
+                "pid": 21,
+                "state": "R",
+                "parent_pid": 16,
+                "process_group_id": 16,
+                "session_id": 16,
+                "start_time_clock_ticks": 107383199
+              }
+            ],
+            "ownership_verified": true
+          },
+          "returncode": null,
+          "signal_number": null,
+          "signal_name": null,
+          "exit_code": null,
+          "status": "running",
+          "scope": "direct Popen process; wrappers may mask a native child signal"
+        }
+      ],
+      "role": "simulator",
+      "entry_sha256": "3992b3ffb4f43a04f20991fe30f334e547edbf0049a96f8fc3b1055caf05cacb",
+      "entry_process": {
+        "pid": 21,
+        "pid_namespace": "current container",
+        "observed_unix": 1791645837.570611,
+        "proc_status": {
+          "Name": "python3",
+          "Tgid": "21",
+          "Pid": "21",
+          "PPid": "16",
+          "NSpid": "21",
+          "Threads": "1"
+        },
+        "state": "R",
+        "process_group_id": 16,
+        "session_id": 16,
+        "start_time_clock_ticks": 107383199,
+        "cmdline": "/isaac-sim/kit/python/bin/python3 /workspace/php_parkour/scripts/research/sim2sim.py --worker simulator --output /outputs/rollout "
+      }
+    },
+    {
+      "event": "worker_spawned",
+      "observed_unix": 1791645844.156096,
+      "elapsed_seconds": 6.617620903998613,
+      "workers": [
+        {
+          "role": "simulator",
+          "launch": [
+            "/opt/php/bin/train-python",
+            "/workspace/php_parkour/scripts/research/sim2sim.py",
+            "--worker",
+            "simulator",
+            "--output",
+            "/outputs/rollout"
+          ],
+          "identity_at_spawn": {
+            "pid": 16,
+            "pid_namespace": "current container",
+            "observed_unix": 1791645837.5388749,
+            "proc_status": {
+              "Name": "train-python",
+              "Tgid": "16",
+              "Pid": "16",
+              "PPid": "10",
+              "NSpid": "16",
+              "Threads": "1"
+            },
+            "state": "R",
+            "process_group_id": 16,
+            "session_id": 16,
+            "start_time_clock_ticks": 107383199,
+            "cmdline": "/usr/bin/env bash /opt/php/bin/train-python /workspace/php_parkour/scripts/research/sim2sim.py --worker simulator --output /outputs/rollout "
+          },
+          "process_group": {
+            "process_group_id": 16,
+            "session_id": 16,
+            "source": "Popen start_new_session=True; private session/group leader PID",
+            "leader_identity": {
+              "pid": 16,
+              "start_time_clock_ticks": 107383199
+            },
+            "known_members": [
+              {
+                "pid": 16,
+                "start_time_clock_ticks": 107383199
+              },
+              {
+                "pid": 21,
+                "start_time_clock_ticks": 107383199
+              },
+              {
+                "pid": 50,
+                "start_time_clock_ticks": 107383836
+              }
+            ],
+            "retired": false,
+            "ownership_lost": false,
+            "ownership_state": "owned",
+            "ownership_reason": null,
+            "live_members": [
+              {
+                "pid": 16,
+                "state": "S",
+                "parent_pid": 10,
+                "process_group_id": 16,
+                "session_id": 16,
+                "start_time_clock_ticks": 107383199
+              },
+              {
+                "pid": 21,
+                "state": "S",
+                "parent_pid": 16,
+                "process_group_id": 16,
+                "session_id": 16,
+                "start_time_clock_ticks": 107383199
+              },
+              {
+                "pid": 50,
+                "state": "S",
+                "parent_pid": 21,
+                "process_group_id": 16,
+                "session_id": 16,
+                "start_time_clock_ticks": 107383836
+              }
+            ],
+            "ownership_verified": true
+          },
+          "returncode": null,
+          "signal_number": null,
+          "signal_name": null,
+          "exit_code": null,
+          "status": "running",
+          "scope": "direct Popen process; wrappers may mask a native child signal"
+        },
+        {
+          "role": "inference",
+          "launch": [
+            "/opt/php/bin/inference-python",
+            "/workspace/php_parkour/scripts/research/sim2sim.py",
+            "--worker",
+            "inference",
+            "--output",
+            "/outputs/rollout"
+          ],
+          "identity_at_spawn": {
+            "pid": 54,
+            "pid_namespace": "current container",
+            "observed_unix": 1791645844.1555219,
+            "proc_status": {
+              "Name": "inference-pytho",
+              "Tgid": "54",
+              "Pid": "54",
+              "PPid": "10",
+              "NSpid": "54",
+              "Threads": "1"
+            },
+            "state": "R",
+            "process_group_id": 54,
+            "session_id": 54,
+            "start_time_clock_ticks": 107383861,
+            "cmdline": "/usr/bin/env bash /opt/php/bin/inference-python /workspace/php_parkour/scripts/research/sim2sim.py --worker inference --output /outputs/rollout "
+          },
+          "process_group": {
+            "process_group_id": 54,
+            "session_id": 54,
+            "source": "Popen start_new_session=True; private session/group leader PID",
+            "leader_identity": {
+              "pid": 54,
+              "start_time_clock_ticks": 107383861
+            },
+            "known_members": [
+              {
+                "pid": 54,
+                "start_time_clock_ticks": 107383861
+              }
+            ],
+            "retired": false,
+            "ownership_lost": false,
+            "ownership_state": "owned",
+            "ownership_reason": null,
+            "live_members": [
+              {
+                "pid": 54,
+                "state": "R",
+                "parent_pid": 10,
+                "process_group_id": 54,
+                "session_id": 54,
+                "start_time_clock_ticks": 107383861
+              }
+            ],
+            "ownership_verified": true
+          },
+          "returncode": null,
+          "signal_number": null,
+          "signal_name": null,
+          "exit_code": null,
+          "status": "running",
+          "scope": "direct Popen process; wrappers may mask a native child signal"
+        }
+      ],
+      "role": "inference"
+    },
+    {
+      "event": "worker_entry_observed",
+      "observed_unix": 1791645844.3579774,
+      "elapsed_seconds": 6.8195022330619395,
+      "workers": [
+        {
+          "role": "simulator",
+          "launch": [
+            "/opt/php/bin/train-python",
+            "/workspace/php_parkour/scripts/research/sim2sim.py",
+            "--worker",
+            "simulator",
+            "--output",
+            "/outputs/rollout"
+          ],
+          "identity_at_spawn": {
+            "pid": 16,
+            "pid_namespace": "current container",
+            "observed_unix": 1791645837.5388749,
+            "proc_status": {
+              "Name": "train-python",
+              "Tgid": "16",
+              "Pid": "16",
+              "PPid": "10",
+              "NSpid": "16",
+              "Threads": "1"
+            },
+            "state": "R",
+            "process_group_id": 16,
+            "session_id": 16,
+            "start_time_clock_ticks": 107383199,
+            "cmdline": "/usr/bin/env bash /opt/php/bin/train-python /workspace/php_parkour/scripts/research/sim2sim.py --worker simulator --output /outputs/rollout "
+          },
+          "process_group": {
+            "process_group_id": 16,
+            "session_id": 16,
+            "source": "Popen start_new_session=True; private session/group leader PID",
+            "leader_identity": {
+              "pid": 16,
+              "start_time_clock_ticks": 107383199
+            },
+            "known_members": [
+              {
+                "pid": 16,
+                "start_time_clock_ticks": 107383199
+              },
+              {
+                "pid": 21,
+                "start_time_clock_ticks": 107383199
+              },
+              {
+                "pid": 50,
+                "start_time_clock_ticks": 107383836
+              }
+            ],
+            "retired": false,
+            "ownership_lost": false,
+            "ownership_state": "owned",
+            "ownership_reason": null,
+            "live_members": [
+              {
+                "pid": 16,
+                "state": "S",
+                "parent_pid": 10,
+                "process_group_id": 16,
+                "session_id": 16,
+                "start_time_clock_ticks": 107383199
+              },
+              {
+                "pid": 21,
+                "state": "S",
+                "parent_pid": 16,
+                "process_group_id": 16,
+                "session_id": 16,
+                "start_time_clock_ticks": 107383199
+              },
+              {
+                "pid": 50,
+                "state": "S",
+                "parent_pid": 21,
+                "process_group_id": 16,
+                "session_id": 16,
+                "start_time_clock_ticks": 107383836
+              }
+            ],
+            "ownership_verified": true
+          },
+          "returncode": null,
+          "signal_number": null,
+          "signal_name": null,
+          "exit_code": null,
+          "status": "running",
+          "scope": "direct Popen process; wrappers may mask a native child signal"
+        },
+        {
+          "role": "inference",
+          "launch": [
+            "/opt/php/bin/inference-python",
+            "/workspace/php_parkour/scripts/research/sim2sim.py",
+            "--worker",
+            "inference",
+            "--output",
+            "/outputs/rollout"
+          ],
+          "identity_at_spawn": {
+            "pid": 54,
+            "pid_namespace": "current container",
+            "observed_unix": 1791645844.1555219,
+            "proc_status": {
+              "Name": "inference-pytho",
+              "Tgid": "54",
+              "Pid": "54",
+              "PPid": "10",
+              "NSpid": "54",
+              "Threads": "1"
+            },
+            "state": "R",
+            "process_group_id": 54,
+            "session_id": 54,
+            "start_time_clock_ticks": 107383861,
+            "cmdline": "/usr/bin/env bash /opt/php/bin/inference-python /workspace/php_parkour/scripts/research/sim2sim.py --worker inference --output /outputs/rollout "
+          },
+          "process_group": {
+            "process_group_id": 54,
+            "session_id": 54,
+            "source": "Popen start_new_session=True; private session/group leader PID",
+            "leader_identity": {
+              "pid": 54,
+              "start_time_clock_ticks": 107383861
+            },
+            "known_members": [
+              {
+                "pid": 54,
+                "start_time_clock_ticks": 107383861
+              }
+            ],
+            "retired": false,
+            "ownership_lost": false,
+            "ownership_state": "owned",
+            "ownership_reason": null,
+            "live_members": [
+              {
+                "pid": 54,
+                "state": "R",
+                "parent_pid": 10,
+                "process_group_id": 54,
+                "session_id": 54,
+                "start_time_clock_ticks": 107383861
+              }
+            ],
+            "ownership_verified": true
+          },
+          "returncode": null,
+          "signal_number": null,
+          "signal_name": null,
+          "exit_code": null,
+          "status": "running",
+          "scope": "direct Popen process; wrappers may mask a native child signal"
+        }
+      ],
+      "role": "inference",
+      "entry_sha256": "f3a3d3312ef9e0eca96e43923a76e5a3cbb789ad83c880b55bf174b6514f9966",
+      "entry_process": {
+        "pid": 54,
+        "pid_namespace": "current container",
+        "observed_unix": 1791645844.1832893,
+        "proc_status": {
+          "Name": "python",
+          "Tgid": "54",
+          "Pid": "54",
+          "PPid": "10",
+          "NSpid": "54",
+          "Threads": "1"
+        },
+        "state": "R",
+        "process_group_id": 54,
+        "session_id": 54,
+        "start_time_clock_ticks": 107383861,
+        "cmdline": "/opt/php/envs/inference/bin/python /workspace/php_parkour/scripts/research/sim2sim.py --worker inference --output /outputs/rollout "
+      }
+    },
+    {
+      "event": "workers_loop_complete",
+      "observed_unix": 1791645857.595885,
+      "elapsed_seconds": 20.0574100560043,
+      "workers": [
+        {
+          "role": "simulator",
+          "launch": [
+            "/opt/php/bin/train-python",
+            "/workspace/php_parkour/scripts/research/sim2sim.py",
+            "--worker",
+            "simulator",
+            "--output",
+            "/outputs/rollout"
+          ],
+          "identity_at_spawn": {
+            "pid": 16,
+            "pid_namespace": "current container",
+            "observed_unix": 1791645837.5388749,
+            "proc_status": {
+              "Name": "train-python",
+              "Tgid": "16",
+              "Pid": "16",
+              "PPid": "10",
+              "NSpid": "16",
+              "Threads": "1"
+            },
+            "state": "R",
+            "process_group_id": 16,
+            "session_id": 16,
+            "start_time_clock_ticks": 107383199,
+            "cmdline": "/usr/bin/env bash /opt/php/bin/train-python /workspace/php_parkour/scripts/research/sim2sim.py --worker simulator --output /outputs/rollout "
+          },
+          "process_group": {
+            "process_group_id": 16,
+            "session_id": 16,
+            "source": "Popen start_new_session=True; private session/group leader PID",
+            "leader_identity": {
+              "pid": 16,
+              "start_time_clock_ticks": 107383199
+            },
+            "known_members": [
+              {
+                "pid": 16,
+                "start_time_clock_ticks": 107383199
+              },
+              {
+                "pid": 21,
+                "start_time_clock_ticks": 107383199
+              },
+              {
+                "pid": 50,
+                "start_time_clock_ticks": 107383836
+              },
+              {
+                "pid": 86,
+                "start_time_clock_ticks": 107385066
+              }
+            ],
+            "retired": true,
+            "ownership_lost": false,
+            "ownership_state": "retired_empty",
+            "ownership_reason": null,
+            "live_members": [],
+            "ownership_verified": true
+          },
+          "returncode": 0,
+          "signal_number": null,
+          "signal_name": null,
+          "exit_code": 0,
+          "status": "exited",
+          "scope": "direct Popen process; wrappers may mask a native child signal"
+        },
+        {
+          "role": "inference",
+          "launch": [
+            "/opt/php/bin/inference-python",
+            "/workspace/php_parkour/scripts/research/sim2sim.py",
+            "--worker",
+            "inference",
+            "--output",
+            "/outputs/rollout"
+          ],
+          "identity_at_spawn": {
+            "pid": 54,
+            "pid_namespace": "current container",
+            "observed_unix": 1791645844.1555219,
+            "proc_status": {
+              "Name": "inference-pytho",
+              "Tgid": "54",
+              "Pid": "54",
+              "PPid": "10",
+              "NSpid": "54",
+              "Threads": "1"
+            },
+            "state": "R",
+            "process_group_id": 54,
+            "session_id": 54,
+            "start_time_clock_ticks": 107383861,
+            "cmdline": "/usr/bin/env bash /opt/php/bin/inference-python /workspace/php_parkour/scripts/research/sim2sim.py --worker inference --output /outputs/rollout "
+          },
+          "process_group": {
+            "process_group_id": 54,
+            "session_id": 54,
+            "source": "Popen start_new_session=True; private session/group leader PID",
+            "leader_identity": {
+              "pid": 54,
+              "start_time_clock_ticks": 107383861
+            },
+            "known_members": [
+              {
+                "pid": 54,
+                "start_time_clock_ticks": 107383861
+              },
+              {
+                "pid": 69,
+                "start_time_clock_ticks": 107383989
+              }
+            ],
+            "retired": true,
+            "ownership_lost": false,
+            "ownership_state": "retired_empty",
+            "ownership_reason": null,
+            "live_members": [],
+            "ownership_verified": true
+          },
+          "returncode": 0,
+          "signal_number": null,
+          "signal_name": null,
+          "exit_code": 0,
+          "status": "exited",
+          "scope": "direct Popen process; wrappers may mask a native child signal"
+        }
+      ]
+    },
+    {
+      "event": "finally_enter",
+      "observed_unix": 1791645857.664674,
+      "elapsed_seconds": 20.126198868034407,
+      "workers": [
+        {
+          "role": "simulator",
+          "launch": [
+            "/opt/php/bin/train-python",
+            "/workspace/php_parkour/scripts/research/sim2sim.py",
+            "--worker",
+            "simulator",
+            "--output",
+            "/outputs/rollout"
+          ],
+          "identity_at_spawn": {
+            "pid": 16,
+            "pid_namespace": "current container",
+            "observed_unix": 1791645837.5388749,
+            "proc_status": {
+              "Name": "train-python",
+              "Tgid": "16",
+              "Pid": "16",
+              "PPid": "10",
+              "NSpid": "16",
+              "Threads": "1"
+            },
+            "state": "R",
+            "process_group_id": 16,
+            "session_id": 16,
+            "start_time_clock_ticks": 107383199,
+            "cmdline": "/usr/bin/env bash /opt/php/bin/train-python /workspace/php_parkour/scripts/research/sim2sim.py --worker simulator --output /outputs/rollout "
+          },
+          "process_group": {
+            "process_group_id": 16,
+            "session_id": 16,
+            "source": "Popen start_new_session=True; private session/group leader PID",
+            "leader_identity": {
+              "pid": 16,
+              "start_time_clock_ticks": 107383199
+            },
+            "known_members": [
+              {
+                "pid": 16,
+                "start_time_clock_ticks": 107383199
+              },
+              {
+                "pid": 21,
+                "start_time_clock_ticks": 107383199
+              },
+              {
+                "pid": 50,
+                "start_time_clock_ticks": 107383836
+              },
+              {
+                "pid": 86,
+                "start_time_clock_ticks": 107385066
+              }
+            ],
+            "retired": true,
+            "ownership_lost": false,
+            "ownership_state": "retired_empty",
+            "ownership_reason": null,
+            "live_members": [],
+            "ownership_verified": true
+          },
+          "returncode": 0,
+          "signal_number": null,
+          "signal_name": null,
+          "exit_code": 0,
+          "status": "exited",
+          "scope": "direct Popen process; wrappers may mask a native child signal"
+        },
+        {
+          "role": "inference",
+          "launch": [
+            "/opt/php/bin/inference-python",
+            "/workspace/php_parkour/scripts/research/sim2sim.py",
+            "--worker",
+            "inference",
+            "--output",
+            "/outputs/rollout"
+          ],
+          "identity_at_spawn": {
+            "pid": 54,
+            "pid_namespace": "current container",
+            "observed_unix": 1791645844.1555219,
+            "proc_status": {
+              "Name": "inference-pytho",
+              "Tgid": "54",
+              "Pid": "54",
+              "PPid": "10",
+              "NSpid": "54",
+              "Threads": "1"
+            },
+            "state": "R",
+            "process_group_id": 54,
+            "session_id": 54,
+            "start_time_clock_ticks": 107383861,
+            "cmdline": "/usr/bin/env bash /opt/php/bin/inference-python /workspace/php_parkour/scripts/research/sim2sim.py --worker inference --output /outputs/rollout "
+          },
+          "process_group": {
+            "process_group_id": 54,
+            "session_id": 54,
+            "source": "Popen start_new_session=True; private session/group leader PID",
+            "leader_identity": {
+              "pid": 54,
+              "start_time_clock_ticks": 107383861
+            },
+            "known_members": [
+              {
+                "pid": 54,
+                "start_time_clock_ticks": 107383861
+              },
+              {
+                "pid": 69,
+                "start_time_clock_ticks": 107383989
+              }
+            ],
+            "retired": true,
+            "ownership_lost": false,
+            "ownership_state": "retired_empty",
+            "ownership_reason": null,
+            "live_members": [],
+            "ownership_verified": true
+          },
+          "returncode": 0,
+          "signal_number": null,
+          "signal_name": null,
+          "exit_code": 0,
+          "status": "exited",
+          "scope": "direct Popen process; wrappers may mask a native child signal"
+        }
+      ]
+    },
+    {
+      "event": "finally_wait_complete",
+      "observed_unix": 1791645857.6660836,
+      "elapsed_seconds": 20.127607892034575,
+      "workers": [
+        {
+          "role": "simulator",
+          "launch": [
+            "/opt/php/bin/train-python",
+            "/workspace/php_parkour/scripts/research/sim2sim.py",
+            "--worker",
+            "simulator",
+            "--output",
+            "/outputs/rollout"
+          ],
+          "identity_at_spawn": {
+            "pid": 16,
+            "pid_namespace": "current container",
+            "observed_unix": 1791645837.5388749,
+            "proc_status": {
+              "Name": "train-python",
+              "Tgid": "16",
+              "Pid": "16",
+              "PPid": "10",
+              "NSpid": "16",
+              "Threads": "1"
+            },
+            "state": "R",
+            "process_group_id": 16,
+            "session_id": 16,
+            "start_time_clock_ticks": 107383199,
+            "cmdline": "/usr/bin/env bash /opt/php/bin/train-python /workspace/php_parkour/scripts/research/sim2sim.py --worker simulator --output /outputs/rollout "
+          },
+          "process_group": {
+            "process_group_id": 16,
+            "session_id": 16,
+            "source": "Popen start_new_session=True; private session/group leader PID",
+            "leader_identity": {
+              "pid": 16,
+              "start_time_clock_ticks": 107383199
+            },
+            "known_members": [
+              {
+                "pid": 16,
+                "start_time_clock_ticks": 107383199
+              },
+              {
+                "pid": 21,
+                "start_time_clock_ticks": 107383199
+              },
+              {
+                "pid": 50,
+                "start_time_clock_ticks": 107383836
+              },
+              {
+                "pid": 86,
+                "start_time_clock_ticks": 107385066
+              }
+            ],
+            "retired": true,
+            "ownership_lost": false,
+            "ownership_state": "retired_empty",
+            "ownership_reason": null,
+            "live_members": [],
+            "ownership_verified": true
+          },
+          "returncode": 0,
+          "signal_number": null,
+          "signal_name": null,
+          "exit_code": 0,
+          "status": "exited",
+          "scope": "direct Popen process; wrappers may mask a native child signal"
+        },
+        {
+          "role": "inference",
+          "launch": [
+            "/opt/php/bin/inference-python",
+            "/workspace/php_parkour/scripts/research/sim2sim.py",
+            "--worker",
+            "inference",
+            "--output",
+            "/outputs/rollout"
+          ],
+          "identity_at_spawn": {
+            "pid": 54,
+            "pid_namespace": "current container",
+            "observed_unix": 1791645844.1555219,
+            "proc_status": {
+              "Name": "inference-pytho",
+              "Tgid": "54",
+              "Pid": "54",
+              "PPid": "10",
+              "NSpid": "54",
+              "Threads": "1"
+            },
+            "state": "R",
+            "process_group_id": 54,
+            "session_id": 54,
+            "start_time_clock_ticks": 107383861,
+            "cmdline": "/usr/bin/env bash /opt/php/bin/inference-python /workspace/php_parkour/scripts/research/sim2sim.py --worker inference --output /outputs/rollout "
+          },
+          "process_group": {
+            "process_group_id": 54,
+            "session_id": 54,
+            "source": "Popen start_new_session=True; private session/group leader PID",
+            "leader_identity": {
+              "pid": 54,
+              "start_time_clock_ticks": 107383861
+            },
+            "known_members": [
+              {
+                "pid": 54,
+                "start_time_clock_ticks": 107383861
+              },
+              {
+                "pid": 69,
+                "start_time_clock_ticks": 107383989
+              }
+            ],
+            "retired": true,
+            "ownership_lost": false,
+            "ownership_state": "retired_empty",
+            "ownership_reason": null,
+            "live_members": [],
+            "ownership_verified": true
+          },
+          "returncode": 0,
+          "signal_number": null,
+          "signal_name": null,
+          "exit_code": 0,
+          "status": "exited",
+          "scope": "direct Popen process; wrappers may mask a native child signal"
+        }
+      ],
+      "unreaped_roles": [],
+      "cleanup_errors": []
+    }
+  ]
+}

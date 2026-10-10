@@ -1,0 +1,1100 @@
+{
+  "schema_version": 1,
+  "status": "native_reference629_running",
+  "helper": {
+    "path": "/home/dzp/projects/php_parkour/outputs/research/reference629-native-controller-01.py",
+    "bytes": 26405,
+    "sha256": "e25f6be50253044770bae37ba37e8b1db10098b65bf585d2d2af99d42e2e32f0"
+  },
+  "image_id": "sha256:2be18521015b2a84ef7a4442af9a94ef041a19feb9ce385ae15424b1dc158d8f",
+  "gpu_uuid": "GPU-1803972d-e774-ee96-e6f6-1ee1ce47bb25",
+  "container_name": "php-reference-native629-01",
+  "ownership_token": "19cd99de8d744abe935090b775283a2f",
+  "host_process": {
+    "pid": 2237897,
+    "state": "R",
+    "ppid": 2237896,
+    "pgid": 2237897,
+    "sid": 2237897,
+    "start_time_clock_ticks": 107471854
+  },
+  "boot_id": "a4856e87-ac1b-4883-8b4e-d8cd48861796",
+  "commands": [
+    {
+      "argv": [
+        "docker",
+        "context",
+        "show"
+      ],
+      "returncode": 0,
+      "stdout": {
+        "path": "/home/dzp/projects/php_parkour/outputs/research/reference-native629-01/host/00-docker-context.stdout.raw",
+        "bytes": 8,
+        "sha256": "01666ec060466c14b9fa06c613fbac449163f2a2017558fe16526209ab78c6b0"
+      },
+      "stderr": {
+        "path": "/home/dzp/projects/php_parkour/outputs/research/reference-native629-01/host/00-docker-context.stderr.raw",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "argv": [
+        "docker",
+        "context",
+        "inspect",
+        "default"
+      ],
+      "returncode": 0,
+      "stdout": {
+        "path": "/home/dzp/projects/php_parkour/outputs/research/reference-native629-01/host/01-docker-context-inspect.stdout.raw",
+        "bytes": 391,
+        "sha256": "ee957e0747d2328a52b4c9210052a1fddf721cdeaebbaddc288f438c65c54057"
+      },
+      "stderr": {
+        "path": "/home/dzp/projects/php_parkour/outputs/research/reference-native629-01/host/01-docker-context-inspect.stderr.raw",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "argv": [
+        "nvidia-smi",
+        "--query-gpu=uuid",
+        "--format=csv,noheader"
+      ],
+      "returncode": 0,
+      "stdout": {
+        "path": "/home/dzp/projects/php_parkour/outputs/research/reference-native629-01/host/02-gpu-identity.stdout.raw",
+        "bytes": 41,
+        "sha256": "8637a2c31a7e80f9293e1a2f72e63de1c3824a3a88441fe9229ca0c8e04a945e"
+      },
+      "stderr": {
+        "path": "/home/dzp/projects/php_parkour/outputs/research/reference-native629-01/host/02-gpu-identity.stderr.raw",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "argv": [
+        "nvidia-smi",
+        "--query-compute-apps=gpu_uuid,pid",
+        "--format=csv,noheader,nounits"
+      ],
+      "returncode": 0,
+      "stdout": {
+        "path": "/home/dzp/projects/php_parkour/outputs/research/reference-native629-01/host/03-gpu-idle-inside-lock.stdout.raw",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/home/dzp/projects/php_parkour/outputs/research/reference-native629-01/host/03-gpu-idle-inside-lock.stderr.raw",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "argv": [
+        "docker",
+        "create",
+        "--name",
+        "php-reference-native629-01",
+        "--label",
+        "php.reference629.owner=19cd99de8d744abe935090b775283a2f",
+        "--network",
+        "none",
+        "--ipc",
+        "private",
+        "--init",
+        "--shm-size",
+        "8g",
+        "--gpus",
+        "device=GPU-1803972d-e774-ee96-e6f6-1ee1ce47bb25",
+        "--workdir",
+        "/workspace/php_parkour",
+        "--entrypoint",
+        "/bin/bash",
+        "--env",
+        "PHP_DOCKER=1",
+        "--env",
+        "PYTHONDONTWRITEBYTECODE=1",
+        "--env",
+        "MUJOCO_GL=egl",
+        "--env",
+        "MUJOCO_EGL_DEVICE_ID=0",
+        "--env",
+        "PYOPENGL_PLATFORM=egl",
+        "--env",
+        "WANDB_MODE=disabled",
+        "--env",
+        "WANDB_DISABLED=true",
+        "--env",
+        "HF_HUB_OFFLINE=1",
+        "--env",
+        "TRANSFORMERS_OFFLINE=1",
+        "--env",
+        "NVIDIA_DRIVER_CAPABILITIES=compute,utility,graphics",
+        "--env",
+        "OMP_NUM_THREADS=1",
+        "--env",
+        "MKL_NUM_THREADS=1",
+        "--env",
+        "OPENBLAS_NUM_THREADS=1",
+        "--mount",
+        "type=bind,src=/home/dzp/projects/php_parkour/outputs/research/fresh629-sdk018-6cb2ae2-prepared02/source,dst=/workspace/php_parkour,readonly",
+        "--mount",
+        "type=bind,src=/home/dzp/projects/php_parkour/outputs/research/reference-native629-01/overlay,dst=/workspace/php_parkour/scripts/research,readonly",
+        "--mount",
+        "type=bind,src=/home/dzp/projects/php_parkour/outputs/research/fresh629-sdk018-6cb2ae2-prepared02/inputs,dst=/data,readonly",
+        "--mount",
+        "type=bind,src=/home/dzp/projects/php_parkour/outputs/research/reference-native629-01/cache,dst=/data/cache",
+        "--mount",
+        "type=bind,src=/home/dzp/projects/php_parkour/outputs/research/reference-native629-01/checks,dst=/checks",
+        "--mount",
+        "type=bind,src=/home/dzp/projects/php_parkour/outputs/research/reference-native629-01/outputs,dst=/outputs",
+        "sha256:2be18521015b2a84ef7a4442af9a94ef041a19feb9ce385ae15424b1dc158d8f",
+        "-lc",
+        "exec sleep infinity"
+      ],
+      "returncode": 0,
+      "stdout": {
+        "path": "/home/dzp/projects/php_parkour/outputs/research/reference-native629-01/host/04-own-create.stdout.raw",
+        "bytes": 65,
+        "sha256": "bbd24f63ed229e068a365c00eefe2292c2acfbf9e6ec4c094df8d6bb0bdad12d"
+      },
+      "stderr": {
+        "path": "/home/dzp/projects/php_parkour/outputs/research/reference-native629-01/host/04-own-create.stderr.raw",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "argv": [
+        "docker",
+        "inspect",
+        "--type",
+        "container",
+        "4d1e8c16558995d925ed273bc2a2568fffe51b81c229a10257bcefeaccc08a12"
+      ],
+      "returncode": 0,
+      "stdout": {
+        "path": "/home/dzp/projects/php_parkour/outputs/research/reference-native629-01/host/05-own-inspect.stdout.raw",
+        "bytes": 16684,
+        "sha256": "cf081b3cf0e61d8b2785eabf1b1e213eb60621cfb4699aad6e1f4c4d1de8ae08"
+      },
+      "stderr": {
+        "path": "/home/dzp/projects/php_parkour/outputs/research/reference-native629-01/host/05-own-inspect.stderr.raw",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "argv": [
+        "docker",
+        "start",
+        "4d1e8c16558995d925ed273bc2a2568fffe51b81c229a10257bcefeaccc08a12"
+      ],
+      "returncode": 0,
+      "stdout": {
+        "path": "/home/dzp/projects/php_parkour/outputs/research/reference-native629-01/host/06-own-start.stdout.raw",
+        "bytes": 65,
+        "sha256": "bbd24f63ed229e068a365c00eefe2292c2acfbf9e6ec4c094df8d6bb0bdad12d"
+      },
+      "stderr": {
+        "path": "/home/dzp/projects/php_parkour/outputs/research/reference-native629-01/host/06-own-start.stderr.raw",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "argv": [
+        "docker",
+        "inspect",
+        "--type",
+        "container",
+        "4d1e8c16558995d925ed273bc2a2568fffe51b81c229a10257bcefeaccc08a12"
+      ],
+      "returncode": 0,
+      "stdout": {
+        "path": "/home/dzp/projects/php_parkour/outputs/research/reference-native629-01/host/07-own-inspect.stdout.raw",
+        "bytes": 17403,
+        "sha256": "2caff934402df18d2b42a2fe4d08877d48c0e319c10cde03be20c2150b3f5e6a"
+      },
+      "stderr": {
+        "path": "/home/dzp/projects/php_parkour/outputs/research/reference-native629-01/host/07-own-inspect.stderr.raw",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "argv": [
+        "docker",
+        "exec",
+        "4d1e8c16558995d925ed273bc2a2568fffe51b81c229a10257bcefeaccc08a12",
+        "/opt/php/bin/inference-python",
+        "-B",
+        "/workspace/php_parkour/scripts/research/sim2sim_scene_matrix.py",
+        "--matrix",
+        "/data/matrix.json",
+        "--models",
+        "/data/assets/student",
+        "--output",
+        "/outputs/reference629",
+        "--all-configs",
+        "--reference-commands",
+        "--image-id",
+        "sha256:2be18521015b2a84ef7a4442af9a94ef041a19feb9ce385ae15424b1dc158d8f",
+        "--gl",
+        "egl",
+        "--plan",
+        "--plan-output",
+        "/checks/verified-prelaunch-plan.json"
+      ],
+      "returncode": 0,
+      "stdout": {
+        "path": "/home/dzp/projects/php_parkour/outputs/research/reference-native629-01/host/08-actual-prelaunch-plan.stdout.raw",
+        "bytes": 87,
+        "sha256": "f8c6e57277fd4e14ba175908f6710050a482060a9bfafb05744f4c5c4da5bad1"
+      },
+      "stderr": {
+        "path": "/home/dzp/projects/php_parkour/outputs/research/reference-native629-01/host/08-actual-prelaunch-plan.stderr.raw",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  ],
+  "errors": [],
+  "cleanup_errors": [],
+  "quality_verified": false,
+  "obstacle_course_completion_verified": false,
+  "source_before": {
+    "source_files_verified": 5184,
+    "freeze_manifest": {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/fresh629-sdk018-6cb2ae2-prepared02/freeze-manifest.json",
+      "bytes": 1236260,
+      "sha256": "599e09e78fdabd4a7a7792a7cd66e2dcddf25f5e1e6aaf56582b2d1cf7e77169"
+    },
+    "models": {
+      "depth_backbone.onnx": {
+        "path": "/home/dzp/projects/php_parkour/outputs/research/fresh629-sdk018-6cb2ae2-prepared02/inputs/assets/student/depth_backbone.onnx",
+        "bytes": 105240,
+        "sha256": "5b22466a218944e3b0ab0f4f82a910e3eec35375ee03e7fb94eb65fa88431b56"
+      },
+      "student.onnx": {
+        "path": "/home/dzp/projects/php_parkour/outputs/research/fresh629-sdk018-6cb2ae2-prepared02/inputs/assets/student/student.onnx",
+        "bytes": 13841549,
+        "sha256": "e426c4206181d511b838c76efc48e43636299b76cb5a15183977011589931628"
+      }
+    },
+    "source_matrix": {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/fresh629-sdk018-6cb2ae2-prepared02/inputs/matrix.json",
+      "bytes": 2714019,
+      "sha256": "ed413845f4b82156964e11ad6ee3faca30e3c0b10dbfdc295a8284f9ee3308ed"
+    },
+    "cpu_reference_plan": {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/reference629-cpu-plan-01/checks/reference629-plan.json",
+      "bytes": 103152864,
+      "sha256": "7729d5e6b4ea740e69511172c2331dd880cb7aaac3c75a07ccebb8e50d47311f"
+    },
+    "observer": {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/fresh629-sdk018-6cb2ae2-prepared02/control/observe_container_pids.py",
+      "bytes": 12524,
+      "sha256": "e2f8c31fc7136027ebd2d8ec6a973753d56a7a60fdd5434e741b0db4022f40d0"
+    }
+  },
+  "overlay": {
+    "sim2sim.py": {
+      "source": {
+        "path": "/home/dzp/projects/php_parkour/outputs/research/reference629-preparation-01/overlay/sim2sim.py",
+        "bytes": 47450,
+        "sha256": "023fed0f9f31f79b506b370a96013c18e8b1c94239e0504eca4bcea6076c3f4d"
+      },
+      "copy": {
+        "path": "/home/dzp/projects/php_parkour/outputs/research/reference-native629-01/overlay/sim2sim.py",
+        "bytes": 47450,
+        "sha256": "023fed0f9f31f79b506b370a96013c18e8b1c94239e0504eca4bcea6076c3f4d"
+      }
+    },
+    "reference_commands.py": {
+      "source": {
+        "path": "/home/dzp/projects/php_parkour/outputs/research/reference629-preparation-01/overlay/reference_commands.py",
+        "bytes": 5710,
+        "sha256": "1af208fc1f57bac61d37256a4bdbb20fa45b05817291c3372c92b5a8c3807d57"
+      },
+      "copy": {
+        "path": "/home/dzp/projects/php_parkour/outputs/research/reference-native629-01/overlay/reference_commands.py",
+        "bytes": 5710,
+        "sha256": "1af208fc1f57bac61d37256a4bdbb20fa45b05817291c3372c92b5a8c3807d57"
+      }
+    },
+    "sim2sim_scene_matrix.py": {
+      "source": {
+        "path": "/home/dzp/projects/php_parkour/outputs/research/reference629-preparation-01/overlay/sim2sim_scene_matrix.py",
+        "bytes": 47785,
+        "sha256": "599c75df14c5ac902d57f88bfd3d752317e332abce5751153bef8d20d8d0bb70"
+      },
+      "copy": {
+        "path": "/home/dzp/projects/php_parkour/outputs/research/reference-native629-01/overlay/sim2sim_scene_matrix.py",
+        "bytes": 47785,
+        "sha256": "599c75df14c5ac902d57f88bfd3d752317e332abce5751153bef8d20d8d0bb70"
+      }
+    }
+  },
+  "docker_endpoint": "unix:///var/run/docker.sock",
+  "container_id": "4d1e8c16558995d925ed273bc2a2568fffe51b81c229a10257bcefeaccc08a12",
+  "created_inspect": {
+    "Id": "4d1e8c16558995d925ed273bc2a2568fffe51b81c229a10257bcefeaccc08a12",
+    "Created": "2026-10-10T15:38:45.195513773Z",
+    "Path": "/bin/bash",
+    "Args": [
+      "-lc",
+      "exec sleep infinity"
+    ],
+    "State": {
+      "Status": "created",
+      "Running": false,
+      "Paused": false,
+      "Restarting": false,
+      "OOMKilled": false,
+      "Dead": false,
+      "Pid": 0,
+      "ExitCode": 0,
+      "Error": "",
+      "StartedAt": "0001-01-01T00:00:00Z",
+      "FinishedAt": "0001-01-01T00:00:00Z"
+    },
+    "Image": "sha256:2be18521015b2a84ef7a4442af9a94ef041a19feb9ce385ae15424b1dc158d8f",
+    "ResolvConfPath": "",
+    "HostnamePath": "",
+    "HostsPath": "",
+    "LogPath": "",
+    "Name": "/php-reference-native629-01",
+    "RestartCount": 0,
+    "Driver": "overlay2",
+    "Platform": "linux",
+    "MountLabel": "",
+    "ProcessLabel": "",
+    "AppArmorProfile": "",
+    "ExecIDs": null,
+    "HostConfig": {
+      "Binds": null,
+      "ContainerIDFile": "",
+      "LogConfig": {
+        "Type": "json-file",
+        "Config": {}
+      },
+      "NetworkMode": "none",
+      "PortBindings": {},
+      "RestartPolicy": {
+        "Name": "no",
+        "MaximumRetryCount": 0
+      },
+      "AutoRemove": false,
+      "VolumeDriver": "",
+      "VolumesFrom": null,
+      "ConsoleSize": [
+        0,
+        0
+      ],
+      "CapAdd": null,
+      "CapDrop": null,
+      "CgroupnsMode": "private",
+      "Dns": null,
+      "DnsOptions": [],
+      "DnsSearch": [],
+      "ExtraHosts": null,
+      "GroupAdd": null,
+      "IpcMode": "private",
+      "Cgroup": "",
+      "Links": null,
+      "OomScoreAdj": 0,
+      "PidMode": "",
+      "Privileged": false,
+      "PublishAllPorts": false,
+      "ReadonlyRootfs": false,
+      "SecurityOpt": null,
+      "UTSMode": "",
+      "UsernsMode": "",
+      "ShmSize": 8589934592,
+      "Runtime": "runc",
+      "Isolation": "",
+      "CpuShares": 0,
+      "Memory": 0,
+      "NanoCpus": 0,
+      "CgroupParent": "",
+      "BlkioWeight": 0,
+      "BlkioWeightDevice": [],
+      "BlkioDeviceReadBps": [],
+      "BlkioDeviceWriteBps": [],
+      "BlkioDeviceReadIOps": [],
+      "BlkioDeviceWriteIOps": [],
+      "CpuPeriod": 0,
+      "CpuQuota": 0,
+      "CpuRealtimePeriod": 0,
+      "CpuRealtimeRuntime": 0,
+      "CpusetCpus": "",
+      "CpusetMems": "",
+      "Devices": [],
+      "DeviceCgroupRules": null,
+      "DeviceRequests": [
+        {
+          "Driver": "",
+          "Count": 0,
+          "DeviceIDs": [
+            "GPU-1803972d-e774-ee96-e6f6-1ee1ce47bb25"
+          ],
+          "Capabilities": [
+            [
+              "gpu"
+            ]
+          ],
+          "Options": {}
+        }
+      ],
+      "MemoryReservation": 0,
+      "MemorySwap": 0,
+      "MemorySwappiness": null,
+      "OomKillDisable": false,
+      "PidsLimit": null,
+      "Ulimits": [],
+      "CpuCount": 0,
+      "CpuPercent": 0,
+      "IOMaximumIOps": 0,
+      "IOMaximumBandwidth": 0,
+      "Mounts": [
+        {
+          "Type": "bind",
+          "Source": "/home/dzp/projects/php_parkour/outputs/research/fresh629-sdk018-6cb2ae2-prepared02/source",
+          "Target": "/workspace/php_parkour",
+          "ReadOnly": true
+        },
+        {
+          "Type": "bind",
+          "Source": "/home/dzp/projects/php_parkour/outputs/research/reference-native629-01/overlay",
+          "Target": "/workspace/php_parkour/scripts/research",
+          "ReadOnly": true
+        },
+        {
+          "Type": "bind",
+          "Source": "/home/dzp/projects/php_parkour/outputs/research/fresh629-sdk018-6cb2ae2-prepared02/inputs",
+          "Target": "/data",
+          "ReadOnly": true
+        },
+        {
+          "Type": "bind",
+          "Source": "/home/dzp/projects/php_parkour/outputs/research/reference-native629-01/cache",
+          "Target": "/data/cache"
+        },
+        {
+          "Type": "bind",
+          "Source": "/home/dzp/projects/php_parkour/outputs/research/reference-native629-01/checks",
+          "Target": "/checks"
+        },
+        {
+          "Type": "bind",
+          "Source": "/home/dzp/projects/php_parkour/outputs/research/reference-native629-01/outputs",
+          "Target": "/outputs"
+        }
+      ],
+      "MaskedPaths": [
+        "/proc/acpi",
+        "/proc/asound",
+        "/proc/interrupts",
+        "/proc/kcore",
+        "/proc/keys",
+        "/proc/latency_stats",
+        "/proc/sched_debug",
+        "/proc/scsi",
+        "/proc/timer_list",
+        "/proc/timer_stats",
+        "/sys/devices/virtual/powercap",
+        "/sys/firmware"
+      ],
+      "ReadonlyPaths": [
+        "/proc/bus",
+        "/proc/fs",
+        "/proc/irq",
+        "/proc/sys",
+        "/proc/sysrq-trigger"
+      ],
+      "Init": true
+    },
+    "GraphDriver": {
+      "Data": {
+        "ID": "4d1e8c16558995d925ed273bc2a2568fffe51b81c229a10257bcefeaccc08a12",
+        "LowerDir": "/var/lib/docker/overlay2/73fa9a6a20e77e26d072e2ef5f9b6a7a00cce58d9518a0b0ff34a172b44c8902-init/diff:/var/lib/docker/overlay2/qh64o7p1e5jmdemik0wi46qpz/diff:/var/lib/docker/overlay2/x2dko7vqed75i7in9b4bu57aq/diff:/var/lib/docker/overlay2/6b02gyolwp25c88vhpwrdso3y/diff:/var/lib/docker/overlay2/1wyjpb3ve9ja110739ih47d1u/diff:/var/lib/docker/overlay2/tbr64cba1ij6j25qqq7np72tl/diff:/var/lib/docker/overlay2/jw1uc9sdvzw4kd65fgvfqr3bf/diff:/var/lib/docker/overlay2/itgqvfuc3mty8gm5qcn4o130g/diff:/var/lib/docker/overlay2/k24ypgvz528wlfj0cm8fzdp61/diff:/var/lib/docker/overlay2/bpt2251pljph9ijmasar3xtrv/diff:/var/lib/docker/overlay2/pg5eah4nkd35kh1ncdwhh0quz/diff:/var/lib/docker/overlay2/mppi4h34g1hfg9fe8wqjn2ftl/diff:/var/lib/docker/overlay2/t7erlzya8ug9zskhiqee14849/diff:/var/lib/docker/overlay2/uprxng85mkchpt7qidbb2vx9q/diff:/var/lib/docker/overlay2/mx2rjhulpusqlm8c7nvvmw7qz/diff:/var/lib/docker/overlay2/mo3wzzhyde0jmkt9x975fkgtx/diff:/var/lib/docker/overlay2/09fc6d2836f8a807bd02481824f8541f0c9db166ebb235da3a860ee1d6598ce8/diff:/var/lib/docker/overlay2/90d2a1f8731abf5538501175abb46775b8a340798d54b6385d29a07aa4d9e14f/diff:/var/lib/docker/overlay2/8dcd1e0dd5843e1e297fff24ebd114360970f2dcff917fe2dc394cc5356420fb/diff:/var/lib/docker/overlay2/1dd419a427a2c753130267826aad0f724ff5cd24d47f4e15fa1f4695552f3be1/diff:/var/lib/docker/overlay2/c9db63951aef51e4d6c20a5f753681e0ed51f3a38f60c6bb693fe91bfc9ae021/diff:/var/lib/docker/overlay2/83e879c31e24340c44d6852df0c7462a5cd09d94c196e2de088bec3be7220799/diff:/var/lib/docker/overlay2/16fab58bdbdc5117057b7bc06c01f91e51d8dba996aad6ffa57f9c75db114d4c/diff:/var/lib/docker/overlay2/2d63303b59dffa2630ab1ae804b4bbcfe7857db15e50ae6538dcdebabe6c1b38/diff:/var/lib/docker/overlay2/acf576d4fa2081609d3b14f01acf073fce754a286b99ddb74400ea95ef62843b/diff:/var/lib/docker/overlay2/56171f89002385e795a9477358b5641fae0ac0f52e6dcfb6bc182be447d57506/diff:/var/lib/docker/overlay2/902acd4427a446ade81a22f4619a8134042e453015e31b96e7cd74fd8ec2d19b/diff:/var/lib/docker/overlay2/0b29bb4e38490ea1b604266a71dc00a9edce97d1a890e5b506997af326aeedaa/diff:/var/lib/docker/overlay2/0e9df1089170f3653ebbf125205a38e9a2aed0ed100a784bc5b942a3c0d307eb/diff:/var/lib/docker/overlay2/aae9918017bda1c96400990629a4d8470968b136b67eeb743bf4a8b0d21bfc37/diff:/var/lib/docker/overlay2/e4e88e5f246543be9cb848b50f3a9380a322033f6ca090e0e8cc1d307bffba70/diff:/var/lib/docker/overlay2/27fd592da2a562ebe4ac1128bd9c1d743f9b1c4b8c4001ed8fe847d0cb4c6d1a/diff:/var/lib/docker/overlay2/4974e30615fac29898a0caa60eccc2cb3a082f45a689aa5e961d3a3999dbee71/diff:/var/lib/docker/overlay2/1e58a376e565fccf9ad4310537ff0d158f87caf8de7ef87c7573f88ca29129d0/diff:/var/lib/docker/overlay2/fe9d8c9ee45c46069f6ec2a7d553aa997ba7475d05d069dde806b05fa79c5e4a/diff:/var/lib/docker/overlay2/6f441cbc48adece8a3157c0e4ed2af287e826a60a8fc0951c162d1c2018facaa/diff:/var/lib/docker/overlay2/4cf532e34677d083018ef9376064d5eb6045f5a4bfc13044b5c9acf34c63efc0/diff:/var/lib/docker/overlay2/b02ee10b3fc62fc74016d4bbb7b15fff52624eab0de869bdb93a75be034ad8ce/diff:/var/lib/docker/overlay2/2ca0a4b452a34cdd577b67ba263197f8d8982860b5dbdb82c22d4ba4ddc41bbc/diff:/var/lib/docker/overlay2/5252c2f56ef9dbae3eae58ea7380109d8b46816d08af68e1602c9956c6a4b13e/diff:/var/lib/docker/overlay2/ec6d3e16244daaa5717bb8a17a57b94ce735c0278c46b9df627ce340c284ec19/diff:/var/lib/docker/overlay2/135d4efa9497ac9a762291348fe70c0695cedd06aee7966eecec327e5c8aba47/diff:/var/lib/docker/overlay2/f593ae30f9669b9adc0a53192a77f72909ac270ff040a1f40c8392c91a88ce16/diff:/var/lib/docker/overlay2/245953152deeb3e04917fe72b57ff65a1e1daba1e734ab404faa1c89c40b0dbc/diff:/var/lib/docker/overlay2/3d123982322ced92a361f88d183ac2da0fc6411a7dfaff83837f6d0e349628e6/diff",
+        "MergedDir": "/var/lib/docker/overlay2/73fa9a6a20e77e26d072e2ef5f9b6a7a00cce58d9518a0b0ff34a172b44c8902/merged",
+        "UpperDir": "/var/lib/docker/overlay2/73fa9a6a20e77e26d072e2ef5f9b6a7a00cce58d9518a0b0ff34a172b44c8902/diff",
+        "WorkDir": "/var/lib/docker/overlay2/73fa9a6a20e77e26d072e2ef5f9b6a7a00cce58d9518a0b0ff34a172b44c8902/work"
+      },
+      "Name": "overlay2"
+    },
+    "Mounts": [
+      {
+        "Type": "bind",
+        "Source": "/home/dzp/projects/php_parkour/outputs/research/reference-native629-01/checks",
+        "Destination": "/checks",
+        "Mode": "",
+        "RW": true,
+        "Propagation": "rprivate"
+      },
+      {
+        "Type": "bind",
+        "Source": "/home/dzp/projects/php_parkour/outputs/research/reference-native629-01/outputs",
+        "Destination": "/outputs",
+        "Mode": "",
+        "RW": true,
+        "Propagation": "rprivate"
+      },
+      {
+        "Type": "bind",
+        "Source": "/home/dzp/projects/php_parkour/outputs/research/fresh629-sdk018-6cb2ae2-prepared02/source",
+        "Destination": "/workspace/php_parkour",
+        "Mode": "",
+        "RW": false,
+        "Propagation": "rprivate"
+      },
+      {
+        "Type": "bind",
+        "Source": "/home/dzp/projects/php_parkour/outputs/research/reference-native629-01/overlay",
+        "Destination": "/workspace/php_parkour/scripts/research",
+        "Mode": "",
+        "RW": false,
+        "Propagation": "rprivate"
+      },
+      {
+        "Type": "bind",
+        "Source": "/home/dzp/projects/php_parkour/outputs/research/fresh629-sdk018-6cb2ae2-prepared02/inputs",
+        "Destination": "/data",
+        "Mode": "",
+        "RW": false,
+        "Propagation": "rprivate"
+      },
+      {
+        "Type": "bind",
+        "Source": "/home/dzp/projects/php_parkour/outputs/research/reference-native629-01/cache",
+        "Destination": "/data/cache",
+        "Mode": "",
+        "RW": true,
+        "Propagation": "rprivate"
+      }
+    ],
+    "Config": {
+      "Hostname": "4d1e8c165589",
+      "Domainname": "",
+      "User": "root",
+      "AttachStdin": false,
+      "AttachStdout": true,
+      "AttachStderr": true,
+      "ExposedPorts": {
+        "47998/udp": {},
+        "49100/tcp": {}
+      },
+      "Tty": false,
+      "OpenStdin": false,
+      "StdinOnce": false,
+      "Env": [
+        "PHP_DOCKER=1",
+        "WANDB_DISABLED=true",
+        "MKL_NUM_THREADS=1",
+        "no_proxy=localhost,127.0.0.1,::1,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16",
+        "TRANSFORMERS_OFFLINE=1",
+        "NVIDIA_DRIVER_CAPABILITIES=compute,utility,graphics",
+        "OMP_NUM_THREADS=1",
+        "HTTP_PROXY=http://172.17.0.1:7897",
+        "HTTPS_PROXY=http://172.17.0.1:7897",
+        "PYTHONDONTWRITEBYTECODE=1",
+        "PYOPENGL_PLATFORM=egl",
+        "WANDB_MODE=disabled",
+        "HF_HUB_OFFLINE=1",
+        "OPENBLAS_NUM_THREADS=1",
+        "http_proxy=http://172.17.0.1:7897",
+        "https_proxy=http://172.17.0.1:7897",
+        "MUJOCO_GL=egl",
+        "MUJOCO_EGL_DEVICE_ID=0",
+        "NO_PROXY=localhost,127.0.0.1,::1,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16",
+        "PATH=/opt/php/runtimes/train/bin:/opt/php/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+        "NVIDIA_VISIBLE_DEVICES=all",
+        "VK_DRIVER_FILES=/etc/vulkan/icd.d/nvidia_icd.json",
+        "OMNI_SERVER=https://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/5.1",
+        "MIN_DRIVER_VERSION=570.169",
+        "ISAACSIM_VERSION=",
+        "ISAACSIM_ROOT_PATH=/isaac-sim",
+        "ISAACLAB_PATH=/workspace/isaaclab",
+        "DOCKER_USER_HOME=/root",
+        "LANG=C.UTF-8",
+        "DEBIAN_FRONTEND=noninteractive",
+        "ACCEPT_EULA=Y",
+        "PRIVACY_CONSENT=Y",
+        "OMNI_KIT_ACCEPT_EULA=YES",
+        "OMNI_KIT_ALLOW_ROOT=1",
+        "HSSIM_PYTHON=/opt/php/bin/train-python",
+        "LOGGER=tensorboard",
+        "PHP_MOTION_DATABASE_DIR=/data/assets/databases",
+        "XDG_CACHE_HOME=/data/cache",
+        "PYTHONUNBUFFERED=1",
+        "PIP_DEFAULT_TIMEOUT=120",
+        "PIP_RETRIES=8",
+        "PIP_CACHE_DIR=/root/.cache/pip"
+      ],
+      "Cmd": [
+        "-lc",
+        "exec sleep infinity"
+      ],
+      "Image": "sha256:2be18521015b2a84ef7a4442af9a94ef041a19feb9ce385ae15424b1dc158d8f",
+      "Volumes": null,
+      "WorkingDir": "/workspace/php_parkour",
+      "Entrypoint": [
+        "/bin/bash"
+      ],
+      "Labels": {
+        "description": "Dockerfile for building and running the Isaac Lab framework inside Isaac Sim container image.",
+        "org.opencontainers.image.ref.name": "ubuntu",
+        "org.opencontainers.image.revision": "6cb2ae2492ef7bf66da7c5a72da87d6f60f0636f",
+        "org.opencontainers.image.source": "https://github.com/amazon-far/php_parkour",
+        "org.opencontainers.image.version": "24.04",
+        "org.php-parkour.holosoma-revision": "4a0bf04cde5930af5ed59da797568d32be972525",
+        "org.php-parkour.source-dirty": "false",
+        "php.reference629.owner": "19cd99de8d744abe935090b775283a2f",
+        "version": "2.1.1"
+      }
+    },
+    "NetworkSettings": {
+      "SandboxID": "",
+      "SandboxKey": "",
+      "Ports": {},
+      "Networks": {
+        "none": {
+          "IPAMConfig": null,
+          "Links": null,
+          "Aliases": null,
+          "DriverOpts": null,
+          "GwPriority": 0,
+          "NetworkID": "",
+          "EndpointID": "",
+          "Gateway": "",
+          "IPAddress": "",
+          "MacAddress": "",
+          "IPPrefixLen": 0,
+          "IPv6Gateway": "",
+          "GlobalIPv6Address": "",
+          "GlobalIPv6PrefixLen": 0,
+          "DNSNames": null
+        }
+      }
+    }
+  },
+  "running_inspect": {
+    "Id": "4d1e8c16558995d925ed273bc2a2568fffe51b81c229a10257bcefeaccc08a12",
+    "Created": "2026-10-10T15:38:45.195513773Z",
+    "Path": "/bin/bash",
+    "Args": [
+      "-lc",
+      "exec sleep infinity"
+    ],
+    "State": {
+      "Status": "running",
+      "Running": true,
+      "Paused": false,
+      "Restarting": false,
+      "OOMKilled": false,
+      "Dead": false,
+      "Pid": 2238046,
+      "ExitCode": 0,
+      "Error": "",
+      "StartedAt": "2026-10-10T15:38:45.251740461Z",
+      "FinishedAt": "0001-01-01T00:00:00Z"
+    },
+    "Image": "sha256:2be18521015b2a84ef7a4442af9a94ef041a19feb9ce385ae15424b1dc158d8f",
+    "ResolvConfPath": "/var/lib/docker/containers/4d1e8c16558995d925ed273bc2a2568fffe51b81c229a10257bcefeaccc08a12/resolv.conf",
+    "HostnamePath": "/var/lib/docker/containers/4d1e8c16558995d925ed273bc2a2568fffe51b81c229a10257bcefeaccc08a12/hostname",
+    "HostsPath": "/var/lib/docker/containers/4d1e8c16558995d925ed273bc2a2568fffe51b81c229a10257bcefeaccc08a12/hosts",
+    "LogPath": "/var/lib/docker/containers/4d1e8c16558995d925ed273bc2a2568fffe51b81c229a10257bcefeaccc08a12/4d1e8c16558995d925ed273bc2a2568fffe51b81c229a10257bcefeaccc08a12-json.log",
+    "Name": "/php-reference-native629-01",
+    "RestartCount": 0,
+    "Driver": "overlay2",
+    "Platform": "linux",
+    "MountLabel": "",
+    "ProcessLabel": "",
+    "AppArmorProfile": "docker-default",
+    "ExecIDs": null,
+    "HostConfig": {
+      "Binds": null,
+      "ContainerIDFile": "",
+      "LogConfig": {
+        "Type": "json-file",
+        "Config": {}
+      },
+      "NetworkMode": "none",
+      "PortBindings": {},
+      "RestartPolicy": {
+        "Name": "no",
+        "MaximumRetryCount": 0
+      },
+      "AutoRemove": false,
+      "VolumeDriver": "",
+      "VolumesFrom": null,
+      "ConsoleSize": [
+        0,
+        0
+      ],
+      "CapAdd": null,
+      "CapDrop": null,
+      "CgroupnsMode": "private",
+      "Dns": null,
+      "DnsOptions": [],
+      "DnsSearch": [],
+      "ExtraHosts": null,
+      "GroupAdd": null,
+      "IpcMode": "private",
+      "Cgroup": "",
+      "Links": null,
+      "OomScoreAdj": 0,
+      "PidMode": "",
+      "Privileged": false,
+      "PublishAllPorts": false,
+      "ReadonlyRootfs": false,
+      "SecurityOpt": null,
+      "UTSMode": "",
+      "UsernsMode": "",
+      "ShmSize": 8589934592,
+      "Runtime": "runc",
+      "Isolation": "",
+      "CpuShares": 0,
+      "Memory": 0,
+      "NanoCpus": 0,
+      "CgroupParent": "",
+      "BlkioWeight": 0,
+      "BlkioWeightDevice": [],
+      "BlkioDeviceReadBps": [],
+      "BlkioDeviceWriteBps": [],
+      "BlkioDeviceReadIOps": [],
+      "BlkioDeviceWriteIOps": [],
+      "CpuPeriod": 0,
+      "CpuQuota": 0,
+      "CpuRealtimePeriod": 0,
+      "CpuRealtimeRuntime": 0,
+      "CpusetCpus": "",
+      "CpusetMems": "",
+      "Devices": [],
+      "DeviceCgroupRules": null,
+      "DeviceRequests": [
+        {
+          "Driver": "",
+          "Count": 0,
+          "DeviceIDs": [
+            "GPU-1803972d-e774-ee96-e6f6-1ee1ce47bb25"
+          ],
+          "Capabilities": [
+            [
+              "gpu"
+            ]
+          ],
+          "Options": {}
+        }
+      ],
+      "MemoryReservation": 0,
+      "MemorySwap": 0,
+      "MemorySwappiness": null,
+      "OomKillDisable": null,
+      "PidsLimit": null,
+      "Ulimits": [],
+      "CpuCount": 0,
+      "CpuPercent": 0,
+      "IOMaximumIOps": 0,
+      "IOMaximumBandwidth": 0,
+      "Mounts": [
+        {
+          "Type": "bind",
+          "Source": "/home/dzp/projects/php_parkour/outputs/research/fresh629-sdk018-6cb2ae2-prepared02/source",
+          "Target": "/workspace/php_parkour",
+          "ReadOnly": true
+        },
+        {
+          "Type": "bind",
+          "Source": "/home/dzp/projects/php_parkour/outputs/research/reference-native629-01/overlay",
+          "Target": "/workspace/php_parkour/scripts/research",
+          "ReadOnly": true
+        },
+        {
+          "Type": "bind",
+          "Source": "/home/dzp/projects/php_parkour/outputs/research/fresh629-sdk018-6cb2ae2-prepared02/inputs",
+          "Target": "/data",
+          "ReadOnly": true
+        },
+        {
+          "Type": "bind",
+          "Source": "/home/dzp/projects/php_parkour/outputs/research/reference-native629-01/cache",
+          "Target": "/data/cache"
+        },
+        {
+          "Type": "bind",
+          "Source": "/home/dzp/projects/php_parkour/outputs/research/reference-native629-01/checks",
+          "Target": "/checks"
+        },
+        {
+          "Type": "bind",
+          "Source": "/home/dzp/projects/php_parkour/outputs/research/reference-native629-01/outputs",
+          "Target": "/outputs"
+        }
+      ],
+      "MaskedPaths": [
+        "/proc/acpi",
+        "/proc/asound",
+        "/proc/interrupts",
+        "/proc/kcore",
+        "/proc/keys",
+        "/proc/latency_stats",
+        "/proc/sched_debug",
+        "/proc/scsi",
+        "/proc/timer_list",
+        "/proc/timer_stats",
+        "/sys/devices/virtual/powercap",
+        "/sys/firmware"
+      ],
+      "ReadonlyPaths": [
+        "/proc/bus",
+        "/proc/fs",
+        "/proc/irq",
+        "/proc/sys",
+        "/proc/sysrq-trigger"
+      ],
+      "Init": true
+    },
+    "GraphDriver": {
+      "Data": {
+        "ID": "4d1e8c16558995d925ed273bc2a2568fffe51b81c229a10257bcefeaccc08a12",
+        "LowerDir": "/var/lib/docker/overlay2/73fa9a6a20e77e26d072e2ef5f9b6a7a00cce58d9518a0b0ff34a172b44c8902-init/diff:/var/lib/docker/overlay2/qh64o7p1e5jmdemik0wi46qpz/diff:/var/lib/docker/overlay2/x2dko7vqed75i7in9b4bu57aq/diff:/var/lib/docker/overlay2/6b02gyolwp25c88vhpwrdso3y/diff:/var/lib/docker/overlay2/1wyjpb3ve9ja110739ih47d1u/diff:/var/lib/docker/overlay2/tbr64cba1ij6j25qqq7np72tl/diff:/var/lib/docker/overlay2/jw1uc9sdvzw4kd65fgvfqr3bf/diff:/var/lib/docker/overlay2/itgqvfuc3mty8gm5qcn4o130g/diff:/var/lib/docker/overlay2/k24ypgvz528wlfj0cm8fzdp61/diff:/var/lib/docker/overlay2/bpt2251pljph9ijmasar3xtrv/diff:/var/lib/docker/overlay2/pg5eah4nkd35kh1ncdwhh0quz/diff:/var/lib/docker/overlay2/mppi4h34g1hfg9fe8wqjn2ftl/diff:/var/lib/docker/overlay2/t7erlzya8ug9zskhiqee14849/diff:/var/lib/docker/overlay2/uprxng85mkchpt7qidbb2vx9q/diff:/var/lib/docker/overlay2/mx2rjhulpusqlm8c7nvvmw7qz/diff:/var/lib/docker/overlay2/mo3wzzhyde0jmkt9x975fkgtx/diff:/var/lib/docker/overlay2/09fc6d2836f8a807bd02481824f8541f0c9db166ebb235da3a860ee1d6598ce8/diff:/var/lib/docker/overlay2/90d2a1f8731abf5538501175abb46775b8a340798d54b6385d29a07aa4d9e14f/diff:/var/lib/docker/overlay2/8dcd1e0dd5843e1e297fff24ebd114360970f2dcff917fe2dc394cc5356420fb/diff:/var/lib/docker/overlay2/1dd419a427a2c753130267826aad0f724ff5cd24d47f4e15fa1f4695552f3be1/diff:/var/lib/docker/overlay2/c9db63951aef51e4d6c20a5f753681e0ed51f3a38f60c6bb693fe91bfc9ae021/diff:/var/lib/docker/overlay2/83e879c31e24340c44d6852df0c7462a5cd09d94c196e2de088bec3be7220799/diff:/var/lib/docker/overlay2/16fab58bdbdc5117057b7bc06c01f91e51d8dba996aad6ffa57f9c75db114d4c/diff:/var/lib/docker/overlay2/2d63303b59dffa2630ab1ae804b4bbcfe7857db15e50ae6538dcdebabe6c1b38/diff:/var/lib/docker/overlay2/acf576d4fa2081609d3b14f01acf073fce754a286b99ddb74400ea95ef62843b/diff:/var/lib/docker/overlay2/56171f89002385e795a9477358b5641fae0ac0f52e6dcfb6bc182be447d57506/diff:/var/lib/docker/overlay2/902acd4427a446ade81a22f4619a8134042e453015e31b96e7cd74fd8ec2d19b/diff:/var/lib/docker/overlay2/0b29bb4e38490ea1b604266a71dc00a9edce97d1a890e5b506997af326aeedaa/diff:/var/lib/docker/overlay2/0e9df1089170f3653ebbf125205a38e9a2aed0ed100a784bc5b942a3c0d307eb/diff:/var/lib/docker/overlay2/aae9918017bda1c96400990629a4d8470968b136b67eeb743bf4a8b0d21bfc37/diff:/var/lib/docker/overlay2/e4e88e5f246543be9cb848b50f3a9380a322033f6ca090e0e8cc1d307bffba70/diff:/var/lib/docker/overlay2/27fd592da2a562ebe4ac1128bd9c1d743f9b1c4b8c4001ed8fe847d0cb4c6d1a/diff:/var/lib/docker/overlay2/4974e30615fac29898a0caa60eccc2cb3a082f45a689aa5e961d3a3999dbee71/diff:/var/lib/docker/overlay2/1e58a376e565fccf9ad4310537ff0d158f87caf8de7ef87c7573f88ca29129d0/diff:/var/lib/docker/overlay2/fe9d8c9ee45c46069f6ec2a7d553aa997ba7475d05d069dde806b05fa79c5e4a/diff:/var/lib/docker/overlay2/6f441cbc48adece8a3157c0e4ed2af287e826a60a8fc0951c162d1c2018facaa/diff:/var/lib/docker/overlay2/4cf532e34677d083018ef9376064d5eb6045f5a4bfc13044b5c9acf34c63efc0/diff:/var/lib/docker/overlay2/b02ee10b3fc62fc74016d4bbb7b15fff52624eab0de869bdb93a75be034ad8ce/diff:/var/lib/docker/overlay2/2ca0a4b452a34cdd577b67ba263197f8d8982860b5dbdb82c22d4ba4ddc41bbc/diff:/var/lib/docker/overlay2/5252c2f56ef9dbae3eae58ea7380109d8b46816d08af68e1602c9956c6a4b13e/diff:/var/lib/docker/overlay2/ec6d3e16244daaa5717bb8a17a57b94ce735c0278c46b9df627ce340c284ec19/diff:/var/lib/docker/overlay2/135d4efa9497ac9a762291348fe70c0695cedd06aee7966eecec327e5c8aba47/diff:/var/lib/docker/overlay2/f593ae30f9669b9adc0a53192a77f72909ac270ff040a1f40c8392c91a88ce16/diff:/var/lib/docker/overlay2/245953152deeb3e04917fe72b57ff65a1e1daba1e734ab404faa1c89c40b0dbc/diff:/var/lib/docker/overlay2/3d123982322ced92a361f88d183ac2da0fc6411a7dfaff83837f6d0e349628e6/diff",
+        "MergedDir": "/var/lib/docker/overlay2/73fa9a6a20e77e26d072e2ef5f9b6a7a00cce58d9518a0b0ff34a172b44c8902/merged",
+        "UpperDir": "/var/lib/docker/overlay2/73fa9a6a20e77e26d072e2ef5f9b6a7a00cce58d9518a0b0ff34a172b44c8902/diff",
+        "WorkDir": "/var/lib/docker/overlay2/73fa9a6a20e77e26d072e2ef5f9b6a7a00cce58d9518a0b0ff34a172b44c8902/work"
+      },
+      "Name": "overlay2"
+    },
+    "Mounts": [
+      {
+        "Type": "bind",
+        "Source": "/home/dzp/projects/php_parkour/outputs/research/fresh629-sdk018-6cb2ae2-prepared02/source",
+        "Destination": "/workspace/php_parkour",
+        "Mode": "",
+        "RW": false,
+        "Propagation": "rprivate"
+      },
+      {
+        "Type": "bind",
+        "Source": "/home/dzp/projects/php_parkour/outputs/research/reference-native629-01/overlay",
+        "Destination": "/workspace/php_parkour/scripts/research",
+        "Mode": "",
+        "RW": false,
+        "Propagation": "rprivate"
+      },
+      {
+        "Type": "bind",
+        "Source": "/home/dzp/projects/php_parkour/outputs/research/fresh629-sdk018-6cb2ae2-prepared02/inputs",
+        "Destination": "/data",
+        "Mode": "",
+        "RW": false,
+        "Propagation": "rprivate"
+      },
+      {
+        "Type": "bind",
+        "Source": "/home/dzp/projects/php_parkour/outputs/research/reference-native629-01/cache",
+        "Destination": "/data/cache",
+        "Mode": "",
+        "RW": true,
+        "Propagation": "rprivate"
+      },
+      {
+        "Type": "bind",
+        "Source": "/home/dzp/projects/php_parkour/outputs/research/reference-native629-01/checks",
+        "Destination": "/checks",
+        "Mode": "",
+        "RW": true,
+        "Propagation": "rprivate"
+      },
+      {
+        "Type": "bind",
+        "Source": "/home/dzp/projects/php_parkour/outputs/research/reference-native629-01/outputs",
+        "Destination": "/outputs",
+        "Mode": "",
+        "RW": true,
+        "Propagation": "rprivate"
+      }
+    ],
+    "Config": {
+      "Hostname": "4d1e8c165589",
+      "Domainname": "",
+      "User": "root",
+      "AttachStdin": false,
+      "AttachStdout": true,
+      "AttachStderr": true,
+      "ExposedPorts": {
+        "47998/udp": {},
+        "49100/tcp": {}
+      },
+      "Tty": false,
+      "OpenStdin": false,
+      "StdinOnce": false,
+      "Env": [
+        "PHP_DOCKER=1",
+        "WANDB_DISABLED=true",
+        "MKL_NUM_THREADS=1",
+        "no_proxy=localhost,127.0.0.1,::1,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16",
+        "TRANSFORMERS_OFFLINE=1",
+        "NVIDIA_DRIVER_CAPABILITIES=compute,utility,graphics",
+        "OMP_NUM_THREADS=1",
+        "HTTP_PROXY=http://172.17.0.1:7897",
+        "HTTPS_PROXY=http://172.17.0.1:7897",
+        "PYTHONDONTWRITEBYTECODE=1",
+        "PYOPENGL_PLATFORM=egl",
+        "WANDB_MODE=disabled",
+        "HF_HUB_OFFLINE=1",
+        "OPENBLAS_NUM_THREADS=1",
+        "http_proxy=http://172.17.0.1:7897",
+        "https_proxy=http://172.17.0.1:7897",
+        "MUJOCO_GL=egl",
+        "MUJOCO_EGL_DEVICE_ID=0",
+        "NO_PROXY=localhost,127.0.0.1,::1,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16",
+        "PATH=/opt/php/runtimes/train/bin:/opt/php/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+        "NVIDIA_VISIBLE_DEVICES=all",
+        "VK_DRIVER_FILES=/etc/vulkan/icd.d/nvidia_icd.json",
+        "OMNI_SERVER=https://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/5.1",
+        "MIN_DRIVER_VERSION=570.169",
+        "ISAACSIM_VERSION=",
+        "ISAACSIM_ROOT_PATH=/isaac-sim",
+        "ISAACLAB_PATH=/workspace/isaaclab",
+        "DOCKER_USER_HOME=/root",
+        "LANG=C.UTF-8",
+        "DEBIAN_FRONTEND=noninteractive",
+        "ACCEPT_EULA=Y",
+        "PRIVACY_CONSENT=Y",
+        "OMNI_KIT_ACCEPT_EULA=YES",
+        "OMNI_KIT_ALLOW_ROOT=1",
+        "HSSIM_PYTHON=/opt/php/bin/train-python",
+        "LOGGER=tensorboard",
+        "PHP_MOTION_DATABASE_DIR=/data/assets/databases",
+        "XDG_CACHE_HOME=/data/cache",
+        "PYTHONUNBUFFERED=1",
+        "PIP_DEFAULT_TIMEOUT=120",
+        "PIP_RETRIES=8",
+        "PIP_CACHE_DIR=/root/.cache/pip"
+      ],
+      "Cmd": [
+        "-lc",
+        "exec sleep infinity"
+      ],
+      "Image": "sha256:2be18521015b2a84ef7a4442af9a94ef041a19feb9ce385ae15424b1dc158d8f",
+      "Volumes": null,
+      "WorkingDir": "/workspace/php_parkour",
+      "Entrypoint": [
+        "/bin/bash"
+      ],
+      "Labels": {
+        "description": "Dockerfile for building and running the Isaac Lab framework inside Isaac Sim container image.",
+        "org.opencontainers.image.ref.name": "ubuntu",
+        "org.opencontainers.image.revision": "6cb2ae2492ef7bf66da7c5a72da87d6f60f0636f",
+        "org.opencontainers.image.source": "https://github.com/amazon-far/php_parkour",
+        "org.opencontainers.image.version": "24.04",
+        "org.php-parkour.holosoma-revision": "4a0bf04cde5930af5ed59da797568d32be972525",
+        "org.php-parkour.source-dirty": "false",
+        "php.reference629.owner": "19cd99de8d744abe935090b775283a2f",
+        "version": "2.1.1"
+      }
+    },
+    "NetworkSettings": {
+      "SandboxID": "26b9efe688366221782ff63cf322452ae2c0a07eb18a86d63c736bef07e46b26",
+      "SandboxKey": "/var/run/docker/netns/26b9efe68836",
+      "Ports": {},
+      "Networks": {
+        "none": {
+          "IPAMConfig": null,
+          "Links": null,
+          "Aliases": null,
+          "DriverOpts": null,
+          "GwPriority": 0,
+          "NetworkID": "47375fdff4acc57cf0ede3aaece2f664f6765027bdab566f885300ea0ed00587",
+          "EndpointID": "ac38092dffa01d5511d6800c9bd7ddd5d6539f5de0c70d5363621dc204e7c29e",
+          "Gateway": "",
+          "IPAddress": "",
+          "MacAddress": "",
+          "IPPrefixLen": 0,
+          "IPv6Gateway": "",
+          "GlobalIPv6Address": "",
+          "GlobalIPv6PrefixLen": 0,
+          "DNSNames": null
+        }
+      }
+    }
+  },
+  "host_container_init": {
+    "pid": 2238046,
+    "state": "S",
+    "ppid": 2238024,
+    "pgid": 2238046,
+    "sid": 2238046,
+    "start_time_clock_ticks": 107471973
+  },
+  "observer": {
+    "argv": [
+      "/usr/bin/python3",
+      "-B",
+      "/home/dzp/projects/php_parkour/outputs/research/fresh629-sdk018-6cb2ae2-prepared02/control/observe_container_pids.py",
+      "--container-id",
+      "4d1e8c16558995d925ed273bc2a2568fffe51b81c229a10257bcefeaccc08a12",
+      "--expected-image",
+      "sha256:2be18521015b2a84ef7a4442af9a94ef041a19feb9ce385ae15424b1dc158d8f",
+      "--output",
+      "/home/dzp/projects/php_parkour/outputs/research/reference-native629-01/host/observer",
+      "--stop-file",
+      "/home/dzp/projects/php_parkour/outputs/research/reference-native629-01/host/observer.stop",
+      "--interval",
+      "0.2",
+      "--max-seconds",
+      "86400"
+    ],
+    "host_identity_at_spawn": {
+      "pid": 2238093,
+      "state": "R",
+      "ppid": 2237897,
+      "pgid": 2238093,
+      "sid": 2238093,
+      "start_time_clock_ticks": 107471987
+    }
+  },
+  "prelaunch_plan": {
+    "path": "/home/dzp/projects/php_parkour/outputs/research/reference-native629-01/checks/verified-prelaunch-plan.json",
+    "bytes": 103152864,
+    "sha256": "7729d5e6b4ea740e69511172c2331dd880cb7aaac3c75a07ccebb8e50d47311f"
+  },
+  "native": {
+    "argv": [
+      "docker",
+      "exec",
+      "4d1e8c16558995d925ed273bc2a2568fffe51b81c229a10257bcefeaccc08a12",
+      "/opt/php/bin/inference-python",
+      "-B",
+      "/workspace/php_parkour/scripts/research/sim2sim_scene_matrix.py",
+      "--matrix",
+      "/data/matrix.json",
+      "--models",
+      "/data/assets/student",
+      "--output",
+      "/outputs/reference629",
+      "--all-configs",
+      "--reference-commands",
+      "--image-id",
+      "sha256:2be18521015b2a84ef7a4442af9a94ef041a19feb9ce385ae15424b1dc158d8f",
+      "--gl",
+      "egl"
+    ],
+    "host_identity_at_spawn": {
+      "pid": 2238689,
+      "state": "R",
+      "ppid": 2237897,
+      "pgid": 2238689,
+      "sid": 2238689,
+      "start_time_clock_ticks": 107472314
+    },
+    "scope": "host docker-exec client; native worker births are separate observer/entry evidence"
+  }
+}

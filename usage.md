@@ -14,6 +14,12 @@
 
 完整方向键与Backspace也已[实际通过](usage_assets/reports/native-keyboard-reset-allkeys/index.md)：一份424帧录制覆盖0–11全部部署指令，每个非零标签至少12帧；真实窗口重置使MuJoCo time从11.57秒归零，随后物理/控制/深度继续推进。双方原main/atexit与wrapper正常退出，全部原事件、录制、原视频和宿主进程映射已保存。
 
+新增[原始逐帧指令的真实闭环试跑](usage_assets/reports/reference-command-native-pilot/index.md)：`high_speed_speed_vault/run_left_45_0.3s`的341帧、6.82秒指令全部送入公开策略，原生录制的完整15维标签逐元素一致，两个worker正常退出，原MP4完整解码，最终147项CPU回归通过。原629扫描只使用恒定前进，不能证明这些时序。新试跑仍触发倾斜阈值0.18秒，`quality_verified=false`；它证明输入和物理执行通路，不证明翻越成功。全629逐帧验收尚未完成。
+
+[真实629配置CPU预检](usage_assets/reports/reference629-plan/index.md)已通过，逐例读取全部NPZ，合计342,651帧、6,853.02秒，并绑定377份依赖及1887份输入；全计划无损压缩且解压whole SHA一致。这是原生批次的输入计划，不是物理运行结果。
+
+15:38 UTC完整逐帧批次已实际启动，同容器的预启动计划与CPU计划逐字节一致；[15:40 UTC固定启动见证及首例原始产物](usage_assets/reports/reference629-native-start/index.md)记录4例完成、1例运行、0例执行失败。宿主父进程仍在等待，不存在整批完成或1258映射验收结论；视频全片解码将在物理运行结束后另做CPU后验。
+
 教师、纯DAgger和DAgger+PPO的[真实断点续训](usage_assets/reports/native-resume-acceptance/index.md)已完成：6次原生训练，历史3步加新15步完成原18步；优化器、权重更新、冻结专家、TensorBoard、最终ONNX与skip均通过。保存iter1后原生resume会重做index1，target4最终为iter3；这不是仅新增两轮或完整随机状态恢复。首次过严日志检查失败和一次GPU占用门卫拒绝均原样保留。
 
 后台交接已于14:37 UTC[替换为恢复生命周期版本](usage_assets/reports/final-student-delivery-waiter-recovered/index.md)，首次真实SSH仍为waiting，未fetch/prepare/native。官方五教师、两学生完整日程、888逐源尝试及最终自训学生58例仍待原任务完成，不能宣称全部复现结束。

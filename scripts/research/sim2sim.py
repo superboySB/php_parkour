@@ -159,6 +159,17 @@ def signal_worker_group(group: dict, number: int) -> bool:
     return True
 
 
+def verified_reference(config: dict) -> dict | None:
+    expected = config.get("reference_motion")
+    if expected is None:
+        return None
+    from reference_commands import load_reference_commands
+    reference = load_reference_commands(Path(expected["path"]))
+    if {key: value for key, value in reference.items() if key != "commands"} != expected:
+        raise ValueError("Reference motion changed after rollout configuration was written")
+    return reference
+
+
 def simulator(config: dict, output: Path) -> None:
     import numpy as np
     from holosoma.config_types.run_sim import RunSimConfig
@@ -182,6 +193,24 @@ def simulator(config: dict, output: Path) -> None:
     if config.get("mesh"):
         cli += ["--terrain.terrain-term.obj-file-path", config["mesh"]]
     cfg = parse_config(RunSimConfig, args=cli)
+    reference = verified_reference(config)
+    spatial_alignment = None
+    if reference is not None and config.get("reference_spawn"):
+        x, y = reference["root_xy"]
+        yaw = reference["root_yaw"]
+        original_position = list(cfg.robot.init_state.pos)
+        gantry = cfg.simulator.config.virtual_gantry
+        point = list(gantry.point or [0.0, 0.0, gantry.height])
+        point[0] += x - original_position[0]
+        point[1] += y - original_position[1]
+        initial = dataclasses.replace(cfg.robot.init_state,
+                  pos=[x, y, original_position[2]], rot=[0.0, 0.0, float(np.sin(yaw / 2)), float(np.cos(yaw / 2))])
+        cfg = dataclasses.replace(cfg, robot=dataclasses.replace(cfg.robot, init_state=initial),
+              simulator=dataclasses.replace(cfg.simulator, config=dataclasses.replace(cfg.simulator.config,
+                        virtual_gantry=dataclasses.replace(gantry, point=point))))
+        spatial_alignment = {"scope": "reference frame0 root XY/yaw only; original deployment height and startup joints",
+                             "position_xyz": list(initial.pos), "orientation_xyzw": list(initial.rot), "gantry_point": point,
+                             "reference_full_pose_applied": False}
     env, device, app = setup_simulation_environment(cfg, device="cpu")
     rows = []
     started = time.monotonic()
@@ -190,7 +219,12 @@ def simulator(config: dict, output: Path) -> None:
     released_step = None
     with DirectSimulation(cfg, env, device, app) as direct:
         sim = direct.simulator
-        save(output / "sim-ready.json", {"ready": True, "pid": os.getpid(), "cli": cli})
+        ready = {"ready": True, "pid": os.getpid(), "cli": cli}
+        if reference is not None:
+            ready.update(reference_motion_sha256=reference["sha256"], spatial_alignment=spatial_alignment,
+                         initial_qpos=sim.root_data.qpos.tolist(), initial_qvel=sim.root_data.qvel.tolist(),
+                         actual_gantry_point=np.asarray(sim.virtual_gantry.point).tolist())
+        save(output / "sim-ready.json", ready)
         step = 0
         dt = 1.0 / cfg.simulator.config.sim.fps
         decimation = cfg.simulator.config.sim.control_decimation_steps
@@ -211,7 +245,12 @@ def simulator(config: dict, output: Path) -> None:
                     sim.virtual_gantry.set_enable(False)
                     released_at = now
                     released_step = step
-                    save(output / "released.json", {"gantry_enabled": False, "wall_elapsed": now - started, "simulation_seconds": step * dt})
+                    released = {"gantry_enabled": False, "wall_elapsed": now - started, "simulation_seconds": step * dt}
+                    if reference is not None:
+                        released.update(physics_step=step, physics_steps_per_policy_tick=decimation,
+                                        qpos=sim.root_data.qpos.tolist(), qvel=sim.root_data.qvel.tolist(),
+                                        reference_motion_sha256=reference["sha256"], reference_full_pose_applied=False)
+                    save(output / "released.json", released)
             if step % decimation == 0:
                 sim.hooks.emit(Phase.FRAME_BEGIN)
             sim.hooks.emit(Phase.PRE_STEP)
@@ -281,6 +320,9 @@ def inference(config: dict, output: Path) -> None:
     from holosoma_inference.policies.depth_distillation import DepthDistillationPolicy
     random.seed(config["seed"])
     np.random.seed(config["seed"])
+    reference = verified_reference(config)
+    if reference is not None:
+        from reference_commands import reference_frame_for_step
 
     class AutomaticInput:
         def start(self):
@@ -322,6 +364,16 @@ def inference(config: dict, output: Path) -> None:
     command_position = -1
     samples = []
     last_control_step = -1
+    reference_anchor_step = None
+    reference_decimation = None
+
+    def verify_reference_policy_frame(index):
+        if not policy.use_policy_action or policy.get_ready_state:
+            raise RuntimeError("Reference frame cannot be counted while native policy is in manual/ready mode")
+        if policy.active_velocity_command_idx != reference["codes"][index] or not np.array_equal(
+                policy.velocity_command[0], reference["commands"][index]):
+            raise ValueError("Native policy command differs from the full reference one-hot frame")
+
     try:
         while not (output / "stop").exists():
             clock_file = output / "sim-clock.json"
@@ -334,20 +386,37 @@ def inference(config: dict, output: Path) -> None:
                 continue
             last_control_step = clock["step"]
             if policy_started is None and (output / "released.json").exists():
+                if reference is not None:
+                    released = json.loads((output / "released.json").read_text())
+                    reference_decimation = released["physics_steps_per_policy_tick"]
+                    if reference_decimation != 10 or policy.rl_rate != reference["fps"]:
+                        raise ValueError("Reference replay requires the native 500Hz physics / 50Hz policy clocks")
+                    reference_anchor_step = last_control_step
                 policy._handle_start_policy()
                 if config.get("record_policy"):
                     policy._dispatch_command(StateCommand.TOGGLE_RECORDING)
                 policy_started = time.monotonic()
             if policy_started is not None:
                 elapsed = max(0.0, clock["policy_seconds"])
-                index = min(int(elapsed / config["seconds_per_command"]), len(config["commands"]) - 1)
-                if index != command_position:
+                if reference is not None:
+                    index = reference_frame_for_step(last_control_step, reference_anchor_step, reference_decimation, reference["frames"])
+                    if index == reference["frames"]:
+                        break
+                    if index != ticks:
+                        raise RuntimeError("A reference control frame was skipped or repeated")
+                    code = reference["codes"][index]
+                else:
+                    index = min(int(elapsed / config["seconds_per_command"]), len(config["commands"]) - 1)
                     code = config["commands"][index]
+                if index != command_position:
                     policy.speed_mode = 1 if 6 <= code <= 10 else 0
                     policy.set_velocity_command(code)
-                    commands.append({"seconds": elapsed, "code": code, "name": policy._command_name(code)})
+                    command = {"seconds": elapsed, "code": code, "name": policy._command_name(code)}
+                    if reference is not None:
+                        command.update(reference_frame=index, physics_step=last_control_step)
+                    commands.append(command)
                     command_position = index
-                if elapsed >= config["duration"]:
+                if reference is None and elapsed >= config["duration"]:
                     break
                 if config.get("course_guide"):
                     # A human operator normally steers with direction keys.
@@ -368,17 +437,29 @@ def inference(config: dict, output: Path) -> None:
                         policy.speed_mode = 1 if 6 <= code <= 10 else 0
                         policy.set_velocity_command(code)
                         commands.append({"seconds": elapsed, "code": code, "name": policy._command_name(code), "source": "explicit course heading guide", "heading_error_rad": error})
+            if reference is not None and policy_started is not None:
+                verify_reference_policy_frame(index)
             policy.latency_tracker.start_cycle()
             policy.policy_action()
             policy.latency_tracker.end_cycle()
+            if reference is not None and policy_started is not None:
+                # Depth liveness may switch to stiff hold inside policy_action.
+                # Such a frame must fail even when its stand label is unchanged.
+                verify_reference_policy_frame(index)
             save(output / "control-ack.json", {"step": last_control_step})
             if policy_started is not None:
                 if not np.isfinite(policy.cmd_q).all():
                     raise ValueError("Non-finite commanded joint targets")
-                samples.append({"wall_seconds": time.monotonic() - policy_started, "simulation_seconds": elapsed, "command": policy.active_velocity_command_idx,
+                sample = {"wall_seconds": time.monotonic() - policy_started, "simulation_seconds": elapsed, "command": policy.active_velocity_command_idx,
                                 "target_min": float(policy.cmd_q.min()), "target_max": float(policy.cmd_q.max()),
-                                "action_l2": float(np.linalg.norm(policy.last_policy_action))})
+                                "action_l2": float(np.linalg.norm(policy.last_policy_action))}
+                if reference is not None:
+                    sample.update(reference_frame=index, reference_seconds=index / reference["fps"], physics_step=last_control_step,
+                                  velocity_command=policy.velocity_command[0].tolist(), policy_action_enabled=True, get_ready_state=False)
+                samples.append(sample)
                 ticks += 1
+        if reference is not None and ticks != reference["frames"]:
+            raise RuntimeError("Reference replay ended before all command frames were applied")
         policy._handle_stop_policy()
         lifecycle = {"damping_mode_active": bool(policy._damping_mode_active), "policy_action_disabled": not policy.use_policy_action}
         if config.get("record_policy"):
@@ -399,16 +480,24 @@ def inference(config: dict, output: Path) -> None:
                         raise ValueError(f"Unexpected native recording schema: {path}")
                     if not np.isfinite(qpos).all() or not np.isfinite(vel_cmd).all():
                         raise ValueError("Native recording contains non-finite values")
+                    if reference is not None and not np.array_equal(vel_cmd, reference["commands"]):
+                        raise ValueError("Native recording labels differ from the full reference command sequence")
                     if not np.allclose(np.linalg.norm(qpos[:, :4], axis=1), 1, atol=1e-3):
                         raise ValueError("Native recorded quaternion is not normalized")
                     clips.append({"file": str(path.relative_to(output)), "frames": ticks, "fps": fps, "qpos_shape": list(qpos.shape), "vel_cmd_shape": list(vel_cmd.shape),
                                   "qpos_layout": "native SDK wxyz quaternion, xyz root placeholders, 29 joints; inference recording format",
                                   "root_positions_are_zero_placeholders": True})
             lifecycle["recording_toggle_and_stop_autosave"] = clips
-        save(output / "inference.json", {"status": "completed", "ticks": ticks, "commands": commands, "samples": samples,
+        report = {"status": "completed", "ticks": ticks, "commands": commands, "samples": samples,
              "control_period_simulation_seconds": 0.02, "onnxruntime_intra_op_threads": config["ort_threads"],
              "lifecycle": lifecycle,
-             "transport": "official Unitree SDK DDS on lo; official depth shared memory", "input": "automated injected commands"})
+             "transport": "official Unitree SDK DDS on lo; official depth shared memory", "input": "automated injected commands"}
+        if reference is not None:
+            report["reference_replay"] = {"sha256": reference["sha256"], "frames": reference["frames"], "fps": reference["fps"],
+                 "anchor_physics_step": reference_anchor_step, "physics_steps_per_policy_tick": reference_decimation,
+                 "all_frames_applied": ticks == reference["frames"], "reference_qpos_drives_simulation": False,
+                 "spatial_alignment": "root XY/yaw only" if config.get("reference_spawn") else "default deployment spawn"}
+        save(output / "inference.json", report)
     finally:
         (output / "stop").touch()
         if hasattr(policy.interface, "close"):
@@ -423,7 +512,9 @@ def main() -> None:
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--terrain", choices=("plane", "step", "custom"), default="plane")
     parser.add_argument("--mesh", type=Path)
-    parser.add_argument("--commands", default="1", help="Comma-separated deployed command indices 0..11; all tests the twelve deployed directions")
+    parser.add_argument("--commands", help="Comma-separated deployed command indices 0..11; default 1; all tests the twelve deployed directions")
+    parser.add_argument("--reference-motion", type=Path, help="Replay all 50Hz vel_cmd frames from a tracking NPZ through the real policy; overrides duration")
+    parser.add_argument("--reference-spawn", action="store_true", help="Align only root XY/yaw to reference frame0, keeping deployment height/startup joints; shift gantry with the root")
     parser.add_argument("--seconds-per-command", type=float, default=8)
     parser.add_argument("--isolate-commands", action="store_true", help="Launch a fresh simulator/policy per command so a fall cannot contaminate later commands")
     parser.add_argument("--record-policy", action="store_true", help="Test native recording toggle, autosave on STOP, and damping command delivery")
@@ -458,7 +549,19 @@ def main() -> None:
     for name in ("depth_backbone.onnx", "student.onnx"):
         if not (args.models / name).is_file():
             parser.error(f"Missing {args.models / name}")
-    commands = list(range(12)) if args.commands == "all" else [int(x) for x in args.commands.split(",")]
+    reference = None
+    if args.reference_motion is not None:
+        if args.commands is not None or args.isolate_commands or args.course_guide:
+            parser.error("--reference-motion cannot be combined with --commands, --isolate-commands or --course-guide")
+        from reference_commands import load_reference_commands
+        try:
+            reference = load_reference_commands(args.reference_motion.resolve())
+        except (OSError, ValueError, KeyError) as error:
+            parser.error(str(error))
+    elif args.reference_spawn:
+        parser.error("--reference-spawn requires --reference-motion")
+    command_spec = args.commands if args.commands is not None else "1"
+    commands = reference["codes"] if reference is not None else (list(range(12)) if command_spec == "all" else [int(x) for x in command_spec.split(",")])
     if not commands or any(x < 0 or x > 11 for x in commands):
         parser.error("Deployed commands must be indices 0..11; ONNX validation covers reserved indices 12..14")
     if min(args.seconds_per_command, args.settle_seconds, args.startup_timeout) <= 0:
@@ -500,17 +603,20 @@ def main() -> None:
         if any(r["returncode"] != 0 for r in results):
             raise SystemExit(1)
         return
+    duration = reference["frames"] / reference["fps"] if reference is not None else len(commands) * args.seconds_per_command
     config = {"models": str(args.models.resolve()), "terrain": args.terrain, "mesh": str(args.mesh.resolve()) if args.mesh else None,
               "model_sha256": {name: hashlib.sha256((args.models / name).read_bytes()).hexdigest() for name in ("depth_backbone.onnx", "student.onnx")},
               "mesh_sha256": hashlib.sha256(args.mesh.read_bytes()).hexdigest() if args.mesh else None,
-              "commands": commands, "duration": len(commands) * args.seconds_per_command, "seconds_per_command": args.seconds_per_command,
+              "commands": commands, "duration": duration, "seconds_per_command": args.seconds_per_command,
               "record_policy": args.record_policy,
               "python_faulthandler": args.python_faulthandler,
               "course_guide": args.course_guide,
               "settle_seconds": args.settle_seconds, "startup_timeout": args.startup_timeout, "seed": args.seed, "gl": args.gl, "ort_threads": args.ort_threads,
               "egl_device_id": os.environ.get("MUJOCO_EGL_DEVICE_ID", "0") if args.gl == "egl" else None,
-              "wall_timeout": args.wall_timeout or (args.startup_timeout + len(commands) * args.seconds_per_command * 20 + args.settle_seconds + 30),
+              "wall_timeout": args.wall_timeout or (args.startup_timeout + duration * 20 + args.settle_seconds + 30),
               "scope": "native closed-loop rollout, not an assertion of skill success"}
+    if reference is not None:
+        config.update(reference_motion={key: value for key, value in reference.items() if key != "commands"}, reference_spawn=args.reference_spawn)
     save(output / "run.json", config)
     env = os.environ | {"MUJOCO_GL": args.gl, "PYOPENGL_PLATFORM": args.gl, "LOGURU_LEVEL": "INFO",
                         "OMP_NUM_THREADS": "1", "MKL_NUM_THREADS": "1", "MUJOCO_EGL_DEVICE_ID": os.environ.get("MUJOCO_EGL_DEVICE_ID", "0")}

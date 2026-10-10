@@ -419,6 +419,23 @@ docker exec -e OMP_NUM_THREADS=4 php-parkour-research \
 
 这是17场景全部629个配置各自几何上的有界测试，每例500次策略控制。配置数不是独立几何数：固定计划有580个不同OBJ文件SHA，50个平地配置共享同一OBJ；没有做几何等价性判定。[计数核验](usage_assets/reports/sim2sim-configuration-vs-mesh.json)。各例使用恒定forward command，不按参考轨迹回放，也不把存活10秒视为完成课程。旧后台批次已在北京时间15:48有序停止，原目录保持不动；其SDK0.1.6退出段错误与监督漏查需要修复，**不能继续resume该批次作为最终验收**。[实际停止、279 reported completed/5失败/1中断/344未运行及原源码](usage_assets/reports/sim2sim-cohort-halt/summary.md)。具体旧启动时间和两段预检视频见[扫描记录](usage_assets/reports/sim2sim-all-configs-start/summary.md)。
 
+需要按生成场景原本的站立、速度和转向时序验收时，使用新的逐帧模式。先结束已有原生任务，再在新输出目录生成计划；检查后去掉最后的`--plan`正式运行：
+
+```bash
+docker exec php-parkour-research \
+  /opt/php/bin/train-python scripts/research/sim2sim_scene_matrix.py \
+  --all-configs --reference-commands --matrix /outputs/motion-matching/matrix.json \
+  --models /data/assets/student --output /outputs/sim2sim/reference-all-new \
+  --image-id "$(docker inspect --format '{{.Image}}' php-parkour-research)" \
+  --gl egl --plan
+```
+
+每例时长由其NPZ的实际帧数决定，`--seconds`在这个模式下不控制时长。单例也可给`sim2sim.py`传`--reference-motion /absolute/path/name_motion.npz --reference-spawn --record-policy`，配上原有models、custom mesh和output参数。输入必须含50Hz、`vel_cmd:[T,15]`的精确one-hot，以及配对body世界位姿；不修补标签或重采样。初始根位置只对齐XY与yaw，保留部署高度和启动关节；释放吊架后以每10个物理步一帧送入真实策略，检查完整指令、策略启用状态、录制和退出。参考关节姿态不会逐帧施加给机器人。[341帧实际试跑、原片与147项最终CPU检查](usage_assets/reports/reference-command-native-pilot/index.md)已通过输入与执行验收，但该例触发倾斜阈值，不证明speed-vault技能成功。全629逐帧批次另行记录，不能由原恒定前进扫描替代。
+
+[全部629配置的真实CPU计划](usage_assets/reports/reference629-plan/index.md)已读取并校验17场景的NPZ，共342,651帧、6,853.02秒；629个配置对应628个不同NPZ SHA。完整计划以无损gzip保存，页面提供标准库解压及whole SHA校验命令。这个计划验收不等于629次物理运行完成。
+
+完整逐帧批次已于15:38 UTC在独立容器实际启动，[15:40固定见证](usage_assets/reports/reference629-native-start/index.md)记录4例完成、1例运行、0例执行失败及原始controller。当前进度在`outputs/research/reference-native629-01/outputs/reference629/matrix.json`；真正的宿主父进程退出记录将写入`outputs/research/reference629-native-parent-01/process-exit.json`。它持有同一GPU互斥锁，旧最终学生交接会等待释放；当前尚无整批1258映射及视频全片解码结论。
+
 旧[完整发布工具](scripts/research/publish_full_scene_matrix.py)绑定旧driver路径和收据格式，不能直接发布当前隔离的fresh629批次；独立审查已定位命名空间、driver合同、冻结源码及完整后验绑定的缺口。[兼容性审查及固定依赖](usage_assets/reports/fresh629-publisher-compatibility-review/index.md)。初版24项CPU检查和两例浏览器预览通过，新版另有34项CPU回归，这些历史结果不代表新629完成。[首次失败原字节与时间线](usage_assets/reports/sim2sim-worker-failure/report.md)保留父进程exit1，不能只凭worker JSON补造成功。旧工具仍须显式指定独立冻结的`--expected-plan-sha256`与`--expected-harness-sha256`，schema3检查两worker退出与三份进程收据，schema2只允许历史预览。[旧工具命令与初版检查](usage_assets/reports/full-scene-publisher/summary.md)、[新版回归](usage_assets/reports/publisher-schema3-review/review.md)。
 
 主Dockerfile与train/inference约束现已使用SDK0.1.8；Holosoma的unitree extra硬钉0.1.6，因此安装采用booster extra加显式SDK0.1.8，其他版本保持约束。新统一镜像`2be18521…`由干净提交`6cb2ae2`完整构建，实际断网、无宿主源码挂载的265版本核验、Isaac16环境两轮训练/权重更新、12组教师ONNX推理及TensorBoard均通过。[新统一镜像原始证据](usage_assets/reports/sdk018-canonical-offline/summary.md)。原0.1.6镜像及云端官方训练容器不替换；新镜像另行完整上传并核验，旧训练不因升级中断。

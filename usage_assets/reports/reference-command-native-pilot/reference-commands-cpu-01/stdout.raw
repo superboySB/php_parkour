@@ -1,0 +1,80 @@
+........................................................................ [ 54%]
+.........................................................FF..            [100%]
+=================================== FAILURES ===================================
+_____ test_inference_launcher_resolves_local_models_from_calling_directory _____
+
+fake_runtime = (PosixPath('/tmp/pytest-of-root/pytest-0/test_inference_launcher_resolv0/holosoma checkout'), PosixPath('/tmp/pytest-o...TH': '/isaac-sim/kit', 'COMMAND_LOG': '/tmp/pytest-of-root/pytest-0/test_inference_launcher_resolv0/command.log', ...})
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-0/test_inference_launcher_resolv0')
+
+    def test_inference_launcher_resolves_local_models_from_calling_directory(
+        fake_runtime, tmp_path
+    ):
+        holosoma, command_log, env = fake_runtime
+        caller = tmp_path / "caller"
+        models = caller / "models"
+        models.mkdir(parents=True)
+        (models / "depth_backbone.onnx").write_bytes(b"backbone")
+        (models / "student.onnx").write_bytes(b"student")
+        env.update(BACKBONE="models/depth_backbone.onnx", STUDENT="models/student.onnx")
+    
+        result = subprocess.run(
+            [str(ROOT / "run_php_inference.sh"), "--task.depth-shm.no-required"],
+            cwd=caller,
+            env=env,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+    
+        assert result.returncode == 0, result.stderr
+        cwd, args = recorded(command_log)
+        assert cwd == str(holosoma)
+>       assert args[:5] == [
+            str(holosoma / "src/holosoma_inference/holosoma_inference/run_policy.py"),
+            "inference:g1-wbt-distillation-d435i",
+            "--task.interface",
+            "lo",
+            "--task.model-path",
+        ]
+E       AssertionError: assert ['/workspace/...erface', 'lo'] == ['/tmp/pytest...k.model-path']
+E         
+E         At index 0 diff: '/workspace/php_parkour/scripts/research/run_native_policy.py' != '/tmp/pytest-of-root/pytest-0/test_inference_launcher_resolv0/holosoma checkout/src/holosoma_inference/holosoma_inference/run_policy.py'
+E         Use -v to get more diff
+
+tests/test_sim2sim_launchers.py:114: AssertionError
+__________________ test_inference_launcher_builds_wandb_pair ___________________
+
+fake_runtime = (PosixPath('/tmp/pytest-of-root/pytest-0/test_inference_launcher_builds0/holosoma checkout'), PosixPath('/tmp/pytest-o...AND_LOG': '/tmp/pytest-of-root/pytest-0/test_inference_launcher_builds0/command.log', 'CUDA_VISIBLE_DEVICES': '', ...})
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-0/test_inference_launcher_builds0')
+
+    def test_inference_launcher_builds_wandb_pair(fake_runtime, tmp_path):
+        _, command_log, env = fake_runtime
+        env.update(RUN="wandb://team/project/run-id", STEP="model_29999")
+    
+        result = subprocess.run(
+            [str(ROOT / "run_php_inference.sh")],
+            cwd=tmp_path,
+            env=env,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+    
+        assert result.returncode == 0, result.stderr
+        _, args = recorded(command_log)
+>       assert args[5] == (
+            "['wandb://team/project/run-id/model_29999/depth_backbone.onnx',"
+            "'wandb://team/project/run-id/model_29999/student.onnx']"
+        )
+E       assert '--task.model-path' == "['wandb://te...tudent.onnx']"
+E         
+E         - ['wandb://team/project/run-id/model_29999/depth_backbone.onnx','wandb://team/project/run-id/model_29999/student.onnx']
+E         + --task.model-path
+
+tests/test_sim2sim_launchers.py:140: AssertionError
+------------------- generated xml file: /outputs/results.xml -------------------
+=========================== short test summary info ============================
+FAILED tests/test_sim2sim_launchers.py::test_inference_launcher_resolves_local_models_from_calling_directory
+FAILED tests/test_sim2sim_launchers.py::test_inference_launcher_builds_wandb_pair
+2 failed, 131 passed in 1.52s
+There was an error running python

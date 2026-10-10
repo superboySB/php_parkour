@@ -442,6 +442,10 @@ DDS接口为G1/HG/PR路径。早期`far-unitree-sdk==0.1.6`只读wheel审计确�
 
 源码：[unitree_interface.py:26–39,66–103](thirdparty/holosoma/src/holosoma_inference/holosoma_inference/sdk/unitree/unitree_interface.py#L26)。task默认domain0，但Pythoncreate_robot实际只传网卡、robot type和message type；不能把任意domain_id变更说成已验。
 
+自动场景测试现在还支持`--reference-motion`，批量入口对应`--reference-commands`。[输入读取器](scripts/research/reference_commands.py)读取生成NPZ中的50Hz、`vel_cmd:[T,15]`，原样送入上述观测的93:108槽位；标签来自场景生成器，不由策略预测。每帧以整数物理step锚定，每10个500Hz物理步调用一次50Hz原生策略；输入前后都核对完整one-hot及策略启用状态，深度超时转入站立保护不能计为完成帧。`--reference-spawn`仅在初始化时对齐参考首帧根XY/yaw，保留部署站姿，随后由物理动力学决定根轨迹和关节运动；它不读取参考关节角来驱动物理机器人。释放吊架的step与首个策略step分别记录，不能认为两者恰好同时。
+
+[实际341帧闭环](usage_assets/reports/reference-command-native-pilot/index.md)验证了0→6→7→6→0的完整标签、原生录制、两worker退出与视频；最小upright cosine约0.138，触发倾斜阈值0.18秒，技能成功仍未验证。原629个恒定前进rollout、全629参考动作数组生成、这一项逐帧策略试跑分别证明不同范围。该输入模式不改变训练状态维度、reward、loss或教师label；学生仍只靠本体状态、指令和深度latent产生29维动作。
+
 ## 7. Real2sim2real 的实现与验证边界
 
 这里的real2sim先从已经retarget到G1的发布数据开始。上游论文描述人类动作→OmniRetarget→G1技能与人工box/entry标注；本次没有采集真人动作，也没有从原始MoCap重跑retarget。Motion matching产出运动学reference；Isaac中的teacher/student才学习在接触与动力学下执行。真实来源及格式见第2节与 [动作数据审计](usage_assets/reports/technical-audit/motion-data.json)。
