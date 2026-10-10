@@ -4,6 +4,8 @@
 
 学习流程、输入输出、数据/label 来源与 real2sim2real 实现细节见独立的 [technical_pipeline.md](technical_pipeline.md)。
 
+最新纠正：北京时间15:48已有序停止旧629物理批次，原279 reported completed/5失败/1中断/344未运行均保留。旧监督遗漏最终worker退出码，已有10个reported completed及旧12指令的command02存在模拟器SIGSEGV；这些不能作为正常退出验收。后续将修复SDK及监督并新开批次，不修改旧结果伪装通过。[停止回执](usage_assets/reports/sim2sim-cohort-halt/summary.md)、[逐日志实证](usage_assets/reports/worker-exit-completed-log-audit/report.md)。以下历史轨迹、阈值与时间快照仍保留原始范围。
+
 先看真实结果：[17 场景物理闭环视频](usage_assets/sim2sim/scenarios/playback.html)、[17 场景参考动作播放页](usage_assets/motion_matching/playback.html)、[12 指令物理闭环视频](usage_assets/sim2sim/directions.mp4)、[逐项原始报告](usage_assets/reports/)。参考动作来自生成数组，闭环录像来自公开 ONNX 策略驱动的 MuJoCo，训练录像来自实际 Isaac checkpoint。
 
 在本地仓库运行下面的标准库服务后，可打开 `http://127.0.0.1:8088/sim2sim/scenarios/playback.html` 或 `http://127.0.0.1:8088/motion_matching/playback.html` 交互查看；不需要安装包。
@@ -112,6 +114,10 @@ python3 scripts/research/viser_browser.py \
 
 补充验收已实际操作两条完整保存流程，并修复地形配对缺失：Viser切文件、选地形variant、重随机、速度2.0保存223帧，原15维one-hot保留、源地形全部变体和OBJ同步配对；主程序用真实Tk I/J按下/释放，再点Start/End Recording，保存259帧@50Hz、空地形与ground OBJ及来源JSON。两条结果均通过单文件/目录转换、诊断、本地`file://`解析和CPU原生MotionLoader；相关IO/public测试25项通过，其中public12项、纯新增4项。交互录制仍无方向标签，sidecar与GUI明确提示，没有倒推label。[原失败、修复后截图、转换与精确源码](usage_assets/reports/gui-workflows/summary.md)。
 
+独立`play_database`也已真实浏览器验收：27次操作覆盖全部11个可操作控件和contact读数。暂停保持帧，seek100→728切到源数据中不同姿势；Speed0.5/2.0在本次观察器下约39.1/155.0帧每秒；Min200/Max210确实clamp，Auto Play在上界停止。接触读数/marker与原DB一致，follow/XYZ/smoothness的实际client相机读回通过。原生播放器未改、主循环异常0；前四次取证脚本失败的日志也保留。[完整原生读回、命令与失败边界](usage_assets/reports/database-gui/summary.md)。
+
+![数据库播放器实际暂停、定位及相机跟随](usage_assets/reports/database-gui/attempt05/paused-follow-contact.png)
+
 ![Viser真实速度编辑与配对保存](usage_assets/reports/gui-workflows/viewer-final/edited-saved.png)
 
 ![Viser真实播放页面](usage_assets/viser-playback.png)
@@ -143,6 +149,8 @@ smoke 采用显式缩小的并行环境、布局和迭代数，检查实际梯�
 
 最终统一镜像及冻结源码 `3439cb7` 又完整复跑 **22/22 项，通过、退出码 0**，耗时 711.748 秒。13 个训练阶段逐一验证了两轮之间权重的有限性和非零更新；五教师共 60 组真实 ONNX 推理，两学生独立导出各 30 组推理均通过。七次新版质量评估、29 份原始 TensorBoard events、140 个下载产物 SHA 和运行前后 1903 个源码文件均已复核。[最终验收汇总](usage_assets/reports/training-cloud-final/summary.md)、[逐项报告](usage_assets/reports/training-cloud-final/summary.json)、[本轮视频与来源 SHA](usage_assets/reports/training-cloud-final/media.json)。未收敛的失败短片也完整保留，例如[教师 locomotion](usage_assets/videos/final-cloud/eval-teacher-locomotion.mp4)和[学生 finetune](usage_assets/videos/final-cloud/eval-student-finetune.mp4)，不能作为技能成功证据。
 
+进一步对六种教师preset各自保存的PT/ONNX实跑CPU检查：72个图内参考查询与60个确定性动作均值对照全部通过，最大绝对误差6.33e-8，输入模型未变且CUDA未初始化。三个no-heightscan actor/critic为160/286维，其余为449/575维，pelvis/torso anchor和缩放配置分别核对。YAML与PT有原生`robot_action_dim`→29展开差异，原比较false保留且没有改写输入。新增8项错配拒绝测试通过，独立复核也通过；五个非默认preset的Isaac重载仍待GPU空闲，不能用CPU检查替代。[六配置来源、输出与原始报告](usage_assets/reports/teacher-presets-cpu/summary.md)。
+
 学生原生 `--show-depth True` 也已实际运行：同一 smoke 纯学生 PT、4环境、100步，OpenCV 真实显示100帧、98个不同数组SHA，全部有限，进程退出码0、耗时17.168秒。精确标题窗口的两张X11截图已目检，输入PT和评估源码前后未变。初始观察命令的3次参数错误及失败日志保留；修正日志参数后通过，没有修改训练/评估器。本次未达到默认视频间隔，没有生成MP4，不借用其它实验影片。[观察报告与完整命令](usage_assets/reports/depth-gui/summary.md)。
 
 ![原生学生实际接收的延迟深度，4环境拼图](usage_assets/depth-gui/depth-frame-0030.png)
@@ -166,6 +174,10 @@ smoke 采用显式缩小的并行环境、布局和迭代数，检查实际梯�
 正式模型后的衔接脚本 [posttrain_coverage.py](scripts/research/posttrain_coverage.py) 已完成 **61项调度/来源/保留证据回归**，与原48项联合109/109通过；独立复核最终61项也通过。真实smoke PT确认两种学生各自内嵌五个专家的40个MLP tensor和15个normalizer buffer均与有序教师逐位相同，检查全程未初始化CUDA。脚本等待官方16阶段全部完成才启动CPU配置/全源预检，再等固定GPU空闲后执行888次首次尝试；已有失败不重跑，换fresh目录会生成新批次身份和容器名。新fixture漏模拟Docker inspect导致的一次失败与修正后原始JUnit均保留。这些检查没有把smoke PT升级为正式模型，也不表示888次已执行。[CPU检查与准确边界](usage_assets/reports/posttrain-monitor/summary.md)。
 
 该watch已于北京时间14:39真实部署。远端新快照全部文件和镜像内容指纹独立复核通过，实际只读dry-run返回16项训练未完成阻塞；后台进程处于`waiting`，原训练进程仍存活、源码挂载未变、Docker容器集合未新增。首教师14:38的TensorBoard记录到step3362，四类所查标量从step0起全部有限。以上是运行中证据，七模型与888次验收仍未完成。[远端检查、启动与持续轮询回执](usage_assets/reports/posttrain-monitor-deployment/summary.md)。
+
+14:58独立只读快照确认首教师到step3872，四项loss/reward从step0起均有限；真实训练进程和watch均存活，原挂载不变。该次本地快照核验128项完整500ticks证据及全部2230个唯一输入文件。[实际PID、事件、SHA与快照范围](usage_assets/reports/live-audit-0658/summary.md)。这份快照早于下文15:00的native段错误，不代表之后没有异常。
+
+正式学生选择性回传工具通过57项CPU回归，root独立复核同样57项通过（不相加）。真实SSH status于15:26返回waiting/16阻塞/没有cpu-ready，模型目标目录前后均不存在；没有回传任何模型。ready时仅允许四个学生ONNX与28份绑定JSON，核验最终PT/专家来源、成功CPU容器和前后SHA；不运行ORT或MuJoCo。[测试、准确命令与原始等待响应](usage_assets/reports/final-student-transfer/summary.md)。最终自训纯/混合学生的本地CPU推理和各12指令＋17代表场景闭环仍待正式产物，共58次计划，发布学生的629扫描不能替代。
 
 这次还定位并修复了独立评估的 warmup 目标缓存问题：原生 `reset_all` 清零缓存后先检测终止，造成策略开始前的误终止。保留的三次修复前真实记录均为0策略步；按原公式刷新当前帧缓存后才得到上述158/21/21步。参考时间、RNG和终止条件均未修改，当前云训练也未改变。[修复推导与原生逐位对照](usage_assets/reports/source-coverage-pilot/cache-diagnosis/warmup-relative-cache-review.md)、[源码/数据/逐步记录的 SHA 清单](usage_assets/reports/source-coverage-pilot/evidence-manifest.json)。新旧共18个MP4均完整解码通过，启动/预热原片计入此数，不能用录像数推断片段完成数。
 
@@ -235,7 +247,7 @@ bash scripts/research/docker.sh sim scripts/research/sim2sim.py \
 
 [详细数值、引导算法与逐条复跑命令](usage_assets/reports/deployment-summary.md)。所有这些试验都未声明完整课程成功率，单次没有阈值事件也不能推广为任意地形泛化。
 
-最终镜像还逐项运行了全部 **17 个生成场景的代表几何**：每场景独立 seed 42、500 次策略控制、约 10 仿真秒，17/17 执行完成、0 执行错误。其中 14 场景触发高度或倾斜阈值，3 场景未触发；部分倾斜后能恢复，不能把阈值事件都称为永久跌倒，也不能据此认定越障成功。每种场景只选一个配置，未声称覆盖全部 629 配置的策略表现。[逐场景数值与限制](usage_assets/reports/sim2sim-scenes-summary.md)、[包含模型/OBJ SHA 的完整矩阵](usage_assets/reports/sim2sim-scene-matrix.json)。
+旧镜像还逐项运行了全部 **17 个生成场景的代表几何**：每场景独立 seed 42、500 次策略控制、约 10 仿真秒，17个父进程都报告completed。旧监督没有最终worker退出码门卫，不能将父进程报告等同完整正常终态；17场景日志没有fatal标记也不能反证退出码0。[后续只读审计](usage_assets/reports/worker-exit-completed-log-audit/report.md)。轨迹中14场景触发高度或倾斜阈值，3场景未触发；部分倾斜后能恢复，不据此认定越障成功。每种场景只选一个配置，未声称覆盖全部629配置的策略表现。[逐场景数值与限制](usage_assets/reports/sim2sim-scenes-summary.md)、[包含模型/OBJ SHA 的完整矩阵](usage_assets/reports/sim2sim-scene-matrix.json)。
 
 [![17场景真实物理闭环播放页](usage_assets/scene-gallery.png)](usage_assets/sim2sim/scenarios/playback.html)
 
@@ -243,7 +255,13 @@ bash scripts/research/docker.sh sim scripts/research/sim2sim.py \
 
 现已进一步启动**全部629配置**的真实物理扫描：2026-10-10北京时间14:19快照逐项核验16例完成、1例运行中，尚未完成全部扫描。固定计划保存340项运行依赖和1887个输入文件SHA；每例seed42、500策略ticks、10仿真秒、恒定forward command，不回放参考动作。两例预检执行通过，其中一例出现高度/倾斜阈值；原始视频均CPU完整解码通过。首次CPU fixture测试与真实仿真并行被进程门卫拒绝、空闲重跑28/28通过，两轮原始JUnit均保留。[固定计划、运行快照、两例视频与失败记录](usage_assets/reports/sim2sim-all-configs-start/summary.md)。这扩展几何覆盖，不构成629配置技能成功的结论。
 
+完整结果页的独立发布工具已通过24项CPU检查及两例真实PREVIEW的浏览器媒体/筛选/轨迹检查；当前完整发布被实际门卫拒绝，没有发布629完成页。[发布工具与两例截图](usage_assets/reports/full-scene-publisher/summary.md)。2026-10-10北京时间15:12快照为177例完成、1例执行失败、1例运行中、450例待运行；失败low-step index41虽有完整500ticks/10.002s轨迹，父进程检测到worker非零退出，不能补造result记为通过。内核`command_writer`段错误发生在推理完成JSON后约53ms，模拟器在parent失败后才完成收尾；旧记录没有足够PID映射确定具体worker和C++根因。[14个原文件、内核日志与准确时间线](usage_assets/reports/sim2sim-worker-failure/report.md)。待扫描结束后再处理该项，冻结代码未改。
+
 629是配置数；其中有580个不同OBJ文件SHA，50个平地配置使用同一OBJ。不同文件SHA也不自动等于不同几何形状，本次没有几何等价性判定。[基于冻结计划的计数](usage_assets/reports/sim2sim-configuration-vs-mesh.json)只核输入身份，没有新增物理运行。
+
+15:33的新只读PID/计数快照为237完成、2执行失败、1运行、389待运行，原driver和native后代仍存活。[原始快照](usage_assets/reports/technical-pipeline-review/scan-counts-pids.json)。第二项是`low_speed_climb_58:0022:left_90_walk2.0s_plat0s`：500ticks、10仿真秒、无吊架轨迹有限且未触发姿态阈值，但模拟器PID与shell的`Segmentation fault`记录直接匹配，父进程最终exit1。[14份原文件、两条内核记录及共同模式](usage_assets/reports/sim2sim-worker-failure-second/report.md)。这明确保留执行错误，不能因body数据完整就改记成功；具体kernel线程与worker仍缺完整映射。
+
+后续只读审计检查275个reported completed的550份worker日志，发现10份模拟器段错误且封存SHA完全一致；旧12指令command02也有同样退出故障，说明原监督门卫存在实质漏记。旧批次已停止并完整保留340项原依赖的76.77MB本地归档，另逐项证明可由记录的Git提交恢复。[原字节与Git来源](usage_assets/reports/sim2sim-cohort-halt/summary.md)。上游SDK0.1.8已有等待writer结束后再析构的修复；独立候选`caf61487…`离线构建及无GPU导入/API检查通过，原镜像和pins未变。[上游源码与二进制审计](usage_assets/reports/unitree-lifecycle-independent/report.md)、[候选实际CPU结果](usage_assets/reports/unitree-sdk018-candidate/summary.md)。新worker门卫、候选native闭环及fresh629尚未执行。
 
 ```bash
 bash scripts/research/docker.sh sim scripts/research/sim2sim_scene_matrix.py \

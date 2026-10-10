@@ -1,0 +1,156 @@
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 2.58kB done
+#1 WARN: InvalidDefaultArgInFrom: Default value for ARG ${BASE_IMAGE} results in empty or invalid base image name (line 3)
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/php-parkour:sdk018-base-88254ac0b90a
+#2 DONE 0.0s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 64B done
+#3 DONE 0.0s
+
+#4 [internal] load build context
+#4 transferring context: 23.83MB 0.0s done
+#4 DONE 0.0s
+
+#5 [1/6] FROM docker.io/library/php-parkour:sdk018-base-88254ac0b90a
+#5 DONE 0.2s
+
+#6 [2/6] COPY wheels/ /opt/php-sdk018/wheels/
+#6 DONE 0.0s
+
+#7 [3/6] COPY wheel-manifest.json abi_probe.py baseline-train.json baseline-inference.json baseline-motion.json /opt/php-sdk018/
+#7 DONE 0.0s
+
+#8 [4/6] RUN --network=none /usr/bin/python3 -c 'import hashlib,json,pathlib; p=pathlib.Path("/opt/php-sdk018"); m=json.loads((p/"wheel-manifest.json").read_text()); assert len(m["wheels"])==2; [(lambda b,w: (b.stat().st_size==w["bytes"] and hashlib.sha256(b.read_bytes()).hexdigest()==w["sha256"]) or (_ for _ in ()).throw(AssertionError(w["filename"])))(p/"wheels"/w["filename"],w) for w in m["wheels"]]'
+#8 DONE 0.1s
+
+#9 [5/6] RUN --network=none PIP_CONFIG_FILE=/dev/null PIP_NO_INDEX=1 PIP_DISABLE_PIP_VERSION_CHECK=1     /opt/php/bin/train-python -m pip install --no-index --no-deps --force-reinstall       /opt/php-sdk018/wheels/far_unitree_sdk-0.1.8-cp311-cp311-manylinux_2_31_x86_64.whl     && PIP_CONFIG_FILE=/dev/null PIP_NO_INDEX=1 PIP_DISABLE_PIP_VERSION_CHECK=1     /opt/php/bin/inference-python -m pip install --no-index --no-deps --force-reinstall       /opt/php-sdk018/wheels/far_unitree_sdk-0.1.8-cp312-cp312-manylinux_2_31_x86_64.whl
+#9 0.288 Processing /opt/php-sdk018/wheels/far_unitree_sdk-0.1.8-cp311-cp311-manylinux_2_31_x86_64.whl
+#9 0.296 Installing collected packages: far-unitree-sdk
+#9 0.296   Attempting uninstall: far-unitree-sdk
+#9 0.298     Found existing installation: far-unitree-sdk 0.1.6
+#9 0.298     Uninstalling far-unitree-sdk-0.1.6:
+#9 0.332       Successfully uninstalled far-unitree-sdk-0.1.6
+#9 0.434 Successfully installed far-unitree-sdk-0.1.8
+#9 0.434 WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager, possibly rendering your system unusable.It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv. Use the --root-user-action option if you know what you are doing and want to suppress this warning.
+#9 0.645 Processing /opt/php-sdk018/wheels/far_unitree_sdk-0.1.8-cp312-cp312-manylinux_2_31_x86_64.whl
+#9 0.664 Installing collected packages: far-unitree-sdk
+#9 0.664   Attempting uninstall: far-unitree-sdk
+#9 0.666     Found existing installation: far-unitree-sdk 0.1.6
+#9 0.667     Uninstalling far-unitree-sdk-0.1.6:
+#9 0.707       Successfully uninstalled far-unitree-sdk-0.1.6
+#9 0.811 Successfully installed far-unitree-sdk-0.1.8
+#9 DONE 0.9s
+
+#10 [6/6] RUN --network=none CUDA_VISIBLE_DEVICES= NVIDIA_VISIBLE_DEVICES=none     /opt/php/bin/train-python /opt/php-sdk018/abi_probe.py --runtime train       --baseline /opt/php-sdk018/baseline-train.json --output /opt/php-sdk018/build-train.json     && CUDA_VISIBLE_DEVICES= NVIDIA_VISIBLE_DEVICES=none     /opt/php/bin/inference-python /opt/php-sdk018/abi_probe.py --runtime inference       --baseline /opt/php-sdk018/baseline-inference.json --output /opt/php-sdk018/build-inference.json     && CUDA_VISIBLE_DEVICES= NVIDIA_VISIBLE_DEVICES=none     /opt/php/bin/motion-python /opt/php-sdk018/abi_probe.py --runtime motion       --baseline /opt/php-sdk018/baseline-motion.json --output /opt/php-sdk018/build-motion.json     && /opt/php/bin/train-python -m pip freeze > /opt/php-sdk018/train.freeze.txt     && /opt/php/bin/inference-python -m pip freeze > /opt/php-sdk018/inference.freeze.txt     && /opt/php/bin/motion-python -m pip freeze > /opt/php-sdk018/motion.freeze.txt
+#10 0.244 {"runtime": "train", "sdk": "0.1.8", "distribution_count": 357, "comparison": {"passed": false, "failures": ["changed libc"], "scope": "Import-only ABI/public API/package identity; not a native robot lifecycle test", "removed_methods": [], "added_methods": ["enable_motion_switcher_responder"]}}
+#10 0.253 There was an error running python
+#10 ERROR: process "/bin/bash -o pipefail -c CUDA_VISIBLE_DEVICES= NVIDIA_VISIBLE_DEVICES=none     /opt/php/bin/train-python /opt/php-sdk018/abi_probe.py --runtime train       --baseline /opt/php-sdk018/baseline-train.json --output /opt/php-sdk018/build-train.json     && CUDA_VISIBLE_DEVICES= NVIDIA_VISIBLE_DEVICES=none     /opt/php/bin/inference-python /opt/php-sdk018/abi_probe.py --runtime inference       --baseline /opt/php-sdk018/baseline-inference.json --output /opt/php-sdk018/build-inference.json     && CUDA_VISIBLE_DEVICES= NVIDIA_VISIBLE_DEVICES=none     /opt/php/bin/motion-python /opt/php-sdk018/abi_probe.py --runtime motion       --baseline /opt/php-sdk018/baseline-motion.json --output /opt/php-sdk018/build-motion.json     && /opt/php/bin/train-python -m pip freeze > /opt/php-sdk018/train.freeze.txt     && /opt/php/bin/inference-python -m pip freeze > /opt/php-sdk018/inference.freeze.txt     && /opt/php/bin/motion-python -m pip freeze > /opt/php-sdk018/motion.freeze.txt" did not complete successfully: exit code: 1
+------
+ > [6/6] RUN --network=none CUDA_VISIBLE_DEVICES= NVIDIA_VISIBLE_DEVICES=none     /opt/php/bin/train-python /opt/php-sdk018/abi_probe.py --runtime train       --baseline /opt/php-sdk018/baseline-train.json --output /opt/php-sdk018/build-train.json     && CUDA_VISIBLE_DEVICES= NVIDIA_VISIBLE_DEVICES=none     /opt/php/bin/inference-python /opt/php-sdk018/abi_probe.py --runtime inference       --baseline /opt/php-sdk018/baseline-inference.json --output /opt/php-sdk018/build-inference.json     && CUDA_VISIBLE_DEVICES= NVIDIA_VISIBLE_DEVICES=none     /opt/php/bin/motion-python /opt/php-sdk018/abi_probe.py --runtime motion       --baseline /opt/php-sdk018/baseline-motion.json --output /opt/php-sdk018/build-motion.json     && /opt/php/bin/train-python -m pip freeze > /opt/php-sdk018/train.freeze.txt     && /opt/php/bin/inference-python -m pip freeze > /opt/php-sdk018/inference.freeze.txt     && /opt/php/bin/motion-python -m pip freeze > /opt/php-sdk018/motion.freeze.txt:
+0.244 {"runtime": "train", "sdk": "0.1.8", "distribution_count": 357, "comparison": {"passed": false, "failures": ["changed libc"], "scope": "Import-only ABI/public API/package identity; not a native robot lifecycle test", "removed_methods": [], "added_methods": ["enable_motion_switcher_responder"]}}
+0.253 There was an error running python
+------
+
+ [33m1 warning found (use docker --debug to expand):
+[0m - InvalidDefaultArgInFrom: Default value for ARG ${BASE_IMAGE} results in empty or invalid base image name (line 3)
+Dockerfile:17
+--------------------
+  16 |     # No native SDK constructors, DDS, CUDA, SimulationApp or simulator is called.
+  17 | >>> RUN --network=none CUDA_VISIBLE_DEVICES= NVIDIA_VISIBLE_DEVICES=none \
+  18 | >>>     /opt/php/bin/train-python /opt/php-sdk018/abi_probe.py --runtime train \
+  19 | >>>       --baseline /opt/php-sdk018/baseline-train.json --output /opt/php-sdk018/build-train.json \
+  20 | >>>     && CUDA_VISIBLE_DEVICES= NVIDIA_VISIBLE_DEVICES=none \
+  21 | >>>     /opt/php/bin/inference-python /opt/php-sdk018/abi_probe.py --runtime inference \
+  22 | >>>       --baseline /opt/php-sdk018/baseline-inference.json --output /opt/php-sdk018/build-inference.json \
+  23 | >>>     && CUDA_VISIBLE_DEVICES= NVIDIA_VISIBLE_DEVICES=none \
+  24 | >>>     /opt/php/bin/motion-python /opt/php-sdk018/abi_probe.py --runtime motion \
+  25 | >>>       --baseline /opt/php-sdk018/baseline-motion.json --output /opt/php-sdk018/build-motion.json \
+  26 | >>>     && /opt/php/bin/train-python -m pip freeze > /opt/php-sdk018/train.freeze.txt \
+  27 | >>>     && /opt/php/bin/inference-python -m pip freeze > /opt/php-sdk018/inference.freeze.txt \
+  28 | >>>     && /opt/php/bin/motion-python -m pip freeze > /opt/php-sdk018/motion.freeze.txt
+  29 |     
+--------------------
+ERROR: failed to build: failed to solve: process "/bin/bash -o pipefail -c CUDA_VISIBLE_DEVICES= NVIDIA_VISIBLE_DEVICES=none     /opt/php/bin/train-python /opt/php-sdk018/abi_probe.py --runtime train       --baseline /opt/php-sdk018/baseline-train.json --output /opt/php-sdk018/build-train.json     && CUDA_VISIBLE_DEVICES= NVIDIA_VISIBLE_DEVICES=none     /opt/php/bin/inference-python /opt/php-sdk018/abi_probe.py --runtime inference       --baseline /opt/php-sdk018/baseline-inference.json --output /opt/php-sdk018/build-inference.json     && CUDA_VISIBLE_DEVICES= NVIDIA_VISIBLE_DEVICES=none     /opt/php/bin/motion-python /opt/php-sdk018/abi_probe.py --runtime motion       --baseline /opt/php-sdk018/baseline-motion.json --output /opt/php-sdk018/build-motion.json     && /opt/php/bin/train-python -m pip freeze > /opt/php-sdk018/train.freeze.txt     && /opt/php/bin/inference-python -m pip freeze > /opt/php-sdk018/inference.freeze.txt     && /opt/php/bin/motion-python -m pip freeze > /opt/php-sdk018/motion.freeze.txt" did not complete successfully: exit code: 1
+476509 v0.30.1 /usr/libexec/docker/cli-plugins/docker-buildx buildx build --network none --progress plain --build-arg BASE_IMAGE=php-parkour:sdk018-base-88254ac0b90a --tag php-parkour:research-sdk018-pilot --file /home/dzp/projects/php_parkour/outputs/research/unitree-sdk018-candidate/context/Dockerfile /home/dzp/projects/php_parkour/outputs/research/unitree-sdk018-candidate/context
+github.com/docker/buildx/commands.runBuildWithOptions
+	github.com/docker/buildx/commands/build.go:461
+github.com/docker/buildx/commands.runBuild
+	github.com/docker/buildx/commands/build.go:381
+github.com/docker/buildx/commands.buildCmd.func1
+	github.com/docker/buildx/commands/build.go:497
+github.com/docker/cli/cli-plugins/plugin.RunPlugin.func1.1.2
+	github.com/docker/cli@v28.5.1+incompatible/cli-plugins/plugin/plugin.go:65
+github.com/spf13/cobra.(*Command).execute
+	github.com/spf13/cobra@v1.10.1/command.go:1015
+github.com/spf13/cobra.(*Command).ExecuteC
+	github.com/spf13/cobra@v1.10.1/command.go:1148
+github.com/spf13/cobra.(*Command).Execute
+	github.com/spf13/cobra@v1.10.1/command.go:1071
+github.com/docker/cli/cli-plugins/plugin.RunPlugin
+	github.com/docker/cli@v28.5.1+incompatible/cli-plugins/plugin/plugin.go:80
+main.runPlugin
+	github.com/docker/buildx/cmd/buildx/main.go:64
+main.run
+	github.com/docker/buildx/cmd/buildx/main.go:78
+main.main
+	github.com/docker/buildx/cmd/buildx/main.go:88
+runtime.main
+	runtime/proc.go:285
+runtime.goexit
+	runtime/asm_amd64.s:1693
+
+1959  /usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock
+github.com/moby/buildkit/executor/runcexecutor.exitError
+	/root/build-deb/engine/vendor/github.com/moby/buildkit/executor/runcexecutor/executor.go:391
+github.com/moby/buildkit/executor/runcexecutor.(*runcExecutor).Run
+	/root/build-deb/engine/vendor/github.com/moby/buildkit/executor/runcexecutor/executor.go:339
+github.com/moby/buildkit/solver/llbsolver/ops.(*ExecOp).Exec
+	/root/build-deb/engine/vendor/github.com/moby/buildkit/solver/llbsolver/ops/exec.go:498
+github.com/moby/buildkit/solver.(*sharedOp).Exec.func2
+	/root/build-deb/engine/vendor/github.com/moby/buildkit/solver/jobs.go:1181
+github.com/moby/buildkit/util/flightcontrol.(*call[...]).run
+	/root/build-deb/engine/vendor/github.com/moby/buildkit/util/flightcontrol/flightcontrol.go:122
+sync.(*Once).doSlow
+	/usr/local/go/src/sync/once.go:78
+sync.(*Once).Do
+	/usr/local/go/src/sync/once.go:69
+runtime.goexit
+	/usr/local/go/src/runtime/asm_amd64.s:1693
+
+476509 v0.30.1 /usr/libexec/docker/cli-plugins/docker-buildx buildx build --network none --progress plain --build-arg BASE_IMAGE=php-parkour:sdk018-base-88254ac0b90a --tag php-parkour:research-sdk018-pilot --file /home/dzp/projects/php_parkour/outputs/research/unitree-sdk018-candidate/context/Dockerfile /home/dzp/projects/php_parkour/outputs/research/unitree-sdk018-candidate/context
+google.golang.org/grpc.(*ClientConn).Invoke
+	google.golang.org/grpc@v1.76.0/call.go:35
+github.com/moby/buildkit/api/services/control.(*controlClient).Solve
+	github.com/moby/buildkit@v0.26.1/api/services/control/control_grpc.pb.go:88
+github.com/moby/buildkit/client.(*Client).solve.func2
+	github.com/moby/buildkit@v0.26.1/client/solve.go:303
+golang.org/x/sync/errgroup.(*Group).Go.func1
+	golang.org/x/sync@v0.17.0/errgroup/errgroup.go:93
+runtime.goexit
+	runtime/asm_amd64.s:1693
+
+1959  /usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock
+github.com/moby/buildkit/solver.(*edge).execOp
+	/root/build-deb/engine/vendor/github.com/moby/buildkit/solver/edge.go:963
+github.com/moby/buildkit/solver/internal/pipe.NewWithFunction[...].func2
+	/root/build-deb/engine/vendor/github.com/moby/buildkit/solver/internal/pipe/pipe.go:78
+runtime.goexit
+	/usr/local/go/src/runtime/asm_amd64.s:1693
+
+476509 v0.30.1 /usr/libexec/docker/cli-plugins/docker-buildx buildx build --network none --progress plain --build-arg BASE_IMAGE=php-parkour:sdk018-base-88254ac0b90a --tag php-parkour:research-sdk018-pilot --file /home/dzp/projects/php_parkour/outputs/research/unitree-sdk018-candidate/context/Dockerfile /home/dzp/projects/php_parkour/outputs/research/unitree-sdk018-candidate/context
+github.com/moby/buildkit/client.(*Client).solve.func2
+	github.com/moby/buildkit@v0.26.1/client/solve.go:305
+golang.org/x/sync/errgroup.(*Group).Go.func1
+	golang.org/x/sync@v0.17.0/errgroup/errgroup.go:93
+
+1959  /usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock
+github.com/moby/buildkit/solver/llbsolver/ops.(*ExecOp).Exec
+	/root/build-deb/engine/vendor/github.com/moby/buildkit/solver/llbsolver/ops/exec.go:519
+github.com/moby/buildkit/solver.(*sharedOp).Exec.func2
+	/root/build-deb/engine/vendor/github.com/moby/buildkit/solver/jobs.go:1181
+

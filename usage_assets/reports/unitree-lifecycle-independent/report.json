@@ -1,0 +1,162 @@
+{
+  "schema_version": 1,
+  "review_utc": "2026-10-10T07:45:59.891443+00:00",
+  "scope": "Read-only installed API/ELF and immutable official upstream source audit. No create_robot, DDS, GPU, simulator, cloud or current image/package changes.",
+  "base_image_id": "sha256:88254ac0b90a3056375145601d741aa3e08726e18412d201a3c7e7915a23996f",
+  "installed": {
+    "train": {
+      "python": "3.11.13",
+      "prefix": "/isaac-sim/kit/python",
+      "sdk_version": "0.1.6",
+      "extension_sha256": "9200c9bd739eae1b730c03e3603571553d335646f4b871020d92b4ae7930c0a5",
+      "lifecycle_api": []
+    },
+    "inference": {
+      "python": "3.12.3",
+      "prefix": "/opt/php/envs/inference",
+      "sdk_version": "0.1.6",
+      "extension_sha256": "40632e9e05cb7e931c136eaa9ead62df37a19a905b7b38378f5c337040130f5a",
+      "lifecycle_api": []
+    },
+    "motion": {
+      "python": "3.12.3",
+      "prefix": "/opt/php/envs/motion",
+      "sdk_version": null,
+      "extension_sha256": null,
+      "lifecycle_api": []
+    }
+  },
+  "public_lifecycle_api": {
+    "installed_0_1_6": [],
+    "upstream_0_1_8": [],
+    "methods_checked": [
+      "close",
+      "stop",
+      "shutdown",
+      "join",
+      "destroy"
+    ],
+    "native_thread_Wait_not_pybind_exposed": true
+  },
+  "installed_binary_evidence": {
+    "outer_unitree_destructor_symbols": "not exported; cannot directly attribute outer destructor assembly from stripped library",
+    "recurrent_destructor": {
+      "symbol": "unitree::common::RecurrentThread::~RecurrentThread()",
+      "start": "0x27a3b0",
+      "callable_destructor_call": "0x27a3dd",
+      "base_thread_destructor_call": "0x27a3e9",
+      "artifact": "installed/recurrent-destructor.txt"
+    },
+    "thread_destructor": {
+      "symbol": "unitree::common::Thread::~Thread()",
+      "start": "0x27b6cc",
+      "pthread_cancel_call": "0x27b72f",
+      "direct_pthread_join_in_inspected_function": false,
+      "artifact": "installed/thread-destructor.txt"
+    },
+    "recurrent_wait": {
+      "symbol": "unitree::common::RecurrentThread::Wait(long)",
+      "start": "0x27a928",
+      "quit_flag_offset": "0x68",
+      "future_wait_call": "0x27a952",
+      "artifact": "installed/recurrent-wait.txt"
+    },
+    "cyclonedds": "DT_NEEDED includes libddsc-4038630c.so and libddscxx-d3e7c1b0.so; installed PyPI README FastDDS claim does not describe these binary dependencies"
+  },
+  "official_fix": {
+    "old_source": {
+      "tag": "v0.1.6",
+      "commit": "c20385ca7da1b4a254bc77bfa1db8ef2fdbca083",
+      "source_path": "python_binding/unitree_interface.cpp",
+      "url": "https://raw.githubusercontent.com/amazon-far/unitree_sdk2/c20385ca7da1b4a254bc77bfa1db8ef2fdbca083/python_binding/unitree_interface.cpp",
+      "artifact": "upstream/v0.1.6/python_binding/unitree_interface.cpp",
+      "bytes": 25569,
+      "sha256": "7ce9f6efdfe7c0f60abec352c1d820115bf24cb03616b588e1417c0440ae00a3"
+    },
+    "old_lines": [
+      30,
+      38
+    ],
+    "old_behavior": "reset command_writer_ptr_ without Wait()",
+    "intermediate_tag": "v0.1.7 still reset without Wait",
+    "fixed_source": {
+      "tag": "v0.1.8",
+      "commit": "9cf396bda17485febbacb2fadec27c52e0aff391",
+      "source_path": "python_binding/unitree_interface.cpp",
+      "url": "https://raw.githubusercontent.com/amazon-far/unitree_sdk2/9cf396bda17485febbacb2fadec27c52e0aff391/python_binding/unitree_interface.cpp",
+      "artifact": "upstream/v0.1.8/python_binding/unitree_interface.cpp",
+      "bytes": 35736,
+      "sha256": "51cc3b819fd942f7fe27896119ecfb3b32d7d041f999f79e4ae476db1abc28f8"
+    },
+    "fixed_lines": [
+      152,
+      164
+    ],
+    "fixed_behavior": "command_writer_ptr_->Wait() then reset, before DDS objects are reset",
+    "python_api_change": "No explicit lifecycle method exposed. Optional keyword-only dds_config=None added while preserving three positional create_robot args/default HG; adds optional enable_motion_switcher_responder method. DDS initialization guard is also new, so this is a candidate needing real lifecycle regression.",
+    "default_dds_behavior_lines": [
+      83,
+      120
+    ],
+    "default_dds_behavior": "dds_config=None takes ChannelFactory::Instance()->Init(0,nic) as before"
+  },
+  "application_paths": [
+    {
+      "path": "thirdparty/holosoma/src/holosoma_inference/holosoma_inference/sdk/unitree/unitree_interface.py",
+      "lines": [
+        19,
+        39
+      ],
+      "fact": "Python wrapper creates native object and has no close/stop/shutdown/join."
+    },
+    {
+      "path": "thirdparty/holosoma/src/holosoma/holosoma/bridge/unitree/unitree_sdk2py_bridge.py",
+      "lines": [
+        52,
+        53
+      ],
+      "fact": "Simulator also owns a native UnitreeInterface, so both runtime installations matter."
+    },
+    {
+      "path": "scripts/research/sim2sim.py",
+      "lines": [
+        285,
+        290
+      ],
+      "fact": "hasattr(interface,close) conditional is false for the current native Python wrapper."
+    },
+    {
+      "path": "scripts/research/sim2sim.py",
+      "lines": [
+        399,
+        447
+      ],
+      "fact": "Worker failure produces generic parent failure; old evidence lacks explicit worker returncode and host PID namespace mapping."
+    }
+  ],
+  "case_attribution": {
+    "first_case": "low_speed_step:0041",
+    "first_evidence": "outputs/research/sim2sim-failure-forensics/low-speed-step-0041-attempt-0001",
+    "first_conclusion": "command_writer host TID394853 SIGSEGV occurred about52.9ms after inference.json completion. No host PID mapping/core/worker returncode, so neither exact worker attribution nor unique root cause is proven.",
+    "second_case": "low_speed_climb_58:0022",
+    "second_evidence": "outputs/research/sim2sim-failure-forensics/low-speed-climb-58-0022-attempt-0001",
+    "second_conclusion": "simulator.log explicitly reports Kit Python PID63669 Segmentation fault (core dumped), equal sim-ready PID. This assigns at least the simulator SIGSEGV; two host command_writer TIDs still lack per-worker host PID mapping.",
+    "shared_memory_warning": "Also present in successful neighbors40/42; not an independent cause finding.",
+    "old_failed_cases_remain_failed": true,
+    "upstream_race_exists_and_fixed": true,
+    "uniquely_proven_as_case_root_cause": false
+  },
+  "recommendation": {
+    "minimal_candidate": "Independent derivative image replacing far-unitree-sdk0.1.6 with official0.1.8 cp311 wheel in Kit Python and cp312 wheel in inference venv; motion unchanged. Preserve current pins/image/629 cohort until completion.",
+    "avoid": [
+      "No ctypes/dlsym access to hidden SDK thread objects",
+      "No zero-command or control-mode call presented as thread shutdown",
+      "No os._exit(0) workaround presented as successful native cleanup",
+      "No retry reclassification of old629 failures"
+    ],
+    "future_gate": "Fresh isolated single-case cohort after current629 stops: same frozen inputs, normal native process exits, both worker returncodes0, no timeout/kill/SIGSEGV, original finite500ticks+10s+fresh MP4 checks and precise host/containerPID mapping."
+  },
+  "source_manifest": "upstream-sources.json",
+  "installed_binary_manifest": "installed-evidence.json",
+  "candidate_report": "../unitree-sdk018-candidate/summary.md"
+}

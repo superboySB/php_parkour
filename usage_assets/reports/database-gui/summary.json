@@ -1,0 +1,128 @@
+{
+  "schema_version": 1,
+  "status": "passed",
+  "successful_attempt": "attempt05",
+  "native_player_modified": false,
+  "frozen_629_dependencies_modified": false,
+  "source": [
+    {
+      "path": "scripts/research/verify_database_gui.py",
+      "sha256": "f5e023c639a73664334ac8a3d0e3df6f06af3326b225371d4077854e2f313223"
+    },
+    {
+      "path": "scripts/research/viser_browser.py",
+      "sha256": "8a9edb9a34db22d8f29dc180088abfb94849c6c290a4e6b0336fdbf8b23efb06"
+    },
+    {
+      "path": "motion_matching/motion_matching/play_database.py",
+      "sha256": "717247c42c541605400d40a706e15dcab3e6de43c3724832ca6521d1486d58e3"
+    },
+    {
+      "path": "motion_matching/motion_matching/core/database.py",
+      "sha256": "8bf552146ec658ec6e1666bc65fe1539f4d7a96d1af97e94d43d43d17bc86144"
+    },
+    {
+      "path": "motion_matching/motion_matching/core/features.py",
+      "sha256": "cd526cadcd96f85e78233bfd53017d1ac3386e6d54cff5abaa060e1eb7683063"
+    },
+    {
+      "path": "motion_matching/motion_matching/viz/scene.py",
+      "sha256": "57056514d544899e6af08b748b6256ef1766991a767cedab48c3ad4e03a6f982"
+    }
+  ],
+  "image_id": "sha256:88254ac0b90a3056375145601d741aa3e08726e18412d201a3c7e7915a23996f",
+  "database": {
+    "pid": 53153,
+    "pgid": 53153,
+    "source": "/workspace/php_parkour/motion_matching/motion_matching/play_database.py",
+    "source_sha256": "717247c42c541605400d40a706e15dcab3e6de43c3724832ca6521d1486d58e3",
+    "database": "/data/assets/databases/database_g1_locomotion.bin",
+    "database_sha256": "4d34975a9b2e2c455d0f1328af119f6287493e0d58dcffdc74f77efc926a1056",
+    "sample_line": 221,
+    "observer": "read-only native main-loop locals after render and sleep",
+    "cpu_environment": {
+      "CUDA_VISIBLE_DEVICES": "",
+      "OMP_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1",
+      "MKL_NUM_THREADS": "1"
+    }
+  },
+  "native_frames": 59456,
+  "state_samples": 533,
+  "elapsed_observer_seconds": 29.069182067993097,
+  "real_browser_actions": 27,
+  "ui_fields": 12,
+  "mutable_controls_exercised": 11,
+  "contact_text_source_verified": true,
+  "seek_frames": [
+    100,
+    728
+  ],
+  "speed_trials": [
+    {
+      "speed": 0.5,
+      "frames_per_wall_second": 39.10347355991121
+    },
+    {
+      "speed": 2.0,
+      "frames_per_wall_second": 155.03540792877664
+    }
+  ],
+  "autoplay_upper_bound": "clamp; no looping",
+  "native_main_exceptions": [],
+  "failed_attempts_preserved": [
+    {
+      "attempt": "attempt01",
+      "status": "failed",
+      "error": "AssertionError: ",
+      "explanation_and_harness_correction": "Observer caught a newly changed GUI handle before the next native rendered loop; wait for two later samples.",
+      "report_sha256": "8d7838cfb67a89031840805b5ea2644d3114f221c54b5170ce5d6c0dbc69973b"
+    },
+    {
+      "attempt": "attempt02",
+      "status": "failed",
+      "error": "AssertionError: seek did not change actual rendered joints",
+      "explanation_and_harness_correction": "Frames 100 and 200 are identical static source poses; choose two source frames with distinct bone rotations.",
+      "report_sha256": "d2064588335f341d2836a6ac15f0dde84b7c7cbd99f2d825c1a961f971072a2c"
+    },
+    {
+      "attempt": "attempt03",
+      "status": "failed",
+      "error": "AssertionError: ",
+      "explanation_and_harness_correction": "Camera position reached tolerance before browser look-at state settled; wait for position, look-at and up direction together.",
+      "report_sha256": "f4f8dbfacd9b2b9e74a8755fa97129c68467460e597e3606bbbbdd53bd8f06e5"
+    },
+    {
+      "attempt": "attempt04",
+      "status": "failed",
+      "error": "TimeoutError: database GUI condition did not become true",
+      "explanation_and_harness_correction": "Rapid numeric entry/blur after Auto Play pause left browser Frame stale while native seek had succeeded. Synchronize paused frame browser/native readback and allow separate React render cycles between keyboard events.",
+      "report_sha256": "8dd7bb135e5abfc0f67ed880cb2b9ee1f5edaaf909eba54a50a3ae5bcbb1ec86"
+    }
+  ],
+  "owned_server_cleanup": {
+    "pid": 53153,
+    "exit_code": 0,
+    "stderr": ""
+  },
+  "not_claimed": [
+    "Policy execution or locomotion success",
+    "Motion or variant selector: native player has neither; one DB selected by CLI",
+    "Native 60FPS wall-clock benchmark: tracing/browser/CPU load affect measured rates"
+  ],
+  "screenshots": [
+    {
+      "path": "paused-follow-contact.png",
+      "bytes": 425472,
+      "sha256": "ce67537e078aa7a69e2c4c3f37e5af089e92be5aa79e67a96ef4ac1dad3a0523",
+      "visually_reviewed": true
+    },
+    {
+      "path": "paused-seek.png",
+      "bytes": 501810,
+      "sha256": "6aa78f0e4f51f944d3166f6e0ff515b84d7d26ca4180f6f4c6c3448664cd0c9c",
+      "visually_reviewed": true
+    }
+  ],
+  "successful_results_sha256": "5b378f83510aeaf9d0873e7f40979f69f96a5f667dfdbbd46a584c13310aca23"
+}

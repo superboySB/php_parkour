@@ -1,0 +1,78 @@
+{
+  "observed_utc": "2026-10-10T06:58:43.784406+00:00",
+  "container": "php-parkour-research",
+  "image": "sha256:88254ac0b90a3056375145601d741aa3e08726e18412d201a3c7e7915a23996f",
+  "container_id": "1ebbab06208baadedae8c27d645b34202e4ea6a107d7b967d716a4429c5a5020",
+  "state": {
+    "Status": "running",
+    "Running": true,
+    "Paused": false,
+    "Restarting": false,
+    "OOMKilled": false,
+    "Dead": false,
+    "Pid": 4135327,
+    "ExitCode": 0,
+    "Error": "",
+    "StartedAt": "2026-10-10T03:34:55.46464789Z",
+    "FinishedAt": "0001-01-01T00:00:00Z"
+  },
+  "workdir": "/workspace/php_parkour",
+  "mounts": [
+    {
+      "Type": "bind",
+      "Source": "/home/dzp/projects/php_parkour/outputs/research",
+      "Destination": "/outputs",
+      "Mode": "rw",
+      "RW": true,
+      "Propagation": "rprivate"
+    },
+    {
+      "Type": "bind",
+      "Source": "/home/dzp/projects/php_parkour",
+      "Destination": "/workspace/php_parkour",
+      "Mode": "rw",
+      "RW": true,
+      "Propagation": "rprivate"
+    },
+    {
+      "Type": "bind",
+      "Source": "/home/dzp/projects/php_parkour/outputs/research/assets",
+      "Destination": "/data/assets",
+      "Mode": "rw",
+      "RW": true,
+      "Propagation": "rprivate"
+    }
+  ],
+  "driver_receipt": {
+    "status": "running",
+    "pid": 18564,
+    "command": [
+      "/opt/php/bin/train-python",
+      "/workspace/php_parkour/scripts/research/sim2sim_scene_matrix.py",
+      "--all-configs",
+      "--matrix",
+      "/outputs/motion-matching/matrix.json",
+      "--models",
+      "/data/assets/student",
+      "--output",
+      "/outputs/sim2sim/all-configs-final",
+      "--image-id",
+      "sha256:88254ac0b90a3056375145601d741aa3e08726e18412d201a3c7e7915a23996f",
+      "--seconds",
+      "10",
+      "--gl",
+      "egl",
+      "--resume"
+    ],
+    "image_id": "sha256:88254ac0b90a3056375145601d741aa3e08726e18412d201a3c7e7915a23996f",
+    "harness_sha256": "284e3eabfc888303f5090f0d3c22dd8a3c35c5478285dc030778209079d746d2",
+    "started_utc": "2026-10-10T06:14:54.250576+00:00",
+    "quality_verified": false,
+    "completion_verified": false,
+    "native_driver_pid": 18565
+  },
+  "native_driver_source_sha256": "284e3eabfc888303f5090f0d3c22dd8a3c35c5478285dc030778209079d746d2",
+  "plan_file_sha256": "f5a367d18e13099c1970872272fa3bfd144e7ef9caa98b1b81b510770ed51202",
+  "new_gpu_job_started": false,
+  "quality_verified": false
+}

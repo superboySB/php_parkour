@@ -14,7 +14,7 @@ import platform
 from pathlib import Path
 
 
-def validate(path: Path, seed: int) -> dict:
+def validate(path: Path, seed: int, expected_observation_dim: int = 449) -> dict:
     import numpy as np
     import onnx
     import onnxruntime as ort
@@ -56,12 +56,19 @@ def validate(path: Path, seed: int) -> dict:
     options.intra_op_num_threads = 1
     session = ort.InferenceSession(str(path), options, providers=["CPUExecutionProvider"])
     inputs = {x.name: x for x in session.get_inputs()}
-    if inputs["obs"].shape != [1, 449] or inputs["time_step"].shape != [1, 1]:
+    if expected_observation_dim not in (160, 449):
+        raise ValueError("Published terrain teachers use 160 or 449 actor observations")
+    config = json.loads(metadata["experiment_config"])
+    actor_terms = config["observation"]["groups"]["actor_obs"]["terms"]
+    if ("height_scan" in actor_terms) != (expected_observation_dim == 449):
+        raise ValueError("Expected observation size disagrees with saved height-scan configuration")
+    if inputs["obs"].shape != [1, expected_observation_dim] or inputs["time_step"].shape != [1, 1]:
         raise ValueError(f"Unexpected teacher inputs: {inputs}")
     rng = np.random.default_rng(seed)
     cases = []
     for kind in ("zeros", "random_normal"):
-        obs = np.zeros((1, 449), np.float32) if kind == "zeros" else rng.normal(0, 0.1, (1, 449)).astype(np.float32)
+        shape = (1, expected_observation_dim)
+        obs = np.zeros(shape, np.float32) if kind == "zeros" else rng.normal(0, 0.1, shape).astype(np.float32)
         first_action = None
         for i, step in enumerate(steps):
             feed = {"obs": obs, "time_step": np.array([[step]], np.float32)}
@@ -86,7 +93,8 @@ def validate(path: Path, seed: int) -> dict:
             digest.update(block)
     return {"status": "passed", "scope": "Teacher ONNX structure, metadata, deterministic CPU inference and exact embedded reference lookup; not policy quality or PT/ONNX numerical parity",
             "path": str(path.resolve()), "bytes": path.stat().st_size, "sha256": digest.hexdigest(),
-            "seed": seed, "python": platform.python_version(), "onnx": onnx.__version__,
+            "seed": seed, "expected_observation_dim": expected_observation_dim,
+            "python": platform.python_version(), "onnx": onnx.__version__,
             "onnxruntime": ort.__version__, "self_contained": True, "motion_frames": frames,
             "reference_constants": constants, "metadata": metadata,
             "inputs": [{"name": x.name, "shape": x.shape, "type": x.type} for x in session.get_inputs()],
@@ -99,10 +107,11 @@ def main() -> None:
     parser.add_argument("--model", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--seed", type=int, default=2026)
+    parser.add_argument("--expected-observation-dim", type=int, choices=(160, 449), default=449)
     args = parser.parse_args()
     args.output.parent.mkdir(parents=True, exist_ok=True)
     try:
-        result = validate(args.model, args.seed)
+        result = validate(args.model, args.seed, args.expected_observation_dim)
     except Exception as error:
         args.output.write_text(json.dumps({"status": "failed", "error": str(error)}, indent=2) + "\n")
         raise

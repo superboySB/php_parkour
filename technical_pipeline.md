@@ -4,6 +4,8 @@
 
 截至 2026-10-10，完整官方五教师、两学生训练仍在云端运行；本文中的算法说明来自源码和已执行的有界实验，不表示完整日程或真机验收已经完成。
 
+北京时间15:48，旧629物理扫描已因SDK退出异常及父监督漏查最终worker退出码而有序中断，全部相关本地进程退出。原279项reported completed中也已发现崩溃日志，因此这些状态不能作为正常退出验收；下一步须用修复后的新源码、镜像与计划重跑。[原状态及停止回执](usage_assets/reports/sim2sim-cohort-halt/summary.md)、[漏记崩溃实证](usage_assets/reports/worker-exit-completed-log-audit/report.md)。下文带具体时间的运行快照均保留历史含义。
+
 ## 1. 先把整个系统连起来
 
 PHP 先用动作匹配生成长参考轨迹，再让具有特权信息的教师通过强化学习跟踪轨迹，最后把教师的控制能力蒸馏给使用深度图的学生。部署时运行深度 CNN 和学生策略，输出 29 个关节的位置目标偏移。
@@ -203,6 +205,19 @@ Isaac 内部状态包含关节、根/身体运动、接触和参考帧等。策�
 
 教师 actor 输入 `[N,449]`。Critic 先接收同样的 449 项，再接 14 个 tracked body 的局部旋转 `14×6=84` 和位置 `14×3=42`，共 `[N,575]`，输出 `[N,1]` 的状态价值。默认 anchor 是 `torso_link`。教师 actor 的参考轨迹、地形 oracle 和 critic 的身体真值都来自仿真特权信息。
 
+上述维度对应正式五教师使用的默认 `ref-noscale`。六个注册教师 preset 的差别如下；实际保存PT和ONNX已经逐份检查，不能把所有教师都按449维加载。[六配置实际CPU证据](usage_assets/reports/teacher-presets-cpu/summary.md)。
+
+| preset 后缀 | actor / critic 输入 | reference anchor | PD目标的动作缩放 |
+| --- | --- | --- | --- |
+| `ref` | 449 / 575 | torso_link | `0.25 × effort_limit / Kp` |
+| `no-heightscan` | 160 / 286 | torso_link | 同上 |
+| `ref-noscale` | 449 / 575 | torso_link | 1.0 |
+| `no-heightscan-noscale` | 160 / 286 | torso_link | 1.0 |
+| `ref-pelvis` | 449 / 575 | pelvis | `0.25 × effort_limit / Kp` |
+| `no-heightscan-pelvis` | 160 / 286 | pelvis | 同上 |
+
+no-heightscan移除289维地形oracle，剩余状态仍按原有term名字排序，动作输出都是29维。pelvis配置改变参考anchor，不能仅凭相同输入形状互换。当前学生五专家流程构造449维teacher输入并剥离路由列；160维ablation不能直接插入该流程，缩放或anchor不同的教师也不能冒充正式noscale专家。六份两轮smoke模型共72个图内参考查询与60个PT/ONNX动作均值对照通过，最大误差约6.33e-8；这不证明Isaac重载、实际PD缩放表现或技能收敛。
+
 Actor 各项默认还叠加均匀噪声：角速度 ±0.2、线速度 ±0.5、关节位置 ±0.01、关节速度 ±0.5、参考相对旋转 ±0.05、参考相对位置 ±0.25。Critic 的外层噪声关闭。默认 eval 保留 actor 配置的外层噪声；`set_is_evaluating()` 不会自动关闭它。
 
 `height_scan` 的网格间距为 0.1m、范围 1.6×1.6m，yaw 对齐。实际 raycaster 挂在 pelvis，配置射线起点 z offset=20；读数按 `sensor_z - hit_z - 0.5` 计算。这是当前实现的数值契约，不能直接当作实机深度相机像素。源码：[教师观测配置](wbt_training/config_values/terrain.py#L112)、[排序与噪声](thirdparty/holosoma/src/holosoma/holosoma/managers/observation/manager.py#L130)、[观测物理定义](thirdparty/holosoma/src/holosoma/holosoma/managers/observation/terms/wbt.py)、[height scanner](thirdparty/holosoma/src/holosoma/holosoma/simulator/isaacsim/isaacsim.py#L464)。
@@ -371,7 +386,7 @@ Gate EMA/counters 是 detached 统计，当前不进入网络 checkpoint；BaseT
 
 ## 6. 从 PT 导出到 ONNX，再到关节控制
 
-教师 ONNX 与学生 ONNX 的契约不同。教师输入为 `obs(1,449)`、`time_step(1,1)`，输出 `actions(1,29)`、参考 `joint_pos/joint_vel(1,29)`、`ref_pos_xyz(1,3)`、`ref_quat_xyzw(1,4)`。教师 exporter 内嵌**整个合并 reference**，每帧 65 个 float32；正式 locomotion 的 71042×64=4546688 帧仅这些常量就占 1182138880 bytes，解释了约 1.18GB 的图文件。体积主要来自轨迹表，不能用来推断策略网络参数量。[教师 exporter](thirdparty/holosoma/src/holosoma/holosoma/utils/inference_helpers.py#L151)、[实际图与常量检查](usage_assets/reports/technical-audit/teacher-export-contract.json)。
+教师 ONNX 与学生 ONNX 的契约不同。默认教师输入为 `obs(1,449)`（no-heightscan为`(1,160)`）、`time_step(1,1)`，输出 `actions(1,29)`、参考 `joint_pos/joint_vel(1,29)`、`ref_pos_xyz(1,3)`、`ref_quat_xyzw(1,4)`。教师 exporter 内嵌**整个合并 reference**，每帧 65 个 float32；正式 locomotion 的 71042×64=4546688 帧仅这些常量就占 1182138880 bytes，解释了约 1.18GB 的图文件。体积主要来自轨迹表，不能用来推断策略网络参数量。[教师 exporter](thirdparty/holosoma/src/holosoma/holosoma/utils/inference_helpers.py#L151)、[实际图与常量检查](usage_assets/reports/technical-audit/teacher-export-contract.json)。
 
 学生部署使用两个 ONNX 文件组成一条策略：depth backbone 把深度图编码成32维latent，student MLP把该latent与状态、指令一起映射到29维动作。它们不是两种可切换策略。`DepthDistillationPolicy` 校验恰好两个路径，两个session都使用 `CPUExecutionProvider`。
 
@@ -498,7 +513,7 @@ startup default pose bias同时修改qtarget中心与观测`q−default`基准�
 
 ### 本次到达的边界
 
-本次已经实际验证ONNX contract、MuJoCo原生DDS/depth/PD闭环，以及Isaac有界训练/eval/export接口；最终17场景各选1实际OBJ运行10sim秒，14有height/tilt门槛事件、3无事件、0执行失败。它不是629配置policy覆盖，也不是17技能全部成功。两次official20iter pilot的3971累计terminated episodes与最长.08s录像是未收敛失败证据，quality_verified=false。
+本次已经实际验证ONNX contract、MuJoCo原生DDS/depth/PD闭环，以及Isaac有界训练/eval/export接口；旧17场景各选1实际OBJ运行10sim秒，14有height/tilt门槛事件、3无事件，17个父进程都报告completed。旧监督未保存及最终复查所有worker退出码，这不等于完整正常终态；17场景日志未见fatal也不能反证退出码0。旧12指令中的command02则已发现模拟器SIGSEGV被父进程漏记。[退出审计](usage_assets/reports/worker-exit-completed-log-audit/report.md)。这些物理轨迹仍可用于对应指标，但不作为629覆盖或技能全部成功证明。两次official20iter pilot的3971累计terminated episodes与最长.08s录像是未收敛失败证据，quality_verified=false。
 
 本地16GiB已真实接收官方4096env/64variants训练20iter的PT，以64env/1variant做250steps评估：exit0、wall36.861s、采样总显存峰值5797MiB，compute4826MiB。它证明远端训练结果可以拉回本地缩小评估接口；不证明4096env full训练能在16GiB运行，也不证明策略质量。
 
@@ -534,7 +549,7 @@ startup default pose bias同时修改qtarget中心与观测`q−default`基准�
 | 云端 PT 回传本地 | iteration 19 pilot 与正式 iteration 500 都真实加载，在 16GiB 卡运行 64env×250step | 模型传输与 Isaac 推理通路通过；两次均 `quality_verified=false` |
 | 逐原始源片段验收 | 296 对输入逐项校验、48 项 CPU 回归、3 次真实独立 Isaac 片段尝试 | teacher500为158策略步，两种student smoke各21步后失败；0片段完成，尚未跑完296源×三策略 |
 | 发布学生的物理 sim2sim | 原生 ONNX、DDS、深度 SHM、PD；平地 12 个有效 command 与 17 场景各一个 OBJ | 17 场景执行完成，但 14 场景出现高度/倾斜阈值事件，不能宣称全场景技能成功 |
-| 全部生成几何的物理扫描 | 固定17场景629配置计划已后台启动；14:19快照16例完成、1例运行中 | 每例500策略ticks、恒定forward command；不是reference replay，尚未完成629例，也不以存活作为课程成功 |
+| 全部生成几何的物理扫描 | 固定17场景629配置计划已后台启动；15:12快照177完成、1执行失败、1运行、450待运行 | 每例500策略ticks、恒定forward command；保留原生退出异常，尚未完成629例，不以存活作为课程成功 |
 | 实体 G1 | 审计 SDK、映射与相机接口，没有本次真实机器人运行 | 未验证；论文作者的实机成绩不能记成本次结果 |
 
 正式 iteration 500 的同设置短评估记录 **75 次失败重置**，iteration 19 pilot 为 **3971 次**；这是 64 个环境反复终止的累计回合数，不是机器人数量。500 轮模型的四项跟踪误差各有 16000 个有限样本，最长 env0 原片为 3.22s，仍有失败且没有完成整个 course。两个 checkpoint 来自不同训练运行，不能视为同一条逐轮配对实验。详见 [本地 pilot](usage_assets/reports/official-pilot-local-quality/summary.md) 与 [500 轮中间检查点](usage_assets/reports/official-progress-0500-local/summary.md)。
@@ -545,6 +560,8 @@ startup default pose bias同时修改qtarget中心与观测`q−default`基准�
 
 等待进程已实际部署在独立源码快照，远端全文件/镜像校验与只读dry-run通过，目前等待原五教师/两学生driver完成，没有额外GPU任务；正在训练的旧源码挂载未变。[真实部署回执](usage_assets/reports/posttrain-monitor-deployment/summary.md)与CPU报告分别保留，避免将代码准备、启动成功、最终策略质量混为同一结论。
 
+正式部署模型还有独立的[选择性回传入口](scripts/research/pull_final_students.py)：输入是16阶段manifest、七个最终PT身份、有序专家证明与已成功CPU容器的回执，输出为两组学生ONNX及原始来源JSON。它不传教师图或PT，也不更新模型参数；只允许字节/SHA一致的显式文件集合。57项CPU检查和真实waiting检查通过，最终模型不存在时不创建目的目录。[证据](usage_assets/reports/final-student-transfer/summary.md)。最终两学生还需分别实际执行CPU ORT、本地12个有效指令及17个代表地形；公开ONNX的扫描不能作为自训策略验证。
+
 首次真实尝试发现 WBT 的 `reset_all → init_buffers` 清零 relative body target，下一步却先 termination/reward/log、后 `command.step` 刷新目标；这使三个片段在策略开始前误终止。独立工具仅在 warmup 前提取原生 `MotionCommand.step` 的同一对齐公式，刷新两个缓存，保留公式/文件 SHA 和缓存前后值，并核对时间、采样 ID、边界及 RNG 不变。没有推进后回写时钟或放宽失败条件，也没有更换云端训练源码。修复后相同PT和完整源进入158/21/21个实际策略步，随后真正跟踪失败，尚无片段完成。[前后真实结果与原生公式推导](usage_assets/reports/source-coverage-pilot/summary.md)。旧64env报告统计的是策略阶段，不含这些warmup误终止；其原始数值保留。
 
 CPU 测试也保留实际边界：根目录/训练 289 项通过；motion matching 213 项通过、12 个历史 raw-hash 比较失败，未跳过或重写 golden。基线比较中 36 个语义数组逐字节一致，九项不变量通过；仍不能将该 legacy suite 写成全绿。详细原始测试与基线差异见 [usage 的测试记录](usage.md#8-全量测试同步与结果来源)。
@@ -552,6 +569,8 @@ CPU 测试也保留实际边界：根目录/训练 289 项通过；motion matchi
 后续需要等七个正式模型实际训练结束，核验最终 PT/ONNX 与配置/专家来源，再检查长 rollout 和逐源 clip / 场景覆盖。当前顶层 `motion_id=0` 与学生的 expert ID 都不足以证明 296 源片或 629 场景配置已覆盖。真实硬件还需独立完成相机 producer、IMU/外参/默认角核对及实机验收，之后才能宣称此次 real2sim2real 的最后一段已经完成。
 
 全629配置扫描使用发布学生ONNX和各配置的实际OBJ，依赖、模型和1887个输入文件均绑定SHA。两例预检各500策略ticks，其中一例有高度/倾斜阈值事件，原片完整解码通过；长扫描仍在运行。[启动与逐例快照](usage_assets/reports/sim2sim-all-configs-start/summary.md)保留当前状态，不能将运动学生成629组或后台启动回执当作629例物理完成。
+
+low-step配置41的首次attempt仍记为执行失败：推理完成JSON后约53ms出现内核`command_writer`段错误，父进程随后记录worker退出异常，模拟器继续保存完整轨迹和视频，父进程最终exit1。即使两个worker各自有完成JSON，也不能代替整个进程的正常终态；该次没有补写result或伪造通过。具体worker归属缺少旧PID映射，原14个文件与时间线完整保留。[失败取证](usage_assets/reports/sim2sim-worker-failure/report.md)。
 
 配置数与网格身份也分开：629配置含580个不同OBJ字节SHA，50个平地配置共享相同OBJ；同一几何的不同序列化也可能有不同SHA，因此未宣称580种独立形状。[输入计数核验](usage_assets/reports/sim2sim-configuration-vs-mesh.json)。
 

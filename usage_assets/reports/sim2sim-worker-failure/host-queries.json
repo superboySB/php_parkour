@@ -1,0 +1,57 @@
+[
+  {
+    "command": [
+      "journalctl",
+      "-k",
+      "--since",
+      "2026-10-10 07:00:00 UTC",
+      "--until",
+      "2026-10-10 07:02:00 UTC",
+      "--no-pager",
+      "-o",
+      "json"
+    ],
+    "returncode": 0,
+    "stdout": "host-query-00.stdout.log",
+    "stderr": "host-query-00.stderr.log"
+  },
+  {
+    "command": [
+      "journalctl",
+      "--since",
+      "2026-10-10 07:00:00 UTC",
+      "--until",
+      "2026-10-10 07:02:00 UTC",
+      "SYSLOG_IDENTIFIER=systemd-coredump",
+      "--no-pager",
+      "-o",
+      "json"
+    ],
+    "returncode": 0,
+    "stdout": "host-query-01.stdout.log",
+    "stderr": "host-query-01.stderr.log"
+  },
+  {
+    "command": [
+      "coredumpctl",
+      "--no-pager",
+      "info",
+      "394853"
+    ],
+    "returncode": null,
+    "stdout": "host-query-02.stdout.log",
+    "stderr": "host-query-02.stderr.log"
+  },
+  {
+    "command": [
+      "dmesg",
+      "--time-format",
+      "iso",
+      "--level",
+      "err,warn"
+    ],
+    "returncode": 1,
+    "stdout": "host-query-03.stdout.log",
+    "stderr": "host-query-03.stderr.log"
+  }
+]

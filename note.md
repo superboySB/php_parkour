@@ -120,6 +120,13 @@ bash scripts/research/docker.sh motion -m motion_matching.play_database \
 
 交互动作匹配需要 GUI 容器与 Tk；交互和数据库浏览器均使用 `http://localhost:8081`，不能同时占用该端口。运动文件浏览器使用8080。Tk窗口使用 I/K/J/L 前后左右、Tab切换速度、界面列出的技能键触发参考动作，Quit同时停止动作匹配循环。
 
+数据库播放器用`--database`选择一个DB，没有motion/variant下拉菜单。Auto Play、Frame、Min/Max Frame、Speed、contact marker及相机follow/XYZ/smoothness已经真实浏览器验收；播放在Max Frame停止，不自动循环。[原生读回与截图](usage_assets/reports/database-gui/summary.md)。已有Chrome的机器可在不运行其它8081服务时复跑控件检查：
+
+```bash
+python3 scripts/research/verify_database_gui.py \
+  --output outputs/research/database-gui-new
+```
+
 Viser调整速度后点Save，会保存新tracking NPZ及匹配命名的terrain NPY/OBJ，保留源文件全部地形变体；已有方向指令随动作速度/FPS重采样。主交互界面的Start/End Recording默认保存到`motion_matching_results/interactive/mmYYYYMMDD/`，输出`recording_时间戳_motion.npz`、配对`_terrain.npy/.obj`和`.recording.json`；空场景也有合法空地形。交互录制只保存qpos，没有`vel_cmd`，需提供真实逐帧方向标签后才能用于方向条件学生训练。两条实际控件、保存和转换/加载流程见 [GUI验收](usage_assets/reports/gui-workflows/summary.md)。
 
 自定义动作的格式、数据库生成、技能注册方式见 [motion_matching/README.md](motion_matching/README.md)。原生示例中的 `python` 替换为容器的 `motion-python`，所有输入均应放在已挂载目录中。生成数据库的源 qpos 顺序是 `[root_quat_wxyz, root_pos_xyz, dof29]`，需要显式指定源 FPS。
@@ -285,6 +292,17 @@ bash scripts/research/docker.sh train scripts/research/eval_source_coverage.py r
 
 六种教师 preset（含默认 noscale、no-heightscan、pelvis）及两种学生 preset 见 [验收定义](scripts/research/acceptance_matrix.json)。用 `teacher-presets --profile smoke --skills locomotion` 检查六个教师配置；直接 CLI 用 `train-python -m wbt_training.train_agent exp:... simulator:isaacsim ...`。其中 no-heightscan 教师默认 60000 迭代，不能把标准教师的 20000 误当该配置的默认训练量。`--skip-completed` 仅在成功记录、配置与经校验的 checkpoint 都满足目标时跳过阶段。
 
+保存六份smoke模型后，可在同一Docker用CPU核验各自的PT/ONNX配置、参考查询与动作均值。`--root`是该次输出的`smoke`目录，`--output`须新建；height-scan输入449维，no-heightscan输入160维，不能共用一个固定449维检查。
+
+```bash
+docker exec -e CUDA_VISIBLE_DEVICES= -e OMP_NUM_THREADS=1 php-parkour-research \
+  /opt/php/bin/train-python scripts/research/validate_teacher_presets.py \
+  --root /outputs/final-cloud-acceptance/results/smoke \
+  --output /outputs/teacher-presets-cpu-new
+```
+
+本次六份实际模型的72个参考用例与60个均值对照已通过，五个非默认配置的Isaac重载评估仍待GPU空闲。[结果与边界](usage_assets/reports/teacher-presets-cpu/summary.md)。
+
 完整日程也可交给单个可续跑 driver：
 
 ```bash
@@ -338,6 +356,16 @@ python3 scripts/research/cloud.py pull
 
 远端 `/outputs` 回传至本地 `outputs/research/cloud/results/`，`logs/` 单独回传。本地重新评估 `.pt` 时需使用本地实际路径并指定本地注册表，不能照搬只存在于远端的绝对路径。原生手工导出命令及 `.pt` 与 ONNX 的区别见 [训练导出说明](wbt_training/README.md#export-to-onnx)。
 
+只需要正式学生部署模型时，使用[选择性回传工具](scripts/research/pull_final_students.py)，无须拉取整个训练输出。它只读检查16个官方阶段、七个最终PT来源、已成功的独立CPU检查容器及专家顺序；ready后只传两组配套ONNX和28份来源JSON。主机只使用标准库、现有SSH/rsync，不安装模型依赖。
+
+```bash
+python3 -B scripts/research/pull_final_students.py status
+# status为ready后执行；waiting时不会创建模型目录：
+python3 -B scripts/research/pull_final_students.py fetch
+```
+
+目标为`outputs/research/final-student-transfer/<cohort>/initial/`，其中`models/pure/`与`models/finetune/`各有`student.onnx`和`depth_backbone.onnx`。工具校验远端前后身份、本地原文件集合及SHA，保留失败的partial目录；审阅失败后用新的`--attempt`，不会覆盖历史。它不运行ORT或仿真。当前真实status仍是waiting，57项CPU检查通过；最终两组模型尚未回传，更不能拿发布模型的629扫描代替自训模型验收。[检查证据](usage_assets/reports/final-student-transfer/summary.md)。
+
 先验证公开 ONNX 双图的结构、元数据和真实 CPU 推理：
 
 ```bash
@@ -383,7 +411,11 @@ docker exec -e OMP_NUM_THREADS=4 php-parkour-research \
   --seconds 10 --gl egl
 ```
 
-这是17场景全部629个配置各自几何上的有界测试，每例500次策略控制。配置数不是独立几何数：固定计划有580个不同OBJ文件SHA，50个平地配置共享同一OBJ；没有做几何等价性判定。[计数核验](usage_assets/reports/sim2sim-configuration-vs-mesh.json)。各例使用恒定forward command，不按参考轨迹回放，也不把存活10秒视为完成课程。当前后台任务正在使用上述目录和DDS，**不要同时启动第二份扫描或其他原生闭环**。具体启动时间、逐例完成快照和两段真实预检视频见[扫描记录](usage_assets/reports/sim2sim-all-configs-start/summary.md)。
+这是17场景全部629个配置各自几何上的有界测试，每例500次策略控制。配置数不是独立几何数：固定计划有580个不同OBJ文件SHA，50个平地配置共享同一OBJ；没有做几何等价性判定。[计数核验](usage_assets/reports/sim2sim-configuration-vs-mesh.json)。各例使用恒定forward command，不按参考轨迹回放，也不把存活10秒视为完成课程。旧后台批次已在北京时间15:48有序停止，原目录保持不动；其SDK0.1.6退出段错误与监督漏查需要修复，**不能继续resume该批次作为最终验收**。[实际停止、279 reported completed/5失败/1中断/344未运行及原源码](usage_assets/reports/sim2sim-cohort-halt/summary.md)。具体旧启动时间和两段预检视频见[扫描记录](usage_assets/reports/sim2sim-all-configs-start/summary.md)。
+
+最终结果页用[完整发布工具](scripts/research/publish_full_scene_matrix.py)生成；它等待真实driver终态exit0与全部629项证据，保留所有阈值和历史attempt，并逐字节复制原视频/轨迹/日志。目前只有工具的24项CPU检查和两例浏览器预览通过，旧扫描已停止且不能发布完成页。[首次失败原字节与时间线](usage_assets/reports/sim2sim-worker-failure/report.md)保留父进程exit1，不能只凭worker JSON补造成功。工具目前仅接受旧固定plan identity；修复后新批次还须更新并审阅发布期望值。[发布工具检查与精确命令](usage_assets/reports/full-scene-publisher/summary.md)。
+
+SDK0.1.8已在独立离线候选镜像中完成CPU导入/API对照，train Kit与inference两处SDK都替换，其他包版本和motion freeze未变；未修改主Dockerfile/pins或原镜像。该候选尚未跑native闭环，不能当作最终Docker配置或已修复的证据。[官方Wait修复及归因边界](usage_assets/reports/unitree-lifecycle-independent/report.md)、[候选镜像精确recipe与CPU结果](usage_assets/reports/unitree-sdk018-candidate/summary.md)。
 
 ## 8. 验收与定位问题
 

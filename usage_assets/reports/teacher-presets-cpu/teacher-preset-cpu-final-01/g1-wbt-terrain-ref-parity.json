@@ -1,0 +1,102 @@
+{
+  "preset": "g1-wbt-terrain-ref",
+  "status": "passed",
+  "scope": "Two-iteration smoke export execution, embedded reference and PT mean parity; no Isaac reload or policy quality claim",
+  "contract": {
+    "observation_dim": 449,
+    "anchor": [
+      "torso_link"
+    ],
+    "height_scan": true,
+    "observation_scales": {
+      "motion_command": 1.0,
+      "motion_ref_pos_b": 1.0,
+      "motion_ref_ori_b": 1.0,
+      "base_lin_vel": 1.0,
+      "base_ang_vel": 1.0,
+      "dof_pos": 1.0,
+      "dof_vel": 1.0,
+      "actions": 1.0,
+      "height_scan": 1.0
+    }
+  },
+  "inputs": [
+    {
+      "path": "/outputs/final-cloud-acceptance/results/smoke/manifests/teacher-preset-g1-wbt-terrain-ref-locomotion.json",
+      "bytes": 2467,
+      "sha256": "9c4e8ffbe6db20f62a44afec0c5e4f0abb8291cda7d04407813afab7af433148"
+    },
+    {
+      "path": "/outputs/final-cloud-acceptance/results/smoke/teacher-preset-g1-wbt-terrain-ref-locomotion/PHP-research/20261010_040831-teacher-preset-g1-wbt-terrain-ref-locomotion-locomotion/model_00001.pt",
+      "bytes": 10345087,
+      "sha256": "10ef73553d88ccefe2c4d41777449326617d9025ab79cb218685f403b6bf1e99"
+    },
+    {
+      "path": "/outputs/final-cloud-acceptance/results/smoke/teacher-preset-g1-wbt-terrain-ref-locomotion/PHP-research/20261010_040831-teacher-preset-g1-wbt-terrain-ref-locomotion-locomotion/model_00001.onnx",
+      "bytes": 20143106,
+      "sha256": "53b4ae65277a66b3d753745e6b2729d44b2462fe7b754236c774e0bf5c9ee81a"
+    },
+    {
+      "path": "/outputs/final-cloud-acceptance/results/smoke/teacher-preset-g1-wbt-terrain-ref-locomotion/PHP-research/20261010_040831-teacher-preset-g1-wbt-terrain-ref-locomotion-locomotion/holosoma_config.yaml",
+      "bytes": 31002,
+      "sha256": "c95effd47cb7d0cc1ca2352d55218c91c9d66640c073d97cbab43cf2bf0a6fbd"
+    }
+  ],
+  "checkpoint_iteration": 1,
+  "onnx_report": {
+    "path": "/outputs/teacher-preset-cpu-final-01/g1-wbt-terrain-ref-onnx.json",
+    "bytes": 86996,
+    "sha256": "b30cceb419bda5f30fe52cdce14a9fd0196ed2a4489397288627bb7476df1c3a"
+  },
+  "reference_cases": 12,
+  "pt_mean_parity_cases": [
+    {
+      "case": 0,
+      "max_absolute_error": 2.9802322387695312e-08
+    },
+    {
+      "case": 1,
+      "max_absolute_error": 3.3527612686157227e-08
+    },
+    {
+      "case": 2,
+      "max_absolute_error": 3.725290298461914e-08
+    },
+    {
+      "case": 3,
+      "max_absolute_error": 4.0978193283081055e-08
+    },
+    {
+      "case": 4,
+      "max_absolute_error": 4.842877388000488e-08
+    },
+    {
+      "case": 5,
+      "max_absolute_error": 4.0978193283081055e-08
+    },
+    {
+      "case": 6,
+      "max_absolute_error": 4.284083843231201e-08
+    },
+    {
+      "case": 7,
+      "max_absolute_error": 5.029141902923584e-08
+    },
+    {
+      "case": 8,
+      "max_absolute_error": 2.9802322387695312e-08
+    },
+    {
+      "case": 9,
+      "max_absolute_error": 2.9802322387695312e-08
+    }
+  ],
+  "parity_tolerance": {
+    "rtol": 1e-05,
+    "atol": 1e-06
+  },
+  "torch": "2.7.0+cu128",
+  "onnxruntime": "1.23.2",
+  "cuda_initialized": false,
+  "quality_verified": false
+}

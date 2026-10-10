@@ -1,0 +1,85 @@
+{
+  "observed_utc": "2026-10-10T07:33:10.398587+00:00",
+  "matrix_sha256": "3e8223bd6c295a24c39203202fa1859dd667fed9de3944d6f1c4d7696f64d744",
+  "matrix_status": "running",
+  "selection_count": 629,
+  "selection_counts": {
+    "completed": 237,
+    "execution_failed": 2,
+    "running": 1,
+    "planned": 389
+  },
+  "active_selection": [
+    {
+      "scenario": "low_speed_climb_58",
+      "configuration": "left_90_walk2.0s_plat1.2s",
+      "status": "running"
+    }
+  ],
+  "top_level_completed_configurations": 2,
+  "note": "Counts derive from selections; running top-level completed_configurations is stale pilot metadata. No2230source/media verification was rerun.",
+  "pid_observation_utc": "2026-10-10T07:33:10.451535+00:00",
+  "pid_receipt": {
+    "pid_namespace": "php-parkour-research container",
+    "requested": [
+      18564,
+      18565
+    ],
+    "processes": [
+      {
+        "pid": 18564,
+        "ppid": 18554,
+        "state": "S",
+        "cmd": "/isaac-sim/kit/python/bin/python3 /outputs/sim2sim-all-configs-host/full_driver.py "
+      },
+      {
+        "pid": 18565,
+        "ppid": 18564,
+        "state": "S",
+        "cmd": "/bin/bash /isaac-sim/python.sh /workspace/php_parkour/scripts/research/sim2sim_scene_matrix.py --all-configs --matrix /outputs/motion-matching/matrix.json --models /data/assets/student --output /outputs/sim2sim/all-configs-final --image-id sha256:88254ac0b90a3056375145601d741aa3e08726e18412d201a3c7e7915a23996f --seconds 10 --gl egl --resume "
+      },
+      {
+        "pid": 18570,
+        "ppid": 18565,
+        "state": "S",
+        "cmd": "/isaac-sim/kit/python/bin/python3 /workspace/php_parkour/scripts/research/sim2sim_scene_matrix.py --all-configs --matrix /outputs/motion-matching/matrix.json --models /data/assets/student --output /outputs/sim2sim/all-configs-final --image-id sha256:88254ac0b90a3056375145601d741aa3e08726e18412d201a3c7e7915a23996f --seconds 10 --gl egl --resume "
+      },
+      {
+        "pid": 63782,
+        "ppid": 18570,
+        "state": "S",
+        "cmd": "/isaac-sim/kit/python/bin/python3 /workspace/php_parkour/scripts/research/sim2sim.py --models /data/assets/student --terrain custom --mesh /workspace/php_parkour/outputs/research/motion-matching/scenarios/low_speed_climb_58/left_90_walk2.0s_plat1.2s_terrain.obj --commands 1 --seconds-per-command 10.0 --seed 42 --gl egl --sim-python /opt/php/bin/train-python --inference-python /opt/php/bin/inference-python --output /outputs/sim2sim/all-configs-final/low_speed_climb_58/config-0023-left_90_walk2.0s_plat1.2s-e39e58b116ff "
+      },
+      {
+        "pid": 63783,
+        "ppid": 63782,
+        "state": "S",
+        "cmd": "/bin/bash /isaac-sim/python.sh /workspace/php_parkour/scripts/research/sim2sim.py --worker simulator --output /outputs/sim2sim/all-configs-final/low_speed_climb_58/config-0023-left_90_walk2.0s_plat1.2s-e39e58b116ff "
+      },
+      {
+        "pid": 63788,
+        "ppid": 63783,
+        "state": "S",
+        "cmd": "/isaac-sim/kit/python/bin/python3 /workspace/php_parkour/scripts/research/sim2sim.py --worker simulator --output /outputs/sim2sim/all-configs-final/low_speed_climb_58/config-0023-left_90_walk2.0s_plat1.2s-e39e58b116ff "
+      },
+      {
+        "pid": 63817,
+        "ppid": 63788,
+        "state": "S",
+        "cmd": "/isaac-sim/kit/python/bin/python3 -c from multiprocessing.resource_tracker import main;main(34) "
+      },
+      {
+        "pid": 63821,
+        "ppid": 63782,
+        "state": "S",
+        "cmd": "/opt/php/envs/inference/bin/python /workspace/php_parkour/scripts/research/sim2sim.py --worker inference --output /outputs/sim2sim/all-configs-final/low_speed_climb_58/config-0023-left_90_walk2.0s_plat1.2s-e39e58b116ff "
+      },
+      {
+        "pid": 63836,
+        "ppid": 63821,
+        "state": "S",
+        "cmd": "/opt/php/envs/inference/bin/python -c from multiprocessing.resource_tracker import main;main(21) "
+      }
+    ]
+  }
+}

@@ -1,0 +1,100 @@
+{
+  "schema_version": 1,
+  "status": "passed",
+  "observed_utc": "2026-10-10T07:07:02.141984+00:00",
+  "scope": "New offline publisher/CPU gates/browser preview only; no new simulation or full629 completion claim",
+  "sources": [
+    {
+      "path": "scripts/research/publish_full_scene_matrix.py",
+      "bytes": 36653,
+      "sha256": "6abbcf5ef0ba2f82d23383dd4ba93f50c658d9a242e646c69ebe0b2256afe8e6"
+    },
+    {
+      "path": "scripts/research/verify_full_scene_gallery.py",
+      "bytes": 11195,
+      "sha256": "4602c84743ed19f03e36d5616c7cabaea52935fe9b95b95512eda7a7163611e7"
+    },
+    {
+      "path": "tests/test_publish_full_scene_matrix.py",
+      "bytes": 14971,
+      "sha256": "b16c42a0e5d6f66fb7ce3a56461713ba7a3eafbe4d0a10e6b28100b93038bfe4"
+    }
+  ],
+  "cpu_tests": {
+    "tests": 24,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "cpu_tests_report": "outputs/research/full-scene-publisher-cpu-tests-v2.xml",
+  "preview": {
+    "path": "outputs/research/full-scene-publisher-preview-final",
+    "cases": 2,
+    "threshold_events": 1,
+    "configuration_coverage_complete": false,
+    "manifest_entries": 49,
+    "bytes": 7250203,
+    "all_manifest_and_original_copy_bytes_verified": true
+  },
+  "browser": {
+    "report": "outputs/research/full-scene-publisher-browser-complete/results.json",
+    "status": "passed",
+    "checked_videos": 2,
+    "checked_cases": 2,
+    "all_published_media_checked": true,
+    "screenshots": [
+      "outputs/research/full-scene-publisher-browser-complete/gallery.png",
+      "outputs/research/full-scene-publisher-browser-complete/gallery-world-trajectory.png"
+    ]
+  },
+  "actual_full_publication_refusal": {
+    "command": [
+      "python3",
+      "scripts/research/publish_full_scene_matrix.py",
+      "--plan",
+      "outputs/research/sim2sim/all-configs-final/plan.json",
+      "--matrix",
+      "outputs/research/sim2sim/all-configs-final/matrix.json",
+      "--driver-receipt",
+      "outputs/research/sim2sim-all-configs-host/full-driver.json",
+      "--driver-launch",
+      "outputs/research/sim2sim-all-configs-host/full-launch.json",
+      "--driver-wrapper",
+      "outputs/research/sim2sim-all-configs-host/full_driver.py",
+      "--output",
+      "outputs/research/full-scene-publisher-full-refused"
+    ],
+    "returncode": 2,
+    "stderr": "full-refusal.stderr.log",
+    "output_created": false
+  },
+  "frozen_inputs_rechecked": {
+    "dependencies": 340,
+    "source_files": 1887,
+    "total_records": 2230,
+    "all_sha_match": true,
+    "harness_sha256": "284e3eabfc888303f5090f0d3c22dd8a3c35c5478285dc030778209079d746d2"
+  },
+  "disk_estimate": {
+    "method": "Measured raw sealed completed cases in the frozen preview matrix snapshot; no media transcoding. Estimate only; final results may vary by scenario.",
+    "sample_completed_cases": 155,
+    "sample_case_mean_bytes": 632950.9870967742,
+    "sample_case_min_bytes": 550806,
+    "sample_case_max_bytes": 765066,
+    "629_case_raw_bytes_extrapolation": 398126171,
+    "additional_plan_matrix_page_json_svg_manifest_overhead_estimated_bytes": [
+      15000000,
+      40000000
+    ],
+    "conservative_total_budget_bytes": [
+      500000000,
+      1500000000
+    ]
+  },
+  "limitations": [
+    "Full629 browser/media validation has not run; verifier will traverse all pages/media only after genuine terminal publication.",
+    "CPU test artifacts are synthetic fixtures, not robot/video physical evidence.",
+    "Preview only contains the first two actual completed cases; other completed cases in the raw matrix snapshot are not preview media.",
+    "Parent must wait for real full driver exit0 and fixed complete matrix; running snapshot counters do not satisfy gate."
+  ]
+}

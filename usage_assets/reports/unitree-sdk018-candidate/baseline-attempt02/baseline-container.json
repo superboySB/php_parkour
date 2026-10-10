@@ -1,0 +1,240 @@
+{
+  "Id": "973eecccc898259011d8eb39ace18e8d8261ed7f91716ba3b78d67796d73ab1d",
+  "Image": "sha256:88254ac0b90a3056375145601d741aa3e08726e18412d201a3c7e7915a23996f",
+  "Path": "/bin/bash",
+  "Args": [
+    "-lc",
+    "set -e; for php_runtime in train inference motion; do /opt/php/bin/${php_runtime}-python /sdk-review/abi_probe.py --runtime \"$php_runtime\" --output /audit/baseline/${php_runtime}.json; /opt/php/bin/${php_runtime}-python -m pip freeze > /audit/baseline/${php_runtime}.freeze.txt; done"
+  ],
+  "Config": {
+    "Hostname": "973eecccc898",
+    "Domainname": "",
+    "User": "root",
+    "AttachStdin": false,
+    "AttachStdout": true,
+    "AttachStderr": true,
+    "ExposedPorts": {
+      "47998/udp": {},
+      "49100/tcp": {}
+    },
+    "Tty": false,
+    "OpenStdin": false,
+    "StdinOnce": false,
+    "Env": [
+      "HTTPS_PROXY=http://172.17.0.1:7897",
+      "https_proxy=http://172.17.0.1:7897",
+      "NO_PROXY=localhost,127.0.0.1,::1,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16",
+      "no_proxy=localhost,127.0.0.1,::1,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16",
+      "CUDA_VISIBLE_DEVICES=",
+      "NVIDIA_VISIBLE_DEVICES=none",
+      "HTTP_PROXY=http://172.17.0.1:7897",
+      "http_proxy=http://172.17.0.1:7897",
+      "PATH=/opt/php/runtimes/train/bin:/opt/php/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+      "NVIDIA_DRIVER_CAPABILITIES=compute,utility,graphics",
+      "VK_DRIVER_FILES=/etc/vulkan/icd.d/nvidia_icd.json",
+      "OMNI_SERVER=https://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/5.1",
+      "MIN_DRIVER_VERSION=570.169",
+      "ISAACSIM_VERSION=",
+      "ISAACSIM_ROOT_PATH=/isaac-sim",
+      "ISAACLAB_PATH=/workspace/isaaclab",
+      "DOCKER_USER_HOME=/root",
+      "LANG=C.UTF-8",
+      "DEBIAN_FRONTEND=noninteractive",
+      "ACCEPT_EULA=Y",
+      "PRIVACY_CONSENT=Y",
+      "OMNI_KIT_ACCEPT_EULA=YES",
+      "OMNI_KIT_ALLOW_ROOT=1",
+      "PHP_DOCKER=1",
+      "HSSIM_PYTHON=/opt/php/bin/train-python",
+      "LOGGER=tensorboard",
+      "WANDB_MODE=disabled",
+      "PHP_MOTION_DATABASE_DIR=/data/assets/databases",
+      "XDG_CACHE_HOME=/data/cache",
+      "PYTHONUNBUFFERED=1",
+      "PIP_DEFAULT_TIMEOUT=120",
+      "PIP_RETRIES=8",
+      "PIP_CACHE_DIR=/root/.cache/pip"
+    ],
+    "Cmd": [
+      "-lc",
+      "set -e; for php_runtime in train inference motion; do /opt/php/bin/${php_runtime}-python /sdk-review/abi_probe.py --runtime \"$php_runtime\" --output /audit/baseline/${php_runtime}.json; /opt/php/bin/${php_runtime}-python -m pip freeze > /audit/baseline/${php_runtime}.freeze.txt; done"
+    ],
+    "Image": "sha256:88254ac0b90a3056375145601d741aa3e08726e18412d201a3c7e7915a23996f",
+    "Volumes": null,
+    "WorkingDir": "/workspace/php_parkour",
+    "Entrypoint": [
+      "/bin/bash"
+    ],
+    "Labels": {
+      "description": "Dockerfile for building and running the Isaac Lab framework inside Isaac Sim container image.",
+      "org.opencontainers.image.ref.name": "ubuntu",
+      "org.opencontainers.image.revision": "64ebc5f125958ac1a9ab4891858b80a2ece5dd57",
+      "org.opencontainers.image.source": "https://github.com/amazon-far/php_parkour",
+      "org.opencontainers.image.version": "24.04",
+      "org.php-parkour.holosoma-revision": "4a0bf04cde5930af5ed59da797568d32be972525",
+      "org.php-parkour.source-dirty": "false",
+      "version": "2.1.1"
+    }
+  },
+  "HostConfig": {
+    "Binds": null,
+    "ContainerIDFile": "",
+    "LogConfig": {
+      "Type": "json-file",
+      "Config": {}
+    },
+    "NetworkMode": "none",
+    "PortBindings": {},
+    "RestartPolicy": {
+      "Name": "no",
+      "MaximumRetryCount": 0
+    },
+    "AutoRemove": false,
+    "VolumeDriver": "",
+    "VolumesFrom": null,
+    "ConsoleSize": [
+      0,
+      0
+    ],
+    "CapAdd": null,
+    "CapDrop": null,
+    "CgroupnsMode": "private",
+    "Dns": null,
+    "DnsOptions": [],
+    "DnsSearch": [],
+    "ExtraHosts": null,
+    "GroupAdd": null,
+    "IpcMode": "private",
+    "Cgroup": "",
+    "Links": null,
+    "OomScoreAdj": 0,
+    "PidMode": "",
+    "Privileged": false,
+    "PublishAllPorts": false,
+    "ReadonlyRootfs": false,
+    "SecurityOpt": null,
+    "UTSMode": "",
+    "UsernsMode": "",
+    "ShmSize": 67108864,
+    "Runtime": "runc",
+    "Isolation": "",
+    "CpuShares": 0,
+    "Memory": 3221225472,
+    "NanoCpus": 2000000000,
+    "CgroupParent": "",
+    "BlkioWeight": 0,
+    "BlkioWeightDevice": [],
+    "BlkioDeviceReadBps": [],
+    "BlkioDeviceWriteBps": [],
+    "BlkioDeviceReadIOps": [],
+    "BlkioDeviceWriteIOps": [],
+    "CpuPeriod": 0,
+    "CpuQuota": 0,
+    "CpuRealtimePeriod": 0,
+    "CpuRealtimeRuntime": 0,
+    "CpusetCpus": "",
+    "CpusetMems": "",
+    "Devices": [],
+    "DeviceCgroupRules": null,
+    "DeviceRequests": null,
+    "MemoryReservation": 0,
+    "MemorySwap": 6442450944,
+    "MemorySwappiness": null,
+    "OomKillDisable": null,
+    "PidsLimit": null,
+    "Ulimits": [],
+    "CpuCount": 0,
+    "CpuPercent": 0,
+    "IOMaximumIOps": 0,
+    "IOMaximumBandwidth": 0,
+    "Mounts": [
+      {
+        "Type": "bind",
+        "Source": "/home/dzp/projects/php_parkour/outputs/research/unitree-sdk018-candidate/context",
+        "Target": "/sdk-review",
+        "ReadOnly": true
+      },
+      {
+        "Type": "bind",
+        "Source": "/home/dzp/projects/php_parkour/outputs/research/unitree-sdk018-candidate",
+        "Target": "/audit"
+      }
+    ],
+    "MaskedPaths": [
+      "/proc/acpi",
+      "/proc/asound",
+      "/proc/interrupts",
+      "/proc/kcore",
+      "/proc/keys",
+      "/proc/latency_stats",
+      "/proc/sched_debug",
+      "/proc/scsi",
+      "/proc/timer_list",
+      "/proc/timer_stats",
+      "/sys/devices/virtual/powercap",
+      "/sys/firmware"
+    ],
+    "ReadonlyPaths": [
+      "/proc/bus",
+      "/proc/fs",
+      "/proc/irq",
+      "/proc/sys",
+      "/proc/sysrq-trigger"
+    ]
+  },
+  "Mounts": [
+    {
+      "Type": "bind",
+      "Source": "/home/dzp/projects/php_parkour/outputs/research/unitree-sdk018-candidate",
+      "Destination": "/audit",
+      "Mode": "",
+      "RW": true,
+      "Propagation": "rprivate"
+    },
+    {
+      "Type": "bind",
+      "Source": "/home/dzp/projects/php_parkour/outputs/research/unitree-sdk018-candidate/context",
+      "Destination": "/sdk-review",
+      "Mode": "",
+      "RW": false,
+      "Propagation": "rprivate"
+    }
+  ],
+  "NetworkSettings": {
+    "SandboxID": "",
+    "SandboxKey": "",
+    "Ports": {},
+    "Networks": {
+      "none": {
+        "IPAMConfig": null,
+        "Links": null,
+        "Aliases": null,
+        "DriverOpts": null,
+        "GwPriority": 0,
+        "NetworkID": "47375fdff4acc57cf0ede3aaece2f664f6765027bdab566f885300ea0ed00587",
+        "EndpointID": "",
+        "Gateway": "",
+        "IPAddress": "",
+        "MacAddress": "",
+        "IPPrefixLen": 0,
+        "IPv6Gateway": "",
+        "GlobalIPv6Address": "",
+        "GlobalIPv6PrefixLen": 0,
+        "DNSNames": null
+      }
+    }
+  },
+  "State": {
+    "Status": "exited",
+    "Running": false,
+    "Paused": false,
+    "Restarting": false,
+    "OOMKilled": false,
+    "Dead": false,
+    "Pid": 0,
+    "ExitCode": 0,
+    "Error": "",
+    "StartedAt": "2026-10-10T07:35:20.553761941Z",
+    "FinishedAt": "2026-10-10T07:35:21.687264622Z"
+  }
+}

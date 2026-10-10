@@ -1,0 +1,62 @@
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 2.58kB done
+#1 WARN: InvalidDefaultArgInFrom: Default value for ARG ${BASE_IMAGE} results in empty or invalid base image name (line 3)
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/php-parkour:sdk018-base-88254ac0b90a
+#2 DONE 0.0s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 64B done
+#3 DONE 0.0s
+
+#4 [1/6] FROM docker.io/library/php-parkour:sdk018-base-88254ac0b90a
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 7.79kB done
+#5 DONE 0.0s
+
+#6 [2/6] COPY wheels/ /opt/php-sdk018/wheels/
+#6 CACHED
+
+#7 [3/6] COPY wheel-manifest.json abi_probe.py baseline-train.json baseline-inference.json baseline-motion.json /opt/php-sdk018/
+#7 DONE 0.1s
+
+#8 [4/6] RUN --network=none /usr/bin/python3 -c 'import hashlib,json,pathlib; p=pathlib.Path("/opt/php-sdk018"); m=json.loads((p/"wheel-manifest.json").read_text()); assert len(m["wheels"])==2; [(lambda b,w: (b.stat().st_size==w["bytes"] and hashlib.sha256(b.read_bytes()).hexdigest()==w["sha256"]) or (_ for _ in ()).throw(AssertionError(w["filename"])))(p/"wheels"/w["filename"],w) for w in m["wheels"]]'
+#8 DONE 0.1s
+
+#9 [5/6] RUN --network=none PIP_CONFIG_FILE=/dev/null PIP_NO_INDEX=1 PIP_DISABLE_PIP_VERSION_CHECK=1     /opt/php/bin/train-python -m pip install --no-index --no-deps --force-reinstall       /opt/php-sdk018/wheels/far_unitree_sdk-0.1.8-cp311-cp311-manylinux_2_31_x86_64.whl     && PIP_CONFIG_FILE=/dev/null PIP_NO_INDEX=1 PIP_DISABLE_PIP_VERSION_CHECK=1     /opt/php/bin/inference-python -m pip install --no-index --no-deps --force-reinstall       /opt/php-sdk018/wheels/far_unitree_sdk-0.1.8-cp312-cp312-manylinux_2_31_x86_64.whl
+#9 0.304 Processing /opt/php-sdk018/wheels/far_unitree_sdk-0.1.8-cp311-cp311-manylinux_2_31_x86_64.whl
+#9 0.313 Installing collected packages: far-unitree-sdk
+#9 0.313   Attempting uninstall: far-unitree-sdk
+#9 0.314     Found existing installation: far-unitree-sdk 0.1.6
+#9 0.315     Uninstalling far-unitree-sdk-0.1.6:
+#9 0.359       Successfully uninstalled far-unitree-sdk-0.1.6
+#9 0.464 Successfully installed far-unitree-sdk-0.1.8
+#9 0.464 WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager, possibly rendering your system unusable.It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv. Use the --root-user-action option if you know what you are doing and want to suppress this warning.
+#9 0.671 Processing /opt/php-sdk018/wheels/far_unitree_sdk-0.1.8-cp312-cp312-manylinux_2_31_x86_64.whl
+#9 0.687 Installing collected packages: far-unitree-sdk
+#9 0.687   Attempting uninstall: far-unitree-sdk
+#9 0.688     Found existing installation: far-unitree-sdk 0.1.6
+#9 0.689     Uninstalling far-unitree-sdk-0.1.6:
+#9 0.723       Successfully uninstalled far-unitree-sdk-0.1.6
+#9 0.825 Successfully installed far-unitree-sdk-0.1.8
+#9 DONE 0.9s
+
+#10 [6/6] RUN --network=none CUDA_VISIBLE_DEVICES= NVIDIA_VISIBLE_DEVICES=none     /opt/php/bin/train-python /opt/php-sdk018/abi_probe.py --runtime train       --baseline /opt/php-sdk018/baseline-train.json --output /opt/php-sdk018/build-train.json     && CUDA_VISIBLE_DEVICES= NVIDIA_VISIBLE_DEVICES=none     /opt/php/bin/inference-python /opt/php-sdk018/abi_probe.py --runtime inference       --baseline /opt/php-sdk018/baseline-inference.json --output /opt/php-sdk018/build-inference.json     && CUDA_VISIBLE_DEVICES= NVIDIA_VISIBLE_DEVICES=none     /opt/php/bin/motion-python /opt/php-sdk018/abi_probe.py --runtime motion       --baseline /opt/php-sdk018/baseline-motion.json --output /opt/php-sdk018/build-motion.json     && /opt/php/bin/train-python -m pip freeze > /opt/php-sdk018/train.freeze.txt     && /opt/php/bin/inference-python -m pip freeze > /opt/php-sdk018/inference.freeze.txt     && /opt/php/bin/motion-python -m pip freeze > /opt/php-sdk018/motion.freeze.txt
+#10 0.255 {"runtime": "train", "sdk": "0.1.8", "distribution_count": 357, "comparison": {"passed": true, "failures": [], "scope": "Import-only ABI/public API/package identity; not a native robot lifecycle test", "removed_methods": [], "added_methods": ["enable_motion_switcher_responder"]}}
+#10 0.346 {"runtime": "inference", "sdk": "0.1.8", "distribution_count": 68, "comparison": {"passed": true, "failures": [], "scope": "Import-only ABI/public API/package identity; not a native robot lifecycle test", "removed_methods": [], "added_methods": ["enable_motion_switcher_responder"]}}
+#10 0.416 {"runtime": "motion", "sdk": null, "distribution_count": 84, "comparison": {"passed": true, "failures": [], "scope": "Import-only ABI/public API/package identity; not a native robot lifecycle test", "removed_methods": [], "added_methods": []}}
+#10 DONE 1.0s
+
+#11 exporting to image
+#11 exporting layers 0.1s done
+#11 writing image sha256:caf61487b69ce478980b3bf9df38a7f1fcaaae4b109d971dfbea10b09bf441aa done
+#11 naming to docker.io/library/php-parkour:research-sdk018-pilot done
+#11 DONE 0.1s
+
+ [33m1 warning found (use docker --debug to expand):
+[0m - InvalidDefaultArgInFrom: Default value for ARG ${BASE_IMAGE} results in empty or invalid base image name (line 3)

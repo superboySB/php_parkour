@@ -1,0 +1,423 @@
+{
+  "schema_version": 1,
+  "status": "planned-not-executed",
+  "scope": "Five nondefault preset own checkpoint reload/eval; smoke 64env2iter checkpoints only, not converged or full ablation schedules.",
+  "rows": [
+    {
+      "pt": "/outputs/final-cloud-acceptance/results/smoke/teacher-preset-g1-wbt-terrain-no-heightscan-locomotion/PHP-research/20261010_040852-teacher-preset-g1-wbt-terrain-no-heightscan-locomotion-locomotion/model_00001.pt",
+      "onnx": "/outputs/final-cloud-acceptance/results/smoke/teacher-preset-g1-wbt-terrain-no-heightscan-locomotion/PHP-research/20261010_040852-teacher-preset-g1-wbt-terrain-no-heightscan-locomotion-locomotion/model_00001.onnx",
+      "config": "/outputs/final-cloud-acceptance/results/smoke/teacher-preset-g1-wbt-terrain-no-heightscan-locomotion/PHP-research/20261010_040852-teacher-preset-g1-wbt-terrain-no-heightscan-locomotion-locomotion/holosoma_config.yaml",
+      "inputs": {
+        "obs": [
+          1,
+          160
+        ],
+        "time_step": [
+          1,
+          1
+        ]
+      },
+      "outputs": {
+        "actions": [
+          1,
+          29
+        ],
+        "joint_pos": [
+          1,
+          29
+        ],
+        "joint_vel": [
+          1,
+          29
+        ],
+        "ref_pos_xyz": [
+          1,
+          3
+        ],
+        "ref_quat_xyzw": [
+          1,
+          4
+        ]
+      },
+      "actor_input_dim": 160,
+      "eval_command": [
+        "docker",
+        "exec",
+        "-e",
+        "CHECKPOINT=/outputs/final-cloud-acceptance/results/smoke/teacher-preset-g1-wbt-terrain-no-heightscan-locomotion/PHP-research/20261010_040852-teacher-preset-g1-wbt-terrain-no-heightscan-locomotion-locomotion/model_00001.pt",
+        "-e",
+        "REGISTRY=file:///data/assets/motions-locomotion",
+        "-e",
+        "LOGGER=tensorboard",
+        "-e",
+        "WANDB_MODE=disabled",
+        "-e",
+        "NUM_ENVS=16",
+        "-e",
+        "MAX_EVAL_STEPS=100",
+        "php-parkour-research",
+        "bash",
+        "scripts/research/eval_quality.sh",
+        "teacher",
+        "/outputs/preset-reload/teacher-preset-g1-wbt-terrain-no-heightscan-locomotion/quality.json",
+        "--training.headless",
+        "True",
+        "--logger.video.interval",
+        "1",
+        "--logger.video.upload-to-wandb",
+        "False"
+      ],
+      "files": {
+        "pt": {
+          "host_path": "outputs/research/final-cloud-acceptance/results/smoke/teacher-preset-g1-wbt-terrain-no-heightscan-locomotion/PHP-research/20261010_040852-teacher-preset-g1-wbt-terrain-no-heightscan-locomotion-locomotion/model_00001.pt",
+          "bytes": 6793599,
+          "sha256": "3cff831a29515b73a86b2815dae0f29e2cc0e6f3434ed4bcf3d70ff473a43559"
+        },
+        "onnx": {
+          "host_path": "outputs/research/final-cloud-acceptance/results/smoke/teacher-preset-g1-wbt-terrain-no-heightscan-locomotion/PHP-research/20261010_040852-teacher-preset-g1-wbt-terrain-no-heightscan-locomotion-locomotion/model_00001.onnx",
+          "bytes": 19550992,
+          "sha256": "0f0aa96058fa87a62f41d7a0af87d8e582a5db3ecbabe9a3045370e792a6e732"
+        },
+        "config": {
+          "host_path": "outputs/research/final-cloud-acceptance/results/smoke/teacher-preset-g1-wbt-terrain-no-heightscan-locomotion/PHP-research/20261010_040852-teacher-preset-g1-wbt-terrain-no-heightscan-locomotion-locomotion/holosoma_config.yaml",
+          "bytes": 30686,
+          "sha256": "5fe3f0f7ecdc543bb59e060a89d35dd1aa9dcf443f718692d003f4dbefcf1011"
+        }
+      }
+    },
+    {
+      "pt": "/outputs/final-cloud-acceptance/results/smoke/teacher-preset-g1-wbt-terrain-no-heightscan-noscale-locomotion/PHP-research/20261010_040933-teacher-preset-g1-wbt-terrain-no-heightscan-noscale-locomotion-locomotion/model_00001.pt",
+      "onnx": "/outputs/final-cloud-acceptance/results/smoke/teacher-preset-g1-wbt-terrain-no-heightscan-noscale-locomotion/PHP-research/20261010_040933-teacher-preset-g1-wbt-terrain-no-heightscan-noscale-locomotion-locomotion/model_00001.onnx",
+      "config": "/outputs/final-cloud-acceptance/results/smoke/teacher-preset-g1-wbt-terrain-no-heightscan-noscale-locomotion/PHP-research/20261010_040933-teacher-preset-g1-wbt-terrain-no-heightscan-noscale-locomotion-locomotion/holosoma_config.yaml",
+      "inputs": {
+        "obs": [
+          1,
+          160
+        ],
+        "time_step": [
+          1,
+          1
+        ]
+      },
+      "outputs": {
+        "actions": [
+          1,
+          29
+        ],
+        "joint_pos": [
+          1,
+          29
+        ],
+        "joint_vel": [
+          1,
+          29
+        ],
+        "ref_pos_xyz": [
+          1,
+          3
+        ],
+        "ref_quat_xyzw": [
+          1,
+          4
+        ]
+      },
+      "actor_input_dim": 160,
+      "eval_command": [
+        "docker",
+        "exec",
+        "-e",
+        "CHECKPOINT=/outputs/final-cloud-acceptance/results/smoke/teacher-preset-g1-wbt-terrain-no-heightscan-noscale-locomotion/PHP-research/20261010_040933-teacher-preset-g1-wbt-terrain-no-heightscan-noscale-locomotion-locomotion/model_00001.pt",
+        "-e",
+        "REGISTRY=file:///data/assets/motions-locomotion",
+        "-e",
+        "LOGGER=tensorboard",
+        "-e",
+        "WANDB_MODE=disabled",
+        "-e",
+        "NUM_ENVS=16",
+        "-e",
+        "MAX_EVAL_STEPS=100",
+        "php-parkour-research",
+        "bash",
+        "scripts/research/eval_quality.sh",
+        "teacher",
+        "/outputs/preset-reload/teacher-preset-g1-wbt-terrain-no-heightscan-noscale-locomotion/quality.json",
+        "--training.headless",
+        "True",
+        "--logger.video.interval",
+        "1",
+        "--logger.video.upload-to-wandb",
+        "False"
+      ],
+      "files": {
+        "pt": {
+          "host_path": "outputs/research/final-cloud-acceptance/results/smoke/teacher-preset-g1-wbt-terrain-no-heightscan-noscale-locomotion/PHP-research/20261010_040933-teacher-preset-g1-wbt-terrain-no-heightscan-noscale-locomotion-locomotion/model_00001.pt",
+          "bytes": 6793599,
+          "sha256": "08e803d7af63b813a4325c55a83f42892144010c1fb17d80b5d20f090e5955b6"
+        },
+        "onnx": {
+          "host_path": "outputs/research/final-cloud-acceptance/results/smoke/teacher-preset-g1-wbt-terrain-no-heightscan-noscale-locomotion/PHP-research/20261010_040933-teacher-preset-g1-wbt-terrain-no-heightscan-noscale-locomotion-locomotion/model_00001.onnx",
+          "bytes": 19550569,
+          "sha256": "a2a413329c84a794b3e38af4d034514b0ca15a2e714dcb2645515cb1d24adf04"
+        },
+        "config": {
+          "host_path": "outputs/research/final-cloud-acceptance/results/smoke/teacher-preset-g1-wbt-terrain-no-heightscan-noscale-locomotion/PHP-research/20261010_040933-teacher-preset-g1-wbt-terrain-no-heightscan-noscale-locomotion-locomotion/holosoma_config.yaml",
+          "bytes": 30702,
+          "sha256": "e518151cbad08b58381f0db83dcc1d86685807ca31eed4a75e454082683d1819"
+        }
+      }
+    },
+    {
+      "pt": "/outputs/final-cloud-acceptance/results/smoke/teacher-preset-g1-wbt-terrain-no-heightscan-pelvis-locomotion/PHP-research/20261010_041014-teacher-preset-g1-wbt-terrain-no-heightscan-pelvis-locomotion-locomotion/model_00001.pt",
+      "onnx": "/outputs/final-cloud-acceptance/results/smoke/teacher-preset-g1-wbt-terrain-no-heightscan-pelvis-locomotion/PHP-research/20261010_041014-teacher-preset-g1-wbt-terrain-no-heightscan-pelvis-locomotion-locomotion/model_00001.onnx",
+      "config": "/outputs/final-cloud-acceptance/results/smoke/teacher-preset-g1-wbt-terrain-no-heightscan-pelvis-locomotion/PHP-research/20261010_041014-teacher-preset-g1-wbt-terrain-no-heightscan-pelvis-locomotion-locomotion/holosoma_config.yaml",
+      "inputs": {
+        "obs": [
+          1,
+          160
+        ],
+        "time_step": [
+          1,
+          1
+        ]
+      },
+      "outputs": {
+        "actions": [
+          1,
+          29
+        ],
+        "joint_pos": [
+          1,
+          29
+        ],
+        "joint_vel": [
+          1,
+          29
+        ],
+        "ref_pos_xyz": [
+          1,
+          3
+        ],
+        "ref_quat_xyzw": [
+          1,
+          4
+        ]
+      },
+      "actor_input_dim": 160,
+      "eval_command": [
+        "docker",
+        "exec",
+        "-e",
+        "CHECKPOINT=/outputs/final-cloud-acceptance/results/smoke/teacher-preset-g1-wbt-terrain-no-heightscan-pelvis-locomotion/PHP-research/20261010_041014-teacher-preset-g1-wbt-terrain-no-heightscan-pelvis-locomotion-locomotion/model_00001.pt",
+        "-e",
+        "REGISTRY=file:///data/assets/motions-locomotion",
+        "-e",
+        "LOGGER=tensorboard",
+        "-e",
+        "WANDB_MODE=disabled",
+        "-e",
+        "NUM_ENVS=16",
+        "-e",
+        "MAX_EVAL_STEPS=100",
+        "php-parkour-research",
+        "bash",
+        "scripts/research/eval_quality.sh",
+        "teacher",
+        "/outputs/preset-reload/teacher-preset-g1-wbt-terrain-no-heightscan-pelvis-locomotion/quality.json",
+        "--training.headless",
+        "True",
+        "--logger.video.interval",
+        "1",
+        "--logger.video.upload-to-wandb",
+        "False"
+      ],
+      "files": {
+        "pt": {
+          "host_path": "outputs/research/final-cloud-acceptance/results/smoke/teacher-preset-g1-wbt-terrain-no-heightscan-pelvis-locomotion/PHP-research/20261010_041014-teacher-preset-g1-wbt-terrain-no-heightscan-pelvis-locomotion-locomotion/model_00001.pt",
+          "bytes": 6793599,
+          "sha256": "043922cea8d03a362e302d84cef4868dcdc8f86a0e627abe981cb1dff955cdf1"
+        },
+        "onnx": {
+          "host_path": "outputs/research/final-cloud-acceptance/results/smoke/teacher-preset-g1-wbt-terrain-no-heightscan-pelvis-locomotion/PHP-research/20261010_041014-teacher-preset-g1-wbt-terrain-no-heightscan-pelvis-locomotion-locomotion/model_00001.onnx",
+          "bytes": 19551002,
+          "sha256": "a78d6bf9687e1577e4f521eabdea4b984b2edb2acf66061f3bb49d5b62fef6ff"
+        },
+        "config": {
+          "host_path": "outputs/research/final-cloud-acceptance/results/smoke/teacher-preset-g1-wbt-terrain-no-heightscan-pelvis-locomotion/PHP-research/20261010_041014-teacher-preset-g1-wbt-terrain-no-heightscan-pelvis-locomotion-locomotion/holosoma_config.yaml",
+          "bytes": 30696,
+          "sha256": "99efc80ac72af16b574fb47258fe4af4a9a15e359550e48cc2d60c8e2ade3104"
+        }
+      }
+    },
+    {
+      "pt": "/outputs/final-cloud-acceptance/results/smoke/teacher-preset-g1-wbt-terrain-ref-locomotion/PHP-research/20261010_040831-teacher-preset-g1-wbt-terrain-ref-locomotion-locomotion/model_00001.pt",
+      "onnx": "/outputs/final-cloud-acceptance/results/smoke/teacher-preset-g1-wbt-terrain-ref-locomotion/PHP-research/20261010_040831-teacher-preset-g1-wbt-terrain-ref-locomotion-locomotion/model_00001.onnx",
+      "config": "/outputs/final-cloud-acceptance/results/smoke/teacher-preset-g1-wbt-terrain-ref-locomotion/PHP-research/20261010_040831-teacher-preset-g1-wbt-terrain-ref-locomotion-locomotion/holosoma_config.yaml",
+      "inputs": {
+        "obs": [
+          1,
+          449
+        ],
+        "time_step": [
+          1,
+          1
+        ]
+      },
+      "outputs": {
+        "actions": [
+          1,
+          29
+        ],
+        "joint_pos": [
+          1,
+          29
+        ],
+        "joint_vel": [
+          1,
+          29
+        ],
+        "ref_pos_xyz": [
+          1,
+          3
+        ],
+        "ref_quat_xyzw": [
+          1,
+          4
+        ]
+      },
+      "actor_input_dim": 449,
+      "eval_command": [
+        "docker",
+        "exec",
+        "-e",
+        "CHECKPOINT=/outputs/final-cloud-acceptance/results/smoke/teacher-preset-g1-wbt-terrain-ref-locomotion/PHP-research/20261010_040831-teacher-preset-g1-wbt-terrain-ref-locomotion-locomotion/model_00001.pt",
+        "-e",
+        "REGISTRY=file:///data/assets/motions-locomotion",
+        "-e",
+        "LOGGER=tensorboard",
+        "-e",
+        "WANDB_MODE=disabled",
+        "-e",
+        "NUM_ENVS=16",
+        "-e",
+        "MAX_EVAL_STEPS=100",
+        "php-parkour-research",
+        "bash",
+        "scripts/research/eval_quality.sh",
+        "teacher",
+        "/outputs/preset-reload/teacher-preset-g1-wbt-terrain-ref-locomotion/quality.json",
+        "--training.headless",
+        "True",
+        "--logger.video.interval",
+        "1",
+        "--logger.video.upload-to-wandb",
+        "False"
+      ],
+      "files": {
+        "pt": {
+          "host_path": "outputs/research/final-cloud-acceptance/results/smoke/teacher-preset-g1-wbt-terrain-ref-locomotion/PHP-research/20261010_040831-teacher-preset-g1-wbt-terrain-ref-locomotion-locomotion/model_00001.pt",
+          "bytes": 10345087,
+          "sha256": "10ef73553d88ccefe2c4d41777449326617d9025ab79cb218685f403b6bf1e99"
+        },
+        "onnx": {
+          "host_path": "outputs/research/final-cloud-acceptance/results/smoke/teacher-preset-g1-wbt-terrain-ref-locomotion/PHP-research/20261010_040831-teacher-preset-g1-wbt-terrain-ref-locomotion-locomotion/model_00001.onnx",
+          "bytes": 20143106,
+          "sha256": "53b4ae65277a66b3d753745e6b2729d44b2462fe7b754236c774e0bf5c9ee81a"
+        },
+        "config": {
+          "host_path": "outputs/research/final-cloud-acceptance/results/smoke/teacher-preset-g1-wbt-terrain-ref-locomotion/PHP-research/20261010_040831-teacher-preset-g1-wbt-terrain-ref-locomotion-locomotion/holosoma_config.yaml",
+          "bytes": 31002,
+          "sha256": "c95effd47cb7d0cc1ca2352d55218c91c9d66640c073d97cbab43cf2bf0a6fbd"
+        }
+      }
+    },
+    {
+      "pt": "/outputs/final-cloud-acceptance/results/smoke/teacher-preset-g1-wbt-terrain-ref-pelvis-locomotion/PHP-research/20261010_040954-teacher-preset-g1-wbt-terrain-ref-pelvis-locomotion-locomotion/model_00001.pt",
+      "onnx": "/outputs/final-cloud-acceptance/results/smoke/teacher-preset-g1-wbt-terrain-ref-pelvis-locomotion/PHP-research/20261010_040954-teacher-preset-g1-wbt-terrain-ref-pelvis-locomotion-locomotion/model_00001.onnx",
+      "config": "/outputs/final-cloud-acceptance/results/smoke/teacher-preset-g1-wbt-terrain-ref-pelvis-locomotion/PHP-research/20261010_040954-teacher-preset-g1-wbt-terrain-ref-pelvis-locomotion-locomotion/holosoma_config.yaml",
+      "inputs": {
+        "obs": [
+          1,
+          449
+        ],
+        "time_step": [
+          1,
+          1
+        ]
+      },
+      "outputs": {
+        "actions": [
+          1,
+          29
+        ],
+        "joint_pos": [
+          1,
+          29
+        ],
+        "joint_vel": [
+          1,
+          29
+        ],
+        "ref_pos_xyz": [
+          1,
+          3
+        ],
+        "ref_quat_xyzw": [
+          1,
+          4
+        ]
+      },
+      "actor_input_dim": 449,
+      "eval_command": [
+        "docker",
+        "exec",
+        "-e",
+        "CHECKPOINT=/outputs/final-cloud-acceptance/results/smoke/teacher-preset-g1-wbt-terrain-ref-pelvis-locomotion/PHP-research/20261010_040954-teacher-preset-g1-wbt-terrain-ref-pelvis-locomotion-locomotion/model_00001.pt",
+        "-e",
+        "REGISTRY=file:///data/assets/motions-locomotion",
+        "-e",
+        "LOGGER=tensorboard",
+        "-e",
+        "WANDB_MODE=disabled",
+        "-e",
+        "NUM_ENVS=16",
+        "-e",
+        "MAX_EVAL_STEPS=100",
+        "php-parkour-research",
+        "bash",
+        "scripts/research/eval_quality.sh",
+        "teacher",
+        "/outputs/preset-reload/teacher-preset-g1-wbt-terrain-ref-pelvis-locomotion/quality.json",
+        "--training.headless",
+        "True",
+        "--logger.video.interval",
+        "1",
+        "--logger.video.upload-to-wandb",
+        "False"
+      ],
+      "files": {
+        "pt": {
+          "host_path": "outputs/research/final-cloud-acceptance/results/smoke/teacher-preset-g1-wbt-terrain-ref-pelvis-locomotion/PHP-research/20261010_040954-teacher-preset-g1-wbt-terrain-ref-pelvis-locomotion-locomotion/model_00001.pt",
+          "bytes": 10345087,
+          "sha256": "aa17c4ce7d660d1d895c5965914b83a3e8141684aaf96718151f46ed22496f40"
+        },
+        "onnx": {
+          "host_path": "outputs/research/final-cloud-acceptance/results/smoke/teacher-preset-g1-wbt-terrain-ref-pelvis-locomotion/PHP-research/20261010_040954-teacher-preset-g1-wbt-terrain-ref-pelvis-locomotion-locomotion/model_00001.onnx",
+          "bytes": 20143116,
+          "sha256": "303f9579970d67c25d7274f6888180fb4f20d151fb334ae1b19bad9b35dc55d1"
+        },
+        "config": {
+          "host_path": "outputs/research/final-cloud-acceptance/results/smoke/teacher-preset-g1-wbt-terrain-ref-pelvis-locomotion/PHP-research/20261010_040954-teacher-preset-g1-wbt-terrain-ref-pelvis-locomotion-locomotion/holosoma_config.yaml",
+          "bytes": 31012,
+          "sha256": "7593b35df2e3610038735c02640f35c1f1a58457f0ba97372fd4bdf30912cbc3"
+        }
+      }
+    }
+  ],
+  "constraints": [
+    "Do not execute GPU reload until 629 releases local GPU.",
+    "Fresh output per case; preserve failures.",
+    "Read actual ONNX/PT actor input dimensions; no-heightscan inputs160, reference inputs449.",
+    "Use saved checkpoint experiment config via native eval loader; no full ablation retraining required."
+  ]
+}

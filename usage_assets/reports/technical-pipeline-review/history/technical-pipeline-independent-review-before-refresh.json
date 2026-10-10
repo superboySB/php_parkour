@@ -1,0 +1,1863 @@
+{
+  "schema_version": 1,
+  "created_at_utc": "2026-10-10T07:29:12.991071+00:00",
+  "document": "technical_pipeline.md",
+  "document_sha256": "a2933ee0c69d1dad52e9cb357f575329aeed1882b7f36c94963af2651c6ed56c",
+  "document_lines": 580,
+  "method": "Read-only source and published-evidence review, host standard-library link/SHA verification. No source/document edits, package installation, GPU, DDS, simulator, cloud or training run. Existing upstream provenance audit was checked; no fresh claim about original MoCap provenance is introduced.",
+  "verdict": "No required algorithm/source-fact correction or unqualified physical-hardware completion claim found. User-requested technical subjects are covered. One optional current-evidence refresh is recorded.",
+  "required_corrections": [],
+  "coverage": [
+    {
+      "topic": "Teacher RL state/observations",
+      "document_lines": [
+        188,
+        221
+      ],
+      "verdict": "covered; sorted term order, actor449/critic575 and six preset variants/noise are explicit",
+      "sources": [
+        "wbt_training/config_values/terrain.py:112-195",
+        "thirdparty/holosoma/src/holosoma/holosoma/config_values/wbt/g1/observation.py:57-116",
+        "thirdparty/holosoma/src/holosoma/holosoma/managers/observation/manager.py:130-171"
+      ]
+    },
+    {
+      "topic": "Actions/control/physics",
+      "document_lines": [
+        223,
+        245
+      ],
+      "verdict": "covered; Gaussian mean29, positional residual/scale, runtime default-bias and 200Hz/50Hz timing are distinguished",
+      "sources": [
+        "wbt_training/config_values/experiment.py:82-117",
+        "wbt_training/config_values/robot_config.py",
+        "thirdparty/holosoma/src/holosoma/holosoma/managers/action/terms/joint_control.py"
+      ]
+    },
+    {
+      "topic": "Reward/termination/PPO loss",
+      "document_lines": [
+        247,
+        294
+      ],
+      "verdict": "covered; nine reward terms, dt, BadTracking, GAE, clipped actor/value loss and entropy agree with native implementation",
+      "sources": [
+        "wbt_training/config_values/terrain.py:290-351",
+        "thirdparty/holosoma/src/holosoma/holosoma/config_values/wbt/g1/reward.py",
+        "thirdparty/holosoma/src/holosoma/holosoma/agents/ppo/ppo.py:452-472,565-611"
+      ]
+    },
+    {
+      "topic": "Student inputs/labels/BC/PPO/gate",
+      "document_lines": [
+        296,
+        383
+      ],
+      "verdict": "covered; depth/current-state inputs, expert routing, deterministic label origin, zero-label mask differences, both objectives and noncheckpointed residual statistics are explicit",
+      "sources": [
+        "wbt_training/config_values/depth_distillation.py:50-155,216-245",
+        "wbt_training/utils/student_teacher.py:190-224",
+        "thirdparty/holosoma/src/holosoma/holosoma/agents/distillation_ppo/distillation_ppo.py:369-390,651-712",
+        "thirdparty/holosoma/src/holosoma/holosoma/agents/modules/student_teacher_modules.py:470-475",
+        "wbt_training/config_values/motion_command.py:99-258"
+      ]
+    },
+    {
+      "topic": "Nonlearning provenance/formats/labels",
+      "document_lines": [
+        44,
+        182
+      ],
+      "verdict": "covered; upstream retarget versus this run,27D normalized L2/features,inertialization/FK/IK/terrain schemas, quaternions and units, native mapping, FPS and command sources are distinguished; neither playback nor conversion is called learned policy success",
+      "sources": [
+        "usage_assets/reports/technical-audit/motion-data.json",
+        "motion_matching/motion_matching/generate_database.py:182-227",
+        "motion_matching/motion_matching/core/features.py",
+        "motion_matching/motion_matching/core/database.py",
+        "motion_matching/motion_matching/utils/tracking_format.py",
+        "wbt_training/training_runs/motion_convert.py"
+      ]
+    },
+    {
+      "topic": "GUI labels and paired files",
+      "document_lines": [
+        172,
+        180
+      ],
+      "verdict": "covered; current Tk saves paired files but still lacks vel_cmd, Viser preserves existing labels; no intent inferred from displacement",
+      "sources": [
+        "usage_assets/reports/gui-workflows/summary.md",
+        "motion_matching/motion_matching/run.py:1712",
+        "motion_matching/motion_matching/motion_visualizer.py:776"
+      ]
+    },
+    {
+      "topic": "Deployment/real2sim2real",
+      "document_lines": [
+        385,
+        520
+      ],
+      "verdict": "covered; two ONNX sessions, observation order/default metadata caveat, joint map/PD/DDS/frame/depth/SHM clocks, robot description differences, randomization and physical hardware limits are explicit",
+      "sources": [
+        "usage_assets/reports/technical-audit/real2sim2real.json",
+        "thirdparty/holosoma/src/holosoma_inference/holosoma_inference/policies/depth_distillation.py",
+        "thirdparty/holosoma/src/holosoma_inference/holosoma_inference/sdk/unitree/unitree_interface.py",
+        "thirdparty/holosoma/src/holosoma/holosoma/simulator/plugins/depth_shm_plugin.py"
+      ]
+    },
+    {
+      "topic": "Validation/completion boundaries",
+      "document_lines": [
+        522,
+        580
+      ],
+      "verdict": "covered; smoke versus official schedules, source clip IDs/warmup/boundaries, 17 versus629, threshold versus skill success, failed quality and unverified hardware remain explicit",
+      "sources": [
+        "usage_assets/reports/source-coverage-pilot/summary.md",
+        "usage_assets/reports/sim2sim-all-configs-start/summary.md",
+        "usage_assets/reports/teacher-presets-cpu/summary.md",
+        "usage_assets/reports/official-progress-0500-local/summary.md"
+      ]
+    }
+  ],
+  "recommendations": [
+    {
+      "severity": "evidence-update, not an algorithm correction",
+      "document_lines": [
+        439,
+        550,
+        567
+      ],
+      "finding": "The629 statement is explicitly a historical14:19 snapshot and therefore not false. A subsequently observed native execution_failed case is not yet mentioned in this snapshot document. DDS0.1.6 is still the correct installed/cohort version; an upstream lifecycle fix has not been validated in this cohort.",
+      "suggestion": "When refreshing this document, append a time-stamped note/link for low_speed_step:0041 and its preserved execution_failed attempt; distinguish shutdown/process failure from height/tilt/skill failure and keep the old snapshot. Do not describe629complete or SDK0.1.8 as used/verified without a new actual run.",
+      "evidence": [
+        "outputs/research/sim2sim-failure-forensics/low-speed-step-0041-attempt-0001/report.json",
+        "outputs/research/sim2sim-failure-forensics/low-speed-step-0041-attempt-0001/evidence-manifest.json"
+      ]
+    }
+  ],
+  "local_links": {
+    "count": 129,
+    "missing": [],
+    "invalid_line_fragments": [],
+    "records": [
+      {
+        "line": 3,
+        "target": "note.md",
+        "exists": true
+      },
+      {
+        "line": 3,
+        "target": "usage.md",
+        "exists": true
+      },
+      {
+        "line": 58,
+        "target": "usage_assets/reports/motion-conversion.json",
+        "exists": true
+      },
+      {
+        "line": 58,
+        "target": "motion_matching/motion_matching/utils/tracking_format.py",
+        "exists": true
+      },
+      {
+        "line": 58,
+        "target": "wbt_training/training_runs/motion_convert.py",
+        "exists": true
+      },
+      {
+        "line": 58,
+        "target": "wbt_training/config_values/robot_config.py",
+        "exists": true
+      },
+      {
+        "line": 87,
+        "target": "motion_matching/motion_matching/generate_database.py#L182",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 88,
+        "target": "thirdparty/holosoma/src/holosoma_retargeting/holosoma_retargeting/src/interaction_mesh_retargeter.py#L65",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 90,
+        "target": "thirdparty/holosoma/src/holosoma_retargeting/holosoma_retargeting/examples/robot_retarget.py#L499",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 92,
+        "target": "motion_matching/motion_matching/generate_database.py#L231",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 105,
+        "target": "motion_matching/motion_matching/core/database.py#L105",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 119,
+        "target": "motion_matching/motion_matching/core/features.py#L194",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 121,
+        "target": "motion_matching/motion_matching/core/features.py#L148",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 123,
+        "target": "motion_matching/motion_matching/run.py#L571",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 123,
+        "target": "motion_matching/motion_matching/core/database.py#L292",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 131,
+        "target": "motion_matching/motion_matching/utils/animation_state.py#L55",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 132,
+        "target": "motion_matching/motion_matching/run.py#L888",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 133,
+        "target": "motion_matching/motion_matching/kinematics/quat.py#L236",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 134,
+        "target": "motion_matching/motion_matching/run.py#L628",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 135,
+        "target": "motion_matching/motion_matching/utils/data_utils.py#L256",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 136,
+        "target": "wbt_training/utils/obstacle_helpers.py#L228",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 136,
+        "target": "wbt_training/config_values/depth_distillation.py#L122",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 142,
+        "target": "motion_matching/motion_matching/utils/tracking_format.py#L82",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 152,
+        "target": "wbt_training/training_runs/motion_convert.py#L69",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 152,
+        "target": "wbt_training/config_values/robot_config.py#L12",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 154,
+        "target": "wbt_training/training_runs/motion_convert.py#L44",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 154,
+        "target": "thirdparty/holosoma/src/holosoma/holosoma/managers/command/terms/wbt.py#L124",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 156,
+        "target": "thirdparty/holosoma/src/holosoma/holosoma/managers/command/terms/wbt.py#L1000",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 166,
+        "target": "motion_matching/motion_matching/run.py#L1440",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 168,
+        "target": "motion_matching/motion_matching/io/terrain_io.py#L213",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 168,
+        "target": "wbt_training/utils/obstacle_helpers.py#L61",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 170,
+        "target": "wbt_training/utils/obstacle_helpers.py#L148",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 174,
+        "target": "motion_matching/motion_matching/scenarios/builtin.py#L6",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 174,
+        "target": "motion_matching/motion_matching/run.py#L1179",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 176,
+        "target": "motion_matching/motion_matching/run.py#L1712",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 176,
+        "target": "motion_matching/motion_matching/motion_visualizer.py#L776",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 176,
+        "target": "usage_assets/reports/gui-workflows/summary.md",
+        "exists": true
+      },
+      {
+        "line": 178,
+        "target": "wbt_training/utils/registry.py#L60",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 178,
+        "target": "wbt_training/utils/multi_motion_helpers.py#L26",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 180,
+        "target": "usage_assets/reports/motion-matching.json",
+        "exists": true
+      },
+      {
+        "line": 180,
+        "target": "usage_assets/reports/motion-workflows.json",
+        "exists": true
+      },
+      {
+        "line": 206,
+        "target": "usage_assets/reports/teacher-presets-cpu/summary.md",
+        "exists": true
+      },
+      {
+        "line": 221,
+        "target": "wbt_training/config_values/terrain.py#L112",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 221,
+        "target": "thirdparty/holosoma/src/holosoma/holosoma/managers/observation/manager.py#L130",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 221,
+        "target": "thirdparty/holosoma/src/holosoma/holosoma/managers/observation/terms/wbt.py",
+        "exists": true
+      },
+      {
+        "line": 221,
+        "target": "thirdparty/holosoma/src/holosoma/holosoma/simulator/isaacsim/isaacsim.py#L464",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 245,
+        "target": "thirdparty/holosoma/src/holosoma/holosoma/managers/action/terms/joint_control.py#L15",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 245,
+        "target": "wbt_training/config_values/robot_config.py",
+        "exists": true
+      },
+      {
+        "line": 245,
+        "target": "thirdparty/holosoma/src/holosoma/holosoma/config_values/simulator.py#L36",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 267,
+        "target": "wbt_training/config_values/terrain.py#L290",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 267,
+        "target": "thirdparty/holosoma/src/holosoma/holosoma/config_values/wbt/g1/reward.py",
+        "exists": true
+      },
+      {
+        "line": 267,
+        "target": "thirdparty/holosoma/src/holosoma/holosoma/managers/reward/terms/wbt.py#L32",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 267,
+        "target": "thirdparty/holosoma/src/holosoma/holosoma/managers/reward/manager.py#L126",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 267,
+        "target": "thirdparty/holosoma/src/holosoma/holosoma/managers/termination/terms/wbt.py#L59",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 294,
+        "target": "thirdparty/holosoma/src/holosoma/holosoma/agents/ppo/ppo.py#L387",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 294,
+        "target": "wbt_training/config_values/experiment.py#L81",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 315,
+        "target": "usage_assets/reports/depth-gui/summary.md",
+        "exists": true
+      },
+      {
+        "line": 321,
+        "target": "wbt_training/config_values/depth_distillation.py#L50",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 321,
+        "target": "thirdparty/holosoma/src/holosoma/holosoma/managers/observation/terms/depth.py#L202",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 321,
+        "target": "thirdparty/holosoma/src/holosoma/holosoma/sensors/warp/camera_config/d435i_depth_config.py",
+        "exists": true
+      },
+      {
+        "line": 321,
+        "target": "thirdparty/holosoma/src/holosoma/holosoma/agents/modules/depth_backbone.py#L50",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 335,
+        "target": "wbt_training/utils/student_teacher.py#L63",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 335,
+        "target": "wbt_training/config_values/motion_command.py#L339",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 335,
+        "target": "wbt_training/config_values/curriculum.py#L97",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 347,
+        "target": "wbt_training/config_values/experiment.py#L253",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 347,
+        "target": "thirdparty/holosoma/src/holosoma/holosoma/agents/distillation/distillation.py#L267",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 367,
+        "target": "thirdparty/holosoma/src/holosoma/holosoma/agents/distillation_ppo/distillation_ppo.py#L369",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 367,
+        "target": "thirdparty/holosoma/src/holosoma/holosoma/agents/modules/student_teacher_modules.py#L470",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 367,
+        "target": "wbt_training/utils/student_teacher.py#L190",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 383,
+        "target": "wbt_training/config_values/depth_distillation.py#L216",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 383,
+        "target": "wbt_training/config_values/motion_command.py#L99",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 383,
+        "target": "thirdparty/holosoma/src/holosoma/holosoma/agents/distillation_ppo/distillation_ppo.py#L849",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 383,
+        "target": "thirdparty/holosoma/src/holosoma/holosoma/envs/base_task/base_task.py#L217",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 387,
+        "target": "thirdparty/holosoma/src/holosoma/holosoma/utils/inference_helpers.py#L151",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 387,
+        "target": "usage_assets/reports/technical-audit/teacher-export-contract.json",
+        "exists": true
+      },
+      {
+        "line": 391,
+        "target": "usage_assets/reports/technical-audit/deployment-cpu-inspection.json",
+        "exists": true
+      },
+      {
+        "line": 400,
+        "target": "wbt_training/utils/exporter.py#L69",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 400,
+        "target": "thirdparty/holosoma/src/holosoma_inference/holosoma_inference/policies/depth_distillation.py#L189",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 416,
+        "target": "wbt_training/config_values/depth_distillation.py#L50",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 416,
+        "target": "thirdparty/holosoma/src/holosoma/holosoma/managers/observation/manager.py#L159",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 416,
+        "target": "thirdparty/holosoma/src/holosoma_inference/holosoma_inference/config/config_values/observation.py#L177",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 425,
+        "target": "thirdparty/holosoma/src/holosoma_inference/holosoma_inference/policies/depth_distillation.py#L256",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 437,
+        "target": "wbt_training/config_values/robot_config.py#L118",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 437,
+        "target": "thirdparty/holosoma/src/holosoma_inference/holosoma_inference/config/config_values/robot.py#L237",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 437,
+        "target": "thirdparty/holosoma/src/holosoma/holosoma/bridge/base/basic_sdk2py_bridge.py#L104",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 441,
+        "target": "thirdparty/holosoma/src/holosoma_inference/holosoma_inference/sdk/unitree/unitree_interface.py#L26",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 445,
+        "target": "usage_assets/reports/technical-audit/motion-data.json",
+        "exists": true
+      },
+      {
+        "line": 451,
+        "target": "wbt_training/config_values/experiment.py#L100",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 451,
+        "target": "thirdparty/holosoma/src/holosoma/holosoma/simulator/isaacsim/isaacsim.py#L346",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 451,
+        "target": "run_php_sim.sh#L32",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 451,
+        "target": "usage_assets/reports/technical-audit/asset-description-inspection.json",
+        "exists": true
+      },
+      {
+        "line": 461,
+        "target": "wbt_training/training_runs/motion_convert.py#L87",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 461,
+        "target": "thirdparty/holosoma/src/holosoma/holosoma/simulator/mujoco/mujoco.py#L1102",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 467,
+        "target": "thirdparty/holosoma/src/holosoma_inference/holosoma_inference/sdk/unitree/unitree_interface.py#L45",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 475,
+        "target": "thirdparty/holosoma/src/holosoma/holosoma/sensors/warp/camera_config/d435i_depth_config.py#L16",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 481,
+        "target": "thirdparty/holosoma/src/holosoma/holosoma/config_types/plugin.py#L402",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 481,
+        "target": "thirdparty/holosoma/src/holosoma_inference/holosoma_inference/sensors/depth_shm.py#L88",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 489,
+        "target": "thirdparty/holosoma/src/holosoma/holosoma/config_values/simulator.py#L36",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 489,
+        "target": "scripts/research/sim2sim.py#L200",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 489,
+        "target": "wbt_training/config_values/depth_distillation.py#L124",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 506,
+        "target": "wbt_training/config_values/terrain.py#L200",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 506,
+        "target": "thirdparty/holosoma/src/holosoma/holosoma/managers/randomization/terms/locomotion.py#L299",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 510,
+        "target": "thirdparty/holosoma/src/holosoma/holosoma/config_types/experiment.py#L213",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 510,
+        "target": "scripts/research/eval_quality.sh#L24",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 510,
+        "target": "usage_assets/reports/official-pilot-quality/actual-eval-config.yaml#L247",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 520,
+        "target": "run_php_sim.sh#L32",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 520,
+        "target": "run_php_inference.sh#L59",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 520,
+        "target": "thirdparty/holosoma/src/holosoma_inference/holosoma_inference/policies/depth_distillation.py#L158",
+        "exists": true,
+        "line_fragment_in_range": true
+      },
+      {
+        "line": 535,
+        "target": "usage_assets/reports/technical-audit/checkpoint-schema.json",
+        "exists": true
+      },
+      {
+        "line": 553,
+        "target": "usage_assets/reports/official-pilot-local-quality/summary.md",
+        "exists": true
+      },
+      {
+        "line": 553,
+        "target": "usage_assets/reports/official-progress-0500-local/summary.md",
+        "exists": true
+      },
+      {
+        "line": 555,
+        "target": "scripts/research/eval_source_coverage.py",
+        "exists": true
+      },
+      {
+        "line": 557,
+        "target": "scripts/research/posttrain_coverage.py",
+        "exists": true
+      },
+      {
+        "line": 557,
+        "target": "usage_assets/reports/posttrain-monitor/summary.md",
+        "exists": true
+      },
+      {
+        "line": 559,
+        "target": "usage_assets/reports/posttrain-monitor-deployment/summary.md",
+        "exists": true
+      },
+      {
+        "line": 561,
+        "target": "usage_assets/reports/source-coverage-pilot/summary.md",
+        "exists": true
+      },
+      {
+        "line": 563,
+        "target": "usage.md#8-全量测试同步与结果来源",
+        "exists": true
+      },
+      {
+        "line": 567,
+        "target": "usage_assets/reports/sim2sim-all-configs-start/summary.md",
+        "exists": true
+      },
+      {
+        "line": 569,
+        "target": "usage_assets/reports/sim2sim-configuration-vs-mesh.json",
+        "exists": true
+      },
+      {
+        "line": 575,
+        "target": "usage_assets/reports/technical-audit/learning.json",
+        "exists": true
+      },
+      {
+        "line": 575,
+        "target": "usage_assets/reports/technical-audit/resolved-defaults.json",
+        "exists": true
+      },
+      {
+        "line": 576,
+        "target": "usage_assets/reports/technical-audit/motion-data.json",
+        "exists": true
+      },
+      {
+        "line": 576,
+        "target": "usage_assets/reports/technical-audit/motion-data-specimens.json",
+        "exists": true
+      },
+      {
+        "line": 577,
+        "target": "usage_assets/reports/technical-audit/real2sim2real.json",
+        "exists": true
+      },
+      {
+        "line": 577,
+        "target": "usage_assets/reports/technical-audit/deployment-cpu-inspection.json",
+        "exists": true
+      },
+      {
+        "line": 577,
+        "target": "usage_assets/reports/technical-audit/asset-description-inspection.json",
+        "exists": true
+      },
+      {
+        "line": 578,
+        "target": "usage_assets/reports/technical-audit/evidence-manifest.json",
+        "exists": true
+      },
+      {
+        "line": 578,
+        "target": "usage.md",
+        "exists": true
+      },
+      {
+        "line": 580,
+        "target": "usage_assets/reports/gui-workflows/source-after/manifest.json",
+        "exists": true
+      }
+    ]
+  },
+  "source_integrity": {
+    "count": 115,
+    "passed": 115,
+    "current": 112,
+    "historical_gui_fallback": 3,
+    "records": [
+      {
+        "audit": "learning",
+        "path": "thirdparty/holosoma/src/holosoma/holosoma/agents/ppo/ppo.py",
+        "expected_sha256": "0899268dff8e9f8def38db6b76d2e4afd193c3d7a4ef28550217dc142d6898f6",
+        "match": true,
+        "resolved_path": "thirdparty/holosoma/src/holosoma/holosoma/agents/ppo/ppo.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "learning",
+        "path": "wbt_training/training_runs/run_terrain_teacher.sh",
+        "expected_sha256": "6d3bdd623e470bd6acc25782dba2a9a54d0bd8acff8e872449ceda5a8e41abe9",
+        "match": true,
+        "resolved_path": "wbt_training/training_runs/run_terrain_teacher.sh",
+        "resolution": "current"
+      },
+      {
+        "audit": "learning",
+        "path": "wbt_training/training_runs/run_terrain_warp_distill.sh",
+        "expected_sha256": "8d1f3a6d467d2e952766f7fa2da9582920afeb14f9f5bd682062af8ce5369f14",
+        "match": true,
+        "resolved_path": "wbt_training/training_runs/run_terrain_warp_distill.sh",
+        "resolution": "current"
+      },
+      {
+        "audit": "learning",
+        "path": "wbt_training/config_values/terrain.py",
+        "expected_sha256": "1c73a314d9016ce923843a1b54273e608c94053fefdbb727056faab718523f7f",
+        "match": true,
+        "resolved_path": "wbt_training/config_values/terrain.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "learning",
+        "path": "thirdparty/holosoma/src/holosoma/holosoma/managers/observation/manager.py",
+        "expected_sha256": "3c5ac22ba33894ce42a4ac12cb067dfd59da33b52f8fca5fc30f16586f371470",
+        "match": true,
+        "resolved_path": "thirdparty/holosoma/src/holosoma/holosoma/managers/observation/manager.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "learning",
+        "path": "thirdparty/holosoma/src/holosoma/holosoma/envs/base_task/base_task.py",
+        "expected_sha256": "4e66b8aea909c4ddc3d2cf344a33d5883c7e04edd1d0724be2b9e01b88ffe115",
+        "match": true,
+        "resolved_path": "thirdparty/holosoma/src/holosoma/holosoma/envs/base_task/base_task.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "learning",
+        "path": "thirdparty/holosoma/src/holosoma/holosoma/managers/observation/terms/wbt.py",
+        "expected_sha256": "470b1b83cd8a11f2b4920f0d8a4f87526240a35707d514afc340810023e16893",
+        "match": true,
+        "resolved_path": "thirdparty/holosoma/src/holosoma/holosoma/managers/observation/terms/wbt.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "learning",
+        "path": "thirdparty/holosoma/src/holosoma/holosoma/managers/command/terms/wbt.py",
+        "expected_sha256": "4acfdb0d14e2877a1503bfb4508c6751db97d064ff270e99bdf74f489fe45d0a",
+        "match": true,
+        "resolved_path": "thirdparty/holosoma/src/holosoma/holosoma/managers/command/terms/wbt.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "learning",
+        "path": "thirdparty/holosoma/src/holosoma/holosoma/simulator/isaacsim/isaacsim.py",
+        "expected_sha256": "2d20d063af240935260250a39aaace0028309efe4ce19c2a6915f0265be7e3a1",
+        "match": true,
+        "resolved_path": "thirdparty/holosoma/src/holosoma/holosoma/simulator/isaacsim/isaacsim.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "learning",
+        "path": "thirdparty/holosoma/src/holosoma/holosoma/config_values/wbt/g1/command.py",
+        "expected_sha256": "8bb7fc26b934124dab66de4b996ebc845677c21222d56cbb548cb59a9a3d4231",
+        "match": true,
+        "resolved_path": "thirdparty/holosoma/src/holosoma/holosoma/config_values/wbt/g1/command.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "learning",
+        "path": "thirdparty/holosoma/src/holosoma/holosoma/config_values/wbt/g1/observation.py",
+        "expected_sha256": "71c0115764595aea0ed7ad5e3e5038999dd2857296f3f3cfc0f6160ebaaab2ee",
+        "match": true,
+        "resolved_path": "thirdparty/holosoma/src/holosoma/holosoma/config_values/wbt/g1/observation.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "learning",
+        "path": "wbt_training/config_values/experiment.py",
+        "expected_sha256": "416e2d1b8720bc4bf4da98681386c6ad85bc4c3804334608820bf6cf3e20d112",
+        "match": true,
+        "resolved_path": "wbt_training/config_values/experiment.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "learning",
+        "path": "thirdparty/holosoma/src/holosoma/holosoma/config_values/algo.py",
+        "expected_sha256": "02b99b641826d6acf3013927cfdf52f0cce6572d6912ee12bcde35acd444ad28",
+        "match": true,
+        "resolved_path": "thirdparty/holosoma/src/holosoma/holosoma/config_values/algo.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "learning",
+        "path": "thirdparty/holosoma/src/holosoma/holosoma/agents/modules/ppo_modules.py",
+        "expected_sha256": "46142be3c3d700aafb13c401750918dd641eb12f266ee6adad71a341c7f9618f",
+        "match": true,
+        "resolved_path": "thirdparty/holosoma/src/holosoma/holosoma/agents/modules/ppo_modules.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "learning",
+        "path": "thirdparty/holosoma/src/holosoma/holosoma/managers/action/terms/joint_control.py",
+        "expected_sha256": "c98847e89b3f8fca281c69ea0534272a669c9a4811de550863275b99caa8803f",
+        "match": true,
+        "resolved_path": "thirdparty/holosoma/src/holosoma/holosoma/managers/action/terms/joint_control.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "learning",
+        "path": "thirdparty/holosoma/src/holosoma/holosoma/config_values/robot.py",
+        "expected_sha256": "1b05ccd2c03d5402c6949a41619551ca6aa47a2dcfe018d40eb6711a85c0a678",
+        "match": true,
+        "resolved_path": "thirdparty/holosoma/src/holosoma/holosoma/config_values/robot.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "learning",
+        "path": "thirdparty/holosoma/src/holosoma/holosoma/config_values/simulator.py",
+        "expected_sha256": "5ee77fe1b1f2704544f7bed9659510b61c7c94c5f05477e57d73199bd87b62dc",
+        "match": true,
+        "resolved_path": "thirdparty/holosoma/src/holosoma/holosoma/config_values/simulator.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "learning",
+        "path": "thirdparty/holosoma/src/holosoma_inference/holosoma_inference/config/config_types/task.py",
+        "expected_sha256": "5e37ef03c99a53f3f64c339f74a4542ec4f4550f94985341b82f2530377690c2",
+        "match": true,
+        "resolved_path": "thirdparty/holosoma/src/holosoma_inference/holosoma_inference/config/config_types/task.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "learning",
+        "path": "scripts/research/sim2sim.py",
+        "expected_sha256": "b286b1a6a9f883bc28aca3dab2256deefd4b567d1c71e2fa2f770a128c8d9879",
+        "match": true,
+        "resolved_path": "scripts/research/sim2sim.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "learning",
+        "path": "wbt_training/config_values/robot_config.py",
+        "expected_sha256": "0b1dfbc9d27c095e568255e78ef68ee0afe70314a6381ea6c4a8dd5384193c48",
+        "match": true,
+        "resolved_path": "wbt_training/config_values/robot_config.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "learning",
+        "path": "thirdparty/holosoma/src/holosoma/holosoma/managers/reward/manager.py",
+        "expected_sha256": "01c6cb683b2e66840d566af61822e0c3e3383e0ae6e7becbf7c69f271c476041",
+        "match": true,
+        "resolved_path": "thirdparty/holosoma/src/holosoma/holosoma/managers/reward/manager.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "learning",
+        "path": "thirdparty/holosoma/src/holosoma/holosoma/config_values/wbt/g1/reward.py",
+        "expected_sha256": "921dd0e1857661fa71c5af963571167001334ec8665eaa32aafe3a6f89d5e55a",
+        "match": true,
+        "resolved_path": "thirdparty/holosoma/src/holosoma/holosoma/config_values/wbt/g1/reward.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "learning",
+        "path": "thirdparty/holosoma/src/holosoma/holosoma/managers/reward/terms/wbt.py",
+        "expected_sha256": "7e6d018276c80839b0e55c612d12aad91c7733fb95fd11db61942f7344ca0a45",
+        "match": true,
+        "resolved_path": "thirdparty/holosoma/src/holosoma/holosoma/managers/reward/terms/wbt.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "learning",
+        "path": "thirdparty/holosoma/src/holosoma/holosoma/managers/termination/terms/wbt.py",
+        "expected_sha256": "366740bf315c19a184d1aa3ca21a239d23a96516e525db100b09448dabb20065",
+        "match": true,
+        "resolved_path": "thirdparty/holosoma/src/holosoma/holosoma/managers/termination/terms/wbt.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "learning",
+        "path": "thirdparty/holosoma/src/holosoma/holosoma/managers/termination/terms/common.py",
+        "expected_sha256": "11b69be9c846557a41db4671ca2cf36e27ca2072f98ad10b45d7940b59060cae",
+        "match": true,
+        "resolved_path": "thirdparty/holosoma/src/holosoma/holosoma/managers/termination/terms/common.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "learning",
+        "path": "wbt_training/config_values/depth_distillation.py",
+        "expected_sha256": "fd20b124ddf64b4815c30a862e8798150f931834f5fda79e916be0e845ff830a",
+        "match": true,
+        "resolved_path": "wbt_training/config_values/depth_distillation.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "learning",
+        "path": "wbt_training/config_values/curriculum.py",
+        "expected_sha256": "a40159e70f5ad782e9b1b49d91d3d1c36dc4967e943fe348f201658d684c275f",
+        "match": true,
+        "resolved_path": "wbt_training/config_values/curriculum.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "learning",
+        "path": "thirdparty/holosoma/src/holosoma/holosoma/envs/wbt/wbt_manager.py",
+        "expected_sha256": "5bd1b8626781773d5368a14fefb16e35e8ffdd85728bcd389d345da0fce87735",
+        "match": true,
+        "resolved_path": "thirdparty/holosoma/src/holosoma/holosoma/envs/wbt/wbt_manager.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "learning",
+        "path": "thirdparty/holosoma/src/holosoma/holosoma/agents/modules/data_utils.py",
+        "expected_sha256": "7ddf6fc9ac2cad3e2fcc614983283265242791bbcf1ec4e783fd298d9274dfab",
+        "match": true,
+        "resolved_path": "thirdparty/holosoma/src/holosoma/holosoma/agents/modules/data_utils.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "learning",
+        "path": "wbt_training/config_values/motion_command.py",
+        "expected_sha256": "e338182452f9eb26e46db4fa445b4a1ec071334f478d5fcb0a54a08ef2563607",
+        "match": true,
+        "resolved_path": "wbt_training/config_values/motion_command.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "learning",
+        "path": "thirdparty/holosoma/src/holosoma/holosoma/sensors/warp/camera_config/d435i_depth_config.py",
+        "expected_sha256": "217dfd41c6046d4c24f7ad3654810021f37232b4bf5d5de38e0ee51318959415",
+        "match": true,
+        "resolved_path": "thirdparty/holosoma/src/holosoma/holosoma/sensors/warp/camera_config/d435i_depth_config.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "learning",
+        "path": "thirdparty/holosoma/src/holosoma/holosoma/managers/observation/terms/depth.py",
+        "expected_sha256": "6d1483e1381e8ccb66aa6f23c236da2678783023a9b0f9d71af25942f133502c",
+        "match": true,
+        "resolved_path": "thirdparty/holosoma/src/holosoma/holosoma/managers/observation/terms/depth.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "learning",
+        "path": "thirdparty/holosoma/src/holosoma/holosoma/config_types/experiment.py",
+        "expected_sha256": "77a369834ac89987e7aedaafcff03a7b65e613ba137c37dc839a7e50a0e8d290",
+        "match": true,
+        "resolved_path": "thirdparty/holosoma/src/holosoma/holosoma/config_types/experiment.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "learning",
+        "path": "thirdparty/holosoma/src/holosoma/holosoma/agents/modules/depth_backbone.py",
+        "expected_sha256": "ae8d50d5b51128d8933785ba51d65338b98a24f72c6789a13ccbaf95930892c4",
+        "match": true,
+        "resolved_path": "thirdparty/holosoma/src/holosoma/holosoma/agents/modules/depth_backbone.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "learning",
+        "path": "thirdparty/holosoma/src/holosoma/holosoma/agents/modules/student_teacher_modules.py",
+        "expected_sha256": "7db02a6c8cd1c441d8d0cf0fd86958ab0b83dd52ab9cf49806d210f6ad5b8251",
+        "match": true,
+        "resolved_path": "thirdparty/holosoma/src/holosoma/holosoma/agents/modules/student_teacher_modules.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "learning",
+        "path": "wbt_training/utils/student_teacher.py",
+        "expected_sha256": "773dd44971d1b09beb76da780422c16de66cd4ac0d9cf65dfd5bf6dd27f30eff",
+        "match": true,
+        "resolved_path": "wbt_training/utils/student_teacher.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "learning",
+        "path": "wbt_training/utils/multi_motion_helpers.py",
+        "expected_sha256": "6c4e16195f645bc93712a46a8e7188773aef1d0e66715bbba163a812dce62663",
+        "match": true,
+        "resolved_path": "wbt_training/utils/multi_motion_helpers.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "learning",
+        "path": "thirdparty/holosoma/src/holosoma/holosoma/agents/distillation/rollout_storage.py",
+        "expected_sha256": "cf868947dfd8edc7a44ab8888c7699e7a924c22f5d6c48815418ad9d3322fc8e",
+        "match": true,
+        "resolved_path": "thirdparty/holosoma/src/holosoma/holosoma/agents/distillation/rollout_storage.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "learning",
+        "path": "thirdparty/holosoma/src/holosoma/holosoma/agents/distillation_ppo/rollout_storage.py",
+        "expected_sha256": "074bb8bc3b624b7cad4ff99e5500375e61357c6ad59bd3fa4d8091264d7b8888",
+        "match": true,
+        "resolved_path": "thirdparty/holosoma/src/holosoma/holosoma/agents/distillation_ppo/rollout_storage.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "learning",
+        "path": "thirdparty/holosoma/src/holosoma/holosoma/agents/distillation/distillation.py",
+        "expected_sha256": "f8a01a1f5c7058ec2f832ea483a484b8dccb1e793f0cb9a8112c9acf8650495a",
+        "match": true,
+        "resolved_path": "thirdparty/holosoma/src/holosoma/holosoma/agents/distillation/distillation.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "learning",
+        "path": "thirdparty/holosoma/src/holosoma/holosoma/agents/distillation_ppo/distillation_ppo.py",
+        "expected_sha256": "cb90b00a16b8749358610f48a87ff5c12ab22326f8a72c81595966c9cb01f8f9",
+        "match": true,
+        "resolved_path": "thirdparty/holosoma/src/holosoma/holosoma/agents/distillation_ppo/distillation_ppo.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "learning",
+        "path": "thirdparty/holosoma/src/holosoma/holosoma/config_types/algo.py",
+        "expected_sha256": "d64e36ce3ca3a5ab17702a3575a4a9a8886e92f931d113217ead4775b4dcb33e",
+        "match": true,
+        "resolved_path": "thirdparty/holosoma/src/holosoma/holosoma/config_types/algo.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "learning",
+        "path": "thirdparty/holosoma/src/holosoma/holosoma/agents/base_algo/base_algo.py",
+        "expected_sha256": "b29d389ca908a8860545f1ada578c5fe408387aade0b21e51234c20470c39a5a",
+        "match": true,
+        "resolved_path": "thirdparty/holosoma/src/holosoma/holosoma/agents/base_algo/base_algo.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "learning",
+        "path": "wbt_training/utils/exporter.py",
+        "expected_sha256": "ae6fa7776bbe3c97c9c70921bd5f0a15137189e6603bd09b0a5d9b73fdf2045e",
+        "match": true,
+        "resolved_path": "wbt_training/utils/exporter.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "motion-data",
+        "path": "README.md",
+        "expected_sha256": "6a82740cce4702d8ef9867f413b38d60c8e7dace95ffbe7762e57ad87e90e7ab",
+        "match": true,
+        "resolved_path": "README.md",
+        "resolution": "current"
+      },
+      {
+        "audit": "motion-data",
+        "path": "motion_matching/motion_matching/core/database.py",
+        "expected_sha256": "8bf552146ec658ec6e1666bc65fe1539f4d7a96d1af97e94d43d43d17bc86144",
+        "match": true,
+        "resolved_path": "motion_matching/motion_matching/core/database.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "motion-data",
+        "path": "motion_matching/motion_matching/core/features.py",
+        "expected_sha256": "cd526cadcd96f85e78233bfd53017d1ac3386e6d54cff5abaa060e1eb7683063",
+        "match": true,
+        "resolved_path": "motion_matching/motion_matching/core/features.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "motion-data",
+        "path": "motion_matching/motion_matching/generate_database.py",
+        "expected_sha256": "495c7e8a74320164ca99d845663477d4260a89fa8d7c66d1c3d78cf295ddb871",
+        "match": true,
+        "resolved_path": "motion_matching/motion_matching/generate_database.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "motion-data",
+        "path": "motion_matching/motion_matching/io/motion_io.py",
+        "expected_sha256": "5e2ab9c805f3a530a8ced132b78b5039cb9f8cea8e900308afb5294dbfd7a2be",
+        "match": true,
+        "resolved_path": "usage_assets/reports/gui-workflows/source-before/motion_matching/motion_matching/io/motion_io.py",
+        "resolution": "source-before"
+      },
+      {
+        "audit": "motion-data",
+        "path": "motion_matching/motion_matching/io/terrain_io.py",
+        "expected_sha256": "86fdf6f7f8576afec46163a59a4aa5d66559f6e3e389b663c1000a701334a3b6",
+        "match": true,
+        "resolved_path": "motion_matching/motion_matching/io/terrain_io.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "motion-data",
+        "path": "motion_matching/motion_matching/kinematics/quat.py",
+        "expected_sha256": "f0c2238e7ee409a3edf112f40b4d632364518a4de432cdcba0ab10748518a811",
+        "match": true,
+        "resolved_path": "motion_matching/motion_matching/kinematics/quat.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "motion-data",
+        "path": "motion_matching/motion_matching/metadata/constants.py",
+        "expected_sha256": "27e784b05b4596a638ab28d902c42a0c8f4dcb31dc2458872559f2e550ab6ce5",
+        "match": true,
+        "resolved_path": "motion_matching/motion_matching/metadata/constants.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "motion-data",
+        "path": "motion_matching/motion_matching/motion_visualizer.py",
+        "expected_sha256": "20ea84be41121267184f9683d4e17ee853f84e7637151139804731e158193273",
+        "match": true,
+        "resolved_path": "usage_assets/reports/gui-workflows/source-before/motion_matching/motion_matching/motion_visualizer.py",
+        "resolution": "source-before"
+      },
+      {
+        "audit": "motion-data",
+        "path": "motion_matching/motion_matching/run.py",
+        "expected_sha256": "cf527c4d68684848858094e5d38e1bf789222b820261aa00e1b0f4a75581d78d",
+        "match": true,
+        "resolved_path": "usage_assets/reports/gui-workflows/source-before/motion_matching/motion_matching/run.py",
+        "resolution": "source-before"
+      },
+      {
+        "audit": "motion-data",
+        "path": "motion_matching/motion_matching/scenarios/builtin.py",
+        "expected_sha256": "a1a25539c90d74c32ed6243c25f909c5e48d4e9dae72c14f43d7d5a8b5bfaff1",
+        "match": true,
+        "resolved_path": "motion_matching/motion_matching/scenarios/builtin.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "motion-data",
+        "path": "motion_matching/motion_matching/scenarios/skill_registry.py",
+        "expected_sha256": "90b2ffa22247f3e7f9180960da22031283ba5a5f2dd2fb1743440828618545eb",
+        "match": true,
+        "resolved_path": "motion_matching/motion_matching/scenarios/skill_registry.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "motion-data",
+        "path": "motion_matching/motion_matching/utils/animation_state.py",
+        "expected_sha256": "48bfb067e9011afa0131b520f258a506ca97fab9f53c40523b05e11d3f9c99e9",
+        "match": true,
+        "resolved_path": "motion_matching/motion_matching/utils/animation_state.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "motion-data",
+        "path": "motion_matching/motion_matching/utils/data_utils.py",
+        "expected_sha256": "71b54096bedcf355c2f80be35e3eeaa369c90d1a8037c6d71edc8bbe64c27d83",
+        "match": true,
+        "resolved_path": "motion_matching/motion_matching/utils/data_utils.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "motion-data",
+        "path": "motion_matching/motion_matching/utils/tracking_format.py",
+        "expected_sha256": "b20437ca7b9912a99d7164c3c1685c8015e789556df95fdb1a047cd91483f995",
+        "match": true,
+        "resolved_path": "motion_matching/motion_matching/utils/tracking_format.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "motion-data",
+        "path": "release-assets.json",
+        "expected_sha256": "3bea66903fc05034b354519764c6997ce0900dbd32716b0356330b44ee8cc72c",
+        "match": true,
+        "resolved_path": "release-assets.json",
+        "resolution": "current"
+      },
+      {
+        "audit": "motion-data",
+        "path": "thirdparty/holosoma/src/holosoma/holosoma/managers/command/terms/wbt.py",
+        "expected_sha256": "4acfdb0d14e2877a1503bfb4508c6751db97d064ff270e99bdf74f489fe45d0a",
+        "match": true,
+        "resolved_path": "thirdparty/holosoma/src/holosoma/holosoma/managers/command/terms/wbt.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "motion-data",
+        "path": "thirdparty/holosoma/src/holosoma_retargeting/README.md",
+        "expected_sha256": "326c5a8f2316ccd183bac8116af65142ee65b397bb6c5a59596eb7b9c02acd40",
+        "match": true,
+        "resolved_path": "thirdparty/holosoma/src/holosoma_retargeting/README.md",
+        "resolution": "current"
+      },
+      {
+        "audit": "motion-data",
+        "path": "thirdparty/holosoma/src/holosoma_retargeting/holosoma_retargeting/examples/robot_retarget.py",
+        "expected_sha256": "aa51b4d99c47f13c4cb11d6c9de9a82e57dfff02acbd3397c59957cc403a67bc",
+        "match": true,
+        "resolved_path": "thirdparty/holosoma/src/holosoma_retargeting/holosoma_retargeting/examples/robot_retarget.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "motion-data",
+        "path": "thirdparty/holosoma/src/holosoma_retargeting/holosoma_retargeting/src/interaction_mesh_retargeter.py",
+        "expected_sha256": "587d7f5b2b9aeecdd74a84ae5a4d590a6f2dcc01f935b9219858549987e9adea",
+        "match": true,
+        "resolved_path": "thirdparty/holosoma/src/holosoma_retargeting/holosoma_retargeting/src/interaction_mesh_retargeter.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "motion-data",
+        "path": "usage_assets/reports/asset-verification.json",
+        "expected_sha256": "346b2ba19f24f4adcaa64178d297ad96bf99eeb78c436802ec3d6307230719e7",
+        "match": true,
+        "resolved_path": "usage_assets/reports/asset-verification.json",
+        "resolution": "current"
+      },
+      {
+        "audit": "motion-data",
+        "path": "usage_assets/reports/motion-conversion.json",
+        "expected_sha256": "6c1eb69efb45445b99ba989d55bdac75f9aeb70b772161a584424371b994a82f",
+        "match": true,
+        "resolved_path": "usage_assets/reports/motion-conversion.json",
+        "resolution": "current"
+      },
+      {
+        "audit": "motion-data",
+        "path": "usage_assets/reports/motion-matching.json",
+        "expected_sha256": "ed413845f4b82156964e11ad6ee3faca30e3c0b10dbfdc295a8284f9ee3308ed",
+        "match": true,
+        "resolved_path": "usage_assets/reports/motion-matching.json",
+        "resolution": "current"
+      },
+      {
+        "audit": "motion-data",
+        "path": "usage_assets/reports/motion-workflows.json",
+        "expected_sha256": "ecaba36f90ec17faeb150712fde63099f42095752b47f357f8a7715418c32da9",
+        "match": true,
+        "resolved_path": "usage_assets/reports/motion-workflows.json",
+        "resolution": "current"
+      },
+      {
+        "audit": "motion-data",
+        "path": "wbt_training/config_values/depth_distillation.py",
+        "expected_sha256": "fd20b124ddf64b4815c30a862e8798150f931834f5fda79e916be0e845ff830a",
+        "match": true,
+        "resolved_path": "wbt_training/config_values/depth_distillation.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "motion-data",
+        "path": "wbt_training/config_values/motion_command.py",
+        "expected_sha256": "e338182452f9eb26e46db4fa445b4a1ec071334f478d5fcb0a54a08ef2563607",
+        "match": true,
+        "resolved_path": "wbt_training/config_values/motion_command.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "motion-data",
+        "path": "wbt_training/config_values/robot_config.py",
+        "expected_sha256": "0b1dfbc9d27c095e568255e78ef68ee0afe70314a6381ea6c4a8dd5384193c48",
+        "match": true,
+        "resolved_path": "wbt_training/config_values/robot_config.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "motion-data",
+        "path": "wbt_training/config_values/terrain.py",
+        "expected_sha256": "1c73a314d9016ce923843a1b54273e608c94053fefdbb727056faab718523f7f",
+        "match": true,
+        "resolved_path": "wbt_training/config_values/terrain.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "motion-data",
+        "path": "wbt_training/training_runs/motion_convert.py",
+        "expected_sha256": "fa60ada9a0bc9b00bf17df0d97e411c0d0e17c84d3e1e6fd296feabbf0dd6cf5",
+        "match": true,
+        "resolved_path": "wbt_training/training_runs/motion_convert.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "motion-data",
+        "path": "wbt_training/utils/multi_motion_helpers.py",
+        "expected_sha256": "6c4e16195f645bc93712a46a8e7188773aef1d0e66715bbba163a812dce62663",
+        "match": true,
+        "resolved_path": "wbt_training/utils/multi_motion_helpers.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "motion-data",
+        "path": "wbt_training/utils/obstacle_helpers.py",
+        "expected_sha256": "08716396ab009571d91dc4973ee3fa1a83b1f7b9b05e9a2db41ac048a7e1189a",
+        "match": true,
+        "resolved_path": "wbt_training/utils/obstacle_helpers.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "motion-data",
+        "path": "wbt_training/utils/registry.py",
+        "expected_sha256": "7e87eeddf6b421b1fa4bf68891ede78dbfc778edeb38f4d5aa4940dca7ede88a",
+        "match": true,
+        "resolved_path": "wbt_training/utils/registry.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "real2sim2real",
+        "path": "README.md",
+        "expected_sha256": "6a82740cce4702d8ef9867f413b38d60c8e7dace95ffbe7762e57ad87e90e7ab",
+        "match": true,
+        "resolved_path": "README.md",
+        "resolution": "current"
+      },
+      {
+        "audit": "real2sim2real",
+        "path": "run_php_inference.sh",
+        "expected_sha256": "c90e010800a9395b5b2aaa3913d5f48c5907d5c2a9a1dfa8da9aef1359669c58",
+        "match": true,
+        "resolved_path": "run_php_inference.sh",
+        "resolution": "current"
+      },
+      {
+        "audit": "real2sim2real",
+        "path": "run_php_sim.sh",
+        "expected_sha256": "03a497ce5a22e9fa2e86820d40c4e2faa8d0fc0e89ca583e92b821f53c36af58",
+        "match": true,
+        "resolved_path": "run_php_sim.sh",
+        "resolution": "current"
+      },
+      {
+        "audit": "real2sim2real",
+        "path": "scripts/research/eval_quality.sh",
+        "expected_sha256": "8434b82dba5acc79deb785b9c6e7ba057879c0300b95dd1f30d6036bc6b1d7c5",
+        "match": true,
+        "resolved_path": "scripts/research/eval_quality.sh",
+        "resolution": "current"
+      },
+      {
+        "audit": "real2sim2real",
+        "path": "thirdparty/holosoma/src/holosoma/holosoma/bridge/base/basic_sdk2py_bridge.py",
+        "expected_sha256": "8453b7a734cc20776ee3514935a730cc0ff12bdbdff56b9f9047fe635512dab6",
+        "match": true,
+        "resolved_path": "thirdparty/holosoma/src/holosoma/holosoma/bridge/base/basic_sdk2py_bridge.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "real2sim2real",
+        "path": "thirdparty/holosoma/src/holosoma/holosoma/bridge/unitree/unitree_sdk2py_bridge.py",
+        "expected_sha256": "249020b197a4d365d2174e057ff54f7e23ed48f9dc6dcf647338a2b3d17a1166",
+        "match": true,
+        "resolved_path": "thirdparty/holosoma/src/holosoma/holosoma/bridge/unitree/unitree_sdk2py_bridge.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "real2sim2real",
+        "path": "thirdparty/holosoma/src/holosoma/holosoma/config_types/experiment.py",
+        "expected_sha256": "77a369834ac89987e7aedaafcff03a7b65e613ba137c37dc839a7e50a0e8d290",
+        "match": true,
+        "resolved_path": "thirdparty/holosoma/src/holosoma/holosoma/config_types/experiment.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "real2sim2real",
+        "path": "thirdparty/holosoma/src/holosoma/holosoma/config_types/plugin.py",
+        "expected_sha256": "e8c4609e689a3b2229e9d34d5b549dd16244c194936f8885c17da34cddba951c",
+        "match": true,
+        "resolved_path": "thirdparty/holosoma/src/holosoma/holosoma/config_types/plugin.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "real2sim2real",
+        "path": "thirdparty/holosoma/src/holosoma/holosoma/config_values/simulator.py",
+        "expected_sha256": "5ee77fe1b1f2704544f7bed9659510b61c7c94c5f05477e57d73199bd87b62dc",
+        "match": true,
+        "resolved_path": "thirdparty/holosoma/src/holosoma/holosoma/config_values/simulator.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "real2sim2real",
+        "path": "thirdparty/holosoma/src/holosoma/holosoma/config_values/wbt/g1/sensor.py",
+        "expected_sha256": "14d0f8e4fd4a8353db6a2275c0a608f868a6661d7d8640f31b0d66cc788873b4",
+        "match": true,
+        "resolved_path": "thirdparty/holosoma/src/holosoma/holosoma/config_values/wbt/g1/sensor.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "real2sim2real",
+        "path": "thirdparty/holosoma/src/holosoma/holosoma/data/robots/g1/g1_29dof_halfspherehand.xml",
+        "expected_sha256": "3d936f6c49deccb906f04f9d02ba109424b7a19a477674d1d3d3ced5b17d1ea0",
+        "match": true,
+        "resolved_path": "thirdparty/holosoma/src/holosoma/holosoma/data/robots/g1/g1_29dof_halfspherehand.xml",
+        "resolution": "current"
+      },
+      {
+        "audit": "real2sim2real",
+        "path": "thirdparty/holosoma/src/holosoma/holosoma/envs/base_task/base_task.py",
+        "expected_sha256": "4e66b8aea909c4ddc3d2cf344a33d5883c7e04edd1d0724be2b9e01b88ffe115",
+        "match": true,
+        "resolved_path": "thirdparty/holosoma/src/holosoma/holosoma/envs/base_task/base_task.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "real2sim2real",
+        "path": "thirdparty/holosoma/src/holosoma/holosoma/managers/command/terms/wbt.py",
+        "expected_sha256": "4acfdb0d14e2877a1503bfb4508c6751db97d064ff270e99bdf74f489fe45d0a",
+        "match": true,
+        "resolved_path": "thirdparty/holosoma/src/holosoma/holosoma/managers/command/terms/wbt.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "real2sim2real",
+        "path": "thirdparty/holosoma/src/holosoma/holosoma/managers/observation/manager.py",
+        "expected_sha256": "3c5ac22ba33894ce42a4ac12cb067dfd59da33b52f8fca5fc30f16586f371470",
+        "match": true,
+        "resolved_path": "thirdparty/holosoma/src/holosoma/holosoma/managers/observation/manager.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "real2sim2real",
+        "path": "thirdparty/holosoma/src/holosoma/holosoma/managers/observation/terms/depth.py",
+        "expected_sha256": "6d1483e1381e8ccb66aa6f23c236da2678783023a9b0f9d71af25942f133502c",
+        "match": true,
+        "resolved_path": "thirdparty/holosoma/src/holosoma/holosoma/managers/observation/terms/depth.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "real2sim2real",
+        "path": "thirdparty/holosoma/src/holosoma/holosoma/sensors/warp/camera_config/d435i_depth_config.py",
+        "expected_sha256": "217dfd41c6046d4c24f7ad3654810021f37232b4bf5d5de38e0ee51318959415",
+        "match": true,
+        "resolved_path": "thirdparty/holosoma/src/holosoma/holosoma/sensors/warp/camera_config/d435i_depth_config.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "real2sim2real",
+        "path": "thirdparty/holosoma/src/holosoma/holosoma/sensors/warp/camera_kernels_warp.py",
+        "expected_sha256": "4c698aae6266b2d5f9c5b604c78073e5259c367c73f4fd3ab9e65ba2d77b1ef2",
+        "match": true,
+        "resolved_path": "thirdparty/holosoma/src/holosoma/holosoma/sensors/warp/camera_kernels_warp.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "real2sim2real",
+        "path": "thirdparty/holosoma/src/holosoma/holosoma/sensors/warp/camera_sensor.py",
+        "expected_sha256": "92c84461c81a5173f7310ca4bb705a6bb313ba45330b45f0f22adf0bf1886bed",
+        "match": true,
+        "resolved_path": "thirdparty/holosoma/src/holosoma/holosoma/sensors/warp/camera_sensor.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "real2sim2real",
+        "path": "thirdparty/holosoma/src/holosoma/holosoma/simulator/isaacsim/isaacsim.py",
+        "expected_sha256": "2d20d063af240935260250a39aaace0028309efe4ce19c2a6915f0265be7e3a1",
+        "match": true,
+        "resolved_path": "thirdparty/holosoma/src/holosoma/holosoma/simulator/isaacsim/isaacsim.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "real2sim2real",
+        "path": "thirdparty/holosoma/src/holosoma/holosoma/simulator/mujoco/mujoco.py",
+        "expected_sha256": "7281feb29e34d7fd0cdf3d2f42e8f358e111eae8deeafcc6a6a22a69482a1049",
+        "match": true,
+        "resolved_path": "thirdparty/holosoma/src/holosoma/holosoma/simulator/mujoco/mujoco.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "real2sim2real",
+        "path": "thirdparty/holosoma/src/holosoma/holosoma/simulator/plugins/depth_shm_plugin.py",
+        "expected_sha256": "c148ae88d0909a50390750f01f9924e8d6ff0daf76ddfcd9a63002a845af4a81",
+        "match": true,
+        "resolved_path": "thirdparty/holosoma/src/holosoma/holosoma/simulator/plugins/depth_shm_plugin.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "real2sim2real",
+        "path": "thirdparty/holosoma/src/holosoma/holosoma/simulator/shared/simulator_bridge.py",
+        "expected_sha256": "b1fdde6e0939c24a490a7168400cc7b1d216f73482931b7e72c6ee10fd9e72d5",
+        "match": true,
+        "resolved_path": "thirdparty/holosoma/src/holosoma/holosoma/simulator/shared/simulator_bridge.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "real2sim2real",
+        "path": "thirdparty/holosoma/src/holosoma/holosoma/utils/common.py",
+        "expected_sha256": "25d65373bfe84529775a014533e791daecd677032b11f96f0685fe68424115c5",
+        "match": true,
+        "resolved_path": "thirdparty/holosoma/src/holosoma/holosoma/utils/common.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "real2sim2real",
+        "path": "thirdparty/holosoma/src/holosoma_inference/docs/workflows/real-robot-wbt.md",
+        "expected_sha256": "d494b73f234358ad85745b8528228c8f451edaab510af61db6b5f20ca2bb5758",
+        "match": true,
+        "resolved_path": "thirdparty/holosoma/src/holosoma_inference/docs/workflows/real-robot-wbt.md",
+        "resolution": "current"
+      },
+      {
+        "audit": "real2sim2real",
+        "path": "thirdparty/holosoma/src/holosoma_inference/holosoma_inference/config/config_types/task.py",
+        "expected_sha256": "5e37ef03c99a53f3f64c339f74a4542ec4f4550f94985341b82f2530377690c2",
+        "match": true,
+        "resolved_path": "thirdparty/holosoma/src/holosoma_inference/holosoma_inference/config/config_types/task.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "real2sim2real",
+        "path": "thirdparty/holosoma/src/holosoma_inference/holosoma_inference/config/config_values/observation.py",
+        "expected_sha256": "58dd5660591b0eaaa86262170ff222ca39099c1570212e066823cedf84f067d3",
+        "match": true,
+        "resolved_path": "thirdparty/holosoma/src/holosoma_inference/holosoma_inference/config/config_values/observation.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "real2sim2real",
+        "path": "thirdparty/holosoma/src/holosoma_inference/holosoma_inference/config/config_values/robot.py",
+        "expected_sha256": "c4926b695d54a92162813b4fc9e6ace10a00cfa2c6e8d93bb11db7e2b04944fa",
+        "match": true,
+        "resolved_path": "thirdparty/holosoma/src/holosoma_inference/holosoma_inference/config/config_values/robot.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "real2sim2real",
+        "path": "thirdparty/holosoma/src/holosoma_inference/holosoma_inference/policies/base.py",
+        "expected_sha256": "616b862d3e4467cff2f3717d56605563050c5211d1fdebc1aa5baa70d67dcd5b",
+        "match": true,
+        "resolved_path": "thirdparty/holosoma/src/holosoma_inference/holosoma_inference/policies/base.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "real2sim2real",
+        "path": "thirdparty/holosoma/src/holosoma_inference/holosoma_inference/policies/depth_distillation.py",
+        "expected_sha256": "ed512b487fc4c74adcf69eec0a98c0e54be84f08dedf97ead6a826fb3270f3e5",
+        "match": true,
+        "resolved_path": "thirdparty/holosoma/src/holosoma_inference/holosoma_inference/policies/depth_distillation.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "real2sim2real",
+        "path": "thirdparty/holosoma/src/holosoma_inference/holosoma_inference/sdk/unitree/unitree_interface.py",
+        "expected_sha256": "c97e8eda01f7b2ebe79b8f8449f13b0d6044fbf9f089902498d97c46667b6446",
+        "match": true,
+        "resolved_path": "thirdparty/holosoma/src/holosoma_inference/holosoma_inference/sdk/unitree/unitree_interface.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "real2sim2real",
+        "path": "thirdparty/holosoma/src/holosoma_inference/holosoma_inference/sensors/depth_heartbeat.py",
+        "expected_sha256": "54f933d9b30abfe95c4417a81973b94172332197e2611e06a5af9fe748b2f8ad",
+        "match": true,
+        "resolved_path": "thirdparty/holosoma/src/holosoma_inference/holosoma_inference/sensors/depth_heartbeat.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "real2sim2real",
+        "path": "thirdparty/holosoma/src/holosoma_inference/holosoma_inference/sensors/depth_shm.py",
+        "expected_sha256": "13855a7e38331a1caaa52ef099d5c18cb589ac5c4aeaa316f3bedaa1312db8ed",
+        "match": true,
+        "resolved_path": "thirdparty/holosoma/src/holosoma_inference/holosoma_inference/sensors/depth_shm.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "real2sim2real",
+        "path": "usage_assets/reports/official-pilot-quality/actual-eval-config.yaml",
+        "expected_sha256": "0842ce0f15d99d8b1111031a3aa792415af8143e81c2f6c31e0e8f9c1bffd6e8",
+        "match": true,
+        "resolved_path": "usage_assets/reports/official-pilot-quality/actual-eval-config.yaml",
+        "resolution": "current"
+      },
+      {
+        "audit": "real2sim2real",
+        "path": "wbt_training/config_values/depth_distillation.py",
+        "expected_sha256": "fd20b124ddf64b4815c30a862e8798150f931834f5fda79e916be0e845ff830a",
+        "match": true,
+        "resolved_path": "wbt_training/config_values/depth_distillation.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "real2sim2real",
+        "path": "wbt_training/config_values/experiment.py",
+        "expected_sha256": "416e2d1b8720bc4bf4da98681386c6ad85bc4c3804334608820bf6cf3e20d112",
+        "match": true,
+        "resolved_path": "wbt_training/config_values/experiment.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "real2sim2real",
+        "path": "wbt_training/config_values/robot_config.py",
+        "expected_sha256": "0b1dfbc9d27c095e568255e78ef68ee0afe70314a6381ea6c4a8dd5384193c48",
+        "match": true,
+        "resolved_path": "wbt_training/config_values/robot_config.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "real2sim2real",
+        "path": "wbt_training/config_values/terrain.py",
+        "expected_sha256": "1c73a314d9016ce923843a1b54273e608c94053fefdbb727056faab718523f7f",
+        "match": true,
+        "resolved_path": "wbt_training/config_values/terrain.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "real2sim2real",
+        "path": "wbt_training/training_runs/motion_convert.py",
+        "expected_sha256": "fa60ada9a0bc9b00bf17df0d97e411c0d0e17c84d3e1e6fd296feabbf0dd6cf5",
+        "match": true,
+        "resolved_path": "wbt_training/training_runs/motion_convert.py",
+        "resolution": "current"
+      },
+      {
+        "audit": "real2sim2real",
+        "path": "wbt_training/utils/exporter.py",
+        "expected_sha256": "ae6fa7776bbe3c97c9c70921bd5f0a15137189e6603bd09b0a5d9b73fdf2045e",
+        "match": true,
+        "resolved_path": "wbt_training/utils/exporter.py",
+        "resolution": "current"
+      }
+    ]
+  },
+  "gui_source_before_manifest": {
+    "path": "usage_assets/reports/gui-workflows/source-before/manifest.json",
+    "sha256": "d7aa35e1749820e5bef609ca3bd5bfa0a7051d4b5815db629838fd5250b72475",
+    "count": 7,
+    "passed": 7,
+    "records": [
+      {
+        "path": "motion_matching/motion_matching/motion_visualizer.py",
+        "bytes": 37866,
+        "sha256": "20ea84be41121267184f9683d4e17ee853f84e7637151139804731e158193273",
+        "match": true
+      },
+      {
+        "path": "motion_matching/motion_matching/run.py",
+        "bytes": 94463,
+        "sha256": "cf527c4d68684848858094e5d38e1bf789222b820261aa00e1b0f4a75581d78d",
+        "match": true
+      },
+      {
+        "path": "motion_matching/motion_matching/io/motion_io.py",
+        "bytes": 3513,
+        "sha256": "5e2ab9c805f3a530a8ced132b78b5039cb9f8cea8e900308afb5294dbfd7a2be",
+        "match": true
+      },
+      {
+        "path": "motion_matching/motion_matching/ui/gui_controller.py",
+        "bytes": 13221,
+        "sha256": "36a87837288b479e4de8e7c24447486a2c32b3b9af3bd6b50d224f57e9f85cac",
+        "match": true
+      },
+      {
+        "path": "motion_matching/tests/test_public_workflows.py",
+        "bytes": 5010,
+        "sha256": "a801a39c9859da9221aac3e4876b13336870f04065699ed22c14de4d6ead705a",
+        "match": true
+      },
+      {
+        "path": "scripts/research/viser_browser.py",
+        "bytes": 11330,
+        "sha256": "8a9edb9a34db22d8f29dc180088abfb94849c6c290a4e6b0336fdbf8b23efb06",
+        "match": true
+      },
+      {
+        "path": "scripts/research/verify_keyboard_gui.py",
+        "bytes": 9646,
+        "sha256": "e602b8134dbf95d26f3b1c215d405ca26dda7611815c2f547b5c54bacd7db0f0",
+        "match": true
+      }
+    ]
+  },
+  "limits": [
+    "Static/source/evidence review does not replace the unfinished seven official training schedules, Isaac native reload/dynamics or physical G1 calibration/testing.",
+    "Historical raw evidence was not rewritten, and current running629matrix was not used to claim a terminal count.",
+    "The original MoCap to each released PHP clip mapping remains unavailable; the document correctly describes it as an upstream provenance gap."
+  ]
+}
