@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "utc": "2026-10-10T09:34:30.666755+00:00",
+  "argv": [
+    "docker",
+    "create",
+    "--name",
+    "php-quality-retry-fix-cpu-20261010T0941",
+    "--runtime",
+    "runc",
+    "--network",
+    "none",
+    "--read-only",
+    "--tmpfs",
+    "/tmp:rw,exec,size=2g",
+    "-e",
+    "CUDA_VISIBLE_DEVICES=",
+    "-e",
+    "NVIDIA_VISIBLE_DEVICES=none",
+    "-e",
+    "PYTHONDONTWRITEBYTECODE=1",
+    "-e",
+    "OMP_NUM_THREADS=1",
+    "--mount",
+    "type=bind,src=/home/dzp/projects/php_parkour,dst=/workspace/php_parkour,readonly",
+    "--mount",
+    "type=bind,src=/home/dzp/projects/php_parkour/outputs/research/eval-quality-retry-integration-fix,dst=/audit",
+    "-w",
+    "/workspace/php_parkour",
+    "--entrypoint",
+    "/opt/php/bin/train-python",
+    "sha256:2be18521015b2a84ef7a4442af9a94ef041a19feb9ce385ae15424b1dc158d8f",
+    "-m",
+    "pytest",
+    "-q",
+    "tests/test_research_training.py",
+    "tests/test_eval_quality.py",
+    "--junitxml=/audit/tests.xml"
+  ],
+  "container_id": "933fc2291c34572c28fd08eb24cafa2728faf0b833b5198f13a11d8af5c4d503",
+  "source_sha_before": {
+    "scripts/research/train_pipeline.py": "29ec49da5495b3eada535b93d2eb42010936b39e6497eaf0f4359102017de0cc",
+    "tests/test_research_training.py": "480fd64cf1197967b15c51d92ddeae2c4e609b5a2c49a21f62ae3ab0a7cc1b17",
+    "scripts/research/eval_quality.py": "5cbb7f483f2aacbf83633b45ccd99872be796a7322e7846d042de1f550bee17e"
+  },
+  "gpu_requested": false,
+  "returncode": 0,
+  "source_sha_after": {
+    "scripts/research/train_pipeline.py": "29ec49da5495b3eada535b93d2eb42010936b39e6497eaf0f4359102017de0cc",
+    "tests/test_research_training.py": "480fd64cf1197967b15c51d92ddeae2c4e609b5a2c49a21f62ae3ab0a7cc1b17",
+    "scripts/research/eval_quality.py": "5cbb7f483f2aacbf83633b45ccd99872be796a7322e7846d042de1f550bee17e"
+  }
+}

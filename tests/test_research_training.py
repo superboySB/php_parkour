@@ -38,7 +38,7 @@ def pipeline(monkeypatch, tmp_path):
     class FakeProcess:
         def __init__(self, command, **kwargs):
             commands.append(command)
-            output = Path(command[command.index("--logger.base-dir") + 1]) / "native-run"
+            output = Path(command[command.index("--logger.base-dir") + 1]) / f"native-run-{len(commands)}"
             output.mkdir(parents=True, exist_ok=True)
             restored = 0
             if "--training.checkpoint" in command:
@@ -53,8 +53,10 @@ def pipeline(monkeypatch, tmp_path):
                 report_path = Path(command[launcher_index + 2])
                 assert report_path.is_absolute() and report_path.name == "quality.json"
                 assert report_path.is_relative_to(tmp_path), "The mock must never write into the project root"
+                assert not report_path.exists(), "The real quality CLI requires a fresh report target"
                 source = Path(kwargs["env"]["CHECKPOINT"])
-                event = output / "events.out.tfevents.test"
+                event = report_path.parent / "tensorboard" / f"events.out.tfevents.test-{len(commands)}"
+                event.parent.mkdir(exist_ok=True)
                 event.write_bytes(b"mock event artifact; real TensorBoard parsing is tested separately")
                 steps, num_envs = int(kwargs["env"]["MAX_EVAL_STEPS"]), int(kwargs["env"]["NUM_ENVS"])
                 report_path.write_text(json.dumps({"schema_version": 1, "status": "completed", "control_steps": steps, "num_envs": num_envs,
@@ -89,6 +91,7 @@ def pipeline(monkeypatch, tmp_path):
                  "eval-student-finetune" if action == "eval-student" else "export-student-finetune")
         return json.loads((tmp_path / "official/manifests" / f"{label}.json").read_text())
 
+    run.pipeline_module = module
     return run, commands, tmp_path
 
 
@@ -377,6 +380,156 @@ def test_quality_report_rejects_structure_changes_even_if_hash_is_refreshed(pipe
     (directory / "official/manifests/eval-student-finetune.json").write_text(json.dumps(result))
     run("--checkpoint", teacher["checkpoint"], "--skip-completed", action="eval-student")
     assert len(commands) == 3
+
+
+def test_valid_evaluation_skip_does_not_archive_or_mutate(pipeline):
+    run, commands, _ = pipeline
+    teacher = run("--iterations", "2")
+    first = run("--checkpoint", teacher["checkpoint"], action="eval-student")
+    quality = Path(first["evaluation_quality_report"])
+    original = quality.read_bytes()
+    event = Path(first["evaluation_tensorboard_events"][0])
+    event_bytes = event.read_bytes()
+    skipped = run("--checkpoint", teacher["checkpoint"], "--skip-completed", action="eval-student")
+    assert len(commands) == 2 and skipped == first
+    assert quality.read_bytes() == original and event.read_bytes() == event_bytes
+    assert not (quality.parent / "quality-history").exists()
+
+
+def test_actual_eval_retry_archives_quality_and_tensorboard_bytes(pipeline):
+    run, _, directory = pipeline
+    teacher = run("--iterations", "2")
+    first = run("--checkpoint", teacher["checkpoint"], action="eval-student")
+    old_manifest = (directory / "official/manifests/eval-student-finetune.json").read_bytes()
+    quality = Path(first["evaluation_quality_report"])
+    event = Path(first["evaluation_tensorboard_events"][0])
+    originals = {str(path): path.read_bytes() for path in (quality, event)}
+    Path(first["evaluation_videos"][0]["path"]).write_bytes(b"deleted or changed video evidence")
+    retry = run("--checkpoint", teacher["checkpoint"], "--skip-completed", action="eval-student")
+    assert retry["status"] == "passed" and retry["evaluation_quality_report"] == first["evaluation_quality_report"]
+    retained = retry["previous_evaluation_evidence"]
+    receipt = Path(retained["receipt"]["path"])
+    assert hashlib.sha256(receipt.read_bytes()).hexdigest() == retained["receipt"]["sha256"]
+    for mapping in retained["files"]:
+        assert Path(mapping["retained"]["path"]).read_bytes() == originals[mapping["original"]["path"]]
+        assert mapping["original"]["sha256"] == mapping["retained"]["sha256"]
+    assert set(originals) == {mapping["original"]["path"] for mapping in retained["files"]}
+    assert not event.exists() and first["evaluation_tensorboard_events"][0] not in retry["evaluation_tensorboard_events"]
+    assert any(path.read_bytes() == old_manifest for path in (directory / "official/manifests/history").glob("*.json"))
+
+
+def test_malformed_old_quality_is_retained_without_parsing(pipeline):
+    run, _, _ = pipeline
+    teacher = run("--iterations", "2")
+    first = run("--checkpoint", teacher["checkpoint"], action="eval-student")
+    quality = Path(first["evaluation_quality_report"])
+    quality.write_bytes(b"malformed previous report; preserve these exact bytes")
+    retry = run("--checkpoint", teacher["checkpoint"], "--skip-completed", action="eval-student")
+    previous = next(item for item in retry["previous_evaluation_evidence"]["files"] if item["original"]["path"] == str(quality))
+    assert Path(previous["retained"]["path"]).read_bytes() == b"malformed previous report; preserve these exact bytes"
+    assert retry["status"] == "passed"
+
+
+def test_failed_attempt_with_report_can_retry_without_overwriting_history(pipeline):
+    run, _, directory = pipeline
+    teacher = run("--iterations", "2")
+    first = run("--checkpoint", teacher["checkpoint"], action="eval-student")
+    first["status"] = "failed"
+    manifest = directory / "official/manifests/eval-student-finetune.json"
+    manifest.write_text(json.dumps(first))
+    retry = run("--checkpoint", teacher["checkpoint"], "--skip-completed", action="eval-student")
+    assert retry["status"] == "passed" and retry["previous_evaluation_evidence"]["files"]
+
+
+def test_failed_retry_keeps_prior_history_and_new_failed_manifest(pipeline, monkeypatch):
+    run, _, directory = pipeline
+    teacher = run("--iterations", "2")
+    first = run("--checkpoint", teacher["checkpoint"], action="eval-student")
+    original = Path(first["evaluation_quality_report"]).read_bytes()
+    successful_process = run.pipeline_module.subprocess.Popen
+
+    class FailedProcess(successful_process):
+        def wait(self):
+            return 7
+
+    monkeypatch.setattr(run.pipeline_module.subprocess, "Popen", FailedProcess)
+    with pytest.raises(SystemExit) as failure:
+        run("--checkpoint", teacher["checkpoint"], action="eval-student")
+    assert failure.value.code == 7
+    result = json.loads((directory / "official/manifests/eval-student-finetune.json").read_text())
+    assert result["status"] == "failed" and result["returncode"] == 7
+    old_quality = next(item for item in result["previous_evaluation_evidence"]["files"] if Path(item["original"]["path"]).name == "quality.json")
+    assert Path(old_quality["retained"]["path"]).read_bytes() == original
+    assert Path(result["evaluation_quality_report"]).is_file()
+
+
+@pytest.fixture
+def archive_module():
+    spec = importlib.util.spec_from_file_location("evaluation_archive", ROOT / "scripts/research/train_pipeline.py")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+@pytest.mark.parametrize("fault", ["quality_symlink", "quality_directory", "quality_fifo", "tb_symlink", "tb_file", "tb_nested_symlink", "tb_fifo", "history_symlink", "history_file"])
+def test_archive_refuses_unsafe_evidence_before_moving_bytes(archive_module, tmp_path, fault):
+    stage = tmp_path / "eval"
+    stage.mkdir()
+    quality, tensorboard = stage / "quality.json", stage / "tensorboard"
+    quality.write_bytes(b"previous raw report")
+    foreign = tmp_path / "foreign"
+    foreign.write_bytes(b"must remain untouched")
+    if fault == "quality_symlink":
+        quality.unlink(); quality.symlink_to(foreign)
+    elif fault == "quality_directory":
+        quality.unlink(); quality.mkdir()
+    elif fault == "quality_fifo":
+        quality.unlink(); os.mkfifo(quality)
+    elif fault == "tb_symlink":
+        tensorboard.symlink_to(tmp_path)
+    elif fault == "tb_file":
+        tensorboard.write_bytes(b"not a directory")
+    elif fault in ("tb_nested_symlink", "tb_fifo"):
+        tensorboard.mkdir()
+        if fault == "tb_nested_symlink":
+            (tensorboard / "event").symlink_to(foreign)
+        else:
+            os.mkfifo(tensorboard / "event")
+    elif fault == "history_symlink":
+        (stage / "quality-history").symlink_to(tmp_path)
+    else:
+        (stage / "quality-history").write_bytes(b"not a directory")
+    with pytest.raises(ValueError, match="unsafe type"):
+        archive_module.archive_evaluation_evidence(stage)
+    assert foreign.read_bytes() == b"must remain untouched"
+    if fault not in ("quality_symlink", "quality_directory", "quality_fifo"):
+        assert quality.read_bytes() == b"previous raw report"
+
+
+def test_archive_retains_partial_bytes_if_second_move_fails(archive_module, tmp_path, monkeypatch):
+    stage = tmp_path / "eval"
+    stage.mkdir()
+    quality = stage / "quality.json"
+    quality.write_bytes(b"original quality bytes")
+    tensorboard = stage / "tensorboard"
+    tensorboard.mkdir()
+    (tensorboard / "event").write_bytes(b"original tensorboard bytes")
+    original_rename = Path.rename
+
+    def fail_second_move(source, destination):
+        if source == tensorboard:
+            raise OSError("simulated second move failure")
+        return original_rename(source, destination)
+
+    monkeypatch.setattr(Path, "rename", fail_second_move)
+    with pytest.raises(OSError, match="second move failure"):
+        archive_module.archive_evaluation_evidence(stage)
+    retained = next((stage / "quality-history").iterdir())
+    receipt = json.loads((retained / "archive.json").read_text())
+    assert receipt["status"] == "failed"
+    assert (retained / "quality.json").read_bytes() == b"original quality bytes"
+    assert (tensorboard / "event").read_bytes() == b"original tensorboard bytes"
+    assert not quality.exists()
 
 
 def test_successful_exit_without_target_checkpoint_is_not_success(pipeline, monkeypatch):

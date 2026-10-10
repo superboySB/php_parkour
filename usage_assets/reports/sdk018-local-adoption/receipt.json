@@ -1,0 +1,95 @@
+{
+  "status": "passed",
+  "started_utc": "2026-10-10T09:30:36.085637+00:00",
+  "commands": [
+    {
+      "argv": [
+        "docker",
+        "top",
+        "1ebbab06208baadedae8c27d645b34202e4ea6a107d7b967d716a4429c5a5020",
+        "-eo",
+        "pid,ppid,args"
+      ],
+      "returncode": 0,
+      "log": "before-processes.log"
+    },
+    {
+      "argv": [
+        "docker",
+        "tag",
+        "sha256:88254ac0b90a3056375145601d741aa3e08726e18412d201a3c7e7915a23996f",
+        "php-parkour:research-sdk016-retained"
+      ],
+      "returncode": 0,
+      "log": "retain-old-tag.log"
+    },
+    {
+      "argv": [
+        "docker",
+        "tag",
+        "sha256:2be18521015b2a84ef7a4442af9a94ef041a19feb9ce385ae15424b1dc158d8f",
+        "php-parkour:research"
+      ],
+      "returncode": 0,
+      "log": "adopt-new-tag.log"
+    },
+    {
+      "argv": [
+        "docker",
+        "compose",
+        "-f",
+        "docker/compose.yml",
+        "up",
+        "-d",
+        "--no-build",
+        "--force-recreate"
+      ],
+      "returncode": 0,
+      "log": "compose.log"
+    },
+    {
+      "argv": [
+        "docker",
+        "exec",
+        "8e66b49c0351787299da5d8ad1723529dfb76958fbdb34d589b38e7e041dd231",
+        "/opt/php/bin/train-python",
+        "scripts/research/verify_runtime.py",
+        "--require-gpu",
+        "--output",
+        "/outputs/sdk018-local-adoption-01/runtime.json"
+      ],
+      "returncode": 0,
+      "log": "doctor.log"
+    },
+    {
+      "argv": [
+        "docker",
+        "exec",
+        "-d",
+        "8e66b49c0351787299da5d8ad1723529dfb76958fbdb34d589b38e7e041dd231",
+        "/opt/php/bin/train-python",
+        "-m",
+        "tensorboard.main",
+        "--logdir",
+        "/workspace/php_parkour/usage_assets/tensorboard",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "6006",
+        "--load_fast",
+        "false"
+      ],
+      "returncode": 0,
+      "log": "restart-local-tensorboard.log"
+    }
+  ],
+  "scope": "Adopt fully verified SDK018 image for idle local default container; preserve cloud/independent native containers",
+  "old_image_id": "sha256:88254ac0b90a3056375145601d741aa3e08726e18412d201a3c7e7915a23996f",
+  "old_container_id": "1ebbab06208baadedae8c27d645b34202e4ea6a107d7b967d716a4429c5a5020",
+  "image_id": "sha256:2be18521015b2a84ef7a4442af9a94ef041a19feb9ce385ae15424b1dc158d8f",
+  "new_container_id": "8e66b49c0351787299da5d8ad1723529dfb76958fbdb34d589b38e7e041dd231",
+  "other_local_container_identities_preserved": true,
+  "original_local_tensorboard_restart_requested": true,
+  "cloud_mutations": false,
+  "finished_utc": "2026-10-10T09:30:38.844851+00:00"
+}

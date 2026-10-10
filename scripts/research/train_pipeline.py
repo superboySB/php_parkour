@@ -52,6 +52,66 @@ def fingerprint(path: Path) -> dict:
     return {"path": str(path.resolve()), "sha256": digest.hexdigest(), "bytes": path.stat().st_size}
 
 
+def archive_evaluation_evidence(stage: Path) -> dict | None:
+    """Retain prior fixed-path quality/TB bytes before an actual eval retry.
+
+    Historical JSON is never rewritten. The receipt maps its original paths to
+    retained paths, including the TensorBoard events that the next report must
+    not inherit from its sibling tensorboard directory.
+    """
+    if stage.is_symlink():
+        raise ValueError(f"Evaluation stage must not be a symlink: {stage}")
+    sources = []
+    for name, directory in (("quality.json", False), ("tensorboard", True)):
+        source = stage / name
+        if not (source.exists() or source.is_symlink()):
+            continue
+        if source.is_symlink() or not (source.is_dir() if directory else source.is_file()):
+            raise ValueError(f"Prior evaluation evidence has an unsafe type: {source}")
+        files = []
+        if directory:
+            for path in sorted(source.rglob("*")):
+                if path.is_symlink() or not (path.is_dir() or path.is_file()):
+                    raise ValueError(f"Prior TensorBoard evidence has an unsafe type: {path}")
+                if path.is_file():
+                    files.append(fingerprint(path))
+        else:
+            files.append(fingerprint(source))
+        sources.append((source, directory, files))
+    if not sources:
+        return None
+    history = stage / "quality-history"
+    if history.is_symlink() or history.exists() and not history.is_dir():
+        raise ValueError(f"Evaluation history has an unsafe type: {history}")
+    history.mkdir(exist_ok=True)
+    retained = history / str(time.time_ns())
+    retained.mkdir(exist_ok=False)
+    receipt_path = retained / "archive.json"
+    receipt = {"schema_version": 1, "status": "archiving", "created_utc": now(),
+               "original_stage": str(stage.resolve()), "files": [], "directories": [],
+               "scope": "Original bytes preserved; historical report JSON is not rewritten or revalidated."}
+    try:
+        for source, directory, originals in sources:
+            target = retained / source.name
+            source.rename(target)
+            if directory:
+                receipt["directories"].append({"original_path": str(source), "retained_path": str(target)})
+            for original in originals:
+                old_path = Path(original["path"])
+                new_path = target / old_path.relative_to(source) if directory else target
+                actual = fingerprint(new_path)
+                receipt["files"].append({"original": original, "retained": actual})
+                if original["sha256"] != actual["sha256"] or original["bytes"] != actual["bytes"]:
+                    raise ValueError(f"Prior evaluation evidence changed while archiving: {old_path}")
+        receipt["status"] = "archived"
+    except Exception as error:
+        receipt.update(status="failed", error=f"{type(error).__name__}: {error}")
+        raise
+    finally:
+        write_manifest(receipt_path, receipt)
+    return {"receipt": fingerprint(receipt_path), "files": receipt["files"], "directories": receipt["directories"]}
+
+
 def resume_provenance(settings: dict, command: list[str]) -> dict:
     """Compare the training inputs while allowing a larger iteration target.
 
@@ -309,6 +369,10 @@ def main() -> None:
             history = manifests / "history"
             history.mkdir(exist_ok=True)
             (history / f"{label}-{time.time_ns()}.json").write_bytes(manifest.read_bytes())
+        if label.startswith("eval-"):
+            previous = archive_evaluation_evidence(run_root / label)
+            if previous is not None:
+                evidence["previous_evaluation_evidence"] = previous
         evidence["status"] = "running"
         write_manifest(manifest, evidence)
         log_path = run_root / f"{label}-{time.time_ns()}.log"

@@ -548,7 +548,7 @@ startup default pose bias同时修改qtarget中心与观测`q−default`基准�
 | 正式训练 | 五教师各 20000 轮、纯学生 10000、混合学生 30000 的顺序 driver 已启动 | 截至本文快照，仍在第一教师；不能确认全部完成 |
 | 云端 PT 回传本地 | iteration 19 pilot 与正式 iteration 500 都真实加载，在 16GiB 卡运行 64env×250step | 模型传输与 Isaac 推理通路通过；两次均 `quality_verified=false` |
 | 逐原始源片段验收 | 296 对输入逐项校验、48 项 CPU 回归、3 次真实独立 Isaac 片段尝试 | teacher500为158策略步，两种student smoke各21步后失败；0片段完成，尚未跑完296源×三策略 |
-| 发布学生的物理 sim2sim | 原生 ONNX、DDS、深度 SHM、PD；平地 12 个有效 command 与 17 场景各一个 OBJ | 已有真实轨迹；14场景出现高度/倾斜事件，旧监督未证明所有worker正常退出，command02已发现漏记SIGSEGV |
+| 发布学生的物理 sim2sim | 原生 ONNX、DDS、深度 SHM、PD；平地 12 个有效 command 与 17 场景各一个 OBJ | 新SDK12command已复测24worker正常退出/12视频全解码；旧17代表场景有真实轨迹但未证明所有worker正常终态，fresh629仍待执行 |
 | 全部生成几何的物理扫描 | 旧629计划已于15:48停止；原状态279 reported completed、5执行失败、1中断、344未运行 | 已发现10份reported completed日志带SIGSEGV；旧状态不能用于完整验收，修复后须fresh计划重跑 |
 | 实体 G1 | 审计 SDK、映射与相机接口，没有本次真实机器人运行 | 未验证；论文作者的实机成绩不能记成本次结果 |
 
@@ -598,3 +598,7 @@ low-step配置41的首次attempt仍记为执行失败：推理完成JSON后约53
 IsaacLab的URDF converter会在asset_root下生成USD缓存。五个非默认教师首次重载因只读源码下的converted_rank*写入失败，原生eval捕获异常返回0但没有任何rollout报告；本轮将原始URDF/mesh按SHA复制至独立RW数据目录，再用公有asset_root参数重试，源Python仍RO。当前`eval_quality.py`在checkpoint SHA不变、正整数实际步数/环境数、finite actions/root等检查满足且生成全新quality报告后才正常退出，不能再凭父进程0认定已经仿真。[首次失败原字节](usage_assets/reports/teacher-presets-reload-ro-failure/summary.md)、[报告门卫14项CPU验证](usage_assets/reports/eval-quality-exit-guard/summary.md)。这些运行约束不改变PPO奖励、DAgger动作标签或网络输入输出。
 
 独立可写资产目录的五次重试均已生成实测报告，五份原始PT/ONNX和原始/复制的35份URDF/mesh全部SHA未变。32段实际短MP4完整解码、5份TensorBoard各17项scalar与质量报告一致；保留251次失败重置，不冒充稳定策略。新SDK0.1.8统一Docker由6cb2ae2完整构建，265版本及断网实际训练/ONNX验收通过，10.90GB完整镜像也已离线上传远端并核验，云端原训练进程未替换。[五preset复测](usage_assets/reports/teacher-preset-reload-sdk018-v3/summary.md)、[完整镜像验收](usage_assets/reports/sdk018-canonical-offline/summary.md)、[镜像传输与身份](usage_assets/reports/sdk018-canonical-upload/summary.md)。
+
+新统一SDK0.1.8镜像的12个原平地方向指令另已完成真实复测：每例400ticks/8仿真秒，全部24worker正常退出/进程组为空、24精确host线程映射、12原MP4完整解码；同一发布ONNX pair、原命令/seed/配置和默认wall373秒均保持。路径和转角按真实轨迹报告，例如连续left90指令会累积绕圈，不能把指令名解释为固定终点90度旋转。[完整逐例表与原视频](usage_assets/reports/sdk018-directions/summary.md)。本地默认容器也已实际采用新镜像；云端长训练保留原冻结版本直到完成。[接入与版本边界](usage_assets/reports/sdk018-local-adoption/summary.md)。
+
+评估重试另保存独立证据：旧quality及其同级TensorBoard先原字节归档并记录路径/SHA映射，新报告仍位于固定stage路径；有效skip不修改历史，重跑不混入旧事件。58项pipeline加14项既有exit-guard共72项目标CPU测试通过。该改动影响证据与恢复流程，不改变参考动作、教师label、reward或loss。[重试缺口实证与修复](usage_assets/reports/eval-quality-retry-integration/summary.md)。

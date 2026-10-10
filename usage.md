@@ -6,7 +6,7 @@
 
 最新纠正：北京时间15:48已有序停止旧629物理批次，原279 reported completed/5失败/1中断/344未运行均保留。旧监督遗漏最终worker退出码，已有10个reported completed及旧12指令的command02存在模拟器SIGSEGV；这些不能作为正常退出验收。修复监督与SDK后，原5个显式失败配置的新闭环全部正常退出，fresh629仍须独立执行。[新五例原生试跑](usage_assets/reports/sdk018-native-pilot/summary.md)。[停止回执](usage_assets/reports/sim2sim-cohort-halt/summary.md)、[逐日志实证](usage_assets/reports/worker-exit-completed-log-audit/report.md)。以下历史轨迹、阈值与时间快照仍保留原始范围。
 
-先看真实结果：[17 场景物理闭环视频](usage_assets/sim2sim/scenarios/playback.html)、[17 场景参考动作播放页](usage_assets/motion_matching/playback.html)、[12 指令物理闭环视频](usage_assets/sim2sim/directions.mp4)、[逐项原始报告](usage_assets/reports/)。参考动作来自生成数组，闭环录像来自公开 ONNX 策略驱动的 MuJoCo，训练录像来自实际 Isaac checkpoint。
+先看真实结果：[新SDK全部12指令的正常退出复测与逐段视频](usage_assets/reports/sdk018-directions/summary.md)、[新SDK五个历史失败配置的视频与跌倒结果](usage_assets/reports/sdk018-native-pilot/summary.md)、[17 场景参考动作播放页](usage_assets/motion_matching/playback.html)、[旧17场景物理轨迹播放页](usage_assets/sim2sim/scenarios/playback.html)、[逐项原始报告](usage_assets/reports/)。参考动作来自生成数组，闭环录像来自公开 ONNX 策略驱动的 MuJoCo，训练录像来自实际 Isaac checkpoint；旧17场景页不证明完整正常退出。
 
 在本地仓库运行下面的标准库服务后，可打开 `http://127.0.0.1:8088/sim2sim/scenarios/playback.html` 或 `http://127.0.0.1:8088/motion_matching/playback.html` 交互查看；不需要安装包。
 
@@ -332,3 +332,9 @@ CPU 测试统一在 Docker 中运行，分别保留根目录/训练和 motion ma
 ![no-heightscan实际episode中点帧](usage_assets/isaac/teacher-presets-sdk018-v3/g1-wbt-terrain-no-heightscan.png)
 
 全629新版批次已通过完整5206文件冻结核验、同镜像实际CPU入口/17场景配置预检与19项外层检查，当前仅记为准备完成；未来须有629例和1258个worker的真实正常终态及629原视频完整解码。[准备输入与新计划](usage_assets/reports/fresh629-sdk018-preparation/summary.md)。
+
+新统一镜像上的12方向指令已全部实际复测并独立核验：每例8仿真秒/400ticks，24worker退出码0且进程组最终为空，24份精确host command_writer映射、12段原MP4完整解码、3332冻结文件SHA均通过。命令0–11、seed42、平地独立重置和原配置相同，实际单例wall373秒，无120秒override；宿主总耗时248.185秒。12例均未触发存活启发式失败，但不据此声称动作质量或越障成功。[逐例路径/转角、真实截图和全部视频](usage_assets/reports/sdk018-directions/summary.md)。旧command02的异常记录仍保留，新结果不改写历史。
+
+本地默认统一容器已采用该SDK0.1.8镜像，原镜像保留；接入前确认只剩本项目TensorBoard与sleep，重建后doctor通过、TensorBoard6006的HTTP检查返回200，其它本地容器保持原身份与状态，云端没有变更。[本地接入原回执](usage_assets/reports/sdk018-local-adoption/summary.md)。
+
+评估重试已补齐与新报告门卫的集成：真正重跑前归档旧quality与其TensorBoard原字节/路径/SHA，保持最终学生回传使用的固定路径；有效skip不动文件，unsafe路径与部分移动/child失败均保留证据。实际CPU重现了旧流程的“已有报告被新门卫拒绝”，修复后58项pipeline加14项既有evalguard共72项通过，其中15项是新增回归；不包含新的GPU/策略训练。[原始复现、补丁与JUnit](usage_assets/reports/eval-quality-retry-integration/summary.md)。

@@ -33,6 +33,8 @@ flowchart LR
 
 仓库映射为 `/workspace/php_parkour`，研究产物为 `/outputs`，资产为 `/data/assets`，缓存为 `/data/cache`。镜像封存构建时的源码，可独立断网运行；日常启动挂载当前仓库，云端挂载按内容校验的源码快照。构建提交与实际挂载源码可能不同，复现时以部署记录的 `source_tree_sha256`、逐文件 manifest 和镜像 Config/RootFS 指纹共同确定版本，不能只看镜像标签。同一容器内仿真进程与推理进程共享私有 `/dev/shm`；不要给此容器启用宿主 IPC。大数据、checkpoint 和缓存不进 Git。
 
+当前本地默认`php-parkour:research`和`php-parkour-research`容器已实际采用SDK0.1.8新统一镜像`2be18521…`，doctor与恢复后的TensorBoard6006检查通过；原0.1.6镜像保留为`php-parkour:research-sdk016-retained`。云端完整新镜像也已加载为独立candidate tag，正在运行的官方训练仍保留原冻结镜像/源码直至结束。[本地接入回执](usage_assets/reports/sdk018-local-adoption/summary.md)、[远端完整包校验](usage_assets/reports/sdk018-canonical-upload/summary.md)。
+
 ## 2. 首次克隆与构建
 
 宿主只使用已有 NVIDIA 驱动、Docker/NVIDIA Container Toolkit、Git、SSH、rsync、gzip 和标准库 Python。以下命令均从仓库根目录执行，除非另有说明：
@@ -444,3 +446,5 @@ Isaac评估将URDF转换缓存写在`robot.asset.asset_root`下。源码只读�
 新的SDK0.1.8完整629批次已单独冻结3297份源码及1887份场景输入，合计5206文件SHA通过独立核验；同镜像runc/noGPU/network-none容器的all-configs计划、17场景CLI与两角色实际imports都通过，外层19项CPU检查通过。它使用独立目录和全容器残留进程门卫，保留原生默认单例wall413秒，不能resume旧批次。当前这是准备证据，实际启动与629终态另记。[完整准备记录和计划SHA](usage_assets/reports/fresh629-sdk018-preparation/summary.md)。
 
 新统一镜像已完整传输并在远端加载，10.90GB归档两端SHA和层内容一致；原训练容器及research tag保留。[实际上传回执](usage_assets/reports/sdk018-canonical-upload/summary.md)。
+
+评估`--skip-completed`核验产物失败而需要重跑时，pipeline会先把旧`quality.json`与同级`tensorboard/`按原字节移到`quality-history/<time_ns>/`，在新manifest保存路径与SHA映射，再启动固定路径的新报告。旧视频/原生日志保留；有效跳过不移动文件，异常归档或child失败不删除历史。这样既满足新报告门卫，也不把旧TensorBoard事件混进新评估。[实际CPU缺口复现、72项目标测试与修复](usage_assets/reports/eval-quality-retry-integration/summary.md)。
