@@ -106,7 +106,11 @@ def stage_source(staged: Path) -> list[dict]:
 
 
 def sync(args):
-    with tempfile.TemporaryDirectory(prefix="php-source-") as scratch:
+    # Full evidence snapshots can exceed the host's small /tmp partition.
+    # Keep the default on the workspace filesystem, honoring an explicit override.
+    scratch_root = Path(os.environ.get("TMPDIR") or ROOT / "outputs/research/cloud/source-staging")
+    scratch_root.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(prefix="php-source-", dir=scratch_root) as scratch:
         staged = Path(scratch) / "source"
         files = stage_source(staged)
         tree = hashlib.sha256(json.dumps(files, sort_keys=True).encode()).hexdigest()
