@@ -385,3 +385,15 @@ CPU 测试统一在 Docker 中运行，分别保留根目录/训练和 motion ma
 交接程序另经55项Docker CPU检查，含真实普通CPU父孙进程取消/回收，独立审查无剩余必须修正项。root于11:03:25 UTC（北京时间19:03）实际启动PID1121672，封存PGID/SID/出生ticks/boot_id及准确argv。首轮真实SSH helper exit0且session为空，waiting/16阶段阻塞，fetch/prepare/run均false，两个交付目录未建，本地Docker ID集合不变。[原始测试、预审、实际启动与首轮收据](usage_assets/reports/final-student-delivery-waiter/summary.md)。它每600秒等待，真正ready后仅一次回传、待现629/GPU正常释放再调用冻结入口；错误和partial保留，不自动重试。已有此进程，勿并发手动fetch或final58。
 
 11:00 UTC另一次实际Docker inspect/top确认云端原official driver/train与本地629 wrapper/simulator均存活；固定快照158completed/1running/470planned。同期首教师TensorBoard为step10315，所选四tag全部历史样本有限。[实际活进程和scalar快照](usage_assets/reports/final-student-delivery-waiter/active-jobs/summary.json)。这是进度证据，正式训练、629全量后验与最终模型58项验收仍未完成。
+
+### 当前629发布合同与云端默认镜像的剩余步骤
+
+独立审查确认旧发布器不能直接读取当前隔离批次：其`/outputs`与`/workspace`映射、driver格式和模块ROOT不同，而且尚未绑定新批次的5206输入冻结、1258份hostwriter映射与629次完整解码后验。[原始兼容性审查、15个固定依赖及恢复边界](usage_assets/reports/fresh629-publisher-compatibility-review/index.md)已保存；该审查仅检查兼容性，未产生完整结果页，也未把运行中的动态摘要补造成历史原件。
+
+新统一镜像已在云端加载，当前默认仍保留SDK0.1.6官方训练环境。[训练完成后接入方案及原始证据](usage_assets/reports/cloud-sdk018-postcompletion-adoption-plan/index.md)已冻结，需等official16、原生checkpoint CPU就绪、888终态及watch退出/锁释放后才保留旧容器并切换。该项目前是方案，未执行云端默认SDK0.1.8接入或其运行时验收。
+
+新版专用发布工具最终80/80 Docker CPU fixture检查与独立审查通过；原候选73/80日志和精确源码保留。11:44 UTC root在真实运行中cohort调用status/prepare/publish均exit0/waiting，未建完整页或partial、没有额外仿真、原容器身份和Docker集合不变。root初轮汇总因未开始行缺少status字段失败，原接口收据与错误保留，改正统计后在新目录完成核验。[冻结源码、最终JUnit、独立审查和两轮真实接口原件](usage_assets/reports/fresh629-publication-preparation/summary.md)。
+
+11:44:49 UTC实际Docker top仍确认原云端driver/train和本地629 wrapper/simulator活跃；固定进度279 completed/1 running/349 planned。11:34:36 UTC首教师step11255，所选奖励/loss历史值有限。这些进度摘要不代替完整终态。适配器须原生629/1258worker/1258host映射/629全片解码/5206冻结及2266输入绑定全通过才完整发布；原observer日志无损连续分块，质量及课程完成标记均false。当前尚未执行真实完整校验或生成629页。
+
+[出版包独立复核](usage_assets/reports/fresh629-publication-package-independent-review/summary.md)确认追加本链接之前的94个暂存文件与Git index逐字节一致、87项外层依赖和原内层清单匹配、42个新增/包内链接有效，README/技术说明/Holosoma身份未变，无必须修正项。此核对不重复物理验收。

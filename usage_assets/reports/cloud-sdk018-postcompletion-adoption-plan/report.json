@@ -1,0 +1,420 @@
+{
+  "schema_version": 1,
+  "status": "plan_only_no_adoption",
+  "observed_utc": "2026-10-10T11:26:24.725806+00:00",
+  "scope": "Local file/source/previous receipt read only; no SSH, Docker, GPU, daemon, network or production mutation in this audit",
+  "saved_evidence_state": {
+    "latest_used_live_snapshot_utc": "2026-10-10T11:14:07.156136+00:00",
+    "cloud_original": {
+      "container_id": "f1f079422c8a6927a11a9e4d681ac50bc3abe7db03f2e3ccdbe7e6a07d9702db",
+      "image_id": "sha256:631d9e53768a3cc65372b394d0aa266a34ee92004141a9817824001ade30e3bd",
+      "started_at": "2026-10-10T04:01:22.880471283Z",
+      "top_path": "outputs/research/official-full/live-jobs-20261010T111406Z/cloud-top.txt",
+      "top_sha256": "a60a67af1a41ac2eecfc8474918a85ddb2224d591e74afd8890264841cf7254f"
+    },
+    "local_fresh629_snapshot": {
+      "status": "running",
+      "counts": {
+        "completed": 195,
+        "running": 1,
+        "planned": 433
+      },
+      "matrix_sha256": "eb0757acba2caa313c0f263b07dc0c50d3705751ce37fd7b9d52eaf5a4cd5f5a"
+    },
+    "waiter_first_poll": {
+      "observed_utc": "2026-10-10T11:03:24.092844+00:00",
+      "status": "waiting",
+      "canonical_stage_count": 16,
+      "cpu_ready_present": false
+    },
+    "default_cloud_adoption_verified": false
+  },
+  "image_contract": {
+    "local_default_id": "sha256:2be18521015b2a84ef7a4442af9a94ef041a19feb9ce385ae15424b1dc158d8f",
+    "remote_loaded_candidate_id": "sha256:fdfb7221af88ad70236d8b40c463008677f9a622343972394efa99055ad71df3",
+    "candidate_tag": "php-parkour:research-sdk018-canonical-candidate",
+    "config_rootfs_sha256": "9dc4e5696747951769505625a96dddc5bfd3240e3ff504db7dbef4526b2d8395",
+    "archive_sha256": "03fbce4defd450f365e7654de7fef6308d390301df520562f5b0fb9e1d1f9280",
+    "archive_bytes": 10897464145,
+    "original_cloud_image_id": "sha256:631d9e53768a3cc65372b394d0aa266a34ee92004141a9817824001ade30e3bd",
+    "original_cloud_source_tree": "0093aa40fbae2bcf219d39ace222e0c4d8a71e305551939a5a1b9c0e40c683ab",
+    "monitor_source_tree": "02bc110026d8402cd6046afecb039ee40fbd918c760554ad86f7effa678f9f3c"
+  },
+  "findings": [
+    {
+      "id": "loaded_candidate_is_not_default_adoption",
+      "fact": "Upload proves complete archive equality; retained cloud defaultresearch tag and original named container still use631. Retagging alone does not change existing containers or their image IDs. New default namedcontainer is still needed."
+    },
+    {
+      "id": "upload_image_is_mutating",
+      "fact": "upload_image reads local mutable research tag and retags remote IMAGE after validation; current candidate helper changed IMAGE to a separate tag. Do not call default upload-image during preserved official/888 phases."
+    },
+    {
+      "id": "deploy_refuses_even_stopped_existing_name",
+      "fact": "deploy uses docker ps -aq exact fixed name, so a stopped old container must first be retained under another name. No --image/--name override exists. deploy has no training/watch terminal gate; those are mandatory external post-completion checks."
+    },
+    {
+      "id": "deploy_syncs_and_overwrites_operational_receipts",
+      "fact": "deploy syncs new immutable source and shared assets, verifies assets, creates pinned remote-image container, writes local/remote deployment.json. Archive original operational receipts before replacing; never overwrite official/coverage raw."
+    },
+    {
+      "id": "shared_mount_behavior",
+      "fact": "Current cloud deploy leaves source/assets/outputs/cache/logs RW and uses networkhost/private defaultIPC/16GiBshm. It is a general default environment, not the isolated ROsource/native validation cohorts. Future ROsource evaluation still needs the35file RW robot asset override; do not mix adoption with changing frozen888 or final58."
+    },
+    {
+      "id": "broad_pull_is_wrong_for_final_models",
+      "fact": "cloud.py pull rsyncs entire outputs tree and logs. Final delivery must keep using the existing fixed-SHA selectivepull waiter4ONNX+28JSON; adoption does not fetch or retrain models."
+    }
+  ],
+  "required_gates": [
+    {
+      "id": "official_schedule_terminal",
+      "require": "All16 canonical manifests passed; inspect_artifacts validates final inputs/outputs; actual7PT teacher iter19999 env4096/variants64, pure9999/fine29999 env2048/variants3; orderedteacher SHA and registry provenance; actual CPU-ready7 scientific/config/finite receipt bound to selection. Final driver marker last nonempty line; no native driver/train/eval/export process; original official lock available. Reuse frozen02bc functions; no host Torch/NumPy."
+    },
+    {
+      "id": "888_terminal_verified",
+      "require": "Existing monitor-status and summary completed, exactly3x296 unique first attempts with same selection; frozen verify_finished_batch validates all raw/artifact SHA/native reports, CPU-ready and three unfiltered plans; CPU and GPU coverage containers stopped with matchingexit0. execution_failed is terminal evidence but requires separate failure review; never reinterpret as passed or restart training to force readiness."
+    },
+    {
+      "id": "monitor_and_mutex_quiescent",
+      "require": "Exact old watch PID4074213/start702550493 has exited (PID reuse is not signalled); no matching coverage native children/other monitor; acquire .posttrain-coverage.lock and official-acceptance.lock in a persistent operator lease. Recheck readonly state before first mutation. Keep original container/source/image unchanged until these gates pass."
+    },
+    {
+      "id": "image_and_archives_retained",
+      "require": "Remote candidate immutableID fdfb + current local immutableID2be freshly reproduce9dc4 Config/RootFS. Existing full archive is already loaded/verified; no new build/download needed. Preserve631 tag and exact oldCID/source0093 plus monitor source02bc, official/coverage outputs and provenance; no prune/rm."
+    },
+    {
+      "id": "new_default_parity",
+      "require": "Defaultresearch remote tag and new fixed-name container both use accepted SDK018 contents. Newdoctor passed plus explicit train/inference SDK0.1.8, cuda_available=true, cuda_devices=1, same train/motion/inference Python+library versions as local reference; actual selected physicalUUID matches Docker visibility. Doctor passed alone does not enforce SDK version or device_count1. Source manifests/loadedpackagepaths and all7releaseassets verified; maintain distinct image baked6cb and mounted source SHA."
+    }
+  ],
+  "future_candidate_commands": [
+    {
+      "id": "post_completion_readonly_remote_state",
+      "argv": [
+        "ssh",
+        "-p",
+        "22",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "PasswordAuthentication=no",
+        "tencent-231",
+        "docker inspect --type container f1f079422c8a6927a11a9e4d681ac50bc3abe7db03f2e3ccdbe7e6a07d9702db"
+      ],
+      "phase": "future only, after completion gates"
+    },
+    {
+      "id": "post_completion_candidate_fingerprint_input",
+      "argv": [
+        "ssh",
+        "-p",
+        "22",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "PasswordAuthentication=no",
+        "tencent-231",
+        "docker image inspect sha256:fdfb7221af88ad70236d8b40c463008677f9a622343972394efa99055ad71df3"
+      ],
+      "require": "Recompute Config/RootFS fingerprint=9dc4; immutable remote ID and local research2be fingerprint exact"
+    },
+    {
+      "id": "operator_held_remote_lease",
+      "argv": [
+        "ssh",
+        "-tt",
+        "-p",
+        "22",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "PasswordAuthentication=no",
+        "tencent-231",
+        "flock -n /diff/dzp_is_sb/php-parkour-research/outputs/.posttrain-coverage.lock flock -n /diff/dzp_is_sb/php-parkour-research/outputs/official-full/official-acceptance.lock bash --noprofile --norc"
+      ],
+      "phase": "future explicit operator session; hold both existing locks through adoption and doctor, no driver restart"
+    },
+    {
+      "id": "retain_original_image_tag",
+      "argv": [
+        "ssh",
+        "-p",
+        "22",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "PasswordAuthentication=no",
+        "tencent-231",
+        "docker tag sha256:631d9e53768a3cc65372b394d0aa266a34ee92004141a9817824001ade30e3bd php-parkour:research-sdk016-retained"
+      ],
+      "phase": "future mutation, only while held lease and exact identity verified"
+    },
+    {
+      "id": "stop_exact_own_completed_container",
+      "argv": [
+        "ssh",
+        "-p",
+        "22",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "PasswordAuthentication=no",
+        "tencent-231",
+        "docker stop --time 20 f1f079422c8a6927a11a9e4d681ac50bc3abe7db03f2e3ccdbe7e6a07d9702db"
+      ],
+      "require": "Before stop, exactCID/image/StartedAt/labels/mounts and only sleep/TensorBoard; no driver/train/eval/export/native worker"
+    },
+    {
+      "id": "retain_original_container_identity",
+      "argv": [
+        "ssh",
+        "-p",
+        "22",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "PasswordAuthentication=no",
+        "tencent-231",
+        "docker rename f1f079422c8a6927a11a9e4d681ac50bc3abe7db03f2e3ccdbe7e6a07d9702db php-parkour-cloud-research-sdk016-official-retained-01"
+      ],
+      "require": "Exact oldCID stopped; fresh retained name absent; never rm oldCID or its image/source/output"
+    },
+    {
+      "id": "promote_already_verified_new_default_tag",
+      "argv": [
+        "ssh",
+        "-p",
+        "22",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "PasswordAuthentication=no",
+        "tencent-231",
+        "docker tag sha256:fdfb7221af88ad70236d8b40c463008677f9a622343972394efa99055ad71df3 php-parkour:research"
+      ],
+      "require": "Fresh readonly image fingerprint matches9dc4; old research tag and CID already retained"
+    },
+    {
+      "id": "host_default_image_guard",
+      "argv": [
+        "docker",
+        "image",
+        "inspect",
+        "php-parkour:research"
+      ],
+      "require": "local ID2be and Config/RootFS9dc4 before and after deploy; no concurrent build/tag"
+    },
+    {
+      "id": "create_new_default_cloud_container",
+      "argv": [
+        "python3",
+        "scripts/research/cloud.py",
+        "--host",
+        "tencent-231",
+        "--remote-root",
+        "/diff/dzp_is_sb/php-parkour-research",
+        "deploy"
+      ],
+      "require": "Archive old local/remote deployment, image-transfer and asset-verification reports byteexact first; fixed name absent; returned image fingerprint9dc4 and already_present true expected"
+    },
+    {
+      "id": "new_default_doctor",
+      "argv": [
+        "python3",
+        "scripts/research/cloud.py",
+        "exec",
+        "/opt/php/bin/train-python",
+        "scripts/research/verify_runtime.py",
+        "--require-gpu",
+        "--output",
+        "/outputs/cloud-sdk018-default-adoption-01/runtime.json"
+      ],
+      "require": "New own defaultCID only; fresh report; imports only, no simulation/training"
+    },
+    {
+      "id": "post_adoption_inspect",
+      "argv": [
+        "ssh",
+        "-p",
+        "22",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "PasswordAuthentication=no",
+        "tencent-231",
+        "docker inspect --type container php-parkour-cloud-research"
+      ],
+      "require": "newCID != retained oldCID; image=fdfb immutableID; selectedUUID DeviceRequest/onecuda:0; source label+mount=verified new sync snapshot; intended mounts, old and other container identities unchanged"
+    }
+  ],
+  "minimum_receipt_fields": [
+    "UTC and exact original/newCID, imageID+Config/RootFS fingerprints, StartedAt/PID, sorted mount records, labels, GPUUUID mapping",
+    "official16/7PT/CPU-ready/888/monitor completion identities and zero-live-child/held-lock observations",
+    "source sync returned64SHA+Githead+allfileSHAs, assetrelease verification report, three-runtime doctor SHA",
+    "old/new tags, retainedCID name, archive before/after operational receipts, all other container identity preservation",
+    "actual doctor library/SDK/count comparison; defaultadoption status separate from historical training/skillquality"
+  ],
+  "failure_policy": "Any missing/inconsistent completion/provenance, active process, occupied GPU, changed source/tag/fingerprint or failed doctor stops adoption for manual review. Keep original image/container/source and raw evidence. No restart of official driver, no implicit watch re-arm, no automatic migration of existing coverage/native plans, no automatic rollback restart. New unhealthycontainer may be stopped only after its exact own identity is verified.",
+  "native_validation_boundary": "Existing localSDK018 offline/natives prove their recorded scope. This audit and futuredoctor alone do not prove new remoteSDK018 Isaac training or DDS/MuJoCo execution. No such run is prescribed by this minimal default adoption.",
+  "source_refs": [
+    {
+      "path": "scripts/research/cloud.py",
+      "sha256": "548b688bd1e9f45b61cb018394b88bb12df037226717e12dee2bc20e8ea19c76",
+      "bytes": 15258,
+      "lines": [
+        27,
+        28,
+        108,
+        146,
+        154,
+        211,
+        217,
+        226,
+        230,
+        240,
+        263,
+        289,
+        294
+      ]
+    },
+    {
+      "path": "scripts/research/verify_runtime.py",
+      "sha256": "8828e80182006ee21e8146116aca15d4940674a2bb30c66d07953cf2c7a19bc3",
+      "bytes": 3285,
+      "lines": [
+        12,
+        45,
+        63
+      ]
+    },
+    {
+      "path": "scripts/research/docker.sh",
+      "sha256": "2913e46093ef3442901c99554ca34404a5ebbe2938256a489d31a32a648cf5a1",
+      "bytes": 1171,
+      "lines": [
+        17
+      ]
+    },
+    {
+      "path": "scripts/research/select_idle_gpu.py",
+      "sha256": "43166a33564ffee27d1d3e3b681bb3e93ff88d11d4a0f4b81182d8d02f6a55e1",
+      "bytes": 2849,
+      "lines": [
+        22,
+        38
+      ]
+    },
+    {
+      "path": "scripts/research/posttrain_coverage.py",
+      "sha256": "58b8978cb24d8a194133e6344c1fa415632413d83c92b18a21ebcc3b75ed5dfc",
+      "bytes": 51911,
+      "lines": [
+        36,
+        40,
+        41,
+        108,
+        217,
+        236,
+        283,
+        390,
+        675,
+        728,
+        749
+      ]
+    },
+    {
+      "path": "scripts/research/run_official_acceptance.sh",
+      "sha256": "f2c0eb73772f311487df3e2ccb5b674f34df943abe74a5b41d0e1e6c7b0b0360",
+      "bytes": 1313,
+      "lines": [
+        7,
+        12,
+        19,
+        25
+      ]
+    },
+    {
+      "path": "docker/compose.yml",
+      "sha256": "b83521a5193657615ec27dfd85f54ad66e7ec519f034512266431ca676b20cac",
+      "bytes": 1308,
+      "lines": [
+        4,
+        27
+      ]
+    },
+    {
+      "path": "scripts/research/verify_assets.py",
+      "sha256": "31485d4a8698ec28f139ec9fbc11778e855798b1156f8e1ccb37d996e71fdf44",
+      "bytes": 2723,
+      "lines": [
+        1,
+        16,
+        37
+      ]
+    }
+  ],
+  "evidence_refs": [
+    {
+      "path": "usage_assets/reports/sdk018-canonical-upload/independent-upload-verification.json",
+      "sha256": "6cb4f9cdff11b96b855e2a4677bcd9824c559855e17e67eb2bf5d211f68919c2",
+      "bytes": 1102
+    },
+    {
+      "path": "usage_assets/reports/sdk018-canonical-upload/remote-new-image-inspect.json",
+      "sha256": "d89193315fba6f15e963954af716fecf021aecb7d9da3b06e2a71b55c7352959",
+      "bytes": 6746
+    },
+    {
+      "path": "usage_assets/reports/sdk018-canonical-upload/publication.json",
+      "sha256": "8675ff0c611afc42ba33e7dfd324fbbc64feb833676f1ef30504f78f73e6bf33",
+      "bytes": 3465
+    },
+    {
+      "path": "usage_assets/reports/sdk018-canonical-upload/receipt.json",
+      "sha256": "6b49fa84f2128d3aa107a396f30f04a5ea10dc062e2bbb68c5a4c9b6705e74cb",
+      "bytes": 549
+    },
+    {
+      "path": "usage_assets/reports/sdk018-canonical-upload/postcheck-independent.json",
+      "sha256": "46aa6d8441d33f348fcc77a2957f9f3c080aaf0bb49471f1afad6282b4d66ace",
+      "bytes": 778
+    },
+    {
+      "path": "usage_assets/reports/sdk018-local-adoption/receipt.json",
+      "sha256": "f95edfe6f4100320fd25171215df7ca97c4160c2b84d5e8d41f544bf15dc3ef0",
+      "bytes": 2651
+    },
+    {
+      "path": "usage_assets/reports/sdk018-local-adoption/runtime.json",
+      "sha256": "2293a9c5255b126592446385e776c3d28372411ef2fc643d0e5cae2a95345148",
+      "bytes": 3502
+    },
+    {
+      "path": "usage_assets/reports/training-cloud-final/deployment.json",
+      "sha256": "44872292ecf7ccbb67dca1b48a82ef4b8957330380bfc8bd0c2d91bb672f140d",
+      "bytes": 3191
+    },
+    {
+      "path": "outputs/research/official-full/handoff-after-c362775-before-final-waiter.json",
+      "sha256": "ce9ae638fd1acaa6b34c33644fe16b72a8e985430cd924834793fcb602b22642",
+      "bytes": 10009
+    },
+    {
+      "path": "outputs/research/official-full/live-jobs-20261010T111406Z/summary.json",
+      "sha256": "6937e3801bd3066e50cb850fe70695a1eeb2bad3863e65e47c4913a498eef1d7",
+      "bytes": 1161
+    },
+    {
+      "path": "usage_assets/reports/final-student-delivery-waiter/first-poll/status-1791630205031563760.stdout.log",
+      "sha256": "58893b1bfa85812163db8c40e45cfdb033f7daeab1d2eb6562bb26cd775b569f",
+      "bytes": 1375
+    }
+  ],
+  "packages_installed_on_hosts": false,
+  "commands_executed": [],
+  "completion_verified": false,
+  "quality_verified": false,
+  "operator_lock_lease_note": "Run process_gate lock probe before taking the operator lease; while held, validate process absence/marker/provenance directly so the owned lease is not misreported as a competing lock.",
+  "historical_replay_note": "After adoption address retained originalCID/image explicitly; new default container is not the originalofficial run. No driver/monitor restart is part of adoption."
+}

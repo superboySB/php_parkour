@@ -1,0 +1,73 @@
+{
+  "scope": "runc/network-none/noGPU CPU control fixtures only; no real publication/native/DDS/SSH",
+  "argv": [
+    "docker",
+    "run",
+    "--rm",
+    "--runtime",
+    "runc",
+    "--network",
+    "none",
+    "--ipc",
+    "private",
+    "--env",
+    "CUDA_VISIBLE_DEVICES=",
+    "--env",
+    "NVIDIA_VISIBLE_DEVICES=void",
+    "--env",
+    "PYTHONDONTWRITEBYTECODE=1",
+    "--env",
+    "PYTEST_DISABLE_PLUGIN_AUTOLOAD=1",
+    "--mount",
+    "type=bind,src=/home/dzp/projects/php_parkour/outputs/research/fresh629-publication-preparation,dst=/preparation,readonly",
+    "--mount",
+    "type=bind,src=/home/dzp/projects/php_parkour/outputs/research/fresh629-publication-preparation/cpu-tests-candidate02,dst=/evidence",
+    "--entrypoint",
+    "/opt/php/bin/train-python",
+    "sha256:2be18521015b2a84ef7a4442af9a94ef041a19feb9ce385ae15424b1dc158d8f",
+    "-m",
+    "pytest",
+    "-q",
+    "-p",
+    "no:cacheprovider",
+    "/preparation/test_publish_fresh629.py",
+    "--junitxml=/evidence/tests.xml"
+  ],
+  "started_unix": 1791632207.4995387,
+  "source_before": [
+    {
+      "path": "publish_fresh629.py",
+      "bytes": 37560,
+      "sha256": "37531abfec788d5667ccdecbf2620c3534f02785c3b98e03953acbe1b06a8205"
+    },
+    {
+      "path": "publisher_source.py",
+      "bytes": 39128,
+      "sha256": "5b0d967f96f0d62ca474dcf4746e53f0a4aecd459790d0591aa31d2e89679a7a"
+    },
+    {
+      "path": "test_publish_fresh629.py",
+      "bytes": 28463,
+      "sha256": "9296b29701b6f2baccaf0cfe3df9a6520005c00abcdba1c027ce5418ec0e6a9b"
+    }
+  ],
+  "returncode": 0,
+  "finished_unix": 1791632213.1724792,
+  "source_after": [
+    {
+      "path": "publish_fresh629.py",
+      "bytes": 37560,
+      "sha256": "37531abfec788d5667ccdecbf2620c3534f02785c3b98e03953acbe1b06a8205"
+    },
+    {
+      "path": "publisher_source.py",
+      "bytes": 39128,
+      "sha256": "5b0d967f96f0d62ca474dcf4746e53f0a4aecd459790d0591aa31d2e89679a7a"
+    },
+    {
+      "path": "test_publish_fresh629.py",
+      "bytes": 28463,
+      "sha256": "9296b29701b6f2baccaf0cfe3df9a6520005c00abcdba1c027ce5418ec0e6a9b"
+    }
+  ]
+}

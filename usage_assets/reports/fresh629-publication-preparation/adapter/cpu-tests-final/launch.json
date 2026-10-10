@@ -1,0 +1,81 @@
+{
+  "scope": "runc/network-none/noGPU CPU control fixtures only; no real publication/native/DDS/SSH",
+  "create_argv": [
+    "docker",
+    "create",
+    "--runtime",
+    "runc",
+    "--network",
+    "none",
+    "--ipc",
+    "private",
+    "--env",
+    "CUDA_VISIBLE_DEVICES=",
+    "--env",
+    "NVIDIA_VISIBLE_DEVICES=void",
+    "--env",
+    "PYTHONDONTWRITEBYTECODE=1",
+    "--env",
+    "PYTEST_DISABLE_PLUGIN_AUTOLOAD=1",
+    "--mount",
+    "type=bind,src=/home/dzp/projects/php_parkour/outputs/research/fresh629-publication-preparation,dst=/preparation,readonly",
+    "--mount",
+    "type=bind,src=/home/dzp/projects/php_parkour/outputs/research/fresh629-publication-preparation/cpu-tests-final,dst=/evidence",
+    "--entrypoint",
+    "/opt/php/bin/train-python",
+    "sha256:2be18521015b2a84ef7a4442af9a94ef041a19feb9ce385ae15424b1dc158d8f",
+    "-m",
+    "pytest",
+    "-q",
+    "-p",
+    "no:cacheprovider",
+    "/preparation/test_publish_fresh629.py",
+    "--junitxml=/evidence/tests.xml"
+  ],
+  "started_unix": 1791632346.4641623,
+  "source_before": [
+    {
+      "path": "publish_fresh629.py",
+      "bytes": 37554,
+      "sha256": "53dde18b19ba7244f703f96d7264f15b96ad619cea7203329d42243078bd1858"
+    },
+    {
+      "path": "publisher_source.py",
+      "bytes": 39128,
+      "sha256": "5b0d967f96f0d62ca474dcf4746e53f0a4aecd459790d0591aa31d2e89679a7a"
+    },
+    {
+      "path": "test_publish_fresh629.py",
+      "bytes": 28463,
+      "sha256": "9296b29701b6f2baccaf0cfe3df9a6520005c00abcdba1c027ce5418ec0e6a9b"
+    }
+  ],
+  "container_id": "ca7118831d3ae9bec4c0ce472ab2fd1c4f3c24dacc89b9881d14243d1d896505",
+  "run_argv": [
+    "docker",
+    "start",
+    "--attach",
+    "ca7118831d3ae9bec4c0ce472ab2fd1c4f3c24dacc89b9881d14243d1d896505"
+  ],
+  "returncode": 0,
+  "container_exit_code": 0,
+  "removed_own_container": true,
+  "finished_unix": 1791632352.1702693,
+  "source_after": [
+    {
+      "path": "publish_fresh629.py",
+      "bytes": 37554,
+      "sha256": "53dde18b19ba7244f703f96d7264f15b96ad619cea7203329d42243078bd1858"
+    },
+    {
+      "path": "publisher_source.py",
+      "bytes": 39128,
+      "sha256": "5b0d967f96f0d62ca474dcf4746e53f0a4aecd459790d0591aa31d2e89679a7a"
+    },
+    {
+      "path": "test_publish_fresh629.py",
+      "bytes": 28463,
+      "sha256": "9296b29701b6f2baccaf0cfe3df9a6520005c00abcdba1c027ce5418ec0e6a9b"
+    }
+  ]
+}

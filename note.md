@@ -419,7 +419,7 @@ docker exec -e OMP_NUM_THREADS=4 php-parkour-research \
 
 这是17场景全部629个配置各自几何上的有界测试，每例500次策略控制。配置数不是独立几何数：固定计划有580个不同OBJ文件SHA，50个平地配置共享同一OBJ；没有做几何等价性判定。[计数核验](usage_assets/reports/sim2sim-configuration-vs-mesh.json)。各例使用恒定forward command，不按参考轨迹回放，也不把存活10秒视为完成课程。旧后台批次已在北京时间15:48有序停止，原目录保持不动；其SDK0.1.6退出段错误与监督漏查需要修复，**不能继续resume该批次作为最终验收**。[实际停止、279 reported completed/5失败/1中断/344未运行及原源码](usage_assets/reports/sim2sim-cohort-halt/summary.md)。具体旧启动时间和两段预检视频见[扫描记录](usage_assets/reports/sim2sim-all-configs-start/summary.md)。
 
-最终结果页用[完整发布工具](scripts/research/publish_full_scene_matrix.py)生成；它等待真实driver终态exit0与全部629项证据，保留所有阈值和历史attempt，并逐字节复制原视频/轨迹/日志。初版24项CPU检查和两例浏览器预览通过，新版另有34项CPU回归；旧扫描已停止，尚无新629完成页。[首次失败原字节与时间线](usage_assets/reports/sim2sim-worker-failure/report.md)保留父进程exit1，不能只凭worker JSON补造成功。发布命令须显式指定独立冻结的`--expected-plan-sha256`与`--expected-harness-sha256`；新版完整发布还检查两worker退出与三份进程收据。旧schema2只允许保留历史预览，不能发布完整验收。[初版发布工具检查与命令](usage_assets/reports/full-scene-publisher/summary.md)、[新版回归](usage_assets/reports/publisher-schema3-review/review.md)。
+旧[完整发布工具](scripts/research/publish_full_scene_matrix.py)绑定旧driver路径和收据格式，不能直接发布当前隔离的fresh629批次；独立审查已定位命名空间、driver合同、冻结源码及完整后验绑定的缺口。[兼容性审查及固定依赖](usage_assets/reports/fresh629-publisher-compatibility-review/index.md)。初版24项CPU检查和两例浏览器预览通过，新版另有34项CPU回归，这些历史结果不代表新629完成。[首次失败原字节与时间线](usage_assets/reports/sim2sim-worker-failure/report.md)保留父进程exit1，不能只凭worker JSON补造成功。旧工具仍须显式指定独立冻结的`--expected-plan-sha256`与`--expected-harness-sha256`，schema3检查两worker退出与三份进程收据，schema2只允许历史预览。[旧工具命令与初版检查](usage_assets/reports/full-scene-publisher/summary.md)、[新版回归](usage_assets/reports/publisher-schema3-review/review.md)。
 
 主Dockerfile与train/inference约束现已使用SDK0.1.8；Holosoma的unitree extra硬钉0.1.6，因此安装采用booster extra加显式SDK0.1.8，其他版本保持约束。新统一镜像`2be18521…`由干净提交`6cb2ae2`完整构建，实际断网、无宿主源码挂载的265版本核验、Isaac16环境两轮训练/权重更新、12组教师ONNX推理及TensorBoard均通过。[新统一镜像原始证据](usage_assets/reports/sdk018-canonical-offline/summary.md)。原0.1.6镜像及云端官方训练容器不替换；新镜像另行完整上传并核验，旧训练不因升级中断。
 
@@ -451,6 +451,8 @@ Isaac评估将URDF转换缓存写在`robot.asset.asset_root`下。源码只读�
 
 新统一镜像已完整传输并在远端加载，10.90GB归档两端SHA和层内容一致；原训练容器及research tag保留。[实际上传回执](usage_assets/reports/sdk018-canonical-upload/summary.md)。
 
+云端默认容器仍是启动官方训练时的SDK0.1.6环境，不能把“新镜像已加载”写成“默认环境已切换”。[训练完成后的接入方案](usage_assets/reports/cloud-sdk018-postcompletion-adoption-plan/index.md)规定先验official16、7个原生checkpoint的CPU就绪与888次逐源终态、实际watch进程退出和锁释放，再保留并停止/改名本项目旧容器，提升已加载的SDK0.1.8镜像并用`cloud.py deploy`创建默认容器。随后须实际核验train/inference SDK0.1.8、单一可见GPU、镜像内容、源码/资产SHA及TensorBoard；当前这些切换命令尚未执行。
+
 评估`--skip-completed`核验产物失败而需要重跑时，pipeline会先把旧`quality.json`与同级`tensorboard/`按原字节移到`quality-history/<time_ns>/`，在新manifest保存路径与SHA映射，再启动固定路径的新报告。旧视频/原生日志保留；有效跳过不移动文件，异常归档或child失败不删除历史。这样既满足新报告门卫，也不把旧TensorBoard事件混进新评估。[实际CPU缺口复现、72项目标测试与修复](usage_assets/reports/eval-quality-retry-integration/summary.md)。
 
 ### 只读源码的逐源验收资产根
@@ -474,3 +476,16 @@ python3 -m json.tool outputs/research/final-student-delivery-waiter-preparation/
 ```
 
 当前已有waiter，不要再次watch、手动fetch或同时另起final58。任何已开始步骤的失败/partial都保留并停止，不自动重试；需要取消时先核对启动收据的PID出生身份，再用SIGTERM等待自身清理。准备源码可从上述发布副本恢复，但不能覆盖活控制文件；final58还依赖原canonical context/source-manifest、1887生成输入、baseline/helper准确路径、指定镜像、真实completed fetch和现fresh629成功/释放收据，详见包内restore-map。这些控制面测试与waiting回执不计作正式训练或最终模型验收完成。
+
+### 当前隔离629批次的专用发布入口
+
+[冻结适配器、80项最终CPU测试及独立审查](usage_assets/reports/fresh629-publication-preparation/summary.md)已完成。11:44 UTC针对真实运行中批次的status、prepare、publish均返回waiting/exit0，未建出版目录或partial stage、未启动额外仿真，Docker ID集合及原容器身份前后不变；root初次汇总的状态字段错误和修正后的原收据均保留。该接口只适用本次固定绝对cohort，须保留包内列明的原canonical context、5206冻结文件及全部原生输出。
+
+```bash
+python3 -B usage_assets/reports/fresh629-publication-preparation/adapter/publish_fresh629.py status
+python3 -B usage_assets/reports/fresh629-publication-preparation/adapter/publish_fresh629.py prepare
+```
+
+完整publish命令与固定输出路径见[原计划](usage_assets/reports/fresh629-publication-preparation/adapter/plan.json)，只在真实host和CPU终态、1258正常worker/host映射、629原视频完整解码及冻结SHA全部通过后执行；目前没有完整629结果页。它不重跑仿真或ffmpeg，也不补造旧driver收据。完整原观察日志将以≤25,000,000字节连续块保留offset/各SHA/wholeSHA，失败stage保留；所有跌倒/阈值照实发布，不能据正常退出声称技能成功。
+
+上述三个准备/方案包在出版前另经[94文件Git字节独立核对](usage_assets/reports/fresh629-publication-package-independent-review/summary.md)，原始清单、两次waiting和汇总失败均吻合。该审查绑定追加本链接之前的版本，不代表训练、完整629或云端接入完成。
