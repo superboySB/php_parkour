@@ -6,6 +6,8 @@
 
 最新纠正：北京时间15:48已有序停止旧629物理批次，原279 reported completed/5失败/1中断/344未运行均保留。旧监督遗漏最终worker退出码，已有10个reported completed及旧12指令的command02存在模拟器SIGSEGV；这些不能作为正常退出验收。修复监督与SDK后，原5个显式失败配置的新闭环全部正常退出，fresh629已在新冻结计划下实际启动，完整终态仍待验收。[新五例原生试跑](usage_assets/reports/sdk018-native-pilot/summary.md)。[停止回执](usage_assets/reports/sim2sim-cohort-halt/summary.md)、[逐日志实证](usage_assets/reports/worker-exit-completed-log-audit/report.md)。以下历史轨迹、阈值与时间快照仍保留原始范围。
 
+13:27 UTC补充：fresh629的原宿主监督会话实际返回143，容器内原始仿真仍在继续；原launch receipt没有被改写成通过。[监督中断与四例观察缺口](usage_assets/reports/fresh629-supervision-interruption/index.md)保留工具结果、Docker原exec身份及578例时的只读统计；恢复观察已另起独立记录。完整CPU后验、四例独立补验与正常清理仍待实际完成，该批目前不记作629全量通过。
+
 先看真实结果：[新SDK全部12指令的正常退出复测与逐段视频](usage_assets/reports/sdk018-directions/summary.md)、[新SDK五个历史失败配置的视频与跌倒结果](usage_assets/reports/sdk018-native-pilot/summary.md)、[17 场景参考动作播放页](usage_assets/motion_matching/playback.html)、[旧17场景物理轨迹播放页](usage_assets/sim2sim/scenarios/playback.html)、[逐项原始报告](usage_assets/reports/)。参考动作来自生成数组，闭环录像来自公开 ONNX 策略驱动的 MuJoCo，训练录像来自实际 Isaac checkpoint；旧17场景页不证明完整正常退出。
 
 在本地仓库运行下面的标准库服务后，可打开 `http://127.0.0.1:8088/sim2sim/scenarios/playback.html` 或 `http://127.0.0.1:8088/motion_matching/playback.html` 交互查看；不需要安装包。
@@ -407,3 +409,9 @@ CPU 测试统一在 Docker 中运行，分别保留根目录/训练和 motion ma
 [全键盘/重置准备原件](usage_assets/reports/native-keyboard-reset-allkeys-preparation/index.md)含最终46项CPU fixture、独立只读审查、root真实prepare计划和真实Docker双角色import/config parse；3313项冻结前后相同，未构造原生对象。历史canonical3297项与预先存在的1个bytecode分别记录，没有改动原冻结清单。实际按键、Backspace、录制与退出验收仍未执行。
 
 [teacher/pure/finetune续训准备原件](usage_assets/reports/native-resume-acceptance-preparation/index.md)含最终33/33 CPU检查，旧27/29/30/31/32候选按原字节保留且不相加。真实CPU预处理解析三preset、100个locomotion clip及35文件独立RW机器人合同；既有PT确认teacher40、学生16的优化器计数，包括LR0的finetune std state。实际方案是各自baseline2→target4恢复到iter3，验证计数40→60→100或16→24→40及真实新权重/TensorBoard。HSSIM激活路径和原生INFO日志检查问题已在验收helper中修正，原生算法与加载实现未改；六次真实训练仍未运行。
+
+### 官方训练的真实曲线快照
+
+[首个 locomotion 教师的曲线、原始数据与离线重绘命令](usage_assets/reports/official-teacher-learning-curves/index.md)保留官方训练 iteration 0–14,340 的四个 TensorBoard tag，各14,341个有限样本；叠加25样本后向均值，原始点和负 entropy 值均保留。数据由原云端容器实际导出，绘图在断网、GPU隐藏的Docker CPU容器中完成，退出码0。目标20,000次迭代仍未完成，这只是首个教师的历史进度，不能证明收敛、越障质量或其它教师/学生已完成。
+
+![官方首个教师的进行中曲线](usage_assets/reports/official-teacher-learning-curves/learning-curves-plot-01/figures/learning-curves.png)

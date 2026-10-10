@@ -1,0 +1,103 @@
+{
+  "schema_version": 1,
+  "status": "cpu_rendered_partial_running_snapshot",
+  "started_utc": "2026-10-10T13:29:09.410914+00:00",
+  "image_id": "sha256:2be18521015b2a84ef7a4442af9a94ef041a19feb9ce385ae15424b1dc158d8f",
+  "input": {
+    "path": "/home/dzp/projects/php_parkour/outputs/research/official-full/learning-curves-snapshot-01/scalars.json",
+    "bytes": 4171149,
+    "sha256": "5f165225fa2ad0bbb120783654591acefa4ae54b037be0b509219d32c33b8afd"
+  },
+  "plot_source": {
+    "path": "/home/dzp/projects/php_parkour/outputs/research/official-full/learning-curves-snapshot-01/plot_learning_curves.py",
+    "bytes": 6672,
+    "sha256": "4cf47cc8f1c3847253ef760936cdfa5bb47bc12b82b8c76e895b35dca67f36fd"
+  },
+  "native_started": false,
+  "gpu_started": false,
+  "quality_verified": false,
+  "create_argv": [
+    "docker",
+    "create",
+    "--name",
+    "php-official-learning-curves-cpu-01",
+    "--runtime",
+    "runc",
+    "--network",
+    "none",
+    "--ipc",
+    "private",
+    "--init",
+    "-e",
+    "CUDA_VISIBLE_DEVICES=",
+    "-e",
+    "NVIDIA_VISIBLE_DEVICES=void",
+    "-e",
+    "MPLBACKEND=Agg",
+    "-e",
+    "MPLCONFIGDIR=/tmp/matplotlib",
+    "-e",
+    "PYTHONDONTWRITEBYTECODE=1",
+    "--mount",
+    "type=bind,src=/home/dzp/projects/php_parkour/outputs/research/official-full/learning-curves-snapshot-01,dst=/data,readonly",
+    "--mount",
+    "type=bind,src=/home/dzp/projects/php_parkour/outputs/research/official-full/learning-curves-plot-01/figures,dst=/figures",
+    "--entrypoint",
+    "/opt/php/bin/train-python",
+    "sha256:2be18521015b2a84ef7a4442af9a94ef041a19feb9ce385ae15424b1dc158d8f",
+    "/data/plot_learning_curves.py",
+    "--input",
+    "/data/scalars.json",
+    "--output",
+    "/figures",
+    "--window",
+    "25"
+  ],
+  "container_id": "757d0a1c034e4c102a781a4d38c94280f4e767aece14b9c8045e13117f142a25",
+  "start_argv": [
+    "docker",
+    "start",
+    "--attach",
+    "757d0a1c034e4c102a781a4d38c94280f4e767aece14b9c8045e13117f142a25"
+  ],
+  "attach_returncode": 0,
+  "process_exit_code": 0,
+  "source_bytes_unchanged": true,
+  "files": [
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/official-full/learning-curves-plot-01/figures/learning-curves.png",
+      "bytes": 289860,
+      "sha256": "4c7a59ca66c1ca2c7f1c424bdccb680d57fd0601c5c4f74231b8f19e0d0ffb44"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/official-full/learning-curves-plot-01/figures/learning-curves.svg",
+      "bytes": 1162440,
+      "sha256": "ace81156b5ffc30d87f2db470ce3f52b3c4ca30ca9e075d3c5860d63182407c9"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/official-full/learning-curves-plot-01/figures/plot-report.json",
+      "bytes": 2156,
+      "sha256": "dd685ad2f356906e0b549d53399735e1c67316cbe66c81643a1e9dd73b6d8d18"
+    }
+  ],
+  "owned_stop_argv": [
+    "docker",
+    "stop",
+    "--time",
+    "10",
+    "757d0a1c034e4c102a781a4d38c94280f4e767aece14b9c8045e13117f142a25"
+  ],
+  "owned_stop_stdout": "Flag --time has been deprecated, use --timeout instead\n757d0a1c034e4c102a781a4d38c94280f4e767aece14b9c8045e13117f142a25",
+  "owned_container_running_after_stop": false,
+  "finished_utc": "2026-10-10T13:29:10.802842+00:00",
+  "export_receipt": {
+    "path": "/home/dzp/projects/php_parkour/outputs/research/official-full/learning-curves-snapshot-01/export-receipt.json",
+    "bytes": 4178,
+    "sha256": "ec8893c050c2decd4ca815f379ac1af10f9d79cb13da1f037a30d94def9f7703"
+  },
+  "input_after": {
+    "path": "/home/dzp/projects/php_parkour/outputs/research/official-full/learning-curves-snapshot-01/scalars.json",
+    "bytes": 4171149,
+    "sha256": "5f165225fa2ad0bbb120783654591acefa4ae54b037be0b509219d32c33b8afd"
+  }
+}
