@@ -85,11 +85,24 @@ PHP 上游先把人类动作重定向到 29 DOF G1，再人工标注技能起止
 仓库包含两个不同入口：
 
 - [PHP database generator](motion_matching/motion_matching/generate_database.py#L182) 消费已经是 G1 的 `qpos=[wxyz,xyz,29 joints]`，做镜像、URDF运动学、重采样、速度/接触估计和二进制写盘；不训练网络。
-- [Holosoma retargeter](thirdparty/holosoma/src/holosoma_retargeting/holosoma_retargeting/src/interaction_mesh_retargeter.py#L65) 另有 SQP 风格 diffIK：线性化 Jacobian，最小化 interaction-mesh Laplacian 误差，并加脚约束、非穿透、关节限位与 trust region，由 CVXPY/CLARABEL 逐帧求解。它是轨迹优化，本次没有执行这条原始人体数据路径。
+- [Holosoma retargeter](thirdparty/holosoma/src/holosoma_retargeting/holosoma_retargeting/src/interaction_mesh_retargeter.py#L65) 另有 SQP 风格 diffIK：输入人体世界关节 `human_joints:[T,J,3]`、人体/机器人映射与交互几何，线性化 Jacobian，最小化 interaction-mesh Laplacian 误差，并加脚约束、非穿透、关节限位与 trust region，由 CVXPY/CLARABEL 逐帧求解；示例保存 `qpos:[T,36]`、`human_joints` 和 `fps=30`。目标来自人体运动与几何约束，不是监督网络的人工动作 label。它是轨迹优化，本次没有执行这条原始人体数据路径。
 
 独立 Holosoma retarget 示例内部/保存的 qpos 是 `[xyz,wxyz,joints]`（[源码](thirdparty/holosoma/src/holosoma_retargeting/holosoma_retargeting/examples/robot_retarget.py#L499)），PHP generator 却按 `[wxyz,xyz,joints]` 解析，不能因同为36列就直接混用。HuggingFace发布资产的布局也应按其数据卡分别确认。
 
 PHP内部数据库还增加了一个平面 Simulation root：31 bones 为 Simulation root、pelvis及29关节节点；这不等于 tracking 的30 bodies或native的32 bodies。Simulation root 的位置来自肩部均值投影到XY，朝向来自pelvis局部+X投影并平滑。`contact_states:[F,2]` 是左右踝世界速度 `<0.5` 后 median filter 的启发式标签，不是真实足底力测量。[数据库生成](motion_matching/motion_matching/generate_database.py#L231)
+
+二进制 `.bin` 中，Simulation root 用世界坐标，其余节点用父坐标系。`F` 为总帧数，`R` 为拼接片段数：
+
+| 字段 | shape / dtype | 来源 |
+| --- | --- | --- |
+| `bone_positions`、`bone_velocities` | `[F,31,3]` float32 | URDF 运动学及 60Hz 差分 |
+| `bone_rotations` | `[F,31,4]` float32，wxyz | 关节/根姿态转成骨骼局部旋转 |
+| `bone_angular_velocities` | `[F,31,3]` float32 | 四元数时间差分 |
+| `bone_parents` | `[31]` int32 | URDF 层级加 Simulation root |
+| `range_starts`、`range_stops` | `[R]` int32 | 源片段拼接边界 |
+| `contact_states` | `[F,2]` uint8 | 左/右足速度阈值和中值滤波 |
+
+Writer 按固定字段顺序写维度头与数组；文件没有自描述 FPS、骨骼名称或单位，60Hz/G1/SI 来自代码契约。它是 reference 数据库，不是带网络参数的 checkpoint。[二进制读盘](motion_matching/motion_matching/core/database.py#L105)。
 
 ### 2.4 动作匹配的27维特征与分数
 
