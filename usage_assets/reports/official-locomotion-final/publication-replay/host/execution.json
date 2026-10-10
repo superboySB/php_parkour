@@ -1,0 +1,211 @@
+{
+  "status": "passed",
+  "create_argv": [
+    "docker",
+    "create",
+    "--name",
+    "php-official-locomotion-replay-5a8cb0df78d1",
+    "--runtime",
+    "runc",
+    "--init",
+    "--network",
+    "none",
+    "--cpus",
+    "2",
+    "--memory",
+    "12g",
+    "--label",
+    "php.research.owner=official-locomotion-replay",
+    "-e",
+    "CUDA_VISIBLE_DEVICES=",
+    "-e",
+    "NVIDIA_VISIBLE_DEVICES=void",
+    "-e",
+    "PYTHONDONTWRITEBYTECODE=1",
+    "-e",
+    "OMP_NUM_THREADS=1",
+    "-e",
+    "OPENBLAS_NUM_THREADS=1",
+    "-e",
+    "MKL_NUM_THREADS=1",
+    "-e",
+    "ACCEPT_EULA=Y",
+    "-e",
+    "OMNI_KIT_ACCEPT_EULA=YES",
+    "--mount",
+    "type=bind,src=/home/dzp/projects/php_parkour/usage_assets/reports/official-locomotion-final/cpu-02/source,dst=/code,readonly",
+    "--mount",
+    "type=bind,src=/home/dzp/projects/php_parkour/usage_assets/reports/official-locomotion-final/cpu-02/input,dst=/control,readonly",
+    "--mount",
+    "type=bind,src=/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-locomotion-publication-replay-01/artifacts,dst=/artifacts,readonly",
+    "--mount",
+    "type=bind,src=/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-locomotion-publication-replay-01/validation,dst=/validation",
+    "sha256:2be18521015b2a84ef7a4442af9a94ef041a19feb9ce385ae15424b1dc158d8f",
+    "/usr/bin/python3",
+    "-B",
+    "/code/run_cpu_phases.py"
+  ],
+  "image_id": "sha256:2be18521015b2a84ef7a4442af9a94ef041a19feb9ce385ae15424b1dc158d8f",
+  "quality_verified": false,
+  "official_schedule_complete": false,
+  "inputs_before": [
+    {
+      "native_path": "/control/cloud-control.json",
+      "host_path": "/home/dzp/projects/php_parkour/usage_assets/reports/official-locomotion-final/cpu-02/input/cloud-control.json",
+      "bytes": 13760,
+      "sha256": "a5504898f54153405abd311b26e28cc21d2993b490c3ad4449e4f56edec40eda"
+    },
+    {
+      "native_path": "/control/initial-transfer.json",
+      "host_path": "/home/dzp/projects/php_parkour/usage_assets/reports/official-locomotion-final/cpu-02/input/initial-transfer.json",
+      "bytes": 744,
+      "sha256": "9e1399c04d573046a62f227c7a02e0b95df9c520d3e650998e0559672a3bb56a"
+    },
+    {
+      "native_path": "/control/model_00000.pt",
+      "host_path": "/home/dzp/projects/php_parkour/usage_assets/reports/official-locomotion-final/cpu-02/input/model_00000.pt",
+      "bytes": 10345023,
+      "sha256": "e44ef762fa931cb8b2a7dedef099003ccf7269b87c21fa2aa9b9d81aba5bc1cb"
+    },
+    {
+      "native_path": "/control/teacher-locomotion.json",
+      "host_path": "/home/dzp/projects/php_parkour/usage_assets/reports/official-locomotion-final/cpu-02/input/teacher-locomotion.json",
+      "bytes": 2268,
+      "sha256": "99d35a55778e35b64d4500be2143c52ce0e6f25cc2ea10c1426961796d9860e5"
+    },
+    {
+      "native_path": "/control/terminal-observation.json",
+      "host_path": "/home/dzp/projects/php_parkour/usage_assets/reports/official-locomotion-final/cpu-02/input/terminal-observation.json",
+      "bytes": 10553,
+      "sha256": "44573fa6b9d1b48b09c0c8e17b4eb3e6f16d57d9031aaae10600a90599de31c3"
+    },
+    {
+      "native_path": "/control/transfer-receipt.json",
+      "host_path": "/home/dzp/projects/php_parkour/usage_assets/reports/official-locomotion-final/cpu-02/input/transfer-receipt.json",
+      "bytes": 10454,
+      "sha256": "e9f4440e985e97c2156579bd4201782cf629a189c320fb72161762663a445b1c"
+    },
+    {
+      "native_path": "/artifacts/events.out.tfevents.1791606211.pro5000-6.47700.0",
+      "host_path": "/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-locomotion-publication-replay-01/artifacts/events.out.tfevents.1791606211.pro5000-6.47700.0",
+      "bytes": 72561360,
+      "sha256": "503cd5a80058818ef3bdbe7f2634f3f109169eeb8c9c72f07c6ca84756bbe00a"
+    },
+    {
+      "native_path": "/artifacts/holosoma_config.yaml",
+      "host_path": "/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-locomotion-publication-replay-01/artifacts/holosoma_config.yaml",
+      "bytes": 30950,
+      "sha256": "f582724c0dccb26cd91e27591534020200ce64124fb4138e32fd6bea145afce3"
+    },
+    {
+      "native_path": "/artifacts/model_19999.onnx",
+      "host_path": "/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-locomotion-publication-replay-01/artifacts/model_19999.onnx",
+      "bytes": 1183810764,
+      "sha256": "7255943ae7cdfae4a8371659865a0774709e6898c3d052ea6ceda5f89c9056c7"
+    },
+    {
+      "native_path": "/artifacts/model_19999.pt",
+      "host_path": "/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-locomotion-publication-replay-01/artifacts/model_19999.pt",
+      "bytes": 10345023,
+      "sha256": "b3bec5154ffe126ef364c9617d39d167289a8e0645dbbfa2354a3908dcc2973c"
+    },
+    {
+      "native_path": "/control/runtime-resolution-source.py",
+      "host_path": "/home/dzp/projects/php_parkour/usage_assets/reports/official-locomotion-final/cpu-02/input/runtime-resolution-source.py",
+      "bytes": 7326,
+      "sha256": "46142be3c3d700aafb13c401750918dd641eb12f266ee6adad71a341c7f9618f"
+    },
+    {
+      "native_path": "/control/runtime-resolution-source-receipt.json",
+      "host_path": "/home/dzp/projects/php_parkour/usage_assets/reports/official-locomotion-final/cpu-02/input/runtime-resolution-source-receipt.json",
+      "bytes": 819,
+      "sha256": "46d07308608585d4b94a7d6ef38210b688c974271a41cd7b50a81f1decff8953"
+    }
+  ],
+  "create_returncode": 0,
+  "container_id": "9b19d82ab7fa92add76aecf7f53b53205e25e379e21a45be5c4a4d4397b5fecf",
+  "actual_attached_wait_returncode": 0,
+  "actual_container_exit_code": 0,
+  "inputs_after": [
+    {
+      "native_path": "/control/cloud-control.json",
+      "host_path": "/home/dzp/projects/php_parkour/usage_assets/reports/official-locomotion-final/cpu-02/input/cloud-control.json",
+      "bytes": 13760,
+      "sha256": "a5504898f54153405abd311b26e28cc21d2993b490c3ad4449e4f56edec40eda"
+    },
+    {
+      "native_path": "/control/initial-transfer.json",
+      "host_path": "/home/dzp/projects/php_parkour/usage_assets/reports/official-locomotion-final/cpu-02/input/initial-transfer.json",
+      "bytes": 744,
+      "sha256": "9e1399c04d573046a62f227c7a02e0b95df9c520d3e650998e0559672a3bb56a"
+    },
+    {
+      "native_path": "/control/model_00000.pt",
+      "host_path": "/home/dzp/projects/php_parkour/usage_assets/reports/official-locomotion-final/cpu-02/input/model_00000.pt",
+      "bytes": 10345023,
+      "sha256": "e44ef762fa931cb8b2a7dedef099003ccf7269b87c21fa2aa9b9d81aba5bc1cb"
+    },
+    {
+      "native_path": "/control/teacher-locomotion.json",
+      "host_path": "/home/dzp/projects/php_parkour/usage_assets/reports/official-locomotion-final/cpu-02/input/teacher-locomotion.json",
+      "bytes": 2268,
+      "sha256": "99d35a55778e35b64d4500be2143c52ce0e6f25cc2ea10c1426961796d9860e5"
+    },
+    {
+      "native_path": "/control/terminal-observation.json",
+      "host_path": "/home/dzp/projects/php_parkour/usage_assets/reports/official-locomotion-final/cpu-02/input/terminal-observation.json",
+      "bytes": 10553,
+      "sha256": "44573fa6b9d1b48b09c0c8e17b4eb3e6f16d57d9031aaae10600a90599de31c3"
+    },
+    {
+      "native_path": "/control/transfer-receipt.json",
+      "host_path": "/home/dzp/projects/php_parkour/usage_assets/reports/official-locomotion-final/cpu-02/input/transfer-receipt.json",
+      "bytes": 10454,
+      "sha256": "e9f4440e985e97c2156579bd4201782cf629a189c320fb72161762663a445b1c"
+    },
+    {
+      "native_path": "/artifacts/events.out.tfevents.1791606211.pro5000-6.47700.0",
+      "host_path": "/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-locomotion-publication-replay-01/artifacts/events.out.tfevents.1791606211.pro5000-6.47700.0",
+      "bytes": 72561360,
+      "sha256": "503cd5a80058818ef3bdbe7f2634f3f109169eeb8c9c72f07c6ca84756bbe00a"
+    },
+    {
+      "native_path": "/artifacts/holosoma_config.yaml",
+      "host_path": "/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-locomotion-publication-replay-01/artifacts/holosoma_config.yaml",
+      "bytes": 30950,
+      "sha256": "f582724c0dccb26cd91e27591534020200ce64124fb4138e32fd6bea145afce3"
+    },
+    {
+      "native_path": "/artifacts/model_19999.onnx",
+      "host_path": "/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-locomotion-publication-replay-01/artifacts/model_19999.onnx",
+      "bytes": 1183810764,
+      "sha256": "7255943ae7cdfae4a8371659865a0774709e6898c3d052ea6ceda5f89c9056c7"
+    },
+    {
+      "native_path": "/artifacts/model_19999.pt",
+      "host_path": "/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-locomotion-publication-replay-01/artifacts/model_19999.pt",
+      "bytes": 10345023,
+      "sha256": "b3bec5154ffe126ef364c9617d39d167289a8e0645dbbfa2354a3908dcc2973c"
+    },
+    {
+      "native_path": "/control/runtime-resolution-source.py",
+      "host_path": "/home/dzp/projects/php_parkour/usage_assets/reports/official-locomotion-final/cpu-02/input/runtime-resolution-source.py",
+      "bytes": 7326,
+      "sha256": "46142be3c3d700aafb13c401750918dd641eb12f266ee6adad71a341c7f9618f"
+    },
+    {
+      "native_path": "/control/runtime-resolution-source-receipt.json",
+      "host_path": "/home/dzp/projects/php_parkour/usage_assets/reports/official-locomotion-final/cpu-02/input/runtime-resolution-source-receipt.json",
+      "bytes": 819,
+      "sha256": "46d07308608585d4b94a7d6ef38210b688c974271a41cd7b50a81f1decff8953"
+    }
+  ],
+  "actual_phase_exits": [
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "container_running_after_cleanup": false
+}

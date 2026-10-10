@@ -4,6 +4,10 @@
 
 学习流程、输入输出、数据/label 来源与 real2sim2real 实现细节见独立的 [technical_pipeline.md](technical_pipeline.md)。
 
+**最新进度（2026-10-10 17:08 UTC）：首个官方 locomotion 教师已完成，整套复现尚未完成。** 原始顺序任务完成4096环境、64地形变体的20,000轮训练，最终checkpoint为`model_19999.pt`，并自动进入low-step教师；原容器、训练driver和后续验收等待进程保持原身份。最终PT、ONNX、配置和TensorBoard已按云端传输前后及本地SHA逐项核对，[首教师最终产物与可复现CPU验收](usage_assets/reports/official-locomotion-final/index.md)保存完整证据。五项CPU阶段均实际退出0，四条曲线各有完整20,000点；这还不证明最终策略的技能质量、收敛或PT/ONNX数值一致性。其余四教师、两学生、888逐源尝试、完整逐帧629批次和最终自训学生验收仍在后续日程中。
+
+![首个官方教师完整20000轮TensorBoard曲线](usage_assets/reports/official-locomotion-final/cpu-02/validation/plots/learning-curves.png)
+
 旧SDK历史纠正：北京时间15:48已有序停止旧629物理批次，原279 reported completed/5失败/1中断/344未运行均保留。旧监督遗漏最终worker退出码，已有10个reported completed及旧12指令的command02存在模拟器SIGSEGV；这些不能作为正常退出验收。修复监督与SDK后，原5个显式失败配置的新闭环全部正常退出，[新五例原生试跑](usage_assets/reports/sdk018-native-pilot/summary.md)、[停止回执](usage_assets/reports/sim2sim-cohort-halt/summary.md)、[逐日志实证](usage_assets/reports/worker-exit-completed-log-audit/report.md)保持原始范围；新629的实际终态见下文。
 
 13:27 UTC历史记录：fresh629的原宿主监督会话实际返回143，容器内原始仿真继续执行；原launch receipt保持原字节。[监督中断与四例观察缺口](usage_assets/reports/fresh629-supervision-interruption/index.md)保留当时工具结果、Docker原exec身份及578例时的统计。

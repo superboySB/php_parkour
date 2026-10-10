@@ -1,0 +1,278 @@
+{
+  "status": "passed",
+  "started_utc": "2026-10-10T17:07:43.595434+00:00",
+  "scope": "One real final official teacher CPU validation; no physics, whole-schedule or policy-quality completion",
+  "inputs_before": [
+    {
+      "path": "/control/cloud-control.json",
+      "bytes": 13760,
+      "sha256": "a5504898f54153405abd311b26e28cc21d2993b490c3ad4449e4f56edec40eda"
+    },
+    {
+      "path": "/control/initial-transfer.json",
+      "bytes": 744,
+      "sha256": "9e1399c04d573046a62f227c7a02e0b95df9c520d3e650998e0559672a3bb56a"
+    },
+    {
+      "path": "/control/model_00000.pt",
+      "bytes": 10345023,
+      "sha256": "e44ef762fa931cb8b2a7dedef099003ccf7269b87c21fa2aa9b9d81aba5bc1cb"
+    },
+    {
+      "path": "/control/teacher-locomotion.json",
+      "bytes": 2268,
+      "sha256": "99d35a55778e35b64d4500be2143c52ce0e6f25cc2ea10c1426961796d9860e5"
+    },
+    {
+      "path": "/control/terminal-observation.json",
+      "bytes": 10553,
+      "sha256": "44573fa6b9d1b48b09c0c8e17b4eb3e6f16d57d9031aaae10600a90599de31c3"
+    },
+    {
+      "path": "/control/transfer-receipt.json",
+      "bytes": 10454,
+      "sha256": "e9f4440e985e97c2156579bd4201782cf629a189c320fb72161762663a445b1c"
+    },
+    {
+      "path": "/artifacts/events.out.tfevents.1791606211.pro5000-6.47700.0",
+      "bytes": 72561360,
+      "sha256": "503cd5a80058818ef3bdbe7f2634f3f109169eeb8c9c72f07c6ca84756bbe00a"
+    },
+    {
+      "path": "/artifacts/holosoma_config.yaml",
+      "bytes": 30950,
+      "sha256": "f582724c0dccb26cd91e27591534020200ce64124fb4138e32fd6bea145afce3"
+    },
+    {
+      "path": "/artifacts/model_19999.onnx",
+      "bytes": 1183810764,
+      "sha256": "7255943ae7cdfae4a8371659865a0774709e6898c3d052ea6ceda5f89c9056c7"
+    },
+    {
+      "path": "/artifacts/model_19999.pt",
+      "bytes": 10345023,
+      "sha256": "b3bec5154ffe126ef364c9617d39d167289a8e0645dbbfa2354a3908dcc2973c"
+    },
+    {
+      "path": "/control/runtime-resolution-source.py",
+      "bytes": 7326,
+      "sha256": "46142be3c3d700aafb13c401750918dd641eb12f266ee6adad71a341c7f9618f"
+    },
+    {
+      "path": "/control/runtime-resolution-source-receipt.json",
+      "bytes": 819,
+      "sha256": "46d07308608585d4b94a7d6ef38210b688c974271a41cd7b50a81f1decff8953"
+    },
+    {
+      "path": "/control/input-manifest.json",
+      "bytes": 2202,
+      "sha256": "a13d0e144c79fbf3881f29b918e50b2f05de9d9cca27bf0caac28c60eb428179"
+    },
+    {
+      "path": "/code/accept_teacher.py",
+      "bytes": 18385,
+      "sha256": "61b43730942cbd5af868007bc7a013fbbdb4a5ae261050c3e160fcfd80decc9a"
+    },
+    {
+      "path": "/code/plot_learning_curves.py",
+      "bytes": 7348,
+      "sha256": "84d7ab2a0d26e35d21fc25e6f1c9bafe93422d0d80cbb264526a39bf2b5d82c2"
+    },
+    {
+      "path": "/code/run_cpu_phases.py",
+      "bytes": 3698,
+      "sha256": "faacb90fbf89ca3b26561034f8c9fa654ab0ccc1bbcdbc98fe448e583aa30e0d"
+    },
+    {
+      "path": "/code/validate_teacher_onnx.py",
+      "bytes": 6575,
+      "sha256": "cbc997fb2a39f2aa047f015ba49ecd21d717acff6ea060daeafe80347288bcf7"
+    }
+  ],
+  "phases": [
+    {
+      "phase": "checkpoint",
+      "argv": [
+        "/opt/php/bin/train-python",
+        "-B",
+        "/code/accept_teacher.py",
+        "checkpoint",
+        "--artifacts",
+        "/artifacts",
+        "--baseline",
+        "/control/model_00000.pt",
+        "--output",
+        "/validation/checkpoint.json"
+      ],
+      "started_utc": "2026-10-10T17:07:43.595456+00:00",
+      "actual_wait_returncode": 0,
+      "finished_utc": "2026-10-10T17:07:44.531758+00:00"
+    },
+    {
+      "phase": "scalars",
+      "argv": [
+        "/opt/php/bin/train-python",
+        "-B",
+        "/code/accept_teacher.py",
+        "scalars",
+        "--artifacts",
+        "/artifacts",
+        "--output",
+        "/validation/scalars.json"
+      ],
+      "started_utc": "2026-10-10T17:07:44.531780+00:00",
+      "actual_wait_returncode": 0,
+      "finished_utc": "2026-10-10T17:07:56.651452+00:00"
+    },
+    {
+      "phase": "onnx",
+      "argv": [
+        "/opt/php/bin/inference-python",
+        "-B",
+        "/code/validate_teacher_onnx.py",
+        "--model",
+        "/artifacts/model_19999.onnx",
+        "--output",
+        "/validation/onnx.json",
+        "--seed",
+        "2026",
+        "--expected-observation-dim",
+        "449"
+      ],
+      "started_utc": "2026-10-10T17:07:56.651470+00:00",
+      "actual_wait_returncode": 0,
+      "finished_utc": "2026-10-10T17:07:59.754576+00:00"
+    },
+    {
+      "phase": "bind",
+      "argv": [
+        "/opt/php/bin/inference-python",
+        "-B",
+        "/code/accept_teacher.py",
+        "bind",
+        "--artifacts",
+        "/artifacts",
+        "--checkpoint-report",
+        "/validation/checkpoint.json",
+        "--scalars-report",
+        "/validation/scalars.json",
+        "--onnx-report",
+        "/validation/onnx.json",
+        "--output",
+        "/validation/bind.json"
+      ],
+      "started_utc": "2026-10-10T17:07:59.754589+00:00",
+      "actual_wait_returncode": 0,
+      "finished_utc": "2026-10-10T17:08:00.999747+00:00"
+    },
+    {
+      "phase": "plots",
+      "argv": [
+        "/opt/php/bin/train-python",
+        "-B",
+        "/code/plot_learning_curves.py",
+        "--input",
+        "/validation/scalars.json",
+        "--output",
+        "/validation/plots"
+      ],
+      "started_utc": "2026-10-10T17:08:00.999764+00:00",
+      "actual_wait_returncode": 0,
+      "finished_utc": "2026-10-10T17:08:02.423126+00:00"
+    }
+  ],
+  "quality_verified": false,
+  "official_schedule_complete": false,
+  "cuda_visible_devices": "",
+  "nvidia_visible_devices": "void",
+  "inputs_after": [
+    {
+      "path": "/control/cloud-control.json",
+      "bytes": 13760,
+      "sha256": "a5504898f54153405abd311b26e28cc21d2993b490c3ad4449e4f56edec40eda"
+    },
+    {
+      "path": "/control/initial-transfer.json",
+      "bytes": 744,
+      "sha256": "9e1399c04d573046a62f227c7a02e0b95df9c520d3e650998e0559672a3bb56a"
+    },
+    {
+      "path": "/control/model_00000.pt",
+      "bytes": 10345023,
+      "sha256": "e44ef762fa931cb8b2a7dedef099003ccf7269b87c21fa2aa9b9d81aba5bc1cb"
+    },
+    {
+      "path": "/control/teacher-locomotion.json",
+      "bytes": 2268,
+      "sha256": "99d35a55778e35b64d4500be2143c52ce0e6f25cc2ea10c1426961796d9860e5"
+    },
+    {
+      "path": "/control/terminal-observation.json",
+      "bytes": 10553,
+      "sha256": "44573fa6b9d1b48b09c0c8e17b4eb3e6f16d57d9031aaae10600a90599de31c3"
+    },
+    {
+      "path": "/control/transfer-receipt.json",
+      "bytes": 10454,
+      "sha256": "e9f4440e985e97c2156579bd4201782cf629a189c320fb72161762663a445b1c"
+    },
+    {
+      "path": "/artifacts/events.out.tfevents.1791606211.pro5000-6.47700.0",
+      "bytes": 72561360,
+      "sha256": "503cd5a80058818ef3bdbe7f2634f3f109169eeb8c9c72f07c6ca84756bbe00a"
+    },
+    {
+      "path": "/artifacts/holosoma_config.yaml",
+      "bytes": 30950,
+      "sha256": "f582724c0dccb26cd91e27591534020200ce64124fb4138e32fd6bea145afce3"
+    },
+    {
+      "path": "/artifacts/model_19999.onnx",
+      "bytes": 1183810764,
+      "sha256": "7255943ae7cdfae4a8371659865a0774709e6898c3d052ea6ceda5f89c9056c7"
+    },
+    {
+      "path": "/artifacts/model_19999.pt",
+      "bytes": 10345023,
+      "sha256": "b3bec5154ffe126ef364c9617d39d167289a8e0645dbbfa2354a3908dcc2973c"
+    },
+    {
+      "path": "/control/runtime-resolution-source.py",
+      "bytes": 7326,
+      "sha256": "46142be3c3d700aafb13c401750918dd641eb12f266ee6adad71a341c7f9618f"
+    },
+    {
+      "path": "/control/runtime-resolution-source-receipt.json",
+      "bytes": 819,
+      "sha256": "46d07308608585d4b94a7d6ef38210b688c974271a41cd7b50a81f1decff8953"
+    },
+    {
+      "path": "/control/input-manifest.json",
+      "bytes": 2202,
+      "sha256": "a13d0e144c79fbf3881f29b918e50b2f05de9d9cca27bf0caac28c60eb428179"
+    },
+    {
+      "path": "/code/accept_teacher.py",
+      "bytes": 18385,
+      "sha256": "61b43730942cbd5af868007bc7a013fbbdb4a5ae261050c3e160fcfd80decc9a"
+    },
+    {
+      "path": "/code/plot_learning_curves.py",
+      "bytes": 7348,
+      "sha256": "84d7ab2a0d26e35d21fc25e6f1c9bafe93422d0d80cbb264526a39bf2b5d82c2"
+    },
+    {
+      "path": "/code/run_cpu_phases.py",
+      "bytes": 3698,
+      "sha256": "faacb90fbf89ca3b26561034f8c9fa654ab0ccc1bbcdbc98fe448e583aa30e0d"
+    },
+    {
+      "path": "/code/validate_teacher_onnx.py",
+      "bytes": 6575,
+      "sha256": "cbc997fb2a39f2aa047f015ba49ecd21d717acff6ea060daeafe80347288bcf7"
+    }
+  ],
+  "inputs_unchanged": true,
+  "cgroup_memory_peak_bytes": 3616792576,
+  "finished_utc": "2026-10-10T17:08:02.976969+00:00"
+}

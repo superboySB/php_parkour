@@ -2,7 +2,7 @@
 
 本文解释当前 `research` 分支的实际实现：每个模块接收什么、产生什么、监督信号从哪里来，以及训练得到的动作如何进入机器人控制器。配置与命令见 [note.md](note.md)，真实运行结果、录像与失败记录见 [usage.md](usage.md)。本文件独立于 README。
 
-截至 2026-10-10，完整官方五教师、两学生训练仍在云端运行；本文中的算法说明来自源码和已执行的有界实验，不表示完整日程或真机验收已经完成。
+截至 2026-10-10 17:08 UTC，首个官方 locomotion 教师完成20,000轮，云端顺序日程正在训练low-step教师；其余四教师、两学生及后续验收尚未全部完成。本文的算法说明来自源码和实际实验，不表示完整日程或真机验收已经完成。
 
 北京时间15:48，旧629物理扫描已因SDK退出异常及父监督漏查最终worker退出码而有序中断，全部相关本地进程退出。原279项reported completed中也已发现崩溃日志，因此这些状态不能作为正常退出验收；修复监督和SDK后，原五个显式失败配置的新试跑已正常退出，新的fresh629已完成原629次rollout与四例独立观察补验，完整终态和历史观察缺口见[恢复后的结果包](usage_assets/reports/sim2sim-full629-sdk018-recovered/index.md)。[原状态及停止回执](usage_assets/reports/sim2sim-cohort-halt/summary.md)、[漏记崩溃实证](usage_assets/reports/worker-exit-completed-log-audit/report.md)、[新SDK五例闭环](usage_assets/reports/sdk018-native-pilot/summary.md)。下文带具体时间的运行快照均保留历史含义。
 
@@ -533,7 +533,7 @@ startup default pose bias同时修改qtarget中心与观测`q−default`基准�
 
 | 产物 | 内容与用途 | 是否可直接用于部署 |
 | --- | --- | --- |
-| `holosoma_config.yaml` | 本次运行解析后的真实 preset、环境数、观测 term、registry、随机化、相机与算法超参 | 用来核对模型来源；不是权重 |
+| `holosoma_config.yaml` | 初始化时保存的 preset、环境数、观测 term、registry、随机化、相机与算法超参；模块维度可保留运行时才解析的符号 | 用来核对模型来源；不是权重 |
 | `model_XXXXX.pt` | PyTorch 网络、优化器及迭代等训练状态；不同算法字段不同 | 原生训练/Isaac eval 使用；不能直接替换 ONNX 路径 |
 | `depth_backbone.onnx` + `student.onnx` | CPU 前向推理图及关节/控制 metadata | 两个模型作为一条学生策略配套使用 |
 | native motion NPZ + terrain NPY/OBJ | 参考运动、command 与障碍几何 | 提供训练目标；部署学生不需要在线查询动作库 |
@@ -541,6 +541,8 @@ startup default pose bias同时修改qtarget中心与观测`q−default`基准�
 | quality JSON、视频、轨迹 CSV | checkpoint/config/SHA、真实 rollout、失败与跟踪误差 | 用于判断策略表现；文件存在不等于通过技能质量验收 |
 
 实际 PT 字段也已在 Docker 内读取核对：教师分别存 `actor/critic_model_state_dict` 与两套 optimizer；纯学生存 `model_state_dict`、optimizer、`learning_rate`、`num_teachers`、`teacher_loaded`；混合学生另存 `ppo_coef`。学生 state dict 包含 CNN、学生网络及冻结教师，混合模式再有 critic。三者都存 `experiment_config`、`iter` 和 `iteration`；当前检查的样本没有 `env_state`。所以一个 PT 并非只有部署 actor 参数，也不代表完整环境快照。[实际 checkpoint schema](usage_assets/reports/technical-audit/checkpoint-schema.json)。
+
+首个正式教师的[最终产物](usage_assets/reports/official-locomotion-final/index.md)已完成独立CPU验收：`iter/iteration=19999`，完整PT的68个tensor均有限，相对同run的iter0 checkpoint，actor和critic权重变化且Adam计数由20推进至400,000。iter0已做第一轮更新，不是未训练初值。四条TensorBoard tag各有20,000个有限样本，完整覆盖0–19999；原ONNX的12项CPU输入/参考查询通过。原始YAML的actor输出维度是`['robot_action_dim']`，原训练源码只将该项解析为`[29]`，解析后其余全配置精确相等，PT与ONNX内嵌配置也完全一致；首次严格比较失败保留。CPU检查没有物理rollout，不证明最终技能、收敛或PT/ONNX数值parity。
 
 真实续训也已分别验收教师、纯DAgger和DAgger+PPO：[6次原生训练及原始产物](usage_assets/reports/native-resume-acceptance/index.md)。每类先运行target2，保存iter0/1，再从iter1恢复到target4，最终保存iter3。原生循环会再次执行已保存的index1，所以这次是baseline两轮加resume三轮，不能理解成总共仅四次rollout。教师Adam步数40→60→100，两个学生16→24→40；恢复后的权重产生有限非零变化，冻结教师张量保持一致，新的TensorBoard样本、最终ONNX和已达目标skip均实测通过。混合学生早期std学习率为零，验收要求其参数保持原值而优化器计数继续推进。
 
@@ -555,7 +557,7 @@ startup default pose bias同时修改qtarget中心与观测`q−default`基准�
 | 统一容器与云端同步 | 一个镜像、本地/云端相同 Config/RootFS 指纹、完整镜像离线传输、内容校验源码快照、SSH 密钥登录 | 环境与传输已验证；主机和服务器未安装项目依赖 |
 | 动作生成 | 17 场景、629 配置，28 个独立 traversal executor；公开资产 296 对 native 数据 | 运动学生成与格式通路通过，不等于策略学会全部技能 |
 | 原生训练接口 | 既有22/22有界阶段、13次权重检查；另6次真实teacher/pure/finetune baseline与resume | 加载、优化器连续更新、TensorBoard、ONNX、skip通过；smoke不代表官方日程或收敛完成 |
-| 正式训练 | 五教师各 20000 轮、纯学生 10000、混合学生 30000 的顺序 driver 已启动 | 截至本文快照，仍在第一教师；不能确认全部完成 |
+| 正式训练 | 五教师各 20000 轮、纯学生 10000、混合学生 30000 的原顺序 driver | 首个locomotion教师完成20000轮及最终CPU验收，low-step正在训练；整套日程未完成 |
 | 云端 PT 回传本地 | iteration 19 pilot 与正式 iteration 500 都真实加载，在 16GiB 卡运行 64env×250step | 模型传输与 Isaac 推理通路通过；两次均 `quality_verified=false` |
 | 逐原始源片段验收 | 296 对输入逐项校验、后续116项目标CPU回归；原3次Isaac尝试加新RO资产合同1次实测 | teacher500为158策略步，两种student smoke各21步后失败；0片段完成，尚未跑完296源×三策略 |
 | 发布学生的物理 sim2sim | 原生 ONNX、DDS、深度 SHM、PD；12个有效command、17场景全部629配置 | 新SDK12command的24worker/12视频通过；后续全629原始rollout、1258worker及629全片解码也通过，[完整结果](usage_assets/reports/sim2sim-full629-sdk018-recovered/index.md)保留全部阈值事件，未确认技能成功 |
@@ -567,7 +569,7 @@ startup default pose bias同时修改qtarget中心与观测`q−default`基准�
 
 独立的 [逐源片段工具](scripts/research/eval_source_coverage.py) 将原始 `source_clip_id`、原训练 expert 和 singleton native expert 分开记录：每个源复制为一个本地 bundle，生成一份地形变体，保留实际 native NPZ/OBJ/YAML、逐步参考帧、失败标志、动作、误差、录像和 TensorBoard。原始296个NPZ都没有存储 `motion_idxs` / `motion_ends`；合并时才补上本地 expert0 和最后一帧边界。`plan/preflight` 只做 CPU 检查，`run` 逐片段运行，首次失败/超时/边界即停。原生两次零动作 warmup 与策略控制分列，真正策略参考帧为 `1..T-2`，frame0与最后的边界标记不伪称被策略控制。
 
-正式模型后的 [自动衔接](scripts/research/posttrain_coverage.py) 等待全部官方训练、质量评估和导出结束，核验七个PT的迭代、环境数、variant、seed和算法；学生内嵌五专家的完整MLP和观测normalizer还须逐tensor等于对应最终教师。随后才准备三套296源计划，并在固定GPU空闲时执行888个首次尝试。61项CPU调度回归及实际smoke模型的专家格式核验已通过；正式模型尚不存在，不能把这项准备工作记作888次完成。[检查证据](usage_assets/reports/posttrain-monitor/summary.md)。
+正式模型后的 [自动衔接](scripts/research/posttrain_coverage.py) 等待全部官方训练、质量评估和导出结束，核验七个PT的迭代、环境数、variant、seed和算法；学生内嵌五专家的完整MLP和观测normalizer还须逐tensor等于对应最终教师。随后才准备三套296源计划，并在固定GPU空闲时执行888个首次尝试。61项CPU调度回归及实际smoke模型的专家格式核验已通过；七个正式模型尚未齐备，不能把这项准备工作记作888次完成。[检查证据](usage_assets/reports/posttrain-monitor/summary.md)。
 
 等待进程现已实际升级至独立的02bc源码快照，使用新的RO资产合同和coverage输出目录，PID4074213；只停止身份核验过的旧waiting进程，正式训练的容器/镜像/源码挂载及训练进程出生身份前后均未变。它仍等待原五教师/两学生driver完成，没有额外云GPU任务。[本次升级回执](usage_assets/reports/posttrain-monitor-ro-assets-v2/summary.md)与[最初部署历史](usage_assets/reports/posttrain-monitor-deployment/summary.md)分别保留，代码准备、启动成功与策略质量分别验收。
 

@@ -1,0 +1,69 @@
+{
+  "label": "teacher-locomotion",
+  "profile": "official",
+  "started_utc": "2026-10-10T04:20:55.453752+00:00",
+  "command": [
+    "bash",
+    "/workspace/php_parkour/wbt_training/training_runs/run_terrain_teacher.sh",
+    "--training.headless",
+    "True",
+    "--training.num-envs",
+    "4096",
+    "--training.name",
+    "teacher-locomotion",
+    "--training.project",
+    "PHP-research",
+    "--logger.base-dir",
+    "/outputs/official-full/official/teacher-locomotion",
+    "--training.seed",
+    "42",
+    "--algo.config.num-learning-iterations",
+    "20000"
+  ],
+  "environment": {
+    "LOGGER": "tensorboard",
+    "NGPUS": "1",
+    "CUDA_VISIBLE_DEVICES": "0",
+    "HSSIM_PYTHON": "/opt/php/bin/train-python",
+    "REGISTRY": "file:///data/assets/motions-locomotion"
+  },
+  "settings": {
+    "profile": "official",
+    "skills": [
+      "locomotion",
+      "low-step",
+      "high-step",
+      "low-climb-76",
+      "high-climb-76"
+    ],
+    "assets": "/data/assets",
+    "num_envs": null,
+    "iterations_target": 20000,
+    "registries": "file:///data/assets/motions-locomotion",
+    "finetune": null,
+    "source_checkpoints": [],
+    "eval_steps": null,
+    "eval_quality_schema": null
+  },
+  "overrides": {
+    "num_envs": null,
+    "iterations_target": null
+  },
+  "quality_verified": false,
+  "scope": "official default training schedule; quality requires rollout evaluation",
+  "status": "passed",
+  "returncode": 0,
+  "finished_utc": "2026-10-10T16:52:47.798824+00:00",
+  "elapsed_seconds": 45112.34510906041,
+  "log": "/outputs/official-full/official/teacher-locomotion-1791606055466005589.log",
+  "performance": {
+    "iteration_samples": 20000,
+    "median_collection_plus_learning_seconds": 1.978,
+    "measured_num_envs": 4096,
+    "estimate_scope": "Measured collection+learning only; excludes simulator initialization, exports/checkpoint writes and evaluation. No scaling to another environment count.",
+    "estimated_default_schedule_core_hours": 10.988888888888889
+  },
+  "checkpoint": "/outputs/official-full/official/teacher-locomotion/PHP-research/20261010_042104-teacher-locomotion-locomotion/model_19999.pt",
+  "checkpoint_iteration": 19999,
+  "checkpoint_sha256": "b3bec5154ffe126ef364c9617d39d167289a8e0645dbbfa2354a3908dcc2973c"
+}
