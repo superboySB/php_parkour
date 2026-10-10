@@ -1,0 +1,11 @@
+# 最终学生等待器独立只读预启动审查
+
+通过，剩余必须修正项0。入口SHA`049678a74ff34776120fda26da9c6ebb54c215f084929629a60fc5bfba50535f`，合同SHA`b4cde2ba7b361bd5f18cce9a0a10b1c234fa1519cfe5787fa14e9aef0f0d7f4f`。核11个执行/来源文件和native58冻结10成员，最终Docker CPU55/55、源SHA前后一致；实际本地check exit0/prepared_only，transfer/native/execution/lock四专用路径尚未创建。
+
+单实例flock、600秒只读status、真实ready后单次fetch、固定4ONNX28JSON来源、partial保留且不自动重试、fresh629正常终态/停止/UUID空闲门卫均符合范围。真正prepare后调用封存cohort/control/native58 run，终态要求58例/116worker/116host映射/58原片解码，quality始终不由执行完整性推断。
+
+初稿子进程生命周期缺口已修复：独立session/PID出生身份启动回执，SIGTERM受控取消；native58先自身SIGINT/finally清理，SSH/传输使用核身份的私有组SIGINT。普通CPU helper和孙进程真实回收测试通过，身份变化/残留拒绝通过。transport超过30秒宽限会失败并留现场，不KILL、不自动重试；native58取消等待其自身清理，不能宣称非合作进程总能回收。
+
+审查者未arm daemon、SSH、Docker、fetch、native/GPU，也未改生产/原证据/Git。最终模型交付及60ORT/58native仍待真实就绪后执行。旧50源码重建标识保留，只有final55具有精确前后SHA绑定。
+
+[机器报告](review.json)，SHA256`b8fe3948ff55e35563ab6c5c597633667a88528691e154e8c47831fe0f093e4f`。

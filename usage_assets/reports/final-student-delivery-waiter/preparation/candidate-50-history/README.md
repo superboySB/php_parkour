@@ -1,0 +1,1 @@
+Candidate associated with tests-candidate.xml (50 passed). Waiter source reconstructed by reversing only the subsequent lifecycle patch; no live daemon or model execution occurred. Final source/tests are validated separately.

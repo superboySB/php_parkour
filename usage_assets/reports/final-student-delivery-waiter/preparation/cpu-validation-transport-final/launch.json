@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "scope": "Synthetic CPU control plane, actual owned plain-CPU helper and grandchild only; no SSH/fetch/native/GPU",
+  "argv": [
+    "docker",
+    "run",
+    "--rm",
+    "--runtime=runc",
+    "--network=none",
+    "--name",
+    "php-final-delivery-waiter-cpu-04",
+    "--env",
+    "CUDA_VISIBLE_DEVICES=",
+    "--env",
+    "NVIDIA_VISIBLE_DEVICES=void",
+    "--mount",
+    "type=bind,src=/home/dzp/projects/php_parkour,dst=/home/dzp/projects/php_parkour,readonly",
+    "--mount",
+    "type=bind,src=/home/dzp/projects/php_parkour/outputs/research/final-student-delivery-waiter-preparation,dst=/home/dzp/projects/php_parkour/outputs/research/final-student-delivery-waiter-preparation",
+    "--workdir",
+    "/home/dzp/projects/php_parkour",
+    "--entrypoint",
+    "/opt/php/bin/train-python",
+    "sha256:2be18521015b2a84ef7a4442af9a94ef041a19feb9ce385ae15424b1dc158d8f",
+    "-m",
+    "pytest",
+    "-q",
+    "/home/dzp/projects/php_parkour/outputs/research/final-student-delivery-waiter-preparation/test_wait_final_students.py",
+    "-p",
+    "no:cacheprovider",
+    "--junitxml=/home/dzp/projects/php_parkour/outputs/research/final-student-delivery-waiter-preparation/cpu-validation-transport-final/tests.xml"
+  ],
+  "observed_utc": "2026-10-10T10:57:55.005036+00:00",
+  "returncode": 0,
+  "source_before": [
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/final-student-delivery-waiter-preparation/wait_final_students.py",
+      "sha256": "049678a74ff34776120fda26da9c6ebb54c215f084929629a60fc5bfba50535f",
+      "bytes": 23098
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/final-student-delivery-waiter-preparation/test_wait_final_students.py",
+      "sha256": "9d02b7194997e1b81d9c4d5413a51fc0fd8308ee27dd234f5b95cbd5a2bfd4aa",
+      "bytes": 21475
+    }
+  ],
+  "source_after": [
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/final-student-delivery-waiter-preparation/wait_final_students.py",
+      "sha256": "049678a74ff34776120fda26da9c6ebb54c215f084929629a60fc5bfba50535f",
+      "bytes": 23098
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/final-student-delivery-waiter-preparation/test_wait_final_students.py",
+      "sha256": "9d02b7194997e1b81d9c4d5413a51fc0fd8308ee27dd234f5b95cbd5a2bfd4aa",
+      "bytes": 21475
+    }
+  ],
+  "network": "none",
+  "runtime": "runc",
+  "gpu_requested": false
+}

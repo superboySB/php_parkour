@@ -462,3 +462,15 @@ Isaac评估将URDF转换缓存写在`robot.asset.asset_root`下。源码只读�
 真实只读源码单源验收已完成：原iter500教师初始化并执行158策略步后首次跟踪失败；完整920帧输入和cap920保留，35原资产及3356封存输入SHA不变。独立CPU后验、实际保存配置与三段视频全片解码通过。[真实RO源码/RW资产运行证据](usage_assets/reports/source-coverage-ro-assets-pilot/summary.md)。这证明初始化与评估流程可运行，技能质量仍为false。
 
 学生选择性回传入口现默认使用02bc源码与`coverage-official-final-ro-assets-v2`目录，`status`与`fetch`均支持显式`--coverage-output coverage-official-final-ro-assets-v2`。等待和就绪响应均核对源树、monitor SHA与coverage相对/绝对目录；ready还核对schema2共享资产合同。77/77 Docker CPU测试通过，10:19 UTC真实`status`返回waiting，16阶段仍阻塞、cpu_ready_present=false、transfer_started=false。[修改前后源码、精确命令与真实响应](usage_assets/reports/final-student-transfer-ro-assets-integration/summary.md)。先等待原官方driver，不以旧目录或中间PT替代最终模型。
+
+### 最终学生回传后的本地验收
+
+最终两学生的独立验收入口已冻结，47/47 Docker CPU控制面测试与真实缺fetch的waiting分支通过；真正completed fetch之后才准备模型、执行60项CPU ORT，再按pure12方向/pure17代表场景/finetune12方向/finetune17代表场景串行运行，共58例。要求116个worker正常退出且组为空、116份精确hostwriter出生映射和58原视频全片解码；正常退出仍不代表技能或课程成功。[源码、CLI、原失败与独立审查](usage_assets/reports/final-student-native58-preparation/summary.md)。这项自训模型验收与发布模型的全629扫描分别保留，不能互相替代。
+
+本机已于2026-10-10 11:03 UTC启动单实例交接程序PID1121672，55/55 Docker CPU测试及独立预启动审查通过。首次真实SSH status为waiting，16阶段阻塞，未fetch、未执行真实模型prepare或native。此后每600秒等待真正ready，仅回传4ONNX+28JSON；待现fresh629成功/停止、固定GPU mutex释放且GPU空闲，才由冻结入口串行执行上述步骤。[准确合同、启动argv/PID出生身份及首次原日志](usage_assets/reports/final-student-delivery-waiter/summary.md)。查看当前状态使用：
+
+```bash
+python3 -m json.tool outputs/research/final-student-delivery-waiter-preparation/execution/state.json
+```
+
+当前已有waiter，不要再次watch、手动fetch或同时另起final58。任何已开始步骤的失败/partial都保留并停止，不自动重试；需要取消时先核对启动收据的PID出生身份，再用SIGTERM等待自身清理。准备源码可从上述发布副本恢复，但不能覆盖活控制文件；final58还依赖原canonical context/source-manifest、1887生成输入、baseline/helper准确路径、指定镜像、真实completed fetch和现fresh629成功/释放收据，详见包内restore-map。这些控制面测试与waiting回执不计作正式训练或最终模型验收完成。

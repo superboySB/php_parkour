@@ -377,3 +377,11 @@ CPU 测试统一在 Docker 中运行，分别保留根目录/训练和 motion ma
 这是发布ONNX对的几何扫描，quality/course均false；首两例不是629全量验收。初次CPU checker错误假设轨迹起点为0的失败原件也已保留，改为依据实际ACK偏移检查首末10秒跨度后通过，没有改动原生轨迹。
 
 学生回传入口同步绑定新watch的02bc源码、`coverage-official-final-ro-assets-v2`和schema2共享资产合同，77/77 Docker CPU检查通过。10:19 UTC root真实SSH status为waiting，16阶段阻塞，没有cpu-ready、GPU验收或模型回传；四ONNX加28JSON白名单保持。[最小补丁、原JUnit与真实等待响应](usage_assets/reports/final-student-transfer-ro-assets-integration/summary.md)。旧57项与15:26状态只作历史记录，不与新测试相加。
+
+### 最终两学生的58项验收与实际后台交接
+
+本地适配入口已冻结并通过47项Docker CPU控制面测试，真实缺fetch时只返回waiting、不建cohort；初轮33pass/1fail及中间41pass原件保留。真正模型到达后，每学生先CPU ORT30，再执行12方向和17代表场景，共58例；终态必须同时满足116正常worker/空组、116精确hostwriter出生映射和58原MP4全片解码。8/10仿真秒、默认wall373/413、seed42均保持，原core/helper按SHA复用；质量与课程成功仍false。[冻结源码、完整设计索引、恢复前提及独立审查](usage_assets/reports/final-student-native58-preparation/summary.md)。当前实际最终模型prepare、60项ORT和58次native均未执行。
+
+交接程序另经55项Docker CPU检查，含真实普通CPU父孙进程取消/回收，独立审查无剩余必须修正项。root于11:03:25 UTC（北京时间19:03）实际启动PID1121672，封存PGID/SID/出生ticks/boot_id及准确argv。首轮真实SSH helper exit0且session为空，waiting/16阶段阻塞，fetch/prepare/run均false，两个交付目录未建，本地Docker ID集合不变。[原始测试、预审、实际启动与首轮收据](usage_assets/reports/final-student-delivery-waiter/summary.md)。它每600秒等待，真正ready后仅一次回传、待现629/GPU正常释放再调用冻结入口；错误和partial保留，不自动重试。已有此进程，勿并发手动fetch或final58。
+
+11:00 UTC另一次实际Docker inspect/top确认云端原official driver/train与本地629 wrapper/simulator均存活；固定快照158completed/1running/470planned。同期首教师TensorBoard为step10315，所选四tag全部历史样本有限。[实际活进程和scalar快照](usage_assets/reports/final-student-delivery-waiter/active-jobs/summary.json)。这是进度证据，正式训练、629全量后验与最终模型58项验收仍未完成。
