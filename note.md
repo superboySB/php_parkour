@@ -120,6 +120,8 @@ bash scripts/research/docker.sh motion -m motion_matching.play_database \
 
 交互动作匹配需要 GUI 容器与 Tk；交互和数据库浏览器均使用 `http://localhost:8081`，不能同时占用该端口。运动文件浏览器使用8080。Tk窗口使用 I/K/J/L 前后左右、Tab切换速度、界面列出的技能键触发参考动作，Quit同时停止动作匹配循环。
 
+Viser调整速度后点Save，会保存新tracking NPZ及匹配命名的terrain NPY/OBJ，保留源文件全部地形变体；已有方向指令随动作速度/FPS重采样。主交互界面的Start/End Recording默认保存到`motion_matching_results/interactive/mmYYYYMMDD/`，输出`recording_时间戳_motion.npz`、配对`_terrain.npy/.obj`和`.recording.json`；空场景也有合法空地形。交互录制只保存qpos，没有`vel_cmd`，需提供真实逐帧方向标签后才能用于方向条件学生训练。两条实际控件、保存和转换/加载流程见 [GUI验收](usage_assets/reports/gui-workflows/summary.md)。
+
 自定义动作的格式、数据库生成、技能注册方式见 [motion_matching/README.md](motion_matching/README.md)。原生示例中的 `python` 替换为容器的 `motion-python`，所有输入均应放在已挂载目录中。生成数据库的源 qpos 顺序是 `[root_quat_wxyz, root_pos_xyz, dof29]`，需要显式指定源 FPS。
 
 新生成的动作是29关节/30 body的tracking格式，训练需要转换为36维位置/35维速度/32 body的Holosoma native格式；公开的296组训练数据已转换。转换上面的自定义场景，并保留同名地形配对：
@@ -244,6 +246,20 @@ ssh -p 22 -N -L 6007:127.0.0.1:6006 tencent-231
 
 评估入口 `eval-teachers` / `eval-student` 会生成 `quality.json`：checkpoint SHA、实际仿真时间、失败/超时 reset、跟踪误差、观察到的 motion IDs、录像 SHA 和本地 TensorBoard `Evaluation/*`。`--eval-steps` 控制本次有界 rollout 的步数。当前 MotionLoader 把源动作合并为一个 NPZ，顶层 ID 0 和 `available_clip_count=1` 不能直接统计原始片段覆盖；需要结合 `motion_ends` 和参考时间索引。不能从步数或录像数量推断遍历了整套动作。
 
+学生还支持 `--show-depth True`，显示策略实际读取的延迟深度拼图。先按第2节启动能访问 X11 的 GUI Docker，再使用容器内有效的学生 PT；Isaac 主视窗仍可 headless：
+
+```bash
+: "${PHP_STUDENT_CHECKPOINT:?请先设为容器内实际学生PT的绝对路径}"
+docker exec -e CHECKPOINT="$PHP_STUDENT_CHECKPOINT" \
+  -e REGISTRY=file:///data/assets/motions-locomotion \
+  -e NUM_ENVS=4 -e MAX_EVAL_STEPS=100 php-parkour-research \
+  bash wbt_training/training_runs/eval_student.sh --show-depth True \
+  --training.headless True --training.export-onnx False \
+  --logger.base-dir /outputs/depth-window-new
+```
+
+上述例子只评估 locomotion 输入；完整多技能评估应传入训练顺序一致的 registry 列表。离线 logger 使用 `--logger.base-dir`，不接受 W&B 专属的 `--logger.project` / `--logger.name`。实际窗口已验证4环境、100帧与两张窗口截图；精确观察命令和原始日志见 [深度窗口验收](usage_assets/reports/depth-gui/summary.md)。
+
 逐原始片段检查使用独立工具 [eval_source_coverage.py](scripts/research/eval_source_coverage.py)。它先校验全部 296 对公开数据，再为每个选中的源文件复制独立 `file://` bundle；不改运行中的训练。下面以纯学生和第一个 low-step 片段为例：先把 `PHP_STUDENT_CHECKPOINT` 设为容器内已经存在的学生 `.pt` 绝对路径，使用未占用的输出目录。
 
 ```bash
@@ -277,6 +293,20 @@ python3 scripts/research/cloud.py --detach exec bash -c \
 ```
 
 它依次完成五教师、最终教师 ONNX 检查、五教师质量评估、两种学生训练/质量评估/独立导出。同一输出目录有文件锁；重启会恢复有效 checkpoint，重新生成丢失或被改动的验收产物。训练保留 4096/2048 环境、官方迭代数和每 500 轮保存设置，质量评估单独使用 64 环境 × 3000 步。预计需多天；状态以各阶段 manifest 和原始日志为准。
+
+完成后的逐源验收由 [posttrain_coverage.py](scripts/research/posttrain_coverage.py) 衔接。先用`cloud.py sync`将最新代码同步为独立快照，保留正在训练的旧挂载；下列命令在服务器已有shell中执行，`PHP_COVERAGE_SOURCE_TREE`须填同步输出的64位SHA：
+
+```bash
+: "${PHP_COVERAGE_SOURCE_TREE:?请设为新的源码快照SHA}"
+PHP_COVERAGE_ROOT=/diff/dzp_is_sb/php-parkour-research
+python3 "$PHP_COVERAGE_ROOT/source/$PHP_COVERAGE_SOURCE_TREE/scripts/research/posttrain_coverage.py" \
+  dry-run --source-tree "$PHP_COVERAGE_SOURCE_TREE"
+# 核对dry-run，再以前台watch或已有进程管理方式持续运行：
+python3 "$PHP_COVERAGE_ROOT/source/$PHP_COVERAGE_SOURCE_TREE/scripts/research/posttrain_coverage.py" \
+  watch --source-tree "$PHP_COVERAGE_SOURCE_TREE" --poll-seconds 60
+```
+
+`dry-run`只读状态。`watch`等待全部16阶段manifest、driver最终标记、所有训练/评估子进程退出和官方锁释放；随后用相同镜像启动无GPU、无网络的Docker，核对七个最终PT的真实配置、有限权重及学生内嵌五专家与教师逐tensor一致，再执行三套296源CPU预检。只有固定物理GPU 1的UUID确实空闲时，才启动无网络GPU Docker执行888个首次尝试；不改原训练容器或源码。每个失败、未完成和已完成记录均保留；中断后只有显式`--resume-interrupted`才续跑未尝试项，不重试已失败的技能。状态保存在服务器`outputs/coverage-official-final/monitor-status.json`，逐源输出与官方训练目录分开；启动watch不等于完成这些测试。
 
 本次正式 driver 已于北京时间 2026-10-10 12:20 用上述 `/outputs/official-full` 目录启动，当前无需重复启动。云端 TensorBoard 已以该目录为 `--logdir` 运行，本机 6007 转发也已实测 HTTP 200；打开 `http://127.0.0.1:6007/` 查看实时训练。上述 `/outputs/training` 示例适用于默认输出目录；已有服务时复用同一端口。可随时只读检查进度：
 
@@ -332,6 +362,19 @@ docker exec -it -e BACKBONE=/data/assets/student/depth_backbone.onnx \
 MuJoCo 窗口中 `8` 放下吊架、`9` 移除吊架、Backspace 重置。推理终端 `]` 启动策略、`o` 阻尼停止、`i` 恢复初始站姿；`w/s` 前后，`a/d` 左右 45°，`q/e` 左右 90°，`z` 站立，`=` 切换速度，`c` 开始/结束录制。方向键释放检测需要可用显示会话。启动新仿真前结束旧仿真/推理，避免覆盖仍在使用的深度共享内存。
 
 有界闭环增加 `--record-policy` 可验证原生录制、STOP 自动保存和阻尼模式。原生 SDK 的 qpos 录制布局是 `[wxyz, 零 xyz 占位, dof29]`，不是世界坐标轨迹或 BeyondMimic 文件；不能直接送入训练转换器。位移和真实根位置使用闭环输出的 `trajectory.csv`。任意 OBJ 可加载不代表公开策略能通过任意障碍，实际成功与失败片段见 usage。
+
+全部生成配置的物理扫描用同一容器运行下列入口。先结束已有MuJoCo/DDS推理；该脚本持有容器全局锁，并检查存活的原生子进程，防止覆盖深度共享内存。输出保留逐例日志、世界轨迹、视频及输入SHA；相同计划可重启续跑，已完成项须通过产物SHA复核后才跳过。默认不加`--all-configs`只选17个代表配置。
+
+```bash
+docker exec -e OMP_NUM_THREADS=4 php-parkour-research \
+  /opt/php/bin/train-python scripts/research/sim2sim_scene_matrix.py \
+  --all-configs --matrix /outputs/motion-matching/matrix.json \
+  --models /data/assets/student --output /outputs/sim2sim/all-configs-final \
+  --image-id "$(docker inspect --format '{{.Image}}' php-parkour-research)" \
+  --seconds 10 --gl egl
+```
+
+这是17场景、629种几何上每种500次策略控制的有界测试，各例使用恒定forward command；不会按参考轨迹回放，也不把存活10秒视为完成课程。当前后台任务正在使用上述目录和DDS，**不要同时启动第二份扫描或其他原生闭环**。具体启动时间、逐例完成快照和两段真实预检视频见[扫描记录](usage_assets/reports/sim2sim-all-configs-start/summary.md)。
 
 ## 8. 验收与定位问题
 

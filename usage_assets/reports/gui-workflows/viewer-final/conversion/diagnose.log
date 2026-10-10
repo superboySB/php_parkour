@@ -1,0 +1,73 @@
+
+======================================================================
+  Diagnosing: /workspace/php_parkour/outputs/research/gui-workflows/viewer-final/conversion/single/example_motion.npz
+======================================================================
+
+--- Basic Info ---
+  fps: [50]
+  joint_names (29): ['left_hip_pitch_joint', 'left_hip_roll_joint', 'left_hip_yaw_joint', 'left_knee_joint', 'left_ankle_pitch_joint'] ...
+  body_names  (32): ['pelvis', 'left_hip_pitch_link', 'left_hip_roll_link', 'left_hip_yaw_link', 'left_knee_link'] ...
+  joint_pos           : shape=(223, 36), dtype=float64
+  joint_vel           : shape=(223, 35), dtype=float64
+  body_pos_w          : shape=(223, 32, 3), dtype=float64
+  body_quat_w         : shape=(223, 32, 4), dtype=float64
+  body_lin_vel_w      : shape=(223, 32, 3), dtype=float64
+  body_ang_vel_w      : shape=(223, 32, 3), dtype=float64
+  Total frames: 223, duration: 4.5s
+
+--- Root Pose (from joint_pos, first 7 cols = xyz + quat_wxyz) ---
+  Frame 0 root_xyz:  [-1.47406217e-02 -4.99999987e-06  7.88946569e-01]
+  Frame 0 root_quat: [-0.99974442  0.         -0.02260797  0.        ]
+  Root height range: [0.679, 1.133]
+  Root quat norm (frame 0): 1.000000
+  Root quat convention (joint_pos): wxyz (w-first, w≈1)
+
+--- Body Positions ---
+  Pelvis (body 0) frame 0: [-1.47406217e-02 -4.99999987e-06  7.88946569e-01]
+  Pelvis height range: [0.679, 1.133]
+  |root_xyz - pelvis_pos| frame 0: [0. 0. 0.] (should be ~0)
+  left_ankle_roll_link height (frame 0): 0.039m
+  right_ankle_roll_link height (frame 0): 0.039m
+  torso_link height (frame 0): 0.833m
+
+--- Body Quaternions ---
+  Pelvis quat frame 0: [-0.99974442  0.         -0.02260797  0.        ]
+  Pelvis quat norm (frame 0): 1.000000
+  Body quat convention (pelvis): wxyz (w-first, w≈1)
+  |root_quat - pelvis_quat| frame 0: [0. 0. 0. 0.] (should be ~0)
+
+--- Joint Positions (frame 0, first 10 of 29 DOFs) ---
+  left_hip_pitch_joint               : -0.1628
+  left_hip_roll_joint                : -0.0222
+  left_hip_yaw_joint                 : 0.0091
+  left_knee_joint                    : 0.2915
+  left_ankle_pitch_joint             : -0.1472
+  left_ankle_roll_joint              : 0.0247
+  right_hip_pitch_joint              : -0.1628
+  right_hip_roll_joint               : 0.0222
+  right_hip_yaw_joint                : -0.0091
+  right_knee_joint                   : 0.2915
+
+  Joint position ranges (min, max, range):
+  left_hip_pitch_joint               : [-1.445, +0.148] range=1.592
+  left_hip_roll_joint                : [-0.207, +0.304] range=0.511
+  left_hip_yaw_joint                 : [-0.340, +0.425] range=0.765
+  left_knee_joint                    : [+0.291, +2.195] range=1.904
+  left_ankle_pitch_joint             : [-0.581, +0.175] range=0.756
+  left_ankle_roll_joint              : [-0.288, +0.236] range=0.524
+  right_hip_pitch_joint              : [-0.973, +0.297] range=1.270
+  right_hip_roll_joint               : [-0.209, +0.200] range=0.410
+  right_hip_yaw_joint                : [-0.421, +0.160] range=0.581
+  right_knee_joint                   : [+0.291, +1.924] range=1.632
+
+--- Sanity Checks ---
+  PASS: Average pelvis height 0.824m looks reasonable
+  PASS: Pelvis quaternion norms are valid
+  PASS: left_ankle_roll_link (0.039m) is below pelvis (0.789m)
+  PASS: right_ankle_roll_link (0.039m) is below pelvis (0.789m)
+  PASS: Max body spread 1.068m looks reasonable
+
+======================================================================
+  Diagnosis complete
+======================================================================
+

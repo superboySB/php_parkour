@@ -1,0 +1,482 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="16" skipped="0" tests="28" time="0.864" timestamp="2026-10-10T06:13:03.382937+00:00" hostname="dzp-MS-7E30"><testcase classname="tests.test_sim2sim_scene_matrix" name="test_default_seventeen_contract_and_explicit_all_629" time="0.005" /><testcase classname="tests.test_sim2sim_scene_matrix" name="test_all_configs_refuses_incomplete_or_ambiguous_source[missing]" time="0.001" /><testcase classname="tests.test_sim2sim_scene_matrix" name="test_all_configs_refuses_incomplete_or_ambiguous_source[failed]" time="0.001" /><testcase classname="tests.test_sim2sim_scene_matrix" name="test_all_configs_refuses_incomplete_or_ambiguous_source[duplicate_index]" time="0.001" /><testcase classname="tests.test_sim2sim_scene_matrix" name="test_all_configs_refuses_incomplete_or_ambiguous_source[duplicate_name]" time="0.001" /><testcase classname="tests.test_sim2sim_scene_matrix" name="test_all_configs_refuses_incomplete_or_ambiguous_source[missing_pair]" time="0.001" /><testcase classname="tests.test_sim2sim_scene_matrix" name="test_all_configs_refuses_incomplete_or_ambiguous_source[duplicate_scenario]" time="0.001" /><testcase classname="tests.test_sim2sim_scene_matrix" name="test_resume_skips_only_verified_complete_case_then_finishes_subset" time="0.003"><failure message="ValueError: Native child still running in this container; do not overlap DDS jobs: [17867, 17868, 17873]">run_fixture = (namespace(matrix=PosixPath('/tmp/pytest-of-root/pytest-32/test_resume_skips_only_verifie0/source.json'), models=Posix...b0be52da6aea54e9'}], ...}, PosixPath('/tmp/pytest-of-root/pytest-32/test_resume_skips_only_verifie0/native-helper.py'))
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x71fdb594dbd0&gt;
+
+    def test_resume_skips_only_verified_complete_case_then_finishes_subset(run_fixture, monkeypatch):
+        args, plan, helper = run_fixture
+        calls = fake_child(monkeypatch, plan)
+        args.case_limit = 1
+&gt;       first = matrix.execute(args, plan)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_sim2sim_scene_matrix.py:138: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+scripts/research/sim2sim_scene_matrix.py:331: in execute
+    return execute_locked(args, plan)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+args = namespace(matrix=PosixPath('/tmp/pytest-of-root/pytest-32/test_resume_skips_only_verifie0/source.json'), models=PosixP...aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', all_configs=True, resume=False, case_id=[], case_limit=1)
+plan = {'all_configurations': True, 'concurrency_scope': 'One matrix driver per container; all manual native sim2sim jobs mus...s_only_verifie0/native-helper.py', 'sha256': '6c5d895211935197467d2e31764903545a16d0e6f09bded4b0be52da6aea54e9'}], ...}
+
+    def execute_locked(args, plan: dict) -&gt; dict:
+        # Check all native children, including cases excluded by a pilot filter and
+        # surviving jobs from a different output. Matrix locks alone cannot survive
+        # a killed parent or govern a separately launched manual native harness.
+        live = running_children()
+        if live:
+&gt;           raise ValueError(f"Native child still running in this container; do not overlap DDS jobs: {live}")
+E           ValueError: Native child still running in this container; do not overlap DDS jobs: [17867, 17868, 17873]
+
+scripts/research/sim2sim_scene_matrix.py:340: ValueError</failure></testcase><testcase classname="tests.test_sim2sim_scene_matrix" name="test_resume_refuses_changed_complete_evidence[video/rollout.mp4]" time="0.003"><failure message="ValueError: Native child still running in this container; do not overlap DDS jobs: [17867, 17868, 17873]">run_fixture = (namespace(matrix=PosixPath('/tmp/pytest-of-root/pytest-32/test_resume_refuses_changed_co0/source.json'), models=Posix...b0be52da6aea54e9'}], ...}, PosixPath('/tmp/pytest-of-root/pytest-32/test_resume_refuses_changed_co0/native-helper.py'))
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x71fdbdb67990&gt;
+artifact = 'video/rollout.mp4'
+
+    @pytest.mark.parametrize("artifact", ("video/rollout.mp4", "trajectory.csv", "result.json", "case-evidence.json"))
+    def test_resume_refuses_changed_complete_evidence(run_fixture, monkeypatch, artifact):
+        args, plan, helper = run_fixture
+        fake_child(monkeypatch, plan)
+        args.case_limit = 1
+&gt;       report = matrix.execute(args, plan)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_sim2sim_scene_matrix.py:154: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+scripts/research/sim2sim_scene_matrix.py:331: in execute
+    return execute_locked(args, plan)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+args = namespace(matrix=PosixPath('/tmp/pytest-of-root/pytest-32/test_resume_refuses_changed_co0/source.json'), models=PosixP...aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', all_configs=True, resume=False, case_id=[], case_limit=1)
+plan = {'all_configurations': True, 'concurrency_scope': 'One matrix driver per container; all manual native sim2sim jobs mus...ses_changed_co0/native-helper.py', 'sha256': '6c5d895211935197467d2e31764903545a16d0e6f09bded4b0be52da6aea54e9'}], ...}
+
+    def execute_locked(args, plan: dict) -&gt; dict:
+        # Check all native children, including cases excluded by a pilot filter and
+        # surviving jobs from a different output. Matrix locks alone cannot survive
+        # a killed parent or govern a separately launched manual native harness.
+        live = running_children()
+        if live:
+&gt;           raise ValueError(f"Native child still running in this container; do not overlap DDS jobs: {live}")
+E           ValueError: Native child still running in this container; do not overlap DDS jobs: [17867, 17868, 17873]
+
+scripts/research/sim2sim_scene_matrix.py:340: ValueError</failure></testcase><testcase classname="tests.test_sim2sim_scene_matrix" name="test_resume_refuses_changed_complete_evidence[trajectory.csv]" time="0.002"><failure message="ValueError: Native child still running in this container; do not overlap DDS jobs: [17867, 17868]">run_fixture = (namespace(matrix=PosixPath('/tmp/pytest-of-root/pytest-32/test_resume_refuses_changed_co1/source.json'), models=Posix...b0be52da6aea54e9'}], ...}, PosixPath('/tmp/pytest-of-root/pytest-32/test_resume_refuses_changed_co1/native-helper.py'))
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x71fdb5a3a4d0&gt;
+artifact = 'trajectory.csv'
+
+    @pytest.mark.parametrize("artifact", ("video/rollout.mp4", "trajectory.csv", "result.json", "case-evidence.json"))
+    def test_resume_refuses_changed_complete_evidence(run_fixture, monkeypatch, artifact):
+        args, plan, helper = run_fixture
+        fake_child(monkeypatch, plan)
+        args.case_limit = 1
+&gt;       report = matrix.execute(args, plan)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_sim2sim_scene_matrix.py:154: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+scripts/research/sim2sim_scene_matrix.py:331: in execute
+    return execute_locked(args, plan)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+args = namespace(matrix=PosixPath('/tmp/pytest-of-root/pytest-32/test_resume_refuses_changed_co1/source.json'), models=PosixP...aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', all_configs=True, resume=False, case_id=[], case_limit=1)
+plan = {'all_configurations': True, 'concurrency_scope': 'One matrix driver per container; all manual native sim2sim jobs mus...ses_changed_co1/native-helper.py', 'sha256': '6c5d895211935197467d2e31764903545a16d0e6f09bded4b0be52da6aea54e9'}], ...}
+
+    def execute_locked(args, plan: dict) -&gt; dict:
+        # Check all native children, including cases excluded by a pilot filter and
+        # surviving jobs from a different output. Matrix locks alone cannot survive
+        # a killed parent or govern a separately launched manual native harness.
+        live = running_children()
+        if live:
+&gt;           raise ValueError(f"Native child still running in this container; do not overlap DDS jobs: {live}")
+E           ValueError: Native child still running in this container; do not overlap DDS jobs: [17867, 17868]
+
+scripts/research/sim2sim_scene_matrix.py:340: ValueError</failure></testcase><testcase classname="tests.test_sim2sim_scene_matrix" name="test_resume_refuses_changed_complete_evidence[result.json]" time="0.002"><failure message="ValueError: Native child still running in this container; do not overlap DDS jobs: [17867, 17868]">run_fixture = (namespace(matrix=PosixPath('/tmp/pytest-of-root/pytest-32/test_resume_refuses_changed_co2/source.json'), models=Posix...b0be52da6aea54e9'}], ...}, PosixPath('/tmp/pytest-of-root/pytest-32/test_resume_refuses_changed_co2/native-helper.py'))
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x71fdb5934bd0&gt;
+artifact = 'result.json'
+
+    @pytest.mark.parametrize("artifact", ("video/rollout.mp4", "trajectory.csv", "result.json", "case-evidence.json"))
+    def test_resume_refuses_changed_complete_evidence(run_fixture, monkeypatch, artifact):
+        args, plan, helper = run_fixture
+        fake_child(monkeypatch, plan)
+        args.case_limit = 1
+&gt;       report = matrix.execute(args, plan)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_sim2sim_scene_matrix.py:154: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+scripts/research/sim2sim_scene_matrix.py:331: in execute
+    return execute_locked(args, plan)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+args = namespace(matrix=PosixPath('/tmp/pytest-of-root/pytest-32/test_resume_refuses_changed_co2/source.json'), models=PosixP...aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', all_configs=True, resume=False, case_id=[], case_limit=1)
+plan = {'all_configurations': True, 'concurrency_scope': 'One matrix driver per container; all manual native sim2sim jobs mus...ses_changed_co2/native-helper.py', 'sha256': '6c5d895211935197467d2e31764903545a16d0e6f09bded4b0be52da6aea54e9'}], ...}
+
+    def execute_locked(args, plan: dict) -&gt; dict:
+        # Check all native children, including cases excluded by a pilot filter and
+        # surviving jobs from a different output. Matrix locks alone cannot survive
+        # a killed parent or govern a separately launched manual native harness.
+        live = running_children()
+        if live:
+&gt;           raise ValueError(f"Native child still running in this container; do not overlap DDS jobs: {live}")
+E           ValueError: Native child still running in this container; do not overlap DDS jobs: [17867, 17868]
+
+scripts/research/sim2sim_scene_matrix.py:340: ValueError</failure></testcase><testcase classname="tests.test_sim2sim_scene_matrix" name="test_resume_refuses_changed_complete_evidence[case-evidence.json]" time="0.002"><failure message="ValueError: Native child still running in this container; do not overlap DDS jobs: [17867, 17868]">run_fixture = (namespace(matrix=PosixPath('/tmp/pytest-of-root/pytest-32/test_resume_refuses_changed_co3/source.json'), models=Posix...b0be52da6aea54e9'}], ...}, PosixPath('/tmp/pytest-of-root/pytest-32/test_resume_refuses_changed_co3/native-helper.py'))
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x71fdb593ae50&gt;
+artifact = 'case-evidence.json'
+
+    @pytest.mark.parametrize("artifact", ("video/rollout.mp4", "trajectory.csv", "result.json", "case-evidence.json"))
+    def test_resume_refuses_changed_complete_evidence(run_fixture, monkeypatch, artifact):
+        args, plan, helper = run_fixture
+        fake_child(monkeypatch, plan)
+        args.case_limit = 1
+&gt;       report = matrix.execute(args, plan)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_sim2sim_scene_matrix.py:154: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+scripts/research/sim2sim_scene_matrix.py:331: in execute
+    return execute_locked(args, plan)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+args = namespace(matrix=PosixPath('/tmp/pytest-of-root/pytest-32/test_resume_refuses_changed_co3/source.json'), models=PosixP...aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', all_configs=True, resume=False, case_id=[], case_limit=1)
+plan = {'all_configurations': True, 'concurrency_scope': 'One matrix driver per container; all manual native sim2sim jobs mus...ses_changed_co3/native-helper.py', 'sha256': '6c5d895211935197467d2e31764903545a16d0e6f09bded4b0be52da6aea54e9'}], ...}
+
+    def execute_locked(args, plan: dict) -&gt; dict:
+        # Check all native children, including cases excluded by a pilot filter and
+        # surviving jobs from a different output. Matrix locks alone cannot survive
+        # a killed parent or govern a separately launched manual native harness.
+        live = running_children()
+        if live:
+&gt;           raise ValueError(f"Native child still running in this container; do not overlap DDS jobs: {live}")
+E           ValueError: Native child still running in this container; do not overlap DDS jobs: [17867, 17868]
+
+scripts/research/sim2sim_scene_matrix.py:340: ValueError</failure></testcase><testcase classname="tests.test_sim2sim_scene_matrix" name="test_per_case_input_change_blocks_resume[helper]" time="0.001"><failure message="ValueError: Native child still running in this container; do not overlap DDS jobs: [17867, 17868]">run_fixture = (namespace(matrix=PosixPath('/tmp/pytest-of-root/pytest-32/test_per_case_input_change_blo0/source.json'), models=Posix...b0be52da6aea54e9'}], ...}, PosixPath('/tmp/pytest-of-root/pytest-32/test_per_case_input_change_blo0/native-helper.py'))
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x71fdb5960510&gt;
+input_kind = 'helper'
+
+    @pytest.mark.parametrize("input_kind", ("helper", "source", "model", "mesh"))
+    def test_per_case_input_change_blocks_resume(run_fixture, monkeypatch, input_kind):
+        args, plan, helper = run_fixture
+        fake_child(monkeypatch, plan)
+        args.case_limit = 1
+&gt;       matrix.execute(args, plan)
+
+tests/test_sim2sim_scene_matrix.py:168: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+scripts/research/sim2sim_scene_matrix.py:331: in execute
+    return execute_locked(args, plan)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+args = namespace(matrix=PosixPath('/tmp/pytest-of-root/pytest-32/test_per_case_input_change_blo0/source.json'), models=PosixP...aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', all_configs=True, resume=False, case_id=[], case_limit=1)
+plan = {'all_configurations': True, 'concurrency_scope': 'One matrix driver per container; all manual native sim2sim jobs mus...put_change_blo0/native-helper.py', 'sha256': '6c5d895211935197467d2e31764903545a16d0e6f09bded4b0be52da6aea54e9'}], ...}
+
+    def execute_locked(args, plan: dict) -&gt; dict:
+        # Check all native children, including cases excluded by a pilot filter and
+        # surviving jobs from a different output. Matrix locks alone cannot survive
+        # a killed parent or govern a separately launched manual native harness.
+        live = running_children()
+        if live:
+&gt;           raise ValueError(f"Native child still running in this container; do not overlap DDS jobs: {live}")
+E           ValueError: Native child still running in this container; do not overlap DDS jobs: [17867, 17868]
+
+scripts/research/sim2sim_scene_matrix.py:340: ValueError</failure></testcase><testcase classname="tests.test_sim2sim_scene_matrix" name="test_per_case_input_change_blocks_resume[source]" time="0.001"><failure message="ValueError: Native child still running in this container; do not overlap DDS jobs: [17867]">run_fixture = (namespace(matrix=PosixPath('/tmp/pytest-of-root/pytest-32/test_per_case_input_change_blo1/source.json'), models=Posix...b0be52da6aea54e9'}], ...}, PosixPath('/tmp/pytest-of-root/pytest-32/test_per_case_input_change_blo1/native-helper.py'))
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x71fdb598d390&gt;
+input_kind = 'source'
+
+    @pytest.mark.parametrize("input_kind", ("helper", "source", "model", "mesh"))
+    def test_per_case_input_change_blocks_resume(run_fixture, monkeypatch, input_kind):
+        args, plan, helper = run_fixture
+        fake_child(monkeypatch, plan)
+        args.case_limit = 1
+&gt;       matrix.execute(args, plan)
+
+tests/test_sim2sim_scene_matrix.py:168: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+scripts/research/sim2sim_scene_matrix.py:331: in execute
+    return execute_locked(args, plan)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+args = namespace(matrix=PosixPath('/tmp/pytest-of-root/pytest-32/test_per_case_input_change_blo1/source.json'), models=PosixP...aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', all_configs=True, resume=False, case_id=[], case_limit=1)
+plan = {'all_configurations': True, 'concurrency_scope': 'One matrix driver per container; all manual native sim2sim jobs mus...put_change_blo1/native-helper.py', 'sha256': '6c5d895211935197467d2e31764903545a16d0e6f09bded4b0be52da6aea54e9'}], ...}
+
+    def execute_locked(args, plan: dict) -&gt; dict:
+        # Check all native children, including cases excluded by a pilot filter and
+        # surviving jobs from a different output. Matrix locks alone cannot survive
+        # a killed parent or govern a separately launched manual native harness.
+        live = running_children()
+        if live:
+&gt;           raise ValueError(f"Native child still running in this container; do not overlap DDS jobs: {live}")
+E           ValueError: Native child still running in this container; do not overlap DDS jobs: [17867]
+
+scripts/research/sim2sim_scene_matrix.py:340: ValueError</failure></testcase><testcase classname="tests.test_sim2sim_scene_matrix" name="test_per_case_input_change_blocks_resume[model]" time="0.001"><failure message="ValueError: Native child still running in this container; do not overlap DDS jobs: [17867]">run_fixture = (namespace(matrix=PosixPath('/tmp/pytest-of-root/pytest-32/test_per_case_input_change_blo2/source.json'), models=Posix...b0be52da6aea54e9'}], ...}, PosixPath('/tmp/pytest-of-root/pytest-32/test_per_case_input_change_blo2/native-helper.py'))
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x71fdb5960d10&gt;
+input_kind = 'model'
+
+    @pytest.mark.parametrize("input_kind", ("helper", "source", "model", "mesh"))
+    def test_per_case_input_change_blocks_resume(run_fixture, monkeypatch, input_kind):
+        args, plan, helper = run_fixture
+        fake_child(monkeypatch, plan)
+        args.case_limit = 1
+&gt;       matrix.execute(args, plan)
+
+tests/test_sim2sim_scene_matrix.py:168: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+scripts/research/sim2sim_scene_matrix.py:331: in execute
+    return execute_locked(args, plan)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+args = namespace(matrix=PosixPath('/tmp/pytest-of-root/pytest-32/test_per_case_input_change_blo2/source.json'), models=PosixP...aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', all_configs=True, resume=False, case_id=[], case_limit=1)
+plan = {'all_configurations': True, 'concurrency_scope': 'One matrix driver per container; all manual native sim2sim jobs mus...put_change_blo2/native-helper.py', 'sha256': '6c5d895211935197467d2e31764903545a16d0e6f09bded4b0be52da6aea54e9'}], ...}
+
+    def execute_locked(args, plan: dict) -&gt; dict:
+        # Check all native children, including cases excluded by a pilot filter and
+        # surviving jobs from a different output. Matrix locks alone cannot survive
+        # a killed parent or govern a separately launched manual native harness.
+        live = running_children()
+        if live:
+&gt;           raise ValueError(f"Native child still running in this container; do not overlap DDS jobs: {live}")
+E           ValueError: Native child still running in this container; do not overlap DDS jobs: [17867]
+
+scripts/research/sim2sim_scene_matrix.py:340: ValueError</failure></testcase><testcase classname="tests.test_sim2sim_scene_matrix" name="test_per_case_input_change_blocks_resume[mesh]" time="0.001"><failure message="ValueError: Native child still running in this container; do not overlap DDS jobs: [17867]">run_fixture = (namespace(matrix=PosixPath('/tmp/pytest-of-root/pytest-32/test_per_case_input_change_blo3/source.json'), models=Posix...b0be52da6aea54e9'}], ...}, PosixPath('/tmp/pytest-of-root/pytest-32/test_per_case_input_change_blo3/native-helper.py'))
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x71fdb5915650&gt;
+input_kind = 'mesh'
+
+    @pytest.mark.parametrize("input_kind", ("helper", "source", "model", "mesh"))
+    def test_per_case_input_change_blocks_resume(run_fixture, monkeypatch, input_kind):
+        args, plan, helper = run_fixture
+        fake_child(monkeypatch, plan)
+        args.case_limit = 1
+&gt;       matrix.execute(args, plan)
+
+tests/test_sim2sim_scene_matrix.py:168: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+scripts/research/sim2sim_scene_matrix.py:331: in execute
+    return execute_locked(args, plan)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+args = namespace(matrix=PosixPath('/tmp/pytest-of-root/pytest-32/test_per_case_input_change_blo3/source.json'), models=PosixP...aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', all_configs=True, resume=False, case_id=[], case_limit=1)
+plan = {'all_configurations': True, 'concurrency_scope': 'One matrix driver per container; all manual native sim2sim jobs mus...put_change_blo3/native-helper.py', 'sha256': '6c5d895211935197467d2e31764903545a16d0e6f09bded4b0be52da6aea54e9'}], ...}
+
+    def execute_locked(args, plan: dict) -&gt; dict:
+        # Check all native children, including cases excluded by a pilot filter and
+        # surviving jobs from a different output. Matrix locks alone cannot survive
+        # a killed parent or govern a separately launched manual native harness.
+        live = running_children()
+        if live:
+&gt;           raise ValueError(f"Native child still running in this container; do not overlap DDS jobs: {live}")
+E           ValueError: Native child still running in this container; do not overlap DDS jobs: [17867]
+
+scripts/research/sim2sim_scene_matrix.py:340: ValueError</failure></testcase><testcase classname="tests.test_sim2sim_scene_matrix" name="test_resume_binds_actual_launch_and_parent_log[launch]" time="0.001"><failure message="ValueError: Native child still running in this container; do not overlap DDS jobs: [17867]">run_fixture = (namespace(matrix=PosixPath('/tmp/pytest-of-root/pytest-32/test_resume_binds_actual_launc0/source.json'), models=Posix...b0be52da6aea54e9'}], ...}, PosixPath('/tmp/pytest-of-root/pytest-32/test_resume_binds_actual_launc0/native-helper.py'))
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x71fdb593a290&gt;
+fault = 'launch'
+
+    @pytest.mark.parametrize("fault", ("launch", "parent_log", "result_summary"))
+    def test_resume_binds_actual_launch_and_parent_log(run_fixture, monkeypatch, fault):
+        args, plan, helper = run_fixture
+        fake_child(monkeypatch, plan)
+        args.case_limit = 1
+&gt;       report = matrix.execute(args, plan)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_sim2sim_scene_matrix.py:182: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+scripts/research/sim2sim_scene_matrix.py:331: in execute
+    return execute_locked(args, plan)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+args = namespace(matrix=PosixPath('/tmp/pytest-of-root/pytest-32/test_resume_binds_actual_launc0/source.json'), models=PosixP...aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', all_configs=True, resume=False, case_id=[], case_limit=1)
+plan = {'all_configurations': True, 'concurrency_scope': 'One matrix driver per container; all manual native sim2sim jobs mus...s_actual_launc0/native-helper.py', 'sha256': '6c5d895211935197467d2e31764903545a16d0e6f09bded4b0be52da6aea54e9'}], ...}
+
+    def execute_locked(args, plan: dict) -&gt; dict:
+        # Check all native children, including cases excluded by a pilot filter and
+        # surviving jobs from a different output. Matrix locks alone cannot survive
+        # a killed parent or govern a separately launched manual native harness.
+        live = running_children()
+        if live:
+&gt;           raise ValueError(f"Native child still running in this container; do not overlap DDS jobs: {live}")
+E           ValueError: Native child still running in this container; do not overlap DDS jobs: [17867]
+
+scripts/research/sim2sim_scene_matrix.py:340: ValueError</failure></testcase><testcase classname="tests.test_sim2sim_scene_matrix" name="test_resume_binds_actual_launch_and_parent_log[parent_log]" time="0.002"><failure message="ValueError: Native child still running in this container; do not overlap DDS jobs: [17867]">run_fixture = (namespace(matrix=PosixPath('/tmp/pytest-of-root/pytest-32/test_resume_binds_actual_launc1/source.json'), models=Posix...b0be52da6aea54e9'}], ...}, PosixPath('/tmp/pytest-of-root/pytest-32/test_resume_binds_actual_launc1/native-helper.py'))
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x71fdb599f590&gt;
+fault = 'parent_log'
+
+    @pytest.mark.parametrize("fault", ("launch", "parent_log", "result_summary"))
+    def test_resume_binds_actual_launch_and_parent_log(run_fixture, monkeypatch, fault):
+        args, plan, helper = run_fixture
+        fake_child(monkeypatch, plan)
+        args.case_limit = 1
+&gt;       report = matrix.execute(args, plan)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_sim2sim_scene_matrix.py:182: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+scripts/research/sim2sim_scene_matrix.py:331: in execute
+    return execute_locked(args, plan)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+args = namespace(matrix=PosixPath('/tmp/pytest-of-root/pytest-32/test_resume_binds_actual_launc1/source.json'), models=PosixP...aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', all_configs=True, resume=False, case_id=[], case_limit=1)
+plan = {'all_configurations': True, 'concurrency_scope': 'One matrix driver per container; all manual native sim2sim jobs mus...s_actual_launc1/native-helper.py', 'sha256': '6c5d895211935197467d2e31764903545a16d0e6f09bded4b0be52da6aea54e9'}], ...}
+
+    def execute_locked(args, plan: dict) -&gt; dict:
+        # Check all native children, including cases excluded by a pilot filter and
+        # surviving jobs from a different output. Matrix locks alone cannot survive
+        # a killed parent or govern a separately launched manual native harness.
+        live = running_children()
+        if live:
+&gt;           raise ValueError(f"Native child still running in this container; do not overlap DDS jobs: {live}")
+E           ValueError: Native child still running in this container; do not overlap DDS jobs: [17867]
+
+scripts/research/sim2sim_scene_matrix.py:340: ValueError</failure></testcase><testcase classname="tests.test_sim2sim_scene_matrix" name="test_resume_binds_actual_launch_and_parent_log[result_summary]" time="0.002"><failure message="ValueError: Native child still running in this container; do not overlap DDS jobs: [17867]">run_fixture = (namespace(matrix=PosixPath('/tmp/pytest-of-root/pytest-32/test_resume_binds_actual_launc2/source.json'), models=Posix...b0be52da6aea54e9'}], ...}, PosixPath('/tmp/pytest-of-root/pytest-32/test_resume_binds_actual_launc2/native-helper.py'))
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x71fdb591bd10&gt;
+fault = 'result_summary'
+
+    @pytest.mark.parametrize("fault", ("launch", "parent_log", "result_summary"))
+    def test_resume_binds_actual_launch_and_parent_log(run_fixture, monkeypatch, fault):
+        args, plan, helper = run_fixture
+        fake_child(monkeypatch, plan)
+        args.case_limit = 1
+&gt;       report = matrix.execute(args, plan)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_sim2sim_scene_matrix.py:182: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+scripts/research/sim2sim_scene_matrix.py:331: in execute
+    return execute_locked(args, plan)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+args = namespace(matrix=PosixPath('/tmp/pytest-of-root/pytest-32/test_resume_binds_actual_launc2/source.json'), models=PosixP...aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', all_configs=True, resume=False, case_id=[], case_limit=1)
+plan = {'all_configurations': True, 'concurrency_scope': 'One matrix driver per container; all manual native sim2sim jobs mus...s_actual_launc2/native-helper.py', 'sha256': '6c5d895211935197467d2e31764903545a16d0e6f09bded4b0be52da6aea54e9'}], ...}
+
+    def execute_locked(args, plan: dict) -&gt; dict:
+        # Check all native children, including cases excluded by a pilot filter and
+        # surviving jobs from a different output. Matrix locks alone cannot survive
+        # a killed parent or govern a separately launched manual native harness.
+        live = running_children()
+        if live:
+&gt;           raise ValueError(f"Native child still running in this container; do not overlap DDS jobs: {live}")
+E           ValueError: Native child still running in this container; do not overlap DDS jobs: [17867]
+
+scripts/research/sim2sim_scene_matrix.py:340: ValueError</failure></testcase><testcase classname="tests.test_sim2sim_scene_matrix" name="test_resume_refuses_changed_plan_fields_in_mutable_matrix" time="0.002"><failure message="ValueError: Native child still running in this container; do not overlap DDS jobs: [17867]">run_fixture = (namespace(matrix=PosixPath('/tmp/pytest-of-root/pytest-32/test_resume_refuses_changed_pl0/source.json'), models=Posix...b0be52da6aea54e9'}], ...}, PosixPath('/tmp/pytest-of-root/pytest-32/test_resume_refuses_changed_pl0/native-helper.py'))
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x71fdb5a1d650&gt;
+
+    def test_resume_refuses_changed_plan_fields_in_mutable_matrix(run_fixture, monkeypatch):
+        args, plan, helper = run_fixture
+        fake_child(monkeypatch, plan)
+        args.case_limit = 1
+&gt;       report = matrix.execute(args, plan)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_sim2sim_scene_matrix.py:201: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+scripts/research/sim2sim_scene_matrix.py:331: in execute
+    return execute_locked(args, plan)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+args = namespace(matrix=PosixPath('/tmp/pytest-of-root/pytest-32/test_resume_refuses_changed_pl0/source.json'), models=PosixP...aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', all_configs=True, resume=False, case_id=[], case_limit=1)
+plan = {'all_configurations': True, 'concurrency_scope': 'One matrix driver per container; all manual native sim2sim jobs mus...ses_changed_pl0/native-helper.py', 'sha256': '6c5d895211935197467d2e31764903545a16d0e6f09bded4b0be52da6aea54e9'}], ...}
+
+    def execute_locked(args, plan: dict) -&gt; dict:
+        # Check all native children, including cases excluded by a pilot filter and
+        # surviving jobs from a different output. Matrix locks alone cannot survive
+        # a killed parent or govern a separately launched manual native harness.
+        live = running_children()
+        if live:
+&gt;           raise ValueError(f"Native child still running in this container; do not overlap DDS jobs: {live}")
+E           ValueError: Native child still running in this container; do not overlap DDS jobs: [17867]
+
+scripts/research/sim2sim_scene_matrix.py:340: ValueError</failure></testcase><testcase classname="tests.test_sim2sim_scene_matrix" name="test_surviving_native_child_blocks_interrupted_attempt_resume" time="0.002"><failure message="ValueError: Native child still running in this container; do not overlap DDS jobs: [17867]">run_fixture = (namespace(matrix=PosixPath('/tmp/pytest-of-root/pytest-32/test_surviving_native_child_bl0/source.json'), models=Posix...b0be52da6aea54e9'}], ...}, PosixPath('/tmp/pytest-of-root/pytest-32/test_surviving_native_child_bl0/native-helper.py'))
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x71fdb598a610&gt;
+
+    def test_surviving_native_child_blocks_interrupted_attempt_resume(run_fixture, monkeypatch):
+        args, plan, helper = run_fixture
+        args.case_limit = 1
+        fake_child(monkeypatch, plan, code=7)
+&gt;       matrix.execute(args, plan)
+
+tests/test_sim2sim_scene_matrix.py:213: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+scripts/research/sim2sim_scene_matrix.py:331: in execute
+    return execute_locked(args, plan)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+args = namespace(matrix=PosixPath('/tmp/pytest-of-root/pytest-32/test_surviving_native_child_bl0/source.json'), models=PosixP...aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', all_configs=True, resume=False, case_id=[], case_limit=1)
+plan = {'all_configurations': True, 'concurrency_scope': 'One matrix driver per container; all manual native sim2sim jobs mus...ative_child_bl0/native-helper.py', 'sha256': '6c5d895211935197467d2e31764903545a16d0e6f09bded4b0be52da6aea54e9'}], ...}
+
+    def execute_locked(args, plan: dict) -&gt; dict:
+        # Check all native children, including cases excluded by a pilot filter and
+        # surviving jobs from a different output. Matrix locks alone cannot survive
+        # a killed parent or govern a separately launched manual native harness.
+        live = running_children()
+        if live:
+&gt;           raise ValueError(f"Native child still running in this container; do not overlap DDS jobs: {live}")
+E           ValueError: Native child still running in this container; do not overlap DDS jobs: [17867]
+
+scripts/research/sim2sim_scene_matrix.py:340: ValueError</failure></testcase><testcase classname="tests.test_sim2sim_scene_matrix" name="test_failed_attempt_is_preserved_and_rerun_in_new_directory" time="0.009"><failure message="ValueError: Native child still running in this container; do not overlap DDS jobs: [17867]">run_fixture = (namespace(matrix=PosixPath('/tmp/pytest-of-root/pytest-32/test_failed_attempt_is_preserv0/source.json'), models=Posix...b0be52da6aea54e9'}], ...}, PosixPath('/tmp/pytest-of-root/pytest-32/test_failed_attempt_is_preserv0/native-helper.py'))
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x71fdb5acc150&gt;
+
+    def test_failed_attempt_is_preserved_and_rerun_in_new_directory(run_fixture, monkeypatch):
+        args, plan, helper = run_fixture
+        args.case_limit = 1
+        failed_calls = fake_child(monkeypatch, plan, code=7)
+&gt;       first = matrix.execute(args, plan)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_sim2sim_scene_matrix.py:224: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+scripts/research/sim2sim_scene_matrix.py:331: in execute
+    return execute_locked(args, plan)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+args = namespace(matrix=PosixPath('/tmp/pytest-of-root/pytest-32/test_failed_attempt_is_preserv0/source.json'), models=PosixP...aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', all_configs=True, resume=False, case_id=[], case_limit=1)
+plan = {'all_configurations': True, 'concurrency_scope': 'One matrix driver per container; all manual native sim2sim jobs mus...mpt_is_preserv0/native-helper.py', 'sha256': '6c5d895211935197467d2e31764903545a16d0e6f09bded4b0be52da6aea54e9'}], ...}
+
+    def execute_locked(args, plan: dict) -&gt; dict:
+        # Check all native children, including cases excluded by a pilot filter and
+        # surviving jobs from a different output. Matrix locks alone cannot survive
+        # a killed parent or govern a separately launched manual native harness.
+        live = running_children()
+        if live:
+&gt;           raise ValueError(f"Native child still running in this container; do not overlap DDS jobs: {live}")
+E           ValueError: Native child still running in this container; do not overlap DDS jobs: [17867]
+
+scripts/research/sim2sim_scene_matrix.py:340: ValueError</failure></testcase><testcase classname="tests.test_sim2sim_scene_matrix" name="test_wrong_policy_ticks_cannot_be_marked_completed" time="0.002"><failure message="ValueError: Native child still running in this container; do not overlap DDS jobs: [17867]">run_fixture = (namespace(matrix=PosixPath('/tmp/pytest-of-root/pytest-32/test_wrong_policy_ticks_cannot0/source.json'), models=Posix...b0be52da6aea54e9'}], ...}, PosixPath('/tmp/pytest-of-root/pytest-32/test_wrong_policy_ticks_cannot0/native-helper.py'))
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x71fdb5a43b50&gt;
+
+    def test_wrong_policy_ticks_cannot_be_marked_completed(run_fixture, monkeypatch):
+        args, plan, helper = run_fixture
+        args.case_limit = 1
+        fake_child(monkeypatch, plan, ticks=499)
+&gt;       report = matrix.execute(args, plan)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_sim2sim_scene_matrix.py:241: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+scripts/research/sim2sim_scene_matrix.py:331: in execute
+    return execute_locked(args, plan)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+args = namespace(matrix=PosixPath('/tmp/pytest-of-root/pytest-32/test_wrong_policy_ticks_cannot0/source.json'), models=PosixP...aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', all_configs=True, resume=False, case_id=[], case_limit=1)
+plan = {'all_configurations': True, 'concurrency_scope': 'One matrix driver per container; all manual native sim2sim jobs mus...y_ticks_cannot0/native-helper.py', 'sha256': '6c5d895211935197467d2e31764903545a16d0e6f09bded4b0be52da6aea54e9'}], ...}
+
+    def execute_locked(args, plan: dict) -&gt; dict:
+        # Check all native children, including cases excluded by a pilot filter and
+        # surviving jobs from a different output. Matrix locks alone cannot survive
+        # a killed parent or govern a separately launched manual native harness.
+        live = running_children()
+        if live:
+&gt;           raise ValueError(f"Native child still running in this container; do not overlap DDS jobs: {live}")
+E           ValueError: Native child still running in this container; do not overlap DDS jobs: [17867]
+
+scripts/research/sim2sim_scene_matrix.py:340: ValueError</failure></testcase><testcase classname="tests.test_sim2sim_scene_matrix" name="test_output_lock_prevents_concurrent_driver" time="0.001" /><testcase classname="tests.test_sim2sim_scene_matrix" name="test_container_lock_prevents_different_output_driver" time="0.001" /><testcase classname="tests.test_sim2sim_scene_matrix" name="test_live_excluded_case_blocks_resume_then_receipt_becomes_interrupted" time="0.014" /><testcase classname="tests.test_sim2sim_scene_matrix" name="test_live_native_child_from_other_output_blocks_new_matrix" time="0.003" /><testcase classname="tests.test_sim2sim_scene_matrix" name="test_dependency_list_excludes_motion_gui_and_includes_native_execution" time="0.381" /></testsuite></testsuites>

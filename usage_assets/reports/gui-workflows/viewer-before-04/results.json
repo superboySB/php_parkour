@@ -1,0 +1,168 @@
+{
+  "schema_version": 1,
+  "status": "failed",
+  "mode": "viewer",
+  "scope": "actual reference GUI controls only; CPU browser; no physical policy evaluation",
+  "original_files": [
+    {
+      "path": "outputs/research/motion-matching/scenarios/low_speed_step/forward_walk0.5s_step0.5s_motion.npz",
+      "sha256": "7b23178eeeb279ff70687faf10c5524333d4e348e8e27fc3424481b55af58f49"
+    },
+    {
+      "path": "outputs/research/motion-matching/scenarios/low_speed_step/forward_walk0.5s_step0.5s_terrain.npy",
+      "sha256": "96149cb67818a1058cfafd368341873c5c126f6b9dc6cdeeccde3bcb3cacce69"
+    },
+    {
+      "path": "outputs/research/motion-matching/scenarios/low_speed_step/forward_walk0.5s_step0.5s_terrain.obj",
+      "sha256": "2c6420e7308376f32fb3d4dc6ccc8dd84cbe461bdf7d4a6e0437c20107f974b4"
+    },
+    {
+      "path": "outputs/research/motion-matching/scenarios/low_speed_step/forward_walk0.8s_step0.5s_motion.npz",
+      "sha256": "99d61b749b350d7a6781940cb8cc6829e4caa214d1f9606e0183fb85327259c1"
+    },
+    {
+      "path": "outputs/research/motion-matching/scenarios/low_speed_step/forward_walk0.8s_step0.5s_terrain.npy",
+      "sha256": "ea6927e2805028ec17f6d1bdbcc6b10ad0661d9a3275019c5b1476f8b346348b"
+    },
+    {
+      "path": "outputs/research/motion-matching/scenarios/low_speed_step/forward_walk0.8s_step0.5s_terrain.obj",
+      "sha256": "3d5d60fe733fa42bda03b963aaf90169927ffbeb55bec0538a61340fc0e1cf04"
+    }
+  ],
+  "actions": [
+    {
+      "action": "select",
+      "name": "Motion File",
+      "value": "forward_walk0.8s_step0.5s_motion.npz"
+    },
+    {
+      "action": "select",
+      "name": "Variant",
+      "value": "0"
+    },
+    {
+      "action": "click_button",
+      "name": "Re-randomize Terrain",
+      "result": "Re-randomize Terrain"
+    },
+    {
+      "action": "keyboard_slider",
+      "name": "Speed",
+      "value": 2.0
+    },
+    {
+      "action": "click_button",
+      "name": "Save Motion",
+      "result": "Save Motion"
+    }
+  ],
+  "server_command": [
+    "docker",
+    "exec",
+    "-e",
+    "OMP_NUM_THREADS=1",
+    "-e",
+    "OPENBLAS_NUM_THREADS=1",
+    "-e",
+    "MKL_NUM_THREADS=1",
+    "php-parkour-research",
+    "/opt/php/bin/motion-python",
+    "-u",
+    "-c",
+    "import os,runpy,sys;from pathlib import Path;assert os.getpgid(0)==os.getpid(),'Docker exec must have an isolated process group';Path(sys.argv[1]).write_text(str(os.getpid()));os.chdir(sys.argv[2]);module=sys.argv[3];sys.argv=[module,*sys.argv[4:]];runpy.run_module(module,run_name='__main__')",
+    "/workspace/php_parkour/outputs/research/gui-workflows/viewer-before-04/server.pid",
+    "/workspace/php_parkour/outputs/research/gui-workflows/viewer-before-04",
+    "motion_matching.motion_visualizer",
+    "--motion-file",
+    "/workspace/php_parkour/outputs/research/gui-workflows/viewer-before-04/fixture"
+  ],
+  "browser_command": [
+    "/usr/bin/google-chrome",
+    "--headless=new",
+    "--no-first-run",
+    "--no-default-browser-check",
+    "--disable-dev-shm-usage",
+    "--use-gl=angle",
+    "--use-angle=swiftshader",
+    "--enable-unsafe-swiftshader",
+    "--window-size=1440,1100",
+    "--remote-debugging-port=43211",
+    "--user-data-dir=/tmp/php-gui-browser-hxnww25l",
+    "http://127.0.0.1:8080"
+  ],
+  "terrain_change": {
+    "before": "2",
+    "before_rerandomize": "0",
+    "after_rerandomize": "3"
+  },
+  "speed_control_html": "<div class=\"m_8bffd616 mantine-Flex-root __m__-rca\" style=\"align-items: center;\"><div class=\"\" style=\"width: 6.6125em; flex-shrink: 0; position: relative; padding-right: var(--mantine-spacing-xs);\"><p class=\"mantine-focus-auto m_b6d8b162 mantine-Text-root\" unselectable=\"off\" style=\"font-size: 0.875em; font-weight: 450; line-height: 1.375em; letter-spacing: -0.75px; width: 100%; box-sizing: content-box; overflow-wrap: anywhere; color: var(--mantine-color-dimmed);\"><label for=\"c4ad2b1e-e06a-4c6d-8320-f8678835bb4e\">Speed</label></p></div><div class=\"\" style=\"flex-grow: 1;\"><div class=\"m_8bffd616 mantine-Flex-root __m__-rcf\" style=\"justify-content: space-between;\"><div class=\"_11mcxao1 m_dd36362e mantine-Slider-root\" data-size=\"xs\" tabindex=\"-1\" id=\"c4ad2b1e-e06a-4c6d-8320-f8678835bb4e\" style=\"--slider-size: var(--slider-size-xs); --slider-radius: var(--mantine-radius-xs); --slider-thumb-size: 0rem; flex-grow: 1; padding-top: 0.3em; padding-bottom: 0.2em;\"><div class=\"m_a8645c2 mantine-Slider-trackContainer\" style=\"z-index: 3; position: relative;\"><div class=\"m_c9ade57f mantine-Slider-track\"><div class=\"m_38aeed47 mantine-Slider-bar\" style=\"--slider-bar-width: calc(18.36734693877551% + 2 * var(--slider-size)); --slider-bar-offset: calc(0% - var(--slider-size));\"></div><div class=\"mantine-focus-auto m_c9a9a60a mantine-Slider-thumb\" tabindex=\"0\" role=\"slider\" aria-label=\"\" aria-valuemax=\"5\" aria-valuemin=\"0.1\" aria-valuenow=\"1\" style=\"height: 0.75rem; width: 0.5rem; background: rgb(34, 139, 230); --slider-thumb-offset: 18.36734693877551%;\"></div><div><div class=\"m_b7b0423a mantine-Slider-markWrapper\" style=\"--mark-offset: 0%;\"><div class=\"m_dd33bc19 mantine-Slider-mark\" data-filled=\"true\" style=\"transform: scale(2);\"></div><div class=\"m_68c77a5b mantine-Slider-markLabel\" style=\"transform: translate(-50%, 0.05rem); font-size: 0.6rem; text-align: center;\">0.1</div></div><div class=\"m_b7b0423a mantine-Slider-markWrapper\" style=\"--mark-offset: 100%;\"><div class=\"m_dd33bc19 mantine-Slider-mark\" style=\"transform: scale(2);\"></div><div class=\"m_68c77a5b mantine-Slider-markLabel\" style=\"transform: translate(-50%, 0.05rem); font-size: 0.6rem; text-align: center;\">5</div></div></div></div></div><input type=\"hidden\" value=\"1\"></div><div class=\"m_e2f5cd4e m_46b77525 mantine-InputWrapper-root mantine-NumberInput-root\" data-size=\"xs\" style=\"width: 3rem; margin-left: var(--mantine-spacing-xs);\"><div class=\"m_6c018570 mantine-Input-wrapper mantine-NumberInput-wrapper\" data-variant=\"default\" data-size=\"xs\" style=\"--input-height: var(--input-height-xs); --input-fz: var(--mantine-font-size-xs); --input-radius: var(--mantine-radius-xs); --input-right-section-width: var(--ni-right-section-width-xs);\"><input class=\"m_8fb7ebe7 mantine-Input-input mantine-NumberInput-input\" data-variant=\"default\" aria-invalid=\"false\" id=\"mantine-csd0ebuz8\" type=\"text\" value=\"1\" inputmode=\"numeric\" style=\"padding: 0.375em; letter-spacing: -0.5px; min-height: 1.875em; height: 1.875em;\"></div></div></div></div></div>",
+  "saved_motion": "fixture/forward_walk0.8s_step0.5s_motion_speed_2.npz",
+  "saved_terrain_pair": {
+    ".npy": false,
+    ".obj": false
+  },
+  "error": "AssertionError: actual Save Motion did not produce its paired terrain NPY/OBJ",
+  "failure_dom": "Software WebGL rendering detected\nWebGL is running in software mode, not on your GPU. Performance may be degraded. If this is unexpected, check that hardware acceleration is enabled in your browser settings.\nConnected\nRoot Transform\n\nX Position\n\n-5\n5\n\nY Position\n\n-5\n5\n\nZ Position\n\n-2\n3\n\nRoll\n\n-3.141593\n3.141593\n\nPitch\n\n-3.141593\n3.141593\n\nYaw\n\n-3.141593\n3.141593\nFile Selection\n\nMotion File\n\nAutoplay Sequence\n\nDelete Current File\nAnimation Controls\n\nPlay Animation\n\nSpeed\n\n0.1\n5\n\nFrame\n\n0\n0\n445\nSave Motion\nMotion Info\n\nFile\n\nTimesteps\n\nJoints\n\nDuration\n\nVelocity Command\n\nJoint Values (DOF)\n\nleft_hip_pitch_joint\n\n-2.53\n0\n2.88\n\nleft_hip_roll_joint\n\n-0.52\n0\n2.97\n\nleft_hip_yaw_joint\n\n-2.76\n0\n2.76\n\nleft_knee_joint\n\n-0.09\n0\n2.88\n\nleft_ankle_pitch_joint\n\n-0.87\n0\n0.52\n\nleft_ankle_roll_joint\n\n-0.26\n0\n0.26\n\nright_hip_pitch_joint\n\n-2.53\n0\n2.88\n\nright_hip_roll_joint\n\n-2.97\n0\n0.52\n\nright_hip_yaw_joint\n\n-2.76\n0\n2.76\n\nright_knee_joint\n\n-0.09\n0\n2.88\n\nright_ankle_pitch_joint\n\n-0.87\n0\n0.52\n\nright_ankle_roll_joint\n\n-0.26\n0\n0.26\n\nwaist_yaw_joint\n\n-2.62\n0\n2.62\n\nwaist_roll_joint\n\n-0.52\n0\n0.52\n\nwaist_pitch_joint\n\n-0.52\n0\n0.52\n\nleft_shoulder_pitch_joint\n\n-3.09\n0\n2.67\n\nleft_shoulder_roll_joint\n\n-1.59\n0\n2.25\n\nleft_shoulder_yaw_joint\n\n-2.62\n0\n2.62\n\nleft_elbow_joint\n\n-1.05\n0\n2.09\n\nleft_wrist_roll_joint\n\n-1.97\n0\n1.97\n\nleft_wrist_pitch_joint\n\n-1.61\n0\n1.61\n\nleft_wrist_yaw_joint\n\n-1.61\n0\n1.61\n\nright_shoulder_pitch_joint\n\n-3.09\n0\n2.67\n\nright_shoulder_roll_joint\n\n-2.25\n0\n1.59\n\nright_shoulder_yaw_joint\n\n-2.62\n0\n2.62\n\nright_elbow_joint\n\n-1.05\n0\n2.09\n\nright_wrist_roll_joint\n\n-1.97\n0\n1.97\n\nright_wrist_pitch_joint\n\n-1.61\n0\n1.61\n\nright_wrist_yaw_joint\n\n-1.61\n0\n1.61\nVisibility\n\nShow meshes\n\nTerrain Controls\n\nVariant\n\nRe-randomize Terrain",
+  "artifacts": [
+    {
+      "path": "chrome.log",
+      "bytes": 528,
+      "sha256": "3118b550aa7b727aa460119cfa73cce3df3d51e78520cce71f00d6159759d39b"
+    },
+    {
+      "path": "edited-saved.png",
+      "bytes": 491827,
+      "sha256": "383cacb306046b9c5eabe12a57b418243df99a7712de4e679588341337c7a9d6"
+    },
+    {
+      "path": "fixture/forward_walk0.5s_step0.5s_motion.npz",
+      "bytes": 844700,
+      "sha256": "7b23178eeeb279ff70687faf10c5524333d4e348e8e27fc3424481b55af58f49"
+    },
+    {
+      "path": "fixture/forward_walk0.5s_step0.5s_terrain.npy",
+      "bytes": 1728,
+      "sha256": "96149cb67818a1058cfafd368341873c5c126f6b9dc6cdeeccde3bcb3cacce69"
+    },
+    {
+      "path": "fixture/forward_walk0.5s_step0.5s_terrain.obj",
+      "bytes": 1285,
+      "sha256": "2c6420e7308376f32fb3d4dc6ccc8dd84cbe461bdf7d4a6e0437c20107f974b4"
+    },
+    {
+      "path": "fixture/forward_walk0.8s_step0.5s_motion.npz",
+      "bytes": 828032,
+      "sha256": "99d61b749b350d7a6781940cb8cc6829e4caa214d1f9606e0183fb85327259c1"
+    },
+    {
+      "path": "fixture/forward_walk0.8s_step0.5s_motion_speed_2.npz",
+      "bytes": 415036,
+      "sha256": "45a04bc06fdb25aece0043c5c120efb827a6cdfd5901bbea869d9d4cf71ca507"
+    },
+    {
+      "path": "fixture/forward_walk0.8s_step0.5s_terrain.npy",
+      "bytes": 1728,
+      "sha256": "ea6927e2805028ec17f6d1bdbcc6b10ad0661d9a3275019c5b1476f8b346348b"
+    },
+    {
+      "path": "fixture/forward_walk0.8s_step0.5s_terrain.obj",
+      "bytes": 1285,
+      "sha256": "3d5d60fe733fa42bda03b963aaf90169927ffbeb55bec0538a61340fc0e1cf04"
+    },
+    {
+      "path": "initial.png",
+      "bytes": 240634,
+      "sha256": "106cbbdd0a7b6c93fc3a78a736a6ab07ff59e865741240eb4cc21f181f5a4b9e"
+    },
+    {
+      "path": "server.log",
+      "bytes": 3630,
+      "sha256": "8672329dfba445cdd300d457b689c075c79bbd3a9623b804429c0963dc875647"
+    },
+    {
+      "path": "server.pid",
+      "bytes": 5,
+      "sha256": "c14985e68c2c0caa248d4e115bdfbfccb89697cc347957bd305d9355ea72486e"
+    }
+  ]
+}

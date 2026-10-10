@@ -1,0 +1,63 @@
+Scanning directory: /workspace/php_parkour/outputs/research/gui-workflows/viewer-before-04/fixture
+Found 2 motion files.
+╭────── viser (listening *:8080) ───────╮
+│             ╷                         │
+│   HTTP      │ http://localhost:8080   │
+│   Websocket │ ws://localhost:8080     │
+│             ╵                         │
+╰───────────────────────────────────────╯
+Viser server started. Open http://localhost:8080 in your browser.
+Loading G1 URDF from /workspace/php_parkour/motion_matching/motion_matching/assets/robots/unitree_description/urdf/g1/main_mesh_collision_halfspherehand.urdf
+
+Loading: forward_walk0.5s_step0.5s_motion.npz
+Loaded NPZ motion data: 455 frames @ 50.0 FPS
+Joints: 29  Bodies: 30
+Loaded vel_cmd data: (455, 15)
+Loading terrain mesh from /workspace/php_parkour/outputs/research/gui-workflows/viewer-before-04/fixture/forward_walk0.5s_step0.5s_terrain.npy
+Loaded terrain data: 2 boxes, 10 scene variants
+Loaded NPY terrain variant 4 with 2 mesh(es)
+Starting animation loop...
+opening handshake failed
+Traceback (most recent call last):
+  File "/opt/php/envs/motion/lib/python3.12/site-packages/websockets/http11.py", line 138, in parse
+    request_line = yield from parse_line(read_line)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/php/envs/motion/lib/python3.12/site-packages/websockets/http11.py", line 320, in parse_line
+    line = yield from read_line(MAX_LINE_LENGTH)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/php/envs/motion/lib/python3.12/site-packages/websockets/streams.py", line 46, in read_line
+    raise EOFError(f"stream ends after {p} bytes, before end of line")
+EOFError: stream ends after 0 bytes, before end of line
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/opt/php/envs/motion/lib/python3.12/site-packages/websockets/server.py", line 547, in parse
+    request = yield from Request.parse(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/php/envs/motion/lib/python3.12/site-packages/websockets/http11.py", line 140, in parse
+    raise EOFError("connection closed while reading HTTP request line") from exc
+EOFError: connection closed while reading HTTP request line
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/opt/php/envs/motion/lib/python3.12/site-packages/websockets/asyncio/server.py", line 356, in conn_handler
+    await connection.handshake(
+  File "/opt/php/envs/motion/lib/python3.12/site-packages/websockets/asyncio/server.py", line 207, in handshake
+    raise self.protocol.handshake_exc
+websockets.exceptions.InvalidMessage: did not receive a valid HTTP request
+(viser) Connection opened (0, 1 total), 328 persistent messages
+
+Loading: forward_walk0.8s_step0.5s_motion.npz
+Loaded NPZ motion data: 446 frames @ 50.0 FPS
+Joints: 29  Bodies: 30
+Loaded vel_cmd data: (446, 15)
+Loading terrain mesh from /workspace/php_parkour/outputs/research/gui-workflows/viewer-before-04/fixture/forward_walk0.8s_step0.5s_terrain.npy
+Loaded terrain data: 2 boxes, 10 scene variants
+Loaded NPY terrain variant 0 with 2 mesh(es)
+Loaded NPY terrain variant 2 with 2 mesh(es)
+Loaded NPY terrain variant 0 with 2 mesh(es)
+Loaded NPY terrain variant 3 with 2 mesh(es)
+Motion saved to /workspace/php_parkour/outputs/research/gui-workflows/viewer-before-04/fixture/forward_walk0.8s_step0.5s_motion_speed_2.npz (speed=2.00, fps=50.0)
+(viser) Connection closed (0, 0 total)

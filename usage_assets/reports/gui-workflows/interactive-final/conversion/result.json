@@ -1,0 +1,80 @@
+{
+  "status": "passed",
+  "source": "/workspace/php_parkour/outputs/research/gui-workflows/interactive-final/motion_matching_results/interactive/mm20261010/recording_20261010_061123_876973_motion.npz",
+  "converted": "/workspace/php_parkour/outputs/research/gui-workflows/interactive-final/conversion/single/example_motion.npz",
+  "commands": [
+    {
+      "command": [
+        "/isaac-sim/kit/python/bin/python3",
+        "-m",
+        "wbt_training.training_runs.motion_convert",
+        "/workspace/php_parkour/outputs/research/gui-workflows/interactive-final/motion_matching_results/interactive/mm20261010/recording_20261010_061123_876973_motion.npz",
+        "/workspace/php_parkour/outputs/research/gui-workflows/interactive-final/conversion/single/example_motion.npz"
+      ],
+      "returncode": 0,
+      "log": "single.log"
+    },
+    {
+      "command": [
+        "/isaac-sim/kit/python/bin/python3",
+        "-m",
+        "wbt_training.training_runs.motion_convert",
+        "/workspace/php_parkour/outputs/research/gui-workflows/interactive-final/conversion/directory-source",
+        "/workspace/php_parkour/outputs/research/gui-workflows/interactive-final/conversion/directory-output"
+      ],
+      "returncode": 0,
+      "log": "directory.log"
+    },
+    {
+      "command": [
+        "/isaac-sim/kit/python/bin/python3",
+        "-m",
+        "wbt_training.training_runs.diagnose_motion",
+        "/workspace/php_parkour/outputs/research/gui-workflows/interactive-final/conversion/single/example_motion.npz"
+      ],
+      "returncode": 0,
+      "log": "diagnose.log"
+    }
+  ],
+  "shapes": {
+    "fps": [
+      1
+    ],
+    "joint_pos": [
+      259,
+      36
+    ],
+    "joint_vel": [
+      259,
+      35
+    ],
+    "body_pos_w": [
+      259,
+      32,
+      3
+    ],
+    "body_quat_w": [
+      259,
+      32,
+      4
+    ],
+    "body_lin_vel_w": [
+      259,
+      32,
+      3
+    ],
+    "body_ang_vel_w": [
+      259,
+      32,
+      3
+    ],
+    "joint_names": [
+      29
+    ],
+    "body_names": [
+      32
+    ]
+  },
+  "checks": "File and directory CLI outputs are identical; all root, DOF, body and optional fields match the expected permutation; native registry validates; diagnose CLI ran",
+  "requires_isaac_or_gpu": false
+}

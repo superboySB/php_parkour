@@ -1,0 +1,117 @@
+{
+  "schema_version": 1,
+  "status": "review_passed_no_unresolved_blocker",
+  "reviewed_utc": "2026-10-10T06:33:48.091265+00:00",
+  "scope": "Independent read-only CPU/control-plane review. Canonical official completion and the future 296x3 first-attempt GPU cohort have not been executed by this review.",
+  "source": {
+    "path": "scripts/research/posttrain_coverage.py",
+    "sha256": "00b7ad8d215f04d603ae696cafa613d15cd1287066a1387ddde376ba7203dff0",
+    "bytes": 49254
+  },
+  "tests": {
+    "path": "tests/test_posttrain_coverage.py",
+    "sha256": "91150cb9dbb81126df446fbe004c8531a3ff16e11ab582afd2f0a86e8fc383a7",
+    "bytes": 28349
+  },
+  "independent_pytest": {
+    "passed": 61,
+    "junit": {
+      "path": "outputs/research/technical-audit/posttrain-independent-frozen-tests.xml",
+      "sha256": "8e57dd79de35e1f831e75a401bfdef74b26e2ada201003a9ee2c7af76c2b30e6",
+      "bytes": 8325
+    },
+    "log": {
+      "path": "outputs/research/technical-audit/posttrain-independent-frozen-tests.log",
+      "sha256": "117e45b5994992a704526033c4c600750f9350b452ebb889e6d0dd3702202117",
+      "bytes": 399
+    },
+    "before_after_source_provenance": {
+      "path": "outputs/research/technical-audit/posttrain-independent-frozen-tests-provenance.json",
+      "sha256": "400d4203f5539b8b525f76d2ac51b039bcfe37f9c9bbff96c8bc5c290760d492",
+      "bytes": 1058
+    }
+  },
+  "actual_report_host_translation": {
+    "path": "outputs/research/technical-audit/posttrain-host-translation-proof-frozen.json",
+    "sha256": "74ba26d75c6cbb21072a0a610a32d5473e0a89200c5bc20208d5dce69021b3a4",
+    "bytes": 2449
+  },
+  "actual_smoke_frozen_expert_schema": {
+    "path": "outputs/research/technical-audit/posttrain-frozen-expert-schema-proof.json",
+    "sha256": "71e43b284ca2154426ed0c9b1bd2601918049fe656ac62516ba457d3570bb238",
+    "bytes": 1621
+  },
+  "function_lines": {
+    "now": 41,
+    "digest": 45,
+    "identity": 53,
+    "read": 57,
+    "write": 61,
+    "require": 69,
+    "flag": 74,
+    "host_path": 79,
+    "check_file": 88,
+    "stage_status": 95,
+    "inspect_artifacts": 109,
+    "capture": 208,
+    "official_lock": 213,
+    "process_gate": 231,
+    "verify_frozen_source": 264,
+    "verify_snapshot": 278,
+    "idle_gpu": 289,
+    "docker_command": 299,
+    "container_state": 319,
+    "observe": 351,
+    "tensor_finite": 371,
+    "verify_finished_batch": 382,
+    "scientific_check": 432,
+    "compare_frozen_experts": 485,
+    "cpu_prepare": 516,
+    "verify_prepared_plans": 534,
+    "attempt_case": 560,
+    "batch": 601,
+    "verify_gpu_mapping": 625,
+    "advance": 644,
+    "main": 687
+  },
+  "resolved_findings": [
+    "Actual GPU UUID visibility and cuda:0 device count checked before first worker, in addition to Docker DeviceRequests.",
+    "All deterministic frozen expert actor keys and native observation-normalizer buffers compared bitwise to final ordered teacher checkpoints.",
+    "Observed manifests and final marker log bound to the original training container mounts; old and new source manifest files hashed.",
+    "Existing coverage containers require exact four mount destinations/read-only flags, accepted image/entrypoint, fixed cwd/command/role/network and UUID.",
+    "Canonical rollout size, obstacle variants/seed42, save500, steps24, minibatches4/96 and epochs5/2 checked in recovered native PT configs.",
+    "One monitor lock across coverage output directories plus per-output lock and the original official lock held throughout each child job.",
+    "Selection identity includes the absolute host coverage output path, so a fresh cohort receives different CPU/GPU container names and cannot collide with an old mounted cohort."
+  ],
+  "confirmed_behavior": [
+    "Unfinished canonical stage manifests return waiting before any Docker/GPU query or child launch; dry-run does not write or start containers.",
+    "Existing passed or failed first attempts are retained; an interrupted/ambiguous first attempt becomes execution_failed and is never automatically rerun. --resume-interrupted only continues unattempted cases.",
+    "verify_finished_batch recursively translates paths into new in-memory dictionaries/lists; actual original case/quality file bytes and hashes are untouched.",
+    "Watch may wait while its own child holds the official lock. The child does not need the monitor lock and releases the official lock on exit; the next observation can proceed. There is no cyclic lock dependency.",
+    "Final 888 summary must match all immutable per-case receipts and plans, include all source IDs without duplicates, pass retained-artifact SHA checks, and agree with the stopped container exit status."
+  ],
+  "limits": [
+    "No host/server packages installed; no GPU/SSH/cloud operation or frozen training source modification.",
+    "Tests use explicit control-plane fixtures; real device guard execution and complete official 888 coverage remain future work after actual official training completion.",
+    "The native driver does not persist a shell exit receipt; its completion observation deliberately records driver_exit_status=null and relies on all 16 passed manifests, terminal marker, absent active children and released official lock."
+  ],
+  "quality_verified": false,
+  "retained_prior_failure": {
+    "scope": "Superseded new-test fixture omitted Docker inspect mock; production unchanged. Test-only correction independently reverified in final 61/61 run. No packages installed.",
+    "junit": {
+      "path": "outputs/research/technical-audit/posttrain-independent-identity-tests.xml",
+      "sha256": "78b078c3bc28452ff4c714d4db3dbe550a0fab5520ee4aef433d3d84648dea8e",
+      "bytes": 17827
+    },
+    "log": {
+      "path": "outputs/research/technical-audit/posttrain-independent-identity-tests.log",
+      "sha256": "35f861e6a1291565d3371a7b1b7b1bdbc53325a698163352c727439d24e0ca00",
+      "bytes": 10154
+    },
+    "provenance": {
+      "path": "outputs/research/technical-audit/posttrain-independent-identity-tests-provenance.json",
+      "sha256": "386a925de3ab89a3db0bdfe474e14fee29abd3cc58e525edf02d63785a9ed277",
+      "bytes": 584
+    }
+  }
+}

@@ -26,6 +26,7 @@ from motion_matching.io import (
     sample_offpath_box_obstacles,
     save_motion_npz,
 )
+from motion_matching.io.motion_io import save_recording_bundle
 from motion_matching.metadata.constants import (
     G1_BONE_LEFT_FOOT as bone_left_foot,
 )
@@ -1709,19 +1710,14 @@ def run_interactive(args: argparse.Namespace) -> None:
                     print("Error: trimesh library is required to save terrain meshes. Please install it via pip.")
                     return
 
-                # Generate timestamp and create folder
-                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-                folder_name = f"motion_matching_results/mm{timestamp[:8]}/motion_{timestamp}"
-                os.makedirs(folder_name, exist_ok=True)
+                # Keep one consistent motion/terrain stem in the same directory.
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
+                folder_name = f"motion_matching_results/interactive/mm{timestamp[:8]}"
 
                 # Convert to numpy array: (N, 36) where N is number of frames
                 recorded_data = np.array(recorded_frames, dtype=np.float32)
 
-                required_fps = 50
-                # Save motion file (re-sampled from capture fps to 50hz, FAR-tracking schema)
-                motion_filename = os.path.join(folder_name, "..", f"motion_{timestamp}.npz")
-                save_motion_npz(recorded_data, motion_filename, target_fps=required_fps, source_fps=fps)
-                print(f"Motion saved to {motion_filename} ({len(recorded_frames)} frames)")
+                motion_filename = os.path.join(folder_name, f"recording_{timestamp}_motion.npz")
 
                 # Collect posed terrain meshes + box metadata in stable name order.
                 posed_meshes = []
@@ -1732,18 +1728,19 @@ def run_interactive(args: argparse.Namespace) -> None:
                         posed_meshes.append((mesh, mesh_position, mesh_rotation))
                         metadata_list.append(metadata)
 
-                if metadata_list:
-                    # Save random terrains to a .npy file
-                    random_terrains = randomize_terrain_variants(metadata_list, num_variants=num_terrain_variants)
-                    random_terrains_filename = os.path.join(folder_name, "terrain.npy")
-                    np.save(random_terrains_filename, random_terrains)
-                    print(f"Random terrains saved to {random_terrains_filename} ({random_terrains.shape[0]} terrains)")
-
-                # Combine obstacle meshes + ground plane and export as OBJ.
-                combined_mesh = build_combined_terrain_mesh(posed_meshes)
-                mesh_filename = os.path.join(folder_name, "multi_boxes_scaled.obj")
-                combined_mesh.export(mesh_filename)
-                print(f"Terrain mesh saved to {mesh_filename} ({len(posed_meshes)} terrain meshes + ground plane)")
+                try:
+                    saved = save_recording_bundle(
+                        recorded_data, motion_filename, posed_meshes, metadata_list,
+                        source_fps=fps, target_fps=50, num_variants=num_terrain_variants,
+                    )
+                except ValueError as exc:
+                    recording_status.value = f"Recording not saved: {exc}"
+                    print(f"Recording not saved: {exc}")
+                    return
+                print(f"Motion saved to {motion_filename} ({saved['saved_frames']} frames @ 50 FPS)")
+                print(f"Paired terrain saved: {saved['terrain_npy']}, {saved['terrain_obj']}")
+                recording_status.value = "Saved reference + terrain; no command labels"
+                print(saved["command_limit"])
 
                 recorded_frames = []
             else:

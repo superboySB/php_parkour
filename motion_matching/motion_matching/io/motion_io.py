@@ -8,6 +8,9 @@ sequence so the two call sites cannot drift apart.
 
 from __future__ import annotations
 
+import json
+from pathlib import Path
+import shutil
 from typing import Optional
 
 import numpy as np
@@ -19,6 +22,62 @@ from motion_matching.utils.data_utils import (
     resample_vel_cmd,
 )
 from motion_matching.utils.tracking_format import qpos_to_tracking
+
+
+def paired_terrain_paths(motion_file: str | Path) -> tuple[Path, Path]:
+    """Return the box/mesh filenames paired with a generated motion."""
+    motion = Path(motion_file)
+    stem = "terrain".join(motion.stem.rsplit("motion", 1)) if "motion" in motion.stem else motion.stem + "_terrain"
+    return motion.with_name(stem + ".npy"), motion.with_name(stem + ".obj")
+
+
+def copy_paired_terrain(source_motion: str | Path, saved_motion: str | Path) -> list[Path]:
+    """Keep available source terrain paired when saving an edited motion.
+
+    Copies all NPY variants without inventing geometry or changing labels.
+    An explicitly motion-only source remains motion-only.
+    """
+    source = Path(source_motion)
+    targets = paired_terrain_paths(saved_motion)
+    sources = paired_terrain_paths(source)
+    if not any(path.exists() for path in sources):
+        sources = tuple(source.with_name(source.stem + "_terrain" + ext) for ext in (".npy", ".obj"))
+    copied = []
+    for src, dst in zip(sources, targets):
+        if src.is_file():
+            if src.resolve() != dst.resolve():
+                shutil.copyfile(src, dst)
+            copied.append(dst)
+    return copied
+
+
+def save_recording_bundle(qpos: np.ndarray, motion_file: str | Path, posed_meshes: list,
+                          terrain_metadata: list, *, source_fps: float = 60,
+                          target_fps: int = 50, num_variants: int = 10) -> dict:
+    """Save an unlabeled interactive reference and consistently paired terrain.
+
+    Interactive recording captures poses only. It does not infer training
+    direction labels from motion displacement or pretend to record intent.
+    """
+    from motion_matching.io.terrain_io import build_combined_terrain_mesh, randomize_terrain_variants
+
+    if len(qpos) < 4 or int(target_fps / source_fps * len(qpos)) < 2:
+        raise ValueError("Record at least four source frames before saving")
+    motion = Path(motion_file)
+    motion.parent.mkdir(parents=True, exist_ok=True)
+    tracking = save_motion_npz(qpos, str(motion), target_fps=target_fps, source_fps=source_fps)
+    terrain_npy, terrain_obj = paired_terrain_paths(motion)
+    variants = (randomize_terrain_variants(terrain_metadata, num_variants=num_variants)
+                if terrain_metadata else np.empty((0, num_variants, 10), dtype=np.float32))
+    np.save(terrain_npy, variants)
+    build_combined_terrain_mesh(posed_meshes).export(terrain_obj)
+    metadata = {"schema_version": 1, "kind": "interactive_kinematic_reference", "source_fps": source_fps,
+                "fps": target_fps, "source_frames": len(qpos), "saved_frames": len(tracking["joint_pos"]),
+                "vel_cmd_present": False, "command_label_source": None,
+                "command_limit": "Only qpos was recorded. No direction labels were inferred; provide explicit frame-aligned intent labels before direction-conditioned student training.",
+                "motion": motion.name, "terrain_npy": terrain_npy.name, "terrain_obj": terrain_obj.name}
+    motion.with_suffix(".recording.json").write_text(json.dumps(metadata, indent=2) + "\n")
+    return metadata
 
 
 def save_motion_npz(

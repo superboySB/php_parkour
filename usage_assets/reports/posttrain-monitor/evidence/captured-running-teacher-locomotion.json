@@ -1,0 +1,55 @@
+{
+  "label": "teacher-locomotion",
+  "profile": "official",
+  "started_utc": "2026-10-10T04:20:55.453752+00:00",
+  "command": [
+    "bash",
+    "/workspace/php_parkour/wbt_training/training_runs/run_terrain_teacher.sh",
+    "--training.headless",
+    "True",
+    "--training.num-envs",
+    "4096",
+    "--training.name",
+    "teacher-locomotion",
+    "--training.project",
+    "PHP-research",
+    "--logger.base-dir",
+    "/outputs/official-full/official/teacher-locomotion",
+    "--training.seed",
+    "42",
+    "--algo.config.num-learning-iterations",
+    "20000"
+  ],
+  "environment": {
+    "LOGGER": "tensorboard",
+    "NGPUS": "1",
+    "CUDA_VISIBLE_DEVICES": "0",
+    "HSSIM_PYTHON": "/opt/php/bin/train-python",
+    "REGISTRY": "file:///data/assets/motions-locomotion"
+  },
+  "settings": {
+    "profile": "official",
+    "skills": [
+      "locomotion",
+      "low-step",
+      "high-step",
+      "low-climb-76",
+      "high-climb-76"
+    ],
+    "assets": "/data/assets",
+    "num_envs": null,
+    "iterations_target": 20000,
+    "registries": "file:///data/assets/motions-locomotion",
+    "finetune": null,
+    "source_checkpoints": [],
+    "eval_steps": null,
+    "eval_quality_schema": null
+  },
+  "overrides": {
+    "num_envs": null,
+    "iterations_target": null
+  },
+  "quality_verified": false,
+  "scope": "official default training schedule; quality requires rollout evaluation",
+  "status": "running"
+}

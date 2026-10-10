@@ -8,7 +8,7 @@ import sys
 import numpy as np
 import pytest
 import trimesh
-from motion_matching.io.motion_io import save_edited_motion_npz
+from motion_matching.io.motion_io import copy_paired_terrain, paired_terrain_paths, save_edited_motion_npz, save_recording_bundle
 from motion_matching.motion_visualizer import load_motion_data
 from motion_matching.utils import PKG_ROOT, ROBOT_MOTIONS_DIR
 from motion_matching.utils.tracking_format import qpos_to_tracking
@@ -58,6 +58,47 @@ def test_editing_motion_without_commands_keeps_them_optional(tmp_path):
     save_edited_motion_npz(_qpos(), output, source_fps=30, target_fps=30)
     with np.load(output) as saved:
         assert "vel_cmd" not in saved
+
+
+def test_speed_edited_motion_keeps_byte_identical_paired_terrain(tmp_path):
+    source = tmp_path / "example_motion.npz"
+    source.write_bytes(b"the caller saves the actual motion")
+    terrain, mesh = paired_terrain_paths(source)
+    terrain.write_bytes(b"all source terrain variants")
+    mesh.write_bytes(b"source geometry")
+    edited = tmp_path / "example_motion_speed_2.npz"
+    copied = copy_paired_terrain(source, edited)
+    assert copied == list(paired_terrain_paths(edited))
+    assert [p.read_bytes() for p in copied] == [terrain.read_bytes(), mesh.read_bytes()]
+    assert source.read_bytes() == b"the caller saves the actual motion"
+
+
+def test_editing_motion_only_source_does_not_invent_terrain(tmp_path):
+    source = tmp_path / "example_motion.npz"
+    source.write_bytes(b"motion only")
+    assert copy_paired_terrain(source, tmp_path / "example_motion_speed_2.npz") == []
+    assert list(tmp_path.iterdir()) == [source]
+
+
+def test_interactive_recording_pairs_empty_terrain_and_declares_absent_labels(tmp_path):
+    motion = tmp_path / "recording_motion.npz"
+    report = save_recording_bundle(_qpos(), motion, [], [], source_fps=60, target_fps=50)
+    with np.load(motion) as saved:
+        assert len(saved["joint_pos"]) == 50
+        assert saved["fps"].item() == 50
+        assert "vel_cmd" not in saved
+    terrain, mesh = paired_terrain_paths(motion)
+    assert np.load(terrain, allow_pickle=False).shape == (0, 10, 10)
+    assert len(trimesh.load(mesh, force="mesh").vertices) == 8
+    assert report["vel_cmd_present"] is False
+    assert report["command_label_source"] is None
+    assert json.loads(motion.with_suffix(".recording.json").read_text()) == report
+
+
+def test_interactive_short_recording_fails_before_creating_partial_pair(tmp_path):
+    with pytest.raises(ValueError, match="four source frames"):
+        save_recording_bundle(_qpos(3), tmp_path / "recording_motion.npz", [], [])
+    assert list(tmp_path.iterdir()) == []
 
 
 def test_viewer_rejects_source_clip_with_actionable_error():

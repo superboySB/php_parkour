@@ -173,7 +173,7 @@ grid preprocess只平移`body_pos_w`并复制其他逐帧字段，native `joint_
 
 §2.2的15维command来自场景手工指定`vel_cmd_idx`，每帧one-hot记录；不是29技能分类label，也不是从MoCap测得的瞬时速度。默认低/高速为0.8/2.2m/s；random locomotion中的`left_45/right_90`表示+45/−90°/s的turn rate，场景先乘duration，生成器再除duration，不能理解为整段固定转角。技能过渡步可以使用不同具体speed。[标签定义](motion_matching/motion_matching/scenarios/builtin.py#L6)、[转向生成](motion_matching/motion_matching/run.py#L1179)
 
-GUI控制desired input与skill trigger，录制的是matcher产生的qpos。当前Save输出tracking NPZ和子目录terrain，但**不保存`vel_cmd`**，也不是规范native配对bundle；若要训练需要真实标注command、转换格式并整理配对名称。Viser速度编辑只保留/重采样已有commands，不会凭空生成缺失标签。[GUI保存](motion_matching/motion_matching/run.py#L1712)、[Viser保存](motion_matching/motion_matching/motion_visualizer.py#L776)
+GUI控制desired input与skill trigger，录制的是matcher产生的qpos。修复后的Start/End Recording保存同目录、同stem的tracking NPZ、terrain NPY/OBJ与录制JSON；**仍不保存`vel_cmd`**，sidecar和界面明确提示没有方向标签。若用于方向条件学生训练，需要另有真实、逐帧对齐的command标签，再转换格式；不能由位移倒推意图。Viser速度编辑会保留/重采样已有commands，并复制全部源地形变体和OBJ到匹配名称，不会创造缺失标签。[GUI保存](motion_matching/motion_matching/run.py#L1712)、[Viser保存](motion_matching/motion_matching/motion_visualizer.py#L776)、[两条真实GUI流程与转换/加载验收](usage_assets/reports/gui-workflows/summary.md)。
 
 显式ordered `file://` registries按相对路径顺序找`*motion*.npz`和同stem的`*terrain*.npy`，合并为native NPZ并添加`motion_ends`原片边界及`motion_idxs`专家/registryID；后者顺序须与teacher checkpoints相同。registry门卫检查必需keys与terrain schema，完整shape/finite检查还依赖converter/验收工具。函数名中保留`wandb`不表示本次离线路径调用SDK。[本地解析](wbt_training/utils/registry.py#L60)、[合并与expertID](wbt_training/utils/multi_motion_helpers.py#L26)
 
@@ -298,6 +298,8 @@ L_critic = 1.0·L_value
 Projected gravity 是机器人实际 anchor quaternion 逆旋转重力向量所得的姿态线索。学生不接收教师的参考 joint command、anchor 误差或 height scan，而是另接 `[N,58,87]` 深度图。学生 flat actor 的外层均匀噪声为 gravity ±0.05、gyro ±0.2、q ±0.01、dq ±0.5；actions/command 不加此噪声。
 
 深度 CNN 为 `Conv1→16(k5,s2)→32(k3,s2)→64(k3,s2)→global average pool→Linear64→32`，使用 ELU，输出 `[N,32]` latent。拼接 `[actor108, latent32]` 得到 140 维 MLP 输入。纯学生 MLP 为 `140→512→256→128→29`；混合学生为 `140→2048→1024→512→256→128→29`。它们是前馈网络，上一动作在 flat state 内；深度 buffer 用于延迟采样，不将六帧一起送进 CNN。
+
+原生评估的 `--show-depth True` 将当前 `obs['depth_camera']['depth_cam']` 按环境平铺、加0.5并放大4倍后显示到OpenCV窗口；显示的是同一延迟输入，没有另生成一份无延迟图。实际4环境×100步显示100帧、98种数组SHA，所有值有限，两张真实窗口截图已验。[窗口与数据流证据](usage_assets/reports/depth-gui/summary.md)。
 
 训练使用 Warp raycasting 生成深度，原始相机为 106×60，FOV=89.5°，range=0.3–3m；先裁 top2/left4/right4，再 resize 到 58×87。相机在 torso，nominal offset=(0.01,0.01,0.44)m、Euler=(1°,27°,1°)，另有安装扰动。六帧 buffer 从延迟 3 或 4 帧读取，对应 50Hz 下约 60–80ms。图像还做边缘扰动、Perlin holes、像素 Gaussian 与每环境深度 bias，std 各 0.03m。
 
@@ -532,17 +534,22 @@ startup default pose bias同时修改qtarget中心与观测`q−default`基准�
 | 云端 PT 回传本地 | iteration 19 pilot 与正式 iteration 500 都真实加载，在 16GiB 卡运行 64env×250step | 模型传输与 Isaac 推理通路通过；两次均 `quality_verified=false` |
 | 逐原始源片段验收 | 296 对输入逐项校验、48 项 CPU 回归、3 次真实独立 Isaac 片段尝试 | teacher500为158策略步，两种student smoke各21步后失败；0片段完成，尚未跑完296源×三策略 |
 | 发布学生的物理 sim2sim | 原生 ONNX、DDS、深度 SHM、PD；平地 12 个有效 command 与 17 场景各一个 OBJ | 17 场景执行完成，但 14 场景出现高度/倾斜阈值事件，不能宣称全场景技能成功 |
+| 全部生成几何的物理扫描 | 固定17场景629配置计划已后台启动；14:19快照16例完成、1例运行中 | 每例500策略ticks、恒定forward command；不是reference replay，尚未完成629例，也不以存活作为课程成功 |
 | 实体 G1 | 审计 SDK、映射与相机接口，没有本次真实机器人运行 | 未验证；论文作者的实机成绩不能记成本次结果 |
 
 正式 iteration 500 的同设置短评估记录 **75 次失败重置**，iteration 19 pilot 为 **3971 次**；这是 64 个环境反复终止的累计回合数，不是机器人数量。500 轮模型的四项跟踪误差各有 16000 个有限样本，最长 env0 原片为 3.22s，仍有失败且没有完成整个 course。两个 checkpoint 来自不同训练运行，不能视为同一条逐轮配对实验。详见 [本地 pilot](usage_assets/reports/official-pilot-local-quality/summary.md) 与 [500 轮中间检查点](usage_assets/reports/official-progress-0500-local/summary.md)。
 
 独立的 [逐源片段工具](scripts/research/eval_source_coverage.py) 将原始 `source_clip_id`、原训练 expert 和 singleton native expert 分开记录：每个源复制为一个本地 bundle，生成一份地形变体，保留实际 native NPZ/OBJ/YAML、逐步参考帧、失败标志、动作、误差、录像和 TensorBoard。原始296个NPZ都没有存储 `motion_idxs` / `motion_ends`；合并时才补上本地 expert0 和最后一帧边界。`plan/preflight` 只做 CPU 检查，`run` 逐片段运行，首次失败/超时/边界即停。原生两次零动作 warmup 与策略控制分列，真正策略参考帧为 `1..T-2`，frame0与最后的边界标记不伪称被策略控制。
 
+正式模型后的 [自动衔接](scripts/research/posttrain_coverage.py) 等待全部官方训练、质量评估和导出结束，核验七个PT的迭代、环境数、variant、seed和算法；学生内嵌五专家的完整MLP和观测normalizer还须逐tensor等于对应最终教师。随后才准备三套296源计划，并在固定GPU空闲时执行888个首次尝试。61项CPU调度回归及实际smoke模型的专家格式核验已通过；正式模型尚不存在，不能把这项准备工作记作888次完成。[检查证据](usage_assets/reports/posttrain-monitor/summary.md)。
+
 首次真实尝试发现 WBT 的 `reset_all → init_buffers` 清零 relative body target，下一步却先 termination/reward/log、后 `command.step` 刷新目标；这使三个片段在策略开始前误终止。独立工具仅在 warmup 前提取原生 `MotionCommand.step` 的同一对齐公式，刷新两个缓存，保留公式/文件 SHA 和缓存前后值，并核对时间、采样 ID、边界及 RNG 不变。没有推进后回写时钟或放宽失败条件，也没有更换云端训练源码。修复后相同PT和完整源进入158/21/21个实际策略步，随后真正跟踪失败，尚无片段完成。[前后真实结果与原生公式推导](usage_assets/reports/source-coverage-pilot/summary.md)。旧64env报告统计的是策略阶段，不含这些warmup误终止；其原始数值保留。
 
 CPU 测试也保留实际边界：根目录/训练 289 项通过；motion matching 213 项通过、12 个历史 raw-hash 比较失败，未跳过或重写 golden。基线比较中 36 个语义数组逐字节一致，九项不变量通过；仍不能将该 legacy suite 写成全绿。详细原始测试与基线差异见 [usage 的测试记录](usage.md#8-全量测试同步与结果来源)。
 
 后续需要等七个正式模型实际训练结束，核验最终 PT/ONNX 与配置/专家来源，再检查长 rollout 和逐源 clip / 场景覆盖。当前顶层 `motion_id=0` 与学生的 expert ID 都不足以证明 296 源片或 629 场景配置已覆盖。真实硬件还需独立完成相机 producer、IMU/外参/默认角核对及实机验收，之后才能宣称此次 real2sim2real 的最后一段已经完成。
+
+全629配置扫描使用发布学生ONNX和各配置的实际OBJ，依赖、模型和1887个输入文件均绑定SHA。两例预检各500策略ticks，其中一例有高度/倾斜阈值事件，原片完整解码通过；长扫描仍在运行。[启动与逐例快照](usage_assets/reports/sim2sim-all-configs-start/summary.md)保留当前状态，不能将运动学生成629组或后台启动回执当作629例物理完成。
 
 ### 8.3 如何复核本文
 
@@ -553,4 +560,4 @@ CPU 测试也保留实际边界：根目录/训练 289 项通过；motion matchi
 - [部署与 real2sim2real 审计](usage_assets/reports/technical-audit/real2sim2real.json)、[实际 ONNX/preset CPU 检查](usage_assets/reports/technical-audit/deployment-cpu-inspection.json)、[URDF/MJCF 静态比较](usage_assets/reports/technical-audit/asset-description-inspection.json)。
 - [上述证据的 bytes/SHA 清单](usage_assets/reports/technical-audit/evidence-manifest.json)，以及 [usage.md](usage.md) 中原始训练、视频和浏览器验收记录。
 
-本文源码审计对应 `79d82bb` 工作树与固定 Holosoma 子模块；正在云端长训的源码仍为冻结 `3439cb7` 快照，文档同步不会更换它。后续修改配置时应重新检查真实保存 YAML、模型 metadata 和文件内容 SHA，不能用镜像 tag、函数名或旧注释代替这些记录。
+原算法源码审计对应 `79d82bb` 工作树与固定 Holosoma 子模块；之后的GUI保存修复有独立[修改前/后源码](usage_assets/reports/gui-workflows/source-after/manifest.json)与真实控件证据，旧审计的源码和哈希保留。正在云端长训的源码仍为冻结 `3439cb7` 快照，文档同步不会更换它。后续修改配置时应重新检查真实保存 YAML、模型 metadata 和文件内容 SHA，不能用镜像 tag、函数名或旧注释代替这些记录。

@@ -110,6 +110,10 @@ python3 scripts/research/viser_browser.py \
 
 最后一项使用宿主已有的Chrome/Chromium；生成服务与全部Python依赖仍在Docker。该浏览器自动检查验证播放按钮及帧推进，其他编辑控件的存在与数据格式回归不等于逐控件浏览器操作验收。
 
+补充验收已实际操作两条完整保存流程，并修复地形配对缺失：Viser切文件、选地形variant、重随机、速度2.0保存223帧，原15维one-hot保留、源地形全部变体和OBJ同步配对；主程序用真实Tk I/J按下/释放，再点Start/End Recording，保存259帧@50Hz、空地形与ground OBJ及来源JSON。两条结果均通过单文件/目录转换、诊断、本地`file://`解析和CPU原生MotionLoader；相关IO/public测试25项通过，其中public12项、纯新增4项。交互录制仍无方向标签，sidecar与GUI明确提示，没有倒推label。[原失败、修复后截图、转换与精确源码](usage_assets/reports/gui-workflows/summary.md)。
+
+![Viser真实速度编辑与配对保存](usage_assets/reports/gui-workflows/viewer-final/edited-saved.png)
+
 ![Viser真实播放页面](usage_assets/viser-playback.png)
 
 [浏览器结果](usage_assets/reports/viser-browser.json)；[键盘窗口截图](usage_assets/keyboard-controller.png) 与 [键盘结果](usage_assets/reports/keyboard-gui.json)。另外修复了从仓库根目录启动时资源路径定位错误、Quit 未同步写停止状态，以及窗口裁掉技能/退出控件的问题。
@@ -139,6 +143,10 @@ smoke 采用显式缩小的并行环境、布局和迭代数，检查实际梯�
 
 最终统一镜像及冻结源码 `3439cb7` 又完整复跑 **22/22 项，通过、退出码 0**，耗时 711.748 秒。13 个训练阶段逐一验证了两轮之间权重的有限性和非零更新；五教师共 60 组真实 ONNX 推理，两学生独立导出各 30 组推理均通过。七次新版质量评估、29 份原始 TensorBoard events、140 个下载产物 SHA 和运行前后 1903 个源码文件均已复核。[最终验收汇总](usage_assets/reports/training-cloud-final/summary.md)、[逐项报告](usage_assets/reports/training-cloud-final/summary.json)、[本轮视频与来源 SHA](usage_assets/reports/training-cloud-final/media.json)。未收敛的失败短片也完整保留，例如[教师 locomotion](usage_assets/videos/final-cloud/eval-teacher-locomotion.mp4)和[学生 finetune](usage_assets/videos/final-cloud/eval-student-finetune.mp4)，不能作为技能成功证据。
 
+学生原生 `--show-depth True` 也已实际运行：同一 smoke 纯学生 PT、4环境、100步，OpenCV 真实显示100帧、98个不同数组SHA，全部有限，进程退出码0、耗时17.168秒。精确标题窗口的两张X11截图已目检，输入PT和评估源码前后未变。初始观察命令的3次参数错误及失败日志保留；修正日志参数后通过，没有修改训练/评估器。本次未达到默认视频间隔，没有生成MP4，不借用其它实验影片。[观察报告与完整命令](usage_assets/reports/depth-gui/summary.md)。
+
+![原生学生实际接收的延迟深度，4环境拼图](usage_assets/depth-gui/depth-frame-0030.png)
+
 另按官方 locomotion 默认并行量和完整预处理运行 **4096 环境、20 迭代 pilot**，保存 iteration 19 的原生 checkpoint。显存采样峰值为 20479 MiB，18 个稳定核心迭代的中位耗时为 2.321 秒；对应 20000 轮的 collection+learning 估算约 12.89 小时，不包括初始化、保存和评估。其他教师和学生的耗时需要分别测量。完整官方日程尚未完成，见[pilot 实测与限制](usage_assets/reports/training-cloud-official-pilot.json)。
 
 两种学生也已按官方并行量和完整学生预处理各运行 **2048 环境、20 迭代容量 pilot**。纯 DAgger / DAgger+PPO 的显存峰值为 11399 / 9063 MiB，去首两轮的核心耗时中位数为 3.4255 / 3.9320 秒；两者实际配置均为 3 variants、96 minibatches、2 epochs、24 steps/env、save interval 500。权重更新、各 30 组双 ONNX 推理和 TensorBoard 0–19 全部通过。[容量实测报告](usage_assets/reports/training-cloud-student-capacity.md)注明旧镜像、未收敛专家与唯一的 20 轮日程缩短；这些数据不证明正式训练质量或已训练专家下的最终吞吐。
@@ -154,6 +162,8 @@ smoke 采用显式缩小的并行环境、布局和迭代数，检查实际梯�
 正式长训的 **iteration 500 中间 PT** 已单独回传、校验远端/本地 SHA，并在同样 64 环境 × 250 步设置下实际评估：退出码 0、全程 wall 28.405 秒，累计 **75 次失败 reset、0 次超时**，四项误差各有 16000 个有限样本。3 段原片来自环境 0，最长 3.22 秒；相较 iteration 19 pilot 的失败次数减少，但两个 checkpoint 来自不同运行，且仍未完成课程，`quality_verified=false`。PT 从 iteration 0 到 500 的 actor/critic 权重均有真实非零更新。[检查点来源、权重差异与本地录像](usage_assets/reports/official-progress-0500-local/summary.md)。云端 20000 轮首教师及后续完整日程继续运行。
 
 为避免合并库 ID 掩盖覆盖范围，另实现了 [逐源片段工具](scripts/research/eval_source_coverage.py)：全部 **296 对、181236 帧、50 FPS** 的数据格式、来源 SHA 和顺序校验通过，**48/48 项独立 CPU 回归通过**。实际本地 Isaac 分别尝试完整 920 帧 locomotion 源和两次完整 455 帧 low-step 源：teacher 第500轮运行 **158 策略步**后失败，纯/混合 student 的第1轮 smoke PT 均运行 **21 步**后失败。三次执行与证据保存通过，片段完成数为0，未声称跑完296源或888次尝试。[完整记录、复跑命令与原视频](usage_assets/reports/source-coverage-pilot/summary.md)。
+
+正式模型后的衔接脚本 [posttrain_coverage.py](scripts/research/posttrain_coverage.py) 已完成 **61项调度/来源/保留证据回归**，与原48项联合109/109通过；独立复核最终61项也通过。真实smoke PT确认两种学生各自内嵌五个专家的40个MLP tensor和15个normalizer buffer均与有序教师逐位相同，检查全程未初始化CUDA。脚本等待官方16阶段全部完成才启动CPU配置/全源预检，再等固定GPU空闲后执行888次首次尝试；已有失败不重跑，换fresh目录会生成新批次身份和容器名。新fixture漏模拟Docker inspect导致的一次失败与修正后原始JUnit均保留。这些检查没有把smoke PT升级为正式模型，也不表示888次已执行。[CPU检查与准确边界](usage_assets/reports/posttrain-monitor/summary.md)。
 
 这次还定位并修复了独立评估的 warmup 目标缓存问题：原生 `reset_all` 清零缓存后先检测终止，造成策略开始前的误终止。保留的三次修复前真实记录均为0策略步；按原公式刷新当前帧缓存后才得到上述158/21/21步。参考时间、RNG和终止条件均未修改，当前云训练也未改变。[修复推导与原生逐位对照](usage_assets/reports/source-coverage-pilot/cache-diagnosis/warmup-relative-cache-review.md)、[源码/数据/逐步记录的 SHA 清单](usage_assets/reports/source-coverage-pilot/evidence-manifest.json)。新旧共18个MP4均完整解码通过，启动/预热原片计入此数，不能用录像数推断片段完成数。
 
@@ -228,6 +238,8 @@ bash scripts/research/docker.sh sim scripts/research/sim2sim.py \
 [![17场景真实物理闭环播放页](usage_assets/scene-gallery.png)](usage_assets/sim2sim/scenarios/playback.html)
 
 [离线视频页](usage_assets/sim2sim/scenarios/playback.html)提供全部 17 个原片、截图、世界轨迹和阈值记录。已有 Chrome 逐一加载并 seek 解码全部视频，另检查实际播放、搜索与筛选，[浏览器验收](usage_assets/reports/scene-gallery.json)。视频包含起始安置阶段，视频时长不等于正式策略控制时长。
+
+现已进一步启动**全部629配置**的真实物理扫描：2026-10-10北京时间14:19快照逐项核验16例完成、1例运行中，尚未完成全部扫描。固定计划保存340项运行依赖和1887个输入文件SHA；每例seed42、500策略ticks、10仿真秒、恒定forward command，不回放参考动作。两例预检执行通过，其中一例出现高度/倾斜阈值；原始视频均CPU完整解码通过。首次CPU fixture测试与真实仿真并行被进程门卫拒绝、空闲重跑28/28通过，两轮原始JUnit均保留。[固定计划、运行快照、两例视频与失败记录](usage_assets/reports/sim2sim-all-configs-start/summary.md)。这扩展几何覆盖，不构成629配置技能成功的结论。
 
 ```bash
 bash scripts/research/docker.sh sim scripts/research/sim2sim_scene_matrix.py \

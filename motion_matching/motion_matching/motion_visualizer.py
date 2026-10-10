@@ -26,7 +26,7 @@ from scipy.spatial.transform import Rotation
 import viser
 from viser.extras import ViserUrdf
 
-from motion_matching.io.motion_io import save_edited_motion_npz
+from motion_matching.io.motion_io import copy_paired_terrain, paired_terrain_paths, save_edited_motion_npz
 from motion_matching.utils import G1_URDF
 from motion_matching.scenarios.builtin import VEL_CMD_MAPPING
 
@@ -619,8 +619,8 @@ def main(
                     current_file.unlink()
 
                     # Delete associated terrain files
-                    # Try terrain.obj pattern: {stem}_terrain.obj
-                    terrain_obj = current_file.parent / f"{current_file.stem}_terrain.obj"
+                    # Generated files replace the final motion token with terrain.
+                    _, terrain_obj = paired_terrain_paths(current_file)
                     if terrain_obj.exists():
                         print(f"Deleting terrain file: {terrain_obj}")
                         terrain_obj.unlink()
@@ -798,7 +798,9 @@ def main(
             speed=speed_value,
             vel_cmd=anim_state["vel_cmd_data"],
         )
+        copied_terrains = copy_paired_terrain(curr_file, output_path)
         print(f"Motion saved to {output_path} (speed={speed_value:.2f}, fps={saved_fps})")
+        print(f"Paired terrain files saved: {[path.name for path in copied_terrains]}")
 
     # --- Animation Loop ---
     print("Starting animation loop...")

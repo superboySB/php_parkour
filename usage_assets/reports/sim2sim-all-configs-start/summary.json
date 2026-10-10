@@ -1,0 +1,509 @@
+{
+  "schema_version": 1,
+  "observed_utc": "2026-10-10T06:19:44.570322+00:00",
+  "status": "running_snapshot",
+  "scope": "Real two-case physical preflight and a live started full629 run, not completed629 coverage or policy/course success",
+  "plan": {
+    "path": "plan.json",
+    "bytes_sha256": "f5a367d18e13099c1970872272fa3bfd144e7ef9caa98b1b81b510770ed51202",
+    "plan_identity_sha256": "571dfb1e11c1cb862f8b6e8a3b8760b5cb899e039a5bfeb3b1012213d0b59158",
+    "scenarios": 17,
+    "configurations": 629,
+    "dependency_records": 340,
+    "input_records": 1887,
+    "seed": 42,
+    "seconds_per_configuration": 10,
+    "source_matrix_sha256": "ed413845f4b82156964e11ad6ee3faca30e3c0b10dbfdc295a8284f9ee3308ed",
+    "image_id": "sha256:88254ac0b90a3056375145601d741aa3e08726e18412d201a3c7e7915a23996f"
+  },
+  "pilot": {
+    "launch": "host/pilot-launch.json",
+    "exit": "host/pilot-exit.json",
+    "returncode": 0,
+    "wall_seconds": 43.006015560007654,
+    "cases": [
+      {
+        "configuration_index": 0,
+        "case_id": "random_locomotion:0000:cfg0000_stand_2.0s_left_45_1.4s_forward_2.3s_right_90_0.9s_right_45_0.6s_right_45_2.0s_left_90_0.6s_left_45_2.6s_run_right_45_1.2s_left_45_1.3s_run_right_90_1.6s_stand_2.0s",
+        "command": 6,
+        "status": "completed",
+        "returncode": 0,
+        "policy_ticks": 500,
+        "policy_simulation_seconds": 10.01,
+        "height_or_tilt_threshold_event": false,
+        "minimum_pelvis_height_m": 0.6268362402915955,
+        "minimum_base_up_z": 0.8790161237120628,
+        "gantry_disabled_during_policy": true,
+        "quality_verified": false,
+        "report": "pilot/case-0000/result.json",
+        "evidence": "pilot/case-0000/case-evidence.json",
+        "video": "pilot/case-0000/video/episode_0_1791612781.mp4",
+        "thumbnail": "pilot/case-0000/video/episode_0_1791612781.png"
+      },
+      {
+        "configuration_index": 1,
+        "case_id": "random_locomotion:0001:cfg0001_stand_2.0s_run_left_45_2.0s_stand_2.0s",
+        "command": 6,
+        "status": "completed",
+        "returncode": 0,
+        "policy_ticks": 500,
+        "policy_simulation_seconds": 10.01,
+        "height_or_tilt_threshold_event": true,
+        "minimum_pelvis_height_m": 0.060023728758096695,
+        "minimum_base_up_z": -0.8584563732147217,
+        "gantry_disabled_during_policy": true,
+        "quality_verified": false,
+        "report": "pilot/case-0001/result.json",
+        "evidence": "pilot/case-0001/case-evidence.json",
+        "video": "pilot/case-0001/video/episode_0_1791612802.mp4",
+        "thumbnail": "pilot/case-0001/video/episode_0_1791612802.png"
+      }
+    ],
+    "complete_video_decode": "video-full-decode.json",
+    "quality_verified": false
+  },
+  "full_run": {
+    "launch": "host/full-launch.json",
+    "receipt_snapshot": "host/full-driver-snapshot.json",
+    "started_utc": "2026-10-10T06:14:54.250576+00:00",
+    "live_processes": "live-processes.json",
+    "matrix_snapshot": "matrix-snapshot.json",
+    "matrix_snapshot_bytes_sha256": "2e279dba421abf672d41d5d60a654f4678d2dcd4c1c82a5e599cc047997742d4",
+    "matrix_observed_utc": "2026-10-10T06:19:44.570322+00:00",
+    "matrix_status": "running",
+    "selection_status_counts": {
+      "completed": 16,
+      "running": 1,
+      "planned": 612
+    },
+    "actual_completed_configurations": 16,
+    "completed_policy_ticks": 8000,
+    "height_or_tilt_threshold_event_configurations": 2,
+    "legacy_top_level_completed_counter": 2,
+    "legacy_top_level_finished_unix": 1791612804.3828204,
+    "counter_note": "During resume, top-level counters and finished_unix still retain the prior two-case invocation until the full driver finalizes. Actual progress here is derived only from completed selection records and complete returncode/result/500-tick/gantry-off evidence.",
+    "configuration_coverage_complete": false,
+    "completion_verified": false,
+    "quality_verified": false,
+    "obstacle_course_completion_verified": false
+  },
+  "cpu_tests": {
+    "first_parallel": {
+      "junit": "cpu-tests/root-first-parallel.xml",
+      "tests": 28,
+      "failures": 16,
+      "explanation": "Preserved actual first run. Fixtures encountered real /proc native children [17867,17868,17873] because root launched these tests while native simulation was active; the live-child guard correctly refused overlap. This is not hidden or relabeled as pass."
+    },
+    "idle_rerun": {
+      "junit": "cpu-tests/root-idle-rerun.xml",
+      "tests": 28,
+      "failures": 0,
+      "errors": 0,
+      "log": "host/root-tests-idle.log",
+      "explanation": "Same 28 CPU cases rerun when native children were idle: all pass. CPU fixtures do not prove physics."
+    },
+    "isolated_concurrent": {
+      "tests": 28,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "junit": "cpu-tests/root-isolated-concurrent.xml",
+      "log": "cpu-tests/root-isolated-concurrent.log",
+      "source_artifacts": [
+        {
+          "source": "outputs/research/technical-audit/sim2sim-all-configs-tests-isolated.xml",
+          "published": "cpu-tests/root-isolated-concurrent.xml",
+          "bytes": 4067,
+          "sha256": "38d54e4493d3d92ee43fd1fda5e48c167a4186634a27d0e09af595ab12afe806"
+        },
+        {
+          "source": "outputs/research/technical-audit/sim2sim-all-configs-tests-isolated.log",
+          "published": "cpu-tests/root-isolated-concurrent.log",
+          "bytes": 399,
+          "sha256": "a00356936eaadf80ce784056f9d79c188fc0c9186edf116b10759b19b06fe2fe"
+        }
+      ],
+      "test_file": "tests/test_sim2sim_scene_matrix.py",
+      "test_file_sha256": "82edf69684a04350ced8cf4e025d63fdc287744b6427fed72addabff8a933305",
+      "production_harness_sha256": "284e3eabfc888303f5090f0d3c22dd8a3c35c5478285dc030778209079d746d2",
+      "explanation": "Latest CPU fixtures isolate their own temporary lock and owned /proc child; ordinary fixture rollouts do not inspect unrelated real native jobs, while dedicated liveness cases still use the actual /proc parser filtered to the CPU process owned by that case. Thus these 28 CPU control-flow tests can coexist with the real full629 sweep. All 28 passed. The production harness is unchanged. This is not a new physical rollout or policy-quality result. Earlier first-parallel failures and idle-rerun passes remain preserved unchanged."
+    }
+  },
+  "snapshot_records": [
+    {
+      "source": "outputs/research/sim2sim/all-configs-final/plan.json",
+      "published": "plan.json",
+      "read_started_utc": "2026-10-10T06:19:44.154777+00:00",
+      "read_finished_utc": "2026-10-10T06:19:44.156613+00:00",
+      "bytes": 2440984,
+      "sha256": "f5a367d18e13099c1970872272fa3bfd144e7ef9caa98b1b81b510770ed51202"
+    },
+    {
+      "source": "outputs/research/sim2sim-all-configs-host/pilot-launch.json",
+      "published": "host/pilot-launch.json",
+      "read_started_utc": "2026-10-10T06:19:44.163984+00:00",
+      "read_finished_utc": "2026-10-10T06:19:44.164142+00:00",
+      "bytes": 856,
+      "sha256": "5756a418a2d09a159c31c3558a2b43dd111e21b8ad3695f3b7ed588d1306e09a"
+    },
+    {
+      "source": "outputs/research/sim2sim-all-configs-host/pilot-exit.json",
+      "published": "host/pilot-exit.json",
+      "read_started_utc": "2026-10-10T06:19:44.164244+00:00",
+      "read_finished_utc": "2026-10-10T06:19:44.164370+00:00",
+      "bytes": 60,
+      "sha256": "d2c5db670bdbd32979d4558097ef3bbfee54eae2bde3ec19bc533b9a59dac271"
+    },
+    {
+      "source": "outputs/research/sim2sim-all-configs-host/pilot-execution.log",
+      "published": "host/pilot-execution.log",
+      "read_started_utc": "2026-10-10T06:19:44.164422+00:00",
+      "read_finished_utc": "2026-10-10T06:19:44.164485+00:00",
+      "bytes": 612,
+      "sha256": "8b9ba94cc03761a88b240c058943f77e4ea938261af6d0c67d4029c5db1c284b"
+    },
+    {
+      "source": "outputs/research/sim2sim-all-configs-host/root-test-launch.json",
+      "published": "host/root-test-launch.json",
+      "read_started_utc": "2026-10-10T06:19:44.164525+00:00",
+      "read_finished_utc": "2026-10-10T06:19:44.164710+00:00",
+      "bytes": 410,
+      "sha256": "39f4ec0c82949d27f309e4b0034229d4fd12090bf9f5af6a36d2de7e07600942"
+    },
+    {
+      "source": "outputs/research/sim2sim-all-configs-host/root-tests-idle.log",
+      "published": "host/root-tests-idle.log",
+      "read_started_utc": "2026-10-10T06:19:44.164753+00:00",
+      "read_finished_utc": "2026-10-10T06:19:44.164812+00:00",
+      "bytes": 392,
+      "sha256": "1310811d2c3842e1e000532c7f9683b00eb4364b3ae23b01dc6b53ccd037b35c"
+    },
+    {
+      "source": "outputs/research/sim2sim-all-configs-host/full-launch.json",
+      "published": "host/full-launch.json",
+      "read_started_utc": "2026-10-10T06:19:44.164852+00:00",
+      "read_finished_utc": "2026-10-10T06:19:44.164860+00:00",
+      "bytes": 634,
+      "sha256": "e140e82356c5f76e9710c6b82fa2b5610218311e71c7271caa85a2031b02a5cf"
+    },
+    {
+      "source": "outputs/research/sim2sim-all-configs-host/full_driver.py",
+      "published": "host/full_driver.py",
+      "read_started_utc": "2026-10-10T06:19:44.164894+00:00",
+      "read_finished_utc": "2026-10-10T06:19:44.164902+00:00",
+      "bytes": 2270,
+      "sha256": "8837176b054fa74a4a11670040eb2b6161d8f05475656620a9a3bc9b24ca80a0"
+    },
+    {
+      "source": "outputs/research/sim2sim-all-configs-root-tests.xml",
+      "published": "cpu-tests/root-first-parallel.xml",
+      "read_started_utc": "2026-10-10T06:19:44.164939+00:00",
+      "read_finished_utc": "2026-10-10T06:19:44.165138+00:00",
+      "bytes": 40715,
+      "sha256": "f59d5285fb494d70d9630c7fbaa0735605a30452d1e0170faf7348777f011c02"
+    },
+    {
+      "source": "outputs/research/sim2sim-all-configs-root-tests-idle.xml",
+      "published": "cpu-tests/root-idle-rerun.xml",
+      "read_started_utc": "2026-10-10T06:19:44.165211+00:00",
+      "read_finished_utc": "2026-10-10T06:19:44.165332+00:00",
+      "bytes": 4067,
+      "sha256": "a56d40de718f39006932e389f59c65a7a874e79656412693c49fab1eda3f05dd"
+    },
+    {
+      "source": "scripts/research/sim2sim_scene_matrix.py",
+      "published": "sources/sim2sim_scene_matrix.py",
+      "read_started_utc": "2026-10-10T06:19:44.165370+00:00",
+      "read_finished_utc": "2026-10-10T06:19:44.165380+00:00",
+      "bytes": 30076,
+      "sha256": "284e3eabfc888303f5090f0d3c22dd8a3c35c5478285dc030778209079d746d2"
+    },
+    {
+      "source": "outputs/research/sim2sim/all-configs-final/random_locomotion/config-0000-cfg0000_stand_2.0s_left_45_1.4s_forward_2.3s_right_90_0.9s_right_45_0.6s_right_4-da80e462c317/case-evidence.json",
+      "published": "pilot/case-0000/case-evidence.json",
+      "read_started_utc": "2026-10-10T06:19:44.172100+00:00",
+      "read_finished_utc": "2026-10-10T06:19:44.172118+00:00",
+      "bytes": 9223,
+      "sha256": "dede7539d254036d17c71bfed8801a6f988563cb05f92aa9aa4bd806798f0012"
+    },
+    {
+      "source": "outputs/research/sim2sim/all-configs-final/random_locomotion/config-0000-cfg0000_stand_2.0s_left_45_1.4s_forward_2.3s_right_90_0.9s_right_45_0.6s_right_4-da80e462c317/control-ack.json",
+      "published": "pilot/case-0000/control-ack.json",
+      "read_started_utc": "2026-10-10T06:19:44.172246+00:00",
+      "read_finished_utc": "2026-10-10T06:19:44.172368+00:00",
+      "bytes": 19,
+      "sha256": "d7426d4dc724ec65e22de2f1ac65f4b8d887085e384a08974a9e661d0b6c647d"
+    },
+    {
+      "source": "outputs/research/sim2sim/all-configs-final/random_locomotion/config-0000-cfg0000_stand_2.0s_left_45_1.4s_forward_2.3s_right_90_0.9s_right_45_0.6s_right_4-da80e462c317/inference.json",
+      "published": "pilot/case-0000/inference.json",
+      "read_started_utc": "2026-10-10T06:19:44.172438+00:00",
+      "read_finished_utc": "2026-10-10T06:19:44.172751+00:00",
+      "bytes": 114596,
+      "sha256": "9417b9b1fafb24d3f9f4e300e1da471b1cfc6d0d5a5a6659b2e202dd773999f7"
+    },
+    {
+      "source": "outputs/research/sim2sim/all-configs-final/random_locomotion/config-0000-cfg0000_stand_2.0s_left_45_1.4s_forward_2.3s_right_90_0.9s_right_45_0.6s_right_4-da80e462c317/inference.log",
+      "published": "pilot/case-0000/inference.log",
+      "read_started_utc": "2026-10-10T06:19:44.172879+00:00",
+      "read_finished_utc": "2026-10-10T06:19:44.173074+00:00",
+      "bytes": 2027,
+      "sha256": "e1fbc974d4996f3deeb8b80a23c7fba495a1a7e0455eb084d51bd83947283579"
+    },
+    {
+      "source": "outputs/research/sim2sim/all-configs-final/random_locomotion/config-0000-cfg0000_stand_2.0s_left_45_1.4s_forward_2.3s_right_90_0.9s_right_45_0.6s_right_4-da80e462c317/policy-ready.json",
+      "published": "pilot/case-0000/policy-ready.json",
+      "read_started_utc": "2026-10-10T06:19:44.173137+00:00",
+      "read_finished_utc": "2026-10-10T06:19:44.173192+00:00",
+      "bytes": 55,
+      "sha256": "712157600de0dd339c4f7fae8e2d2e61615ee743d8ce11f7dffca679aa559370"
+    },
+    {
+      "source": "outputs/research/sim2sim/all-configs-final/random_locomotion/config-0000-cfg0000_stand_2.0s_left_45_1.4s_forward_2.3s_right_90_0.9s_right_45_0.6s_right_4-da80e462c317/released.json",
+      "published": "pilot/case-0000/released.json",
+      "read_started_utc": "2026-10-10T06:19:44.173258+00:00",
+      "read_finished_utc": "2026-10-10T06:19:44.173375+00:00",
+      "bytes": 111,
+      "sha256": "88b3a17f73b8634ce77c054a354c3b6b72155b0d30ed0904114a8b6a2d110cc2"
+    },
+    {
+      "source": "outputs/research/sim2sim/all-configs-final/random_locomotion/config-0000-cfg0000_stand_2.0s_left_45_1.4s_forward_2.3s_right_90_0.9s_right_45_0.6s_right_4-da80e462c317/result.json",
+      "published": "pilot/case-0000/result.json",
+      "read_started_utc": "2026-10-10T06:19:44.173434+00:00",
+      "read_finished_utc": "2026-10-10T06:19:44.173439+00:00",
+      "bytes": 3202,
+      "sha256": "b4c557d04a7496bc6662150757f3f5cca86277d3a33016097dc9580301a731ef"
+    },
+    {
+      "source": "outputs/research/sim2sim/all-configs-final/random_locomotion/config-0000-cfg0000_stand_2.0s_left_45_1.4s_forward_2.3s_right_90_0.9s_right_45_0.6s_right_4-da80e462c317/run.json",
+      "published": "pilot/case-0000/run.json",
+      "read_started_utc": "2026-10-10T06:19:44.173497+00:00",
+      "read_finished_utc": "2026-10-10T06:19:44.173617+00:00",
+      "bytes": 988,
+      "sha256": "0bca9af73eec4dca27554849e77d136a37139a0fc918ad3c96da8793eeb8bebf"
+    },
+    {
+      "source": "outputs/research/sim2sim/all-configs-final/random_locomotion/config-0000-cfg0000_stand_2.0s_left_45_1.4s_forward_2.3s_right_90_0.9s_right_45_0.6s_right_4-da80e462c317/sim-clock.json",
+      "published": "pilot/case-0000/sim-clock.json",
+      "read_started_utc": "2026-10-10T06:19:44.173706+00:00",
+      "read_finished_utc": "2026-10-10T06:19:44.173832+00:00",
+      "bytes": 250,
+      "sha256": "30e40cdc3cffa18ca9b29538f7aed2a66b58c5e923ac38b57dec28d2303db076"
+    },
+    {
+      "source": "outputs/research/sim2sim/all-configs-final/random_locomotion/config-0000-cfg0000_stand_2.0s_left_45_1.4s_forward_2.3s_right_90_0.9s_right_45_0.6s_right_4-da80e462c317/sim-ready.json",
+      "published": "pilot/case-0000/sim-ready.json",
+      "read_started_utc": "2026-10-10T06:19:44.173905+00:00",
+      "read_finished_utc": "2026-10-10T06:19:44.173910+00:00",
+      "bytes": 1431,
+      "sha256": "95748f9b8cf64da43f8165252f87f2b4ec3b18bf9ebfbda8becd3d13b38f8fe5"
+    },
+    {
+      "source": "outputs/research/sim2sim/all-configs-final/random_locomotion/config-0000-cfg0000_stand_2.0s_left_45_1.4s_forward_2.3s_right_90_0.9s_right_45_0.6s_right_4-da80e462c317/simulation.json",
+      "published": "pilot/case-0000/simulation.json",
+      "read_started_utc": "2026-10-10T06:19:44.173968+00:00",
+      "read_finished_utc": "2026-10-10T06:19:44.174085+00:00",
+      "bytes": 902,
+      "sha256": "43a9dccc714454b878527ff3dd733e245e53fae85c224a2a150bbb706edcfd43"
+    },
+    {
+      "source": "outputs/research/sim2sim/all-configs-final/random_locomotion/config-0000-cfg0000_stand_2.0s_left_45_1.4s_forward_2.3s_right_90_0.9s_right_45_0.6s_right_4-da80e462c317/simulator.log",
+      "published": "pilot/case-0000/simulator.log",
+      "read_started_utc": "2026-10-10T06:19:44.174141+00:00",
+      "read_finished_utc": "2026-10-10T06:19:44.174359+00:00",
+      "bytes": 31055,
+      "sha256": "c75228f0adea6e7cc22c26433945dda6978a4bed991e032485b09310020aa1a6"
+    },
+    {
+      "source": "outputs/research/sim2sim/all-configs-final/random_locomotion/config-0000-cfg0000_stand_2.0s_left_45_1.4s_forward_2.3s_right_90_0.9s_right_45_0.6s_right_4-da80e462c317/stop",
+      "published": "pilot/case-0000/stop",
+      "read_started_utc": "2026-10-10T06:19:44.174440+00:00",
+      "read_finished_utc": "2026-10-10T06:19:44.174444+00:00",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "outputs/research/sim2sim/all-configs-final/random_locomotion/config-0000-cfg0000_stand_2.0s_left_45_1.4s_forward_2.3s_right_90_0.9s_right_45_0.6s_right_4-da80e462c317/trajectory.csv",
+      "published": "pilot/case-0000/trajectory.csv",
+      "read_started_utc": "2026-10-10T06:19:44.174501+00:00",
+      "read_finished_utc": "2026-10-10T06:19:44.174514+00:00",
+      "bytes": 77155,
+      "sha256": "8488ccd7708ceb03979aa5c95a5115ab9f0f91329969bbcb8e024e48430e7153"
+    },
+    {
+      "source": "outputs/research/sim2sim/all-configs-final/random_locomotion/config-0000-cfg0000_stand_2.0s_left_45_1.4s_forward_2.3s_right_90_0.9s_right_45_0.6s_right_4-da80e462c317/video/episode_0_1791612781.mp4",
+      "published": "pilot/case-0000/video/episode_0_1791612781.mp4",
+      "read_started_utc": "2026-10-10T06:19:44.174614+00:00",
+      "read_finished_utc": "2026-10-10T06:19:44.175039+00:00",
+      "bytes": 365717,
+      "sha256": "fd8c1ddb3cae1325cc209ab0b29ea1a74da54e73cd967e0ba6614324a0da8c61"
+    },
+    {
+      "source": "outputs/research/sim2sim/all-configs-final/random_locomotion/config-0000-cfg0000_stand_2.0s_left_45_1.4s_forward_2.3s_right_90_0.9s_right_45_0.6s_right_4-da80e462c317/video/episode_0_1791612781.png",
+      "published": "pilot/case-0000/video/episode_0_1791612781.png",
+      "read_started_utc": "2026-10-10T06:19:44.175292+00:00",
+      "read_finished_utc": "2026-10-10T06:19:44.175387+00:00",
+      "bytes": 18801,
+      "sha256": "a00aacb5bcd84cfd93ca06bae818b916165322e10e2d506880b1c21dab7bc87b"
+    },
+    {
+      "source": "outputs/research/sim2sim/all-configs-final/random_locomotion/config-0001-cfg0001_stand_2.0s_run_left_45_2.0s_stand_2.0s-81228c5c24f8/case-evidence.json",
+      "published": "pilot/case-0001/case-evidence.json",
+      "read_started_utc": "2026-10-10T06:19:44.345081+00:00",
+      "read_finished_utc": "2026-10-10T06:19:44.345092+00:00",
+      "bytes": 7855,
+      "sha256": "ecf8b1a01a1fe514ce1ccf9a82faabdb9590b990d78078bdfdb5d66549b1367c"
+    },
+    {
+      "source": "outputs/research/sim2sim/all-configs-final/random_locomotion/config-0001-cfg0001_stand_2.0s_run_left_45_2.0s_stand_2.0s-81228c5c24f8/control-ack.json",
+      "published": "pilot/case-0001/control-ack.json",
+      "read_started_utc": "2026-10-10T06:19:44.345207+00:00",
+      "read_finished_utc": "2026-10-10T06:19:44.345212+00:00",
+      "bytes": 19,
+      "sha256": "2b3116dc8d89ad11b826f5924ac67bffa062f001512f4768e0091fdf04a74e39"
+    },
+    {
+      "source": "outputs/research/sim2sim/all-configs-final/random_locomotion/config-0001-cfg0001_stand_2.0s_run_left_45_2.0s_stand_2.0s-81228c5c24f8/inference.json",
+      "published": "pilot/case-0001/inference.json",
+      "read_started_utc": "2026-10-10T06:19:44.345281+00:00",
+      "read_finished_utc": "2026-10-10T06:19:44.345603+00:00",
+      "bytes": 114466,
+      "sha256": "f4362996a57990a52398ab0bf15105cb01317173803b94cd9b1e38e45275e4cd"
+    },
+    {
+      "source": "outputs/research/sim2sim/all-configs-final/random_locomotion/config-0001-cfg0001_stand_2.0s_run_left_45_2.0s_stand_2.0s-81228c5c24f8/inference.log",
+      "published": "pilot/case-0001/inference.log",
+      "read_started_utc": "2026-10-10T06:19:44.345741+00:00",
+      "read_finished_utc": "2026-10-10T06:19:44.345816+00:00",
+      "bytes": 2027,
+      "sha256": "b85fc40b7962b5f4b5c6ae307efeece80b9c0ab3c016790d9a4045d5936ad02f"
+    },
+    {
+      "source": "outputs/research/sim2sim/all-configs-final/random_locomotion/config-0001-cfg0001_stand_2.0s_run_left_45_2.0s_stand_2.0s-81228c5c24f8/policy-ready.json",
+      "published": "pilot/case-0001/policy-ready.json",
+      "read_started_utc": "2026-10-10T06:19:44.345893+00:00",
+      "read_finished_utc": "2026-10-10T06:19:44.345961+00:00",
+      "bytes": 55,
+      "sha256": "31a730c7345a5bbd6085c54cc0989573ebadb6642801424a9dbebba828a26d71"
+    },
+    {
+      "source": "outputs/research/sim2sim/all-configs-final/random_locomotion/config-0001-cfg0001_stand_2.0s_run_left_45_2.0s_stand_2.0s-81228c5c24f8/released.json",
+      "published": "pilot/case-0001/released.json",
+      "read_started_utc": "2026-10-10T06:19:44.346020+00:00",
+      "read_finished_utc": "2026-10-10T06:19:44.346076+00:00",
+      "bytes": 95,
+      "sha256": "eb2eb934ae91645984e03f89eaafe24de1cb8cabf97202e25c0f3031ed992ed9"
+    },
+    {
+      "source": "outputs/research/sim2sim/all-configs-final/random_locomotion/config-0001-cfg0001_stand_2.0s_run_left_45_2.0s_stand_2.0s-81228c5c24f8/result.json",
+      "published": "pilot/case-0001/result.json",
+      "read_started_utc": "2026-10-10T06:19:44.346132+00:00",
+      "read_finished_utc": "2026-10-10T06:19:44.346137+00:00",
+      "bytes": 3082,
+      "sha256": "aa5e6697baad683975f1aafa453f55bd135400c372ebb2f369aa6a97a52e1799"
+    },
+    {
+      "source": "outputs/research/sim2sim/all-configs-final/random_locomotion/config-0001-cfg0001_stand_2.0s_run_left_45_2.0s_stand_2.0s-81228c5c24f8/run.json",
+      "published": "pilot/case-0001/run.json",
+      "read_started_utc": "2026-10-10T06:19:44.346193+00:00",
+      "read_finished_utc": "2026-10-10T06:19:44.346197+00:00",
+      "bytes": 862,
+      "sha256": "9c136000fd3bc1fc138bdf91a493d39e31af50a1baf324c3985264d370a2b190"
+    },
+    {
+      "source": "outputs/research/sim2sim/all-configs-final/random_locomotion/config-0001-cfg0001_stand_2.0s_run_left_45_2.0s_stand_2.0s-81228c5c24f8/sim-clock.json",
+      "published": "pilot/case-0001/sim-clock.json",
+      "read_started_utc": "2026-10-10T06:19:44.346255+00:00",
+      "read_finished_utc": "2026-10-10T06:19:44.346320+00:00",
+      "bytes": 255,
+      "sha256": "afe4e1876aebd8b1415e97f236ff42c4f64546b6ab70b75deee907adc1049e02"
+    },
+    {
+      "source": "outputs/research/sim2sim/all-configs-final/random_locomotion/config-0001-cfg0001_stand_2.0s_run_left_45_2.0s_stand_2.0s-81228c5c24f8/sim-ready.json",
+      "published": "pilot/case-0001/sim-ready.json",
+      "read_started_utc": "2026-10-10T06:19:44.346376+00:00",
+      "read_finished_utc": "2026-10-10T06:19:44.346429+00:00",
+      "bytes": 1271,
+      "sha256": "77007e5c79e8513c4f5ca22a6be73a2218c38ae4c42b014cb7735267e2a89704"
+    },
+    {
+      "source": "outputs/research/sim2sim/all-configs-final/random_locomotion/config-0001-cfg0001_stand_2.0s_run_left_45_2.0s_stand_2.0s-81228c5c24f8/simulation.json",
+      "published": "pilot/case-0001/simulation.json",
+      "read_started_utc": "2026-10-10T06:19:44.346485+00:00",
+      "read_finished_utc": "2026-10-10T06:19:44.346600+00:00",
+      "bytes": 907,
+      "sha256": "df14cde2a986b72db81e4e06de856bbb83bad4fe9ff38d8885d02f194d0f4813"
+    },
+    {
+      "source": "outputs/research/sim2sim/all-configs-final/random_locomotion/config-0001-cfg0001_stand_2.0s_run_left_45_2.0s_stand_2.0s-81228c5c24f8/simulator.log",
+      "published": "pilot/case-0001/simulator.log",
+      "read_started_utc": "2026-10-10T06:19:44.346655+00:00",
+      "read_finished_utc": "2026-10-10T06:19:44.346907+00:00",
+      "bytes": 30862,
+      "sha256": "06eb1ad6609a74bfe0af1f16f8d25a5ac2025aac5874b0167929d3e68e2273c7"
+    },
+    {
+      "source": "outputs/research/sim2sim/all-configs-final/random_locomotion/config-0001-cfg0001_stand_2.0s_run_left_45_2.0s_stand_2.0s-81228c5c24f8/stop",
+      "published": "pilot/case-0001/stop",
+      "read_started_utc": "2026-10-10T06:19:44.346982+00:00",
+      "read_finished_utc": "2026-10-10T06:19:44.346986+00:00",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "outputs/research/sim2sim/all-configs-final/random_locomotion/config-0001-cfg0001_stand_2.0s_run_left_45_2.0s_stand_2.0s-81228c5c24f8/trajectory.csv",
+      "published": "pilot/case-0001/trajectory.csv",
+      "read_started_utc": "2026-10-10T06:19:44.347041+00:00",
+      "read_finished_utc": "2026-10-10T06:19:44.347056+00:00",
+      "bytes": 77435,
+      "sha256": "b9ee7f42a1831dbaf46578dd4395c8b541874b7a2c7688736df62d95fe19cf10"
+    },
+    {
+      "source": "outputs/research/sim2sim/all-configs-final/random_locomotion/config-0001-cfg0001_stand_2.0s_run_left_45_2.0s_stand_2.0s-81228c5c24f8/video/episode_0_1791612802.mp4",
+      "published": "pilot/case-0001/video/episode_0_1791612802.mp4",
+      "read_started_utc": "2026-10-10T06:19:44.347156+00:00",
+      "read_finished_utc": "2026-10-10T06:19:44.347648+00:00",
+      "bytes": 413109,
+      "sha256": "3a5a1404cac5306ab27ebaa89f92b97fd7e15d5916d866781f24a029e9cfb8e4"
+    },
+    {
+      "source": "outputs/research/sim2sim/all-configs-final/random_locomotion/config-0001-cfg0001_stand_2.0s_run_left_45_2.0s_stand_2.0s-81228c5c24f8/video/episode_0_1791612802.png",
+      "published": "pilot/case-0001/video/episode_0_1791612802.png",
+      "read_started_utc": "2026-10-10T06:19:44.347944+00:00",
+      "read_finished_utc": "2026-10-10T06:19:44.348101+00:00",
+      "bytes": 26006,
+      "sha256": "7c7a19d8a23c8ac4ed5334136ca95f70497df80dc3b9b02cc76abbddd3f499bf"
+    },
+    {
+      "source": "outputs/research/sim2sim-all-configs-host/full-driver.json",
+      "published": "host/full-driver-snapshot.json",
+      "read_started_utc": "2026-10-10T06:19:44.516467+00:00",
+      "read_finished_utc": "2026-10-10T06:19:44.516559+00:00",
+      "bytes": 832,
+      "sha256": "55dd5f14f7ef990c6a124955ee8c146810df087837bbff1535c912d958298e24"
+    },
+    {
+      "source": "outputs/research/sim2sim-all-configs-host/full-execution.log",
+      "published": "host/full-execution-snapshot.log",
+      "read_started_utc": "2026-10-10T06:19:44.516656+00:00",
+      "read_finished_utc": "2026-10-10T06:19:44.516670+00:00",
+      "bytes": 4859,
+      "sha256": "7c30af5f6349d6b8c810cf1e3dcf6154e32bf4d988045dee5cf45fd85a0db888"
+    },
+    {
+      "source": "outputs/research/sim2sim/all-configs-final/matrix.json",
+      "published": "matrix-snapshot.json",
+      "read_started_utc": "2026-10-10T06:19:44.569910+00:00",
+      "read_finished_utc": "2026-10-10T06:19:44.570322+00:00",
+      "bytes": 2540858,
+      "sha256": "2e279dba421abf672d41d5d60a654f4678d2dcd4c1c82a5e599cc047997742d4"
+    }
+  ],
+  "limits": [
+    "This publication is an observation snapshot and becomes stale as the background run advances.",
+    "The full run resumes and retains the two successful pilot cases; they are not counted twice.",
+    "Threshold events are conservative height/tilt flags and do not alone prove permanent falls or course completion.",
+    "The released ONNX policy receives constant forward command, not the original trajectory labels/reference matching.",
+    "No in-flight outputs, project source, docs/scripts/tests/git or existing17-scene gallery were changed."
+  ]
+}
