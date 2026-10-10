@@ -214,6 +214,8 @@ CPU 测试统一在 Docker 中运行，分别保留根目录/训练和 motion ma
 
 动作测试目前 **213 passed、12 failed、0 skipped**。12 项均为修改前已有的历史字节 hash：未修改基线`554edcc`与research的36组数组逐字节一致，9项独立功能不变量通过，URDF零位FK的独立误差最大2.30e-16；另外用Python3.10复查6个characterization/FK hash测试，仍出现相同失败。历史`mm_hs`原始数组/环境不可得，[本机限定路径与文件名检查](usage_assets/reports/legacy-local-reference-search.json)也未找到；不能从SHA反推差异，也没有刷新golden或跳过失败。[12项原始详情](usage_assets/reports/legacy-goldens.json)、[原版数值对照](usage_assets/reports/motion-baseline-parity.json)。因此完整CPU命令保留退出码1，不能称为全绿。
 
+还在本机检查了官方仓库全部 5 个 advertised refs、16 个可达 commit：未发现测试提到的 `0424c06c`、`mm_hs` 完整环境锁或 golden 输出数组，GitHub commit 查询也返回该 SHA 不存在。[官方历史调查](usage_assets/reports/legacy-upstream-audit.json)。
+
 云端镜像核对压缩包 SHA-256、镜像配置和层内容，源码快照逐文件复核 SHA-256。选卡检查包含图形与计算进程，Docker 根据 GPU UUID 映射，保存物理 nvidia-smi 编号。远端容器不在本体安装任何项目包。当前运行中的结果均写入 `outputs/research/` 或远端项目持久目录，未完成项目不会在此文件中记作通过。
 
 首次完整镜像归档 **12,014,827,234 字节**，包 SHA-256 `332e292e5b0f542c2dfec6bf1b4c007d623f6acef313c3b37b03ba1d2eaccb83`，两端 Config/RootFS 指纹相同。部署时物理 GPU 1 没有任何进程、显存 1 MiB、利用率 0%，对应 UUID `GPU-27eb1141-ab74-ebdd-42c2-6549fb7253e5`；容器内只见这张卡。[传输记录](usage_assets/reports/cloud-image-transfer.json)、[部署记录](usage_assets/reports/cloud-deployment.json)、[仅公钥登录验证](usage_assets/reports/cloud-ssh-key-check.json)。最终重建的镜像将另行记录，不与首次镜像混记。

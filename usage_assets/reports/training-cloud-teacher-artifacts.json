@@ -1,0 +1,74 @@
+{
+  "scope": "Artifact capacity estimate; only locomotion graph size was measured, other skills inferred from exact source NPZ frame counts and unchanged 64 variants/float32 exporter. Does not change the official artifact policy or learning parameters.",
+  "pilot_actual": {
+    "save_interval": 500,
+    "num_envs": 4096,
+    "num_variants": 64,
+    "export_onnx_config": true,
+    "onnx_bytes": 1183810736,
+    "motion_frames": 4546688,
+    "embedded_reference_bytes": 1182138880,
+    "policy_and_graph_metadata_overhead_bytes": 1671856,
+    "external_tensors": 0,
+    "unreferenced_sidecar_bytes": 1183728640
+  },
+  "schedule": {
+    "iterations": 20000,
+    "periodic_iterations": "0, 500, ..., 19500",
+    "periodic_exports": 40,
+    "final_iteration": 19999,
+    "final_exports": 1,
+    "total_onnx_per_teacher": 41
+  },
+  "teacher_estimates": [
+    {
+      "skill": "high-climb-76",
+      "source_npz": 40,
+      "source_frames": 25191,
+      "expected_frames_64_variants": 1612224,
+      "constant_bytes_29_29_3_4_f32": 419178240,
+      "onnx_bytes_estimate": 420850096,
+      "41_onnx_bytes_estimate": 17254853936
+    },
+    {
+      "skill": "high-step",
+      "source_npz": 60,
+      "source_frames": 26513,
+      "expected_frames_64_variants": 1696832,
+      "constant_bytes_29_29_3_4_f32": 441176320,
+      "onnx_bytes_estimate": 442848176,
+      "41_onnx_bytes_estimate": 18156775216
+    },
+    {
+      "skill": "locomotion",
+      "source_npz": 100,
+      "source_frames": 71042,
+      "expected_frames_64_variants": 4546688,
+      "constant_bytes_29_29_3_4_f32": 1182138880,
+      "onnx_bytes_estimate": 1183810736,
+      "41_onnx_bytes_estimate": 48536240176
+    },
+    {
+      "skill": "low-climb-76",
+      "source_npz": 40,
+      "source_frames": 32814,
+      "expected_frames_64_variants": 2100096,
+      "constant_bytes_29_29_3_4_f32": 546024960,
+      "onnx_bytes_estimate": 547696816,
+      "41_onnx_bytes_estimate": 22455569456
+    },
+    {
+      "skill": "low-step",
+      "source_npz": 56,
+      "source_frames": 25676,
+      "expected_frames_64_variants": 1643264,
+      "constant_bytes_29_29_3_4_f32": 427248640,
+      "onnx_bytes_estimate": 428920496,
+      "41_onnx_bytes_estimate": 17585740336
+    }
+  ],
+  "all_five_onnx_estimate_bytes": 123989179120,
+  "all_five_single_sidecar_estimate_bytes": 3024126320,
+  "checkpoint_estimate_bytes": 2120716595,
+  "recommendation": "Retain official save_interval=500 and final export. Current available capacity is sufficient. Do not assume --training.export-onnx False disables PPO training export; it gates eval_teacher only. Optional artifact retention/filtered download may be applied after SHA validation, preserving all checkpoint logs and final exports."
+}

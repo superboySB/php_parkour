@@ -14,6 +14,7 @@ pipeline=(bash scripts/research/train_pipeline.sh)
 common=(--profile official --output "$output" --skip-completed)
 
 "${pipeline[@]}" teachers "${common[@]}" --resume
+train-python scripts/research/validate_teacher_exports.py --output "$output" --profile official
 "${pipeline[@]}" eval-teachers "${common[@]}" --num-envs "$eval_envs" --eval-steps "$eval_steps"
 for kind in pure finetune; do
     "${pipeline[@]}" "distill-$kind" "${common[@]}" --resume

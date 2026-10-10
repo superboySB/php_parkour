@@ -14,6 +14,7 @@ since it's robot-specific and used by any preset that sets
 from __future__ import annotations
 
 import dataclasses
+import json
 import logging
 import os
 import tempfile
@@ -434,6 +435,20 @@ def apply_terrain_preprocess(
     if add_onpath_obstacle and terrain_npy_file:
         from wbt_training.utils.obstacle_helpers import add_onpath_obstacle_standalone
 
+        # Independent evaluation calls this hook before simulator seeding.
+        # Honor the training seed here too, so recreating a checkpoint's
+        # terrain does not depend on unrelated process-global RNG state.
+        if obstacle_seed is None:
+            obstacle_seed = cfg.training.seed
+        hook_kwargs = json.loads(cfg.training.preprocess_hook_kwargs or "{}")
+        hook_kwargs["obstacle_seed"] = obstacle_seed
+        cfg = dataclasses.replace(
+            cfg,
+            training=dataclasses.replace(
+                cfg.training, preprocess_hook_kwargs=json.dumps(hook_kwargs)
+            ),
+        )
+        logger.info("Terrain obstacle seed: %s", obstacle_seed)
         n_variants = num_variants or cfg.training.num_envs
         _, motion_file_str, terrain_mesh, _ = add_onpath_obstacle_standalone(
             n_variants, str(motion_file), str(terrain_npy_file), obstacle_seed

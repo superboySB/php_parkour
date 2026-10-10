@@ -47,4 +47,6 @@ docker exec php-parkour-research train-python -m tensorboard.main \
   --host 127.0.0.1 --port 6006 --load_fast false
 ```
 
-打开 `http://127.0.0.1:6006/`。教师查看 `Loss/Value`，纯 DAgger 查看 `Loss/behavior`，DAgger+PPO 查看 `Loss/total_loss`；奖励使用 `Train/mean_reward`。`smoke/` 的 13 个 run 只有两轮，`pilot/teacher-locomotion` 有 20 轮。HTTP 数据端已核对真实曲线值，[HTTP 验证记录](training-cloud-tensorboard-http.json) 对应最初 13 个 run；监听检查确认服务仅绑定 127.0.0.1。浏览器截图由单独验收记录补充。
+打开 `http://127.0.0.1:6006/`。教师查看 `Loss/Value`，纯 DAgger 查看 `Loss/behavior`，DAgger+PPO 查看 `Loss/total_loss`；奖励使用 `Train/mean_reward`。`smoke/` 的 13 个 run 只有两轮，`pilot/teacher-locomotion` 有 20 轮。HTTP 数据端已核对真实曲线值，[HTTP 验证记录](training-cloud-tensorboard-http.json) 对应最初 13 个 run；监听检查确认服务仅绑定 127.0.0.1。[真实 Chrome 浏览器验收](tensorboard-browser.json) 另验证 8 条实际曲线、UI 筛选和 canvas 渲染；[20 步教师截图](../tensorboard-pilot.png) 与 [两学生截图](../tensorboard-students.png) 使用 Smoothing=0，完整显示已记录端点。
+
+教师自动 ONNX 的完整动作库占用、官方每 500 轮产物周期、五类教师约 124 GB 的容量估算，以及最终 pilot ONNX 的 12 组实际 CPU 验收，见 [教师产物与最终导出](training-cloud-teacher-artifacts.md)。

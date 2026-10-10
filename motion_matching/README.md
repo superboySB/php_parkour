@@ -9,18 +9,24 @@ and follow the [teacher-training instructions](../wbt_training/README.md#train-a
 
 ## Setup
 
-From the PHP checkout root, with Conda installed:
+The research branch uses the unified Docker from [note.md](../note.md).
+From the PHP checkout root on the host:
 
 ```bash
-bash motion_matching/setup_env.sh
-conda activate php-motion-matching
-python scripts/download_assets.py databases
-cd motion_matching
+bash scripts/research/docker.sh build
+bash scripts/research/docker.sh gui
+python3 scripts/research/verify_assets.py
+docker exec -it php-parkour-research bash
+# The remaining commands run inside this Docker shell.
+source /opt/php/bin/activate motion
+mkdir -p /outputs/manual-motion
+cd /outputs/manual-motion
 ```
 
-Run the remaining commands from `motion_matching/`. Databases default to
-`~/.cache/php-parkour/databases`; set `PHP_MOTION_DATABASE_DIR` before downloading
-and generating to choose another writable directory.
+All project packages are already installed inside Docker. The image sets
+`PHP_MOTION_DATABASE_DIR=/data/assets/databases`; generated files here remain
+under the persistent `/outputs/manual-motion/` directory. GUI mode requires
+the host display configuration described in note.md.
 
 The downloader checks the archive and every extracted file against the SHA-256
 manifest in [release-assets.json](../release-assets.json).
@@ -53,27 +59,26 @@ visualizer's URL to inspect a generated motion.
 For interactive motion matching, run `python -m motion_matching.run`.
 Interactive keyboard control needs Tkinter.
 
-## Upload to a W&B registry
+## Prepare a local training bundle
 
-Create a W&B registry named `terrains-motions` that accepts `terrains-motions`
-artifacts (or all types), then upload:
+Convert generated tracking motions into native Holosoma data and copy their
+paired terrain files. These commands run in the Docker shell above:
 
 ```bash
-python -m pip install -e '.[registry]'
-wandb login
-python tracking_utils/upload_npz_newformat.py \
-    --registry_name high-speed-climb-76 \
-    --file_folder motion_matching_results/high_speed_climb_76 \
-    --entity your-team
+train-python -m wbt_training.training_runs.motion_convert \
+    /outputs/manual-motion/motion_matching_results/high_speed_climb_76 \
+    /outputs/manual-native/high-speed-climb-76
+cp /outputs/manual-motion/motion_matching_results/high_speed_climb_76/*_terrain.npy \
+    /outputs/manual-native/high-speed-climb-76/
 ```
 
-`--registry_name` names the collection. The uploader prints a `REGISTRY`
-reference such as the one below; its organization may differ from your upload
-team. You can select any available version or `:latest` for
-[training](../wbt_training/README.md#train-a-teacher).
+For [training](../wbt_training/README.md#train-a-teacher), use the complete local
+bundle as the registry. No online account or upload is required; TensorBoard
+records training curves locally. The directory converter handles NPZ files;
+the copy command preserves terrain pairing.
 
 ```bash
-REGISTRY=your-org/wandb-registry-terrains-motions/high-speed-climb-76:v0
+REGISTRY=file:///outputs/manual-native/high-speed-climb-76
 ```
 
 ## Add your own motions or scenarios

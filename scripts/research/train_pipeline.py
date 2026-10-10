@@ -11,6 +11,7 @@ import argparse
 import datetime as dt
 import hashlib
 import json
+import math
 import os
 import re
 import statistics
@@ -23,6 +24,7 @@ ROOT = Path(__file__).resolve().parents[2]
 SKILLS = ("locomotion", "low-step", "high-step", "low-climb-76", "high-climb-76")
 TEACHER_PRESETS = ("g1-wbt-terrain-ref", "g1-wbt-terrain-no-heightscan", "g1-wbt-terrain-ref-noscale",
                    "g1-wbt-terrain-no-heightscan-noscale", "g1-wbt-terrain-ref-pelvis", "g1-wbt-terrain-no-heightscan-pelvis")
+QUALITY_METRICS = {"motion/error_ref_pos", "motion/error_ref_rot", "motion/error_body_pos", "motion/error_joint_pos"}
 
 
 def now() -> str:
@@ -40,6 +42,51 @@ def write_manifest(path: Path, evidence: dict) -> None:
     temporary = path.with_name(f"{path.name}.{os.getpid()}.tmp")
     temporary.write_text(json.dumps(evidence, indent=2, allow_nan=False) + "\n")
     temporary.replace(path)
+
+
+def fingerprint(path: Path) -> dict:
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return {"path": str(path.resolve()), "sha256": digest.hexdigest(), "bytes": path.stat().st_size}
+
+
+def load_quality_report(path: Path, source_sha: str, steps: int, num_envs: int) -> dict:
+    quality = json.loads(path.read_text())
+    if not isinstance(quality, dict) or not (quality.get("schema_version") == 1 and quality.get("status") == "completed"
+            and quality.get("control_steps") == steps and quality.get("num_envs") == num_envs
+            and quality.get("checkpoint_sha256") == source_sha
+            and quality.get("finite_actions") is True and quality.get("finite_root_states") is True):
+        raise ValueError("Missing or inconsistent rollout metadata")
+    metrics = quality.get("metrics", {})
+    if not isinstance(metrics, dict) or set(metrics) != QUALITY_METRICS:
+        raise ValueError("Incomplete native tracking metrics")
+    for metric in metrics.values():
+        if not (metric.get("finite") is True and metric.get("samples") == steps * num_envs
+                and all(isinstance(metric.get(key), (int, float)) and math.isfinite(metric[key]) for key in ("mean", "p95", "max"))):
+            raise ValueError("Invalid native tracking samples/statistics")
+    videos, events = quality.get("videos"), quality.get("tensorboard_events")
+    if not videos or not events:
+        raise ValueError("Quality report requires associated video and TensorBoard events")
+    for video in videos:
+        actual = fingerprint(Path(video["path"]))
+        if actual["sha256"] != video.get("sha256") or not video.get("duration_seconds", 0) > 0:
+            raise ValueError("Quality video changed or has no duration")
+    for event in events:
+        if not Path(event).is_file() or not Path(event).stat().st_size:
+            raise ValueError("Missing TensorBoard event artifact")
+    return quality
+
+
+def validate_export_report(path: Path, bundle: Path) -> None:
+    validation = json.loads(path.read_text())
+    if validation.get("status") != "passed" or len(validation.get("cases", [])) != 30:
+        raise ValueError("Incomplete ONNX inference validation report")
+    models = {Path(model["path"]).name: model for model in validation.get("models", [])}
+    for name in ("depth_backbone.onnx", "student.onnx"):
+        if name not in models or fingerprint(bundle / name)["sha256"] != models[name].get("sha256"):
+            raise ValueError("Exported ONNX differs from the inference-validated model")
 
 
 def main() -> None:
@@ -194,7 +241,26 @@ def main() -> None:
         if args.skip_completed and manifest.exists():
             old = json.loads(manifest.read_text())
             if old.get("status") == "passed" and old.get("settings") == settings:
-                if target is None or checkpoint_info(label)[1] >= target - 1:
+                artifacts_valid = True
+                if label.startswith(("eval-", "export-")):
+                    try:
+                        artifacts = old.get("artifact_fingerprints", [])
+                        if not artifacts or any(fingerprint(Path(item["path"])) != item for item in artifacts):
+                            raise ValueError("Missing or changed output artifacts")
+                        if label.startswith("eval-"):
+                            quality_path = Path(old["evaluation_quality_report"])
+                            load_quality_report(quality_path, sources[0]["sha256"], args.eval_steps, int(child_env["NUM_ENVS"]))
+                            if fingerprint(quality_path)["sha256"] != old["evaluation_quality_sha256"]:
+                                raise ValueError("Quality report changed")
+                        else:
+                            if not old.get("onnx_validation_reports"):
+                                raise ValueError("Missing ONNX inference report")
+                            for item in old["onnx_validation_reports"]:
+                                validate_export_report(Path(item["report"]), Path(item["bundle"]))
+                    except (OSError, ValueError, KeyError, TypeError, AttributeError):
+                        artifacts_valid = False
+                        print(f"Output artifacts are missing or changed; rerunning {label}", flush=True)
+                if artifacts_valid and (target is None or checkpoint_info(label)[1] >= target - 1):
                     print(f"Verified completed stage, skipping {label}", flush=True)
                     return
         started = time.monotonic()
@@ -251,7 +317,7 @@ def main() -> None:
                 break
         bundles = sorted({str(path.parent.resolve()) for path in (run_root / label).glob("**/student.onnx")
                           if (path.parent / "depth_backbone.onnx").is_file()
-                          and (not label.startswith("export-") or path.stat().st_mtime >= started_unix)})
+                          and (not label.startswith("export-") or min(path.stat().st_mtime, (path.parent / "depth_backbone.onnx").stat().st_mtime) >= started_unix)})
         if bundles:
             evidence["onnx_bundle_directories"] = bundles
         if label.startswith("export-") and returncode == 0 and not bundles:
@@ -269,8 +335,17 @@ def main() -> None:
                     evidence.update(status="failed", error="Exported bundle failed real ONNX checker/Runtime inference validation")
                     returncode = 1
                     break
+                try:
+                    validate_export_report(report, Path(bundle))
+                except (OSError, ValueError, KeyError, TypeError, AttributeError) as error:
+                    evidence.update(status="failed", error=f"Invalid ONNX validation evidence: {error}")
+                    returncode = 1
+                    break
                 validations.append({"bundle": bundle, "report": str(report.resolve())})
             evidence["onnx_validation_reports"] = validations
+            if returncode == 0:
+                evidence["artifact_fingerprints"] = [fingerprint(path) for item in validations
+                    for path in (Path(item["bundle"]) / "depth_backbone.onnx", Path(item["bundle"]) / "student.onnx", Path(item["report"]))]
         if label.startswith("eval-"):
             videos = []
             for path in sorted((run_root / label).glob("**/*.mp4")):
@@ -289,16 +364,18 @@ def main() -> None:
                 returncode = 1
             quality_path = run_root / label / "quality.json"
             try:
-                quality = json.loads(quality_path.read_text()) if quality_path.stat().st_mtime >= started_unix else {}
-                if not (quality.get("status") == "completed" and quality.get("control_steps") == args.eval_steps
-                        and quality.get("checkpoint_sha256") == sources[0]["sha256"]
-                        and quality.get("finite_actions") and quality.get("finite_root_states")
-                        and quality.get("videos") and all(item.get("finite") for item in quality.get("metrics", {}).values())
-                        and len(quality.get("metrics", {})) == 4):
-                    raise ValueError("Missing, stale or inconsistent rollout metrics")
+                if quality_path.stat().st_mtime < started_unix:
+                    raise ValueError("Stale rollout quality report")
+                quality = load_quality_report(quality_path, sources[0]["sha256"], args.eval_steps, int(child_env["NUM_ENVS"]))
+                fresh_paths = {video["path"] for video in videos}
+                if any(video["path"] not in fresh_paths for video in quality["videos"]):
+                    raise ValueError("Quality report references video outside this evaluation")
                 evidence["evaluation_quality_report"] = str(quality_path.resolve())
-                evidence["evaluation_tensorboard_events"] = quality.get("tensorboard_events", [])
-            except (OSError, ValueError, KeyError, TypeError) as error:
+                evidence["evaluation_quality_sha256"] = fingerprint(quality_path)["sha256"]
+                evidence["evaluation_tensorboard_events"] = quality["tensorboard_events"]
+                evidence["artifact_fingerprints"] = [fingerprint(path) for path in
+                    {quality_path, *(Path(video["path"]) for video in quality["videos"]), *(Path(event) for event in quality["tensorboard_events"])}]
+            except (OSError, ValueError, KeyError, TypeError, AttributeError) as error:
                 if returncode == 0:
                     evidence.update(status="failed", error=f"Evaluation quality report validation failed: {error}")
                     returncode = 1

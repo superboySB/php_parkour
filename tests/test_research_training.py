@@ -7,6 +7,8 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import hashlib
+import os
 import sys
 from types import SimpleNamespace
 from pathlib import Path
@@ -52,17 +54,31 @@ def pipeline(monkeypatch, tmp_path):
                 assert report_path.is_absolute() and report_path.name == "quality.json"
                 assert report_path.is_relative_to(tmp_path), "The mock must never write into the project root"
                 source = Path(kwargs["env"]["CHECKPOINT"])
-                import hashlib
-                report_path.write_text(json.dumps({"status": "completed", "control_steps": int(kwargs["env"]["MAX_EVAL_STEPS"]),
+                event = output / "events.out.tfevents.test"
+                event.write_bytes(b"mock event artifact; real TensorBoard parsing is tested separately")
+                steps, num_envs = int(kwargs["env"]["MAX_EVAL_STEPS"]), int(kwargs["env"]["NUM_ENVS"])
+                report_path.write_text(json.dumps({"schema_version": 1, "status": "completed", "control_steps": steps, "num_envs": num_envs,
                     "checkpoint_sha256": hashlib.sha256(source.read_bytes()).hexdigest(), "finite_actions": True, "finite_root_states": True,
-                    "videos": [{"path": str(output / "evaluation.mp4")}], "metrics": {str(i): {"finite": True} for i in range(4)}}))
+                    "videos": [{"path": str(output / "evaluation.mp4"), "sha256": hashlib.sha256((output / "evaluation.mp4").read_bytes()).hexdigest(), "duration_seconds": 1.0}],
+                    "tensorboard_events": [str(event)],
+                    "metrics": {name: {"finite": True, "samples": steps * num_envs, "mean": .1, "p95": .2, "max": .3} for name in module.QUALITY_METRICS}}))
+            if any("export_distill_onnx" in value for value in command) and os.environ.get("RESEARCH_FAKE_EXPORT") == "1":
+                for name in ("depth_backbone.onnx", "student.onnx"):
+                    (output / name).write_bytes(f"mock {name} model bytes".encode())
             self.stdout = iter(["Computation: 100 steps/s (Collection: 1.000s, Learning 0.500s)\n"])
 
         def wait(self):
             return 0
 
     monkeypatch.setattr(module.subprocess, "Popen", FakeProcess)
-    monkeypatch.setattr(module.subprocess, "run", lambda *a, **kw: SimpleNamespace(returncode=0, stdout='{"format":{"duration":"1.0"}}'))
+    def fake_run(command, **kwargs):
+        if any("validate_onnx.py" in value for value in command):
+            bundle = Path(command[command.index("--models") + 1])
+            output = Path(command[command.index("--output") + 1])
+            output.write_text(json.dumps({"status": "passed", "cases": [{}] * 30, "models": [module.fingerprint(bundle / name) for name in ("depth_backbone.onnx", "student.onnx")]}))
+        return SimpleNamespace(returncode=0, stdout='{"format":{"duration":"1.0"}}', stderr="")
+
+    monkeypatch.setattr(module.subprocess, "run", fake_run)
     monkeypatch.setenv("PHP_DOCKER", "1")
 
     def run(*extra, action="teachers"):
@@ -205,6 +221,62 @@ def test_successful_export_without_new_bundle_is_failed(pipeline):
     manifest = json.loads((directory / "official/manifests/export-student-finetune.json").read_text())
     assert manifest["status"] == "failed"
     assert "bundle" in manifest["error"]
+
+
+@pytest.mark.parametrize("kind", ["video", "quality", "tensorboard"])
+@pytest.mark.parametrize("operation", ["delete", "tamper"])
+def test_eval_skip_rechecks_output_artifacts(pipeline, kind, operation):
+    run, commands, _ = pipeline
+    teacher = run("--iterations", "2")
+    result = run("--checkpoint", teacher["checkpoint"], action="eval-student")
+    run("--checkpoint", teacher["checkpoint"], "--skip-completed", action="eval-student")
+    assert len(commands) == 2
+    path = Path(result["evaluation_quality_report"] if kind == "quality" else result["evaluation_videos"][0]["path"] if kind == "video" else result["evaluation_tensorboard_events"][0])
+    path.unlink() if operation == "delete" else path.write_bytes(b"changed output bytes")
+    rerun = run("--checkpoint", teacher["checkpoint"], "--skip-completed", action="eval-student")
+    assert len(commands) == 3 and rerun["status"] == "passed"
+
+
+def test_legacy_eval_manifest_without_artifact_hashes_is_rerun(pipeline):
+    run, commands, directory = pipeline
+    teacher = run("--iterations", "2")
+    result = run("--checkpoint", teacher["checkpoint"], action="eval-student")
+    del result["artifact_fingerprints"]
+    (directory / "official/manifests/eval-student-finetune.json").write_text(json.dumps(result))
+    run("--checkpoint", teacher["checkpoint"], "--skip-completed", action="eval-student")
+    assert len(commands) == 3
+
+
+@pytest.mark.parametrize("name", ["depth_backbone.onnx", "student.onnx", "onnx-validation-0.json"])
+@pytest.mark.parametrize("operation", ["delete", "tamper"])
+def test_export_skip_rechecks_models_and_inference_report(pipeline, monkeypatch, name, operation):
+    monkeypatch.setenv("RESEARCH_FAKE_EXPORT", "1")
+    run, commands, _ = pipeline
+    teacher = run("--iterations", "2")
+    result = run("--checkpoint", teacher["checkpoint"], action="export")
+    run("--checkpoint", teacher["checkpoint"], "--skip-completed", action="export")
+    assert len(commands) == 2
+    artifact = next(item for item in result["artifact_fingerprints"] if Path(item["path"]).name == name)
+    path = Path(artifact["path"])
+    path.unlink() if operation == "delete" else path.write_bytes(b"changed model/report bytes")
+    rerun = run("--checkpoint", teacher["checkpoint"], "--skip-completed", action="export")
+    assert len(commands) == 3 and rerun["status"] == "passed"
+
+
+def test_quality_report_rejects_structure_changes_even_if_hash_is_refreshed(pipeline):
+    run, commands, directory = pipeline
+    teacher = run("--iterations", "2")
+    result = run("--checkpoint", teacher["checkpoint"], action="eval-student")
+    path = Path(result["evaluation_quality_report"])
+    quality = json.loads(path.read_text())
+    quality["metrics"]["motion/error_ref_pos"]["samples"] -= 1
+    path.write_text(json.dumps(quality))
+    result["evaluation_quality_sha256"] = hashlib.sha256(path.read_bytes()).hexdigest()
+    artifact = next(item for item in result["artifact_fingerprints"] if item["path"] == str(path))
+    artifact.update(sha256=result["evaluation_quality_sha256"], bytes=path.stat().st_size)
+    (directory / "official/manifests/eval-student-finetune.json").write_text(json.dumps(result))
+    run("--checkpoint", teacher["checkpoint"], "--skip-completed", action="eval-student")
+    assert len(commands) == 3
 
 
 def test_successful_exit_without_target_checkpoint_is_not_success(pipeline, monkeypatch):

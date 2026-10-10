@@ -124,3 +124,9 @@ eval/export 从 native PT embedded config 恢复实际算法类型。pipeline �
 独立 Isaac `eval_quality.py` 现已纳入 pipeline，捕获 termination 后、reset 前的原生统计，并把本次视频 SHA、checkpoint/config SHA、仿真/墙钟时长、四个误差的 overall/按 expert 统计及本地 TensorBoard events 关联到原子 JSON。16 env×100 step 的 iter1 教师基线真实运行成功：2 仿真秒/env、32 env-seconds，49 failed resets、0 timeout；reference-position p95=0.44015 m、body-position p95=0.25293 m，4 指标各 1600 有限样本。它真实展示未收敛模型的失败，不能写成训练质量成功。[质量报告](isaac-local-quality.json)、[原片](../isaac/local-teacher-quality.mp4)、[实现与正式评估设置](isaac-quality-plan.md)。加入真实 RootStatesProxy、pre-reset failed/timeout、warmup step 排除、原子写入与 TensorBoard 回归后，目标组 **23/23** 通过：[最新 JUnit](research-quality-training.xml)。此数与前述 21/21 重叠，不累加。
 
 完整来源指标、原报告 SHA 与所有限制见 [deployment-summary.json](deployment-summary.json)。
+
+长期恢复复查已补：顺序教师/学生任务的 `--resume` 遇到尚未开始或尚无完整保存的阶段，会从 iteration0 启动；已有完整 checkpoint 才恢复，已记录 PT 损坏仍拒绝。manifest 用原子替换，避免中断写入产生半个 JSON。测试替身报告路径改为按 launcher 参数位置解析并限定 pytest 临时目录，旧误生成文件已清理。[最新目标组 26/26 JUnit](research-pipeline-review.xml)，与前述目标组重叠，不累加。
+
+评估/导出 `--skip-completed` 现在还会复核产物的存在、SHA 和结构：eval 保存 quality JSON、其视频与 TensorBoard events 的 fingerprint，并复核实际原生指标名称、finite、steps×env 样本数及源模型；export 保存本次 fresh 的两个 ONNX 和真实 30-case 验收报告 fingerprint，模型 SHA 必须匹配验收报告。旧 manifest 缺字段或删除/篡改任何关键产物都会重跑。[加固后目标组 40/40 JUnit](research-pipeline-artifacts.xml)，包含14个新增产物损坏/删除/结构回归，与前述测试数重叠，不累加。实际 16env×100step 的质量报告也通过加强后的 validator。
+
+17 场景物理闭环已准备 [固定配置计划](sim2sim-scene-plan.json)，每场景只选 1 个已生成完整配置的实际 OBJ，默认 10 仿真秒，seed42，低/高速前进输入分别为1/6。`random_locomotion` 固定选含 clutter 的 cfg0035。计划输入的全部 OBJ 和 ONNX SHA 已核验，等待最终镜像重建后真实执行；**计划文件不是运行成功结果，也不是 629 配置的 policy 覆盖**。

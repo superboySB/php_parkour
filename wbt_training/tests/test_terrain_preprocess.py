@@ -155,3 +155,65 @@ def test_saved_config_regenerates_local_terrain_and_depth_assets(
     terrain_path.unlink()
     for path in mesh_paths:
         path.unlink()
+
+
+@pytest.mark.parametrize("explicit_seed", [None, 7])
+def test_obstacle_generation_honors_recorded_seed_despite_global_rng_state(
+    tmp_path, scratch, explicit_seed
+):
+    from wbt_training.config_values.experiment import g1_wbt_terrain_ref_noscale
+
+    bundle = write_bundle(tmp_path, "seeded", {"01": 1, "02": 2})
+    kwargs = {"add_onpath_obstacle": True, "num_variants": 2}
+    if explicit_seed is not None:
+        kwargs["obstacle_seed"] = explicit_seed
+    config = dataclasses.replace(
+        g1_wbt_terrain_ref_noscale,
+        training=dataclasses.replace(
+            g1_wbt_terrain_ref_noscale.training, seed=19,
+            registry_name=bundle.as_uri(), num_envs=2,
+            preprocess_hook_kwargs=json.dumps(kwargs),
+        ),
+    )
+    outputs = []
+    for global_seed in (100, 200):
+        np.random.seed(global_seed)
+        torch.manual_seed(global_seed)
+        processed = apply_preprocess_hook(config)
+        effective = json.loads(processed.training.preprocess_hook_kwargs)["obstacle_seed"]
+        assert effective == (19 if explicit_seed is None else explicit_seed)
+        path = Path(processed.terrain.terrain_term.obj_file_path)
+        motion_config = processed.command.setup_terms["motion_command"].params["motion_config"]
+        with np.load(motion_config["motion_file"] if isinstance(motion_config, dict) else motion_config.motion_file) as motion:
+            arrays = {key: motion[key].copy() for key in motion.files}
+        outputs.append((path.read_bytes(), arrays))
+        path.unlink()
+    assert outputs[0][0] == outputs[1][0]
+    assert outputs[0][1].keys() == outputs[1][1].keys()
+    for key in outputs[0][1]:
+        np.testing.assert_array_equal(outputs[0][1][key], outputs[1][1][key])
+
+
+def test_explicit_hook_seed_preserves_single_gpu_training_geometry(tmp_path, scratch):
+    import shutil
+    from wbt_training.utils.obstacle_helpers import add_onpath_obstacle_standalone
+
+    bundle = write_bundle(tmp_path, "legacy-seed", {"01": 1, "02": 2})
+    _, source, terrain, _ = multi_motion_helpers.pull_paired_from_wandb_registry(bundle.as_uri())
+    copies = [tmp_path / "implicit.npz", tmp_path / "explicit.npz"]
+    for path in copies:
+        shutil.copyfile(source, path)
+    outputs = []
+    for path, seed in zip(copies, (None, 42), strict=True):
+        # Holosoma's single-GPU training entry already seeds these before
+        # preprocessing. Explicit seeding must preserve that sampled geometry.
+        np.random.seed(42)
+        torch.manual_seed(42)
+        _, motion_path, mesh, _ = add_onpath_obstacle_standalone(2, str(path), str(terrain), seed)
+        with np.load(motion_path) as archive:
+            arrays = {key: archive[key].copy() for key in archive.files}
+        outputs.append((mesh.vertices.copy(), mesh.faces.copy(), arrays))
+    np.testing.assert_array_equal(outputs[0][0], outputs[1][0])
+    np.testing.assert_array_equal(outputs[0][1], outputs[1][1])
+    for key in outputs[0][2]:
+        np.testing.assert_array_equal(outputs[0][2][key], outputs[1][2][key])
