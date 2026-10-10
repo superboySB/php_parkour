@@ -44,11 +44,13 @@ COPY pyproject.toml ./
 
 # Retain NVIDIA's Torch/CUDA/Isaac stack. NumPy 1 is needed by Holosoma;
 # motion matching and pinocchio require NumPy 2 and use separate venvs.
+# Upstream [unitree] still pins SDK 0.1.6. Select booster alone and pin the
+# reviewed Unitree SDK explicitly without modifying the Holosoma submodule.
 RUN --mount=type=cache,target=/root/.cache/pip \
     PIP_CONSTRAINT=/opt/php-build/constraints.build.txt train-python -m pip install \
       -c /opt/php-build/isaacsim-5.1.txt -c /opt/php-build/constraints.train.txt \
       -c /opt/php-build/constraints.train-added.txt \
-      -e 'thirdparty/holosoma/src/holosoma[unitree,booster]' \
+      -e 'thirdparty/holosoma/src/holosoma[booster]' 'far-unitree-sdk==0.1.8' \
       'mujoco==3.8.1' 'mujoco-python-viewer==0.1.4' 'av==16.1.0' \
       'quadprog==0.1.13' 'PyJWT==2.10.1' \
     && /usr/bin/python3 -m venv /opt/php/envs/motion \
@@ -63,7 +65,7 @@ RUN --mount=type=cache,target=/root/.cache/pip \
     && inference-python -m pip install \
       --build-constraint /opt/php-build/constraints.build.txt \
       -c /opt/php-build/constraints.inference.txt \
-      -e 'thirdparty/holosoma/src/holosoma_inference[unitree,booster]' \
+      -e 'thirdparty/holosoma/src/holosoma_inference[booster]' 'far-unitree-sdk==0.1.8' \
       'numpy==2.3.5' 'pytest==9.0.3' 'av==16.1.0'
 
 COPY . .
