@@ -165,6 +165,8 @@ smoke 采用显式缩小的并行环境、布局和迭代数，检查实际梯�
 
 正式模型后的衔接脚本 [posttrain_coverage.py](scripts/research/posttrain_coverage.py) 已完成 **61项调度/来源/保留证据回归**，与原48项联合109/109通过；独立复核最终61项也通过。真实smoke PT确认两种学生各自内嵌五个专家的40个MLP tensor和15个normalizer buffer均与有序教师逐位相同，检查全程未初始化CUDA。脚本等待官方16阶段全部完成才启动CPU配置/全源预检，再等固定GPU空闲后执行888次首次尝试；已有失败不重跑，换fresh目录会生成新批次身份和容器名。新fixture漏模拟Docker inspect导致的一次失败与修正后原始JUnit均保留。这些检查没有把smoke PT升级为正式模型，也不表示888次已执行。[CPU检查与准确边界](usage_assets/reports/posttrain-monitor/summary.md)。
 
+该watch已于北京时间14:39真实部署。远端新快照全部文件和镜像内容指纹独立复核通过，实际只读dry-run返回16项训练未完成阻塞；后台进程处于`waiting`，原训练进程仍存活、源码挂载未变、Docker容器集合未新增。首教师14:38的TensorBoard记录到step3362，四类所查标量从step0起全部有限。以上是运行中证据，七模型与888次验收仍未完成。[远端检查、启动与持续轮询回执](usage_assets/reports/posttrain-monitor-deployment/summary.md)。
+
 这次还定位并修复了独立评估的 warmup 目标缓存问题：原生 `reset_all` 清零缓存后先检测终止，造成策略开始前的误终止。保留的三次修复前真实记录均为0策略步；按原公式刷新当前帧缓存后才得到上述158/21/21步。参考时间、RNG和终止条件均未修改，当前云训练也未改变。[修复推导与原生逐位对照](usage_assets/reports/source-coverage-pilot/cache-diagnosis/warmup-relative-cache-review.md)、[源码/数据/逐步记录的 SHA 清单](usage_assets/reports/source-coverage-pilot/evidence-manifest.json)。新旧共18个MP4均完整解码通过，启动/预热原片计入此数，不能用录像数推断片段完成数。
 
 ![本地未收敛教师的实际评估帧](usage_assets/isaac/local-teacher-quality.png)

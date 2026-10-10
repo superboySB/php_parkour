@@ -308,6 +308,15 @@ python3 "$PHP_COVERAGE_ROOT/source/$PHP_COVERAGE_SOURCE_TREE/scripts/research/po
 
 `dry-run`只读状态。`watch`等待全部16阶段manifest、driver最终标记、所有训练/评估子进程退出和官方锁释放；随后用相同镜像启动无GPU、无网络的Docker，核对七个最终PT的真实配置、有限权重及学生内嵌五专家与教师逐tensor一致，再执行三套296源CPU预检。只有固定物理GPU 1的UUID确实空闲时，才启动无网络GPU Docker执行888个首次尝试；不改原训练容器或源码。每个失败、未完成和已完成记录均保留；中断后只有显式`--resume-interrupted`才续跑未尝试项，不重试已失败的技能。状态保存在服务器`outputs/coverage-official-final/monitor-status.json`，逐源输出与官方训练目录分开；启动watch不等于完成这些测试。
 
+本次watch已经在北京时间2026-10-10 14:39部署，使用独立的`8d9ee8a4…`源码快照；官方训练仍用原`0093aa40…`挂载。当前只需读状态，勿重复启动；同服务器全局锁会拒绝同时运行第二个watch。
+
+```bash
+ssh -p 22 -o BatchMode=yes -o PasswordAuthentication=no tencent-231 \
+  cat /diff/dzp_is_sb/php-parkour-research/outputs/coverage-official-final/monitor-status.json
+```
+
+精确源码/镜像校验、只读dry-run、真实PID和持续轮询回执见[部署证据](usage_assets/reports/posttrain-monitor-deployment/summary.md)。当前等待正式训练完成，没有启动额外GPU作业。
+
 本次正式 driver 已于北京时间 2026-10-10 12:20 用上述 `/outputs/official-full` 目录启动，当前无需重复启动。云端 TensorBoard 已以该目录为 `--logdir` 运行，本机 6007 转发也已实测 HTTP 200；打开 `http://127.0.0.1:6007/` 查看实时训练。上述 `/outputs/training` 示例适用于默认输出目录；已有服务时复用同一端口。可随时只读检查进度：
 
 ```bash
