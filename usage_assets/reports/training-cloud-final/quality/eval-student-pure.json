@@ -1,0 +1,432 @@
+{
+  "schema_version": 1,
+  "status": "completed",
+  "quality_verified": false,
+  "scope": "Measured rollout only; clip completion is not course completion or convergence.",
+  "checkpoint": "/outputs/final-training-acceptance/smoke/student-pure/PHP-research/20261010_041432-student-pure-locomotion/model_00001.pt",
+  "checkpoint_sha256": "959b668595ef7b8339eff616135d8011c0ad5ad887b00eae6f7ae8cc0769c77c",
+  "checkpoint_iteration": 1,
+  "native_argv": [
+    "--checkpoint",
+    "/outputs/final-training-acceptance/smoke/student-pure/PHP-research/20261010_041432-student-pure-locomotion/model_00001.pt",
+    "--training.num-envs",
+    "1",
+    "--training.max-eval-steps",
+    "250",
+    "--training.export-onnx",
+    "False",
+    "--training.registry-name",
+    "file:///data/assets/motions-locomotion,file:///data/assets/motions-low-step,file:///data/assets/motions-high-step,file:///data/assets/motions-low-climb-76,file:///data/assets/motions-high-climb-76",
+    "--terrain.terrain-term.spawn.randomize-tiles",
+    "True",
+    "logger:disabled",
+    "--logger.video.enabled",
+    "True",
+    "--training.preprocess-hook-kwargs",
+    "{\"add_onpath_obstacle\": true, \"num_variants\": 3, \"obstacle_seed\": 42}",
+    "--training.seed",
+    "42",
+    "--training.headless",
+    "True",
+    "--logger.base-dir",
+    "/outputs/final-training-acceptance/smoke/eval-student-pure",
+    "--logger.video.interval",
+    "1",
+    "--logger.video.upload-to-wandb",
+    "False"
+  ],
+  "seed": 42,
+  "registry_order": [
+    "file:///data/assets/motions-locomotion",
+    "file:///data/assets/motions-low-step",
+    "file:///data/assets/motions-high-step",
+    "file:///data/assets/motions-low-climb-76",
+    "file:///data/assets/motions-high-climb-76"
+  ],
+  "saved_eval_config": "/outputs/final-training-acceptance/smoke/eval-student-pure/PHP-research/20261010_041529-student-pure-eval/holosoma_config.yaml",
+  "saved_eval_config_sha256": "d965ab536e44a877a228a732ab5721a82c288712138de3cf512636e9c0405d5a",
+  "num_envs": 1,
+  "control_dt_seconds": 0.02,
+  "control_steps": 250,
+  "sim_seconds_per_env": 5.0,
+  "total_env_seconds": 5.0,
+  "wall_seconds": 20.057086814194918,
+  "failed_resets": 16,
+  "timeout_resets": 0,
+  "failed_resets_by_env": [
+    16
+  ],
+  "timeout_resets_by_env": [
+    0
+  ],
+  "first_failure_sim_seconds_by_env": [
+    0.32
+  ],
+  "ended_episode_lengths_steps": [
+    16,
+    10,
+    32,
+    39,
+    7,
+    12,
+    14,
+    22,
+    9,
+    9,
+    8,
+    7,
+    24,
+    13,
+    14,
+    12
+  ],
+  "clip_completions_excluding_failed_timeout_steps": 0,
+  "observed_clip_ids": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "available_clip_count": 1,
+  "observed_expert_ids": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "metrics": {
+    "motion/error_ref_pos": {
+      "unit": "m",
+      "samples": 250,
+      "finite": true,
+      "mean": 0.18849094212055206,
+      "p95": 0.4777252554893493,
+      "max": 0.5589452385902405
+    },
+    "motion/error_ref_rot": {
+      "unit": "rad",
+      "samples": 250,
+      "finite": true,
+      "mean": 0.4852648079395294,
+      "p95": 1.0060163915157319,
+      "max": 1.1894426345825195
+    },
+    "motion/error_body_pos": {
+      "unit": "m",
+      "samples": 250,
+      "finite": true,
+      "mean": 0.13843004405498505,
+      "p95": 0.27172298431396474,
+      "max": 0.3705039322376251
+    },
+    "motion/error_joint_pos": {
+      "unit": "rad (joint-vector L2)",
+      "samples": 250,
+      "finite": true,
+      "mean": 1.5777016878128052,
+      "p95": 2.6448819994926454,
+      "max": 2.8776612281799316
+    }
+  },
+  "metrics_by_expert": {
+    "0": {
+      "motion/error_ref_pos": {
+        "unit": "m",
+        "samples": 64,
+        "finite": true,
+        "mean": 0.18803101778030396,
+        "p95": 0.4535457536578178,
+        "max": 0.5053076148033142
+      },
+      "motion/error_ref_rot": {
+        "unit": "rad",
+        "samples": 64,
+        "finite": true,
+        "mean": 0.498008668422699,
+        "p95": 0.8809586226940154,
+        "max": 1.1550925970077515
+      },
+      "motion/error_body_pos": {
+        "unit": "m",
+        "samples": 64,
+        "finite": true,
+        "mean": 0.13141900300979614,
+        "p95": 0.2767329491674898,
+        "max": 0.3705039322376251
+      },
+      "motion/error_joint_pos": {
+        "unit": "rad (joint-vector L2)",
+        "samples": 64,
+        "finite": true,
+        "mean": 1.5123224258422852,
+        "p95": 2.647550761699676,
+        "max": 2.7631328105926514
+      }
+    },
+    "1": {
+      "motion/error_ref_pos": {
+        "unit": "m",
+        "samples": 46,
+        "finite": true,
+        "mean": 0.20355282723903656,
+        "p95": 0.4862038940191269,
+        "max": 0.5587327480316162
+      },
+      "motion/error_ref_rot": {
+        "unit": "rad",
+        "samples": 46,
+        "finite": true,
+        "mean": 0.44098183512687683,
+        "p95": 0.8308687955141068,
+        "max": 0.8363887667655945
+      },
+      "motion/error_body_pos": {
+        "unit": "m",
+        "samples": 46,
+        "finite": true,
+        "mean": 0.13747160136699677,
+        "p95": 0.2667693570256233,
+        "max": 0.3253518044948578
+      },
+      "motion/error_joint_pos": {
+        "unit": "rad (joint-vector L2)",
+        "samples": 46,
+        "finite": true,
+        "mean": 1.3822208642959595,
+        "p95": 1.991385966539383,
+        "max": 2.1287014484405518
+      }
+    },
+    "2": {
+      "motion/error_ref_pos": {
+        "unit": "m",
+        "samples": 29,
+        "finite": true,
+        "mean": 0.2329263538122177,
+        "p95": 0.5016258120536803,
+        "max": 0.5521774291992188
+      },
+      "motion/error_ref_rot": {
+        "unit": "rad",
+        "samples": 29,
+        "finite": true,
+        "mean": 0.5129570364952087,
+        "p95": 1.1013652801513671,
+        "max": 1.1894426345825195
+      },
+      "motion/error_body_pos": {
+        "unit": "m",
+        "samples": 29,
+        "finite": true,
+        "mean": 0.1652073860168457,
+        "p95": 0.3134648859500885,
+        "max": 0.36786186695098877
+      },
+      "motion/error_joint_pos": {
+        "unit": "rad (joint-vector L2)",
+        "samples": 29,
+        "finite": true,
+        "mean": 2.030080795288086,
+        "p95": 2.6199316501617433,
+        "max": 2.646132230758667
+      }
+    },
+    "3": {
+      "motion/error_ref_pos": {
+        "unit": "m",
+        "samples": 49,
+        "finite": true,
+        "mean": 0.13227036595344543,
+        "p95": 0.33654683232307414,
+        "max": 0.4304834306240082
+      },
+      "motion/error_ref_rot": {
+        "unit": "rad",
+        "samples": 49,
+        "finite": true,
+        "mean": 0.6144629120826721,
+        "p95": 1.0131596803665162,
+        "max": 1.0169123411178589
+      },
+      "motion/error_body_pos": {
+        "unit": "m",
+        "samples": 49,
+        "finite": true,
+        "mean": 0.12830659747123718,
+        "p95": 0.23344911932945245,
+        "max": 0.25897157192230225
+      },
+      "motion/error_joint_pos": {
+        "unit": "rad (joint-vector L2)",
+        "samples": 49,
+        "finite": true,
+        "mean": 1.3542721271514893,
+        "p95": 2.13486132621765,
+        "max": 2.8776612281799316
+      }
+    },
+    "4": {
+      "motion/error_ref_pos": {
+        "unit": "m",
+        "samples": 62,
+        "finite": true,
+        "mean": 0.20143885910511017,
+        "p95": 0.488880643248558,
+        "max": 0.5589452385902405
+      },
+      "motion/error_ref_rot": {
+        "unit": "rad",
+        "samples": 62,
+        "finite": true,
+        "mean": 0.3899039030075073,
+        "p95": 0.8053318709135056,
+        "max": 0.8947416543960571
+      },
+      "motion/error_body_pos": {
+        "unit": "m",
+        "samples": 62,
+        "finite": true,
+        "mean": 0.14185425639152527,
+        "p95": 0.2619316056370735,
+        "max": 0.36473944783210754
+      },
+      "motion/error_joint_pos": {
+        "unit": "rad (joint-vector L2)",
+        "samples": 62,
+        "finite": true,
+        "mean": 1.7552084922790527,
+        "p95": 2.744779062271118,
+        "max": 2.8336386680603027
+      }
+    }
+  },
+  "resets_by_expert": {
+    "2": {
+      "failed_resets": 2,
+      "timeout_resets": 0,
+      "env_steps": 29
+    },
+    "1": {
+      "failed_resets": 3,
+      "timeout_resets": 0,
+      "env_steps": 46
+    },
+    "0": {
+      "failed_resets": 4,
+      "timeout_resets": 0,
+      "env_steps": 64
+    },
+    "3": {
+      "failed_resets": 2,
+      "timeout_resets": 0,
+      "env_steps": 49
+    },
+    "4": {
+      "failed_resets": 5,
+      "timeout_resets": 0,
+      "env_steps": 62
+    }
+  },
+  "finite_actions": true,
+  "finite_root_states": true,
+  "max_abs_action": 0.3776269853115082,
+  "minimum_root_height_m": 0.42061492800712585,
+  "videos": [
+    {
+      "path": "/outputs/final-training-acceptance/smoke/eval-student-pure/PHP-research/20261010_041518-student-pure-wholebodytrackingmanager/renderings_training/episode_10_1791605738.mp4",
+      "sha256": "99504e63393a267b86e2aa74c72f3971201480e0db2463b59b10b47ce6ff0ead",
+      "duration_seconds": 0.14
+    },
+    {
+      "path": "/outputs/final-training-acceptance/smoke/eval-student-pure/PHP-research/20261010_041518-student-pure-wholebodytrackingmanager/renderings_training/episode_11_1791605739.mp4",
+      "sha256": "3ebc4dba43b9e31de274f8bbd762a818614e8fb8a2c934d401017b03a3e1e655",
+      "duration_seconds": 0.24
+    },
+    {
+      "path": "/outputs/final-training-acceptance/smoke/eval-student-pure/PHP-research/20261010_041518-student-pure-wholebodytrackingmanager/renderings_training/episode_12_1791605741.mp4",
+      "sha256": "94fdfa83720958e54d7e1881b1f92411a7c3114e7a30e4c0a211530d2a0acf54",
+      "duration_seconds": 0.28
+    },
+    {
+      "path": "/outputs/final-training-acceptance/smoke/eval-student-pure/PHP-research/20261010_041518-student-pure-wholebodytrackingmanager/renderings_training/episode_13_1791605744.mp4",
+      "sha256": "4db853864bdd585f1ea031ffbe0e248f153beb0a8d8453bc8f46866125a755da",
+      "duration_seconds": 0.44
+    },
+    {
+      "path": "/outputs/final-training-acceptance/smoke/eval-student-pure/PHP-research/20261010_041518-student-pure-wholebodytrackingmanager/renderings_training/episode_14_1791605744.mp4",
+      "sha256": "c90dc4f721f8f92e03aaec16c5b4775654aab555168c7644ba680655d3626236",
+      "duration_seconds": 0.18
+    },
+    {
+      "path": "/outputs/final-training-acceptance/smoke/eval-student-pure/PHP-research/20261010_041518-student-pure-wholebodytrackingmanager/renderings_training/episode_15_1791605745.mp4",
+      "sha256": "12f8302dec6668d8efbe7ba7a79749cc0020a97935e8057ce679c731c572a3b9",
+      "duration_seconds": 0.18
+    },
+    {
+      "path": "/outputs/final-training-acceptance/smoke/eval-student-pure/PHP-research/20261010_041518-student-pure-wholebodytrackingmanager/renderings_training/episode_16_1791605746.mp4",
+      "sha256": "5936b926a2731a5de9118ba81cecf5a6d0fffa25b510472355924bba869d2f64",
+      "duration_seconds": 0.16
+    },
+    {
+      "path": "/outputs/final-training-acceptance/smoke/eval-student-pure/PHP-research/20261010_041518-student-pure-wholebodytrackingmanager/renderings_training/episode_17_1791605746.mp4",
+      "sha256": "697aa9ca25b7e8a515ce4cb0d0e49085443ed7d7501c9edb0a57cd4c159782a1",
+      "duration_seconds": 0.14
+    },
+    {
+      "path": "/outputs/final-training-acceptance/smoke/eval-student-pure/PHP-research/20261010_041518-student-pure-wholebodytrackingmanager/renderings_training/episode_18_1791605747.mp4",
+      "sha256": "4035c1a726ddfa0ca3d7471e58389e21eb47fdfada65253cae100957aa9de80b",
+      "duration_seconds": 0.48
+    },
+    {
+      "path": "/outputs/final-training-acceptance/smoke/eval-student-pure/PHP-research/20261010_041518-student-pure-wholebodytrackingmanager/renderings_training/episode_19_1791605748.mp4",
+      "sha256": "dcf6082c0753382defb0be79e8cf115136aa4fae97832fb038692ac68db5329f",
+      "duration_seconds": 0.26
+    },
+    {
+      "path": "/outputs/final-training-acceptance/smoke/eval-student-pure/PHP-research/20261010_041518-student-pure-wholebodytrackingmanager/renderings_training/episode_20_1791605749.mp4",
+      "sha256": "2ca9b0d25b5bcc97c81f4f7514cc8d5477b0241ce386ac778eddc08a93062154",
+      "duration_seconds": 0.28
+    },
+    {
+      "path": "/outputs/final-training-acceptance/smoke/eval-student-pure/PHP-research/20261010_041518-student-pure-wholebodytrackingmanager/renderings_training/episode_21_1791605750.mp4",
+      "sha256": "eec017530abfb78850ec95e19cd829be333cf485e11a87fd03a2ac424118fd1c",
+      "duration_seconds": 0.24
+    },
+    {
+      "path": "/outputs/final-training-acceptance/smoke/eval-student-pure/PHP-research/20261010_041518-student-pure-wholebodytrackingmanager/renderings_training/episode_22_1791605750.mp4",
+      "sha256": "f9f7217166027d786d945ac08d969a7d755eece829979fe4e93e4aefb986306d",
+      "duration_seconds": 0.04
+    },
+    {
+      "path": "/outputs/final-training-acceptance/smoke/eval-student-pure/PHP-research/20261010_041518-student-pure-wholebodytrackingmanager/renderings_training/episode_5_1791605731.mp4",
+      "sha256": "44aef62262793d64e8bee3578d4c0489f080ddfd040d68e6c065c078d108f29d",
+      "duration_seconds": 0.02
+    },
+    {
+      "path": "/outputs/final-training-acceptance/smoke/eval-student-pure/PHP-research/20261010_041518-student-pure-wholebodytrackingmanager/renderings_training/episode_6_1791605732.mp4",
+      "sha256": "9d9659ebc706c072279aa6ecece7a7e399a35ca47c78c7ff366cc29279545c39",
+      "duration_seconds": 0.32
+    },
+    {
+      "path": "/outputs/final-training-acceptance/smoke/eval-student-pure/PHP-research/20261010_041518-student-pure-wholebodytrackingmanager/renderings_training/episode_7_1791605733.mp4",
+      "sha256": "72a06688170da2dc6daee11e6685eb99a6a9e46bcbb1d47ee9c2cb546c446d09",
+      "duration_seconds": 0.2
+    },
+    {
+      "path": "/outputs/final-training-acceptance/smoke/eval-student-pure/PHP-research/20261010_041518-student-pure-wholebodytrackingmanager/renderings_training/episode_8_1791605735.mp4",
+      "sha256": "4fd9c3c229eb9f112a95e0abab136595528823ec75d05f8dc93210cf82c81275",
+      "duration_seconds": 0.64
+    },
+    {
+      "path": "/outputs/final-training-acceptance/smoke/eval-student-pure/PHP-research/20261010_041518-student-pure-wholebodytrackingmanager/renderings_training/episode_9_1791605737.mp4",
+      "sha256": "b5ccdae8d1dee94a9cd62d451d5aa4dbd886d48e2e2d024fca6983840d6b2bb2",
+      "duration_seconds": 0.78
+    }
+  ],
+  "capture_phase": "after native _update_log_dict, before reset_envs_idx",
+  "tensorboard_events": [
+    "/outputs/final-training-acceptance/smoke/eval-student-pure/tensorboard/events.out.tfevents.1791605751.pro5000-6.29230.1"
+  ]
+}

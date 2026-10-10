@@ -240,7 +240,7 @@ ssh -p 22 -N -L 6007:127.0.0.1:6006 tencent-231
 
 保持 SSH 转发运行，在本地浏览器打开 `http://127.0.0.1:6007/`。若训练指定了其他 `--output`，同步调整 `--logdir`。查看本仓库已验收的原始曲线则用本地 Docker 的 `--logdir /workspace/php_parkour/usage_assets/tensorboard`，打开本地 6006 端口；同一端口只启动一个服务。
 
-评估入口 `eval-teachers` / `eval-student` 会生成 `quality.json`：checkpoint SHA、实际仿真时间、失败/超时 reset、跟踪误差、观察到的 motion IDs、录像 SHA 和本地 TensorBoard `Evaluation/*`。`--eval-steps` 控制本次有界 rollout 的步数；报告中的实际片段数才是覆盖范围，不能从步数推断遍历了整套动作。
+评估入口 `eval-teachers` / `eval-student` 会生成 `quality.json`：checkpoint SHA、实际仿真时间、失败/超时 reset、跟踪误差、观察到的 motion IDs、录像 SHA 和本地 TensorBoard `Evaluation/*`。`--eval-steps` 控制本次有界 rollout 的步数。当前 MotionLoader 把源动作合并为一个 NPZ，顶层 ID 0 和 `available_clip_count=1` 不能直接统计原始片段覆盖；需要结合 `motion_ends` 和参考时间索引。不能从步数或录像数量推断遍历了整套动作。
 
 六种教师 preset（含默认 noscale、no-heightscan、pelvis）及两种学生 preset 见 [验收定义](scripts/research/acceptance_matrix.json)。用 `teacher-presets --profile smoke --skills locomotion` 检查六个教师配置；直接 CLI 用 `train-python -m wbt_training.train_agent exp:... simulator:isaacsim ...`。其中 no-heightscan 教师默认 60000 迭代，不能把标准教师的 20000 误当该配置的默认训练量。`--skip-completed` 仅在成功记录、配置与经校验的 checkpoint 都满足目标时跳过阶段。
 
@@ -252,6 +252,15 @@ python3 scripts/research/cloud.py --detach exec bash -c \
 ```
 
 它依次完成五教师、最终教师 ONNX 检查、五教师质量评估、两种学生训练/质量评估/独立导出。同一输出目录有文件锁；重启会恢复有效 checkpoint，重新生成丢失或被改动的验收产物。训练保留 4096/2048 环境、官方迭代数和每 500 轮保存设置，质量评估单独使用 64 环境 × 3000 步。预计需多天；状态以各阶段 manifest 和原始日志为准。
+
+本次正式 driver 已于北京时间 2026-10-10 12:20 用上述 `/outputs/official-full` 目录启动，当前无需重复启动。云端 TensorBoard 已以该目录为 `--logdir` 运行，本机 6007 转发也已实测 HTTP 200；打开 `http://127.0.0.1:6007/` 查看实时训练。上述 `/outputs/training` 示例适用于默认输出目录；已有服务时复用同一端口。可随时只读检查进度：
+
+```bash
+python3 scripts/research/cloud.py exec tail -n 50 /outputs/official-full-driver.log
+python3 scripts/research/cloud.py exec cat /outputs/official-full/official/manifests/teacher-locomotion.json
+```
+
+SSH 转发退出后，在本机重新运行 `ssh -p 22 -N -L 127.0.0.1:6007:127.0.0.1:6006 tencent-231` 即可。训练持续使用已核验的冻结源码；`cloud.py sync` 会创建新快照，不会替换运行中容器的源码挂载。最新启动证据见 [usage](usage.md#5-训练isaac-sim-评估与导出)。
 
 研究分支让障碍预处理在未提供 `obstacle_seed` 时使用 `training.seed`，并写回保存配置。单 GPU 训练原入口已提前设种子；本修复主要保证独立评估、导出和直接调用 hook 时生成相同地形。显式障碍种子优先。回归实际比较了不同全局 RNG 状态下的地形/动作数组，以及原单 GPU 隐式 seed 42 与显式 seed 42 的几何一致性；这不保证完整训练或 checkpoint 恢复逐位相同，也不声称多 GPU 地形行为等价。
 

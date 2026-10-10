@@ -2,11 +2,17 @@
 
 独立 `scripts/research/eval_quality.py` / `.sh` 已实现并真实运行，pipeline 的 teacher / student 评估已改经该入口。它保留原生载入、环境、策略、动作与 reset 行为，没有编辑 native eval 模块或云端冻结源。退出 0 / 写出视频仍不足以证明跟踪质量。
 
-当前最小实现捕获下表中的仿真时长、失败/超时、首次失败、episode 长度、clip/expert 覆盖、四个主误差的 overall/按 expert 统计、有限性、视频 SHA / ffprobe，并写入报告旁的离线 TensorBoard `Evaluation/*`。`expert-lost fraction` 与完整逐事件序列属于后续扩展，当前 JSON 不宣称已实现这些建议项。
+当前最小实现捕获下表中的仿真时长、失败/超时、首次失败、episode 长度、观察到的顶层 loader/expert ID、边界完成事件数、四个主误差的 overall/按 expert 统计、有限性、视频 SHA / ffprobe，并写入报告旁的离线 TensorBoard `Evaluation/*`。原始源片段覆盖、`expert-lost fraction` 与完整逐事件序列属于后续扩展，当前 JSON 不宣称已实现这些建议项。
 
-真实基线为 [16 env ×100 step 质量报告](isaac-local-quality.json)：2 秒仿真/env、32 env-seconds，49 次失败 reset、0 timeout，reference-position p95=0.44015 m、tracked-body-position p95=0.25293 m。每个误差有 1600 个有限样本，动作与 root state 均有限；所有视频都有本次 SHA、正时长，17 个 TensorBoard scalar tag 通过真实 EventAccumulator 读取。模型仅训练到 iter1，说明执行通路和质量记录生效，**不说明训练收敛**。本 smoke 只加载 1 个 motion segment，不能声称覆盖完整 100 条 locomotion 数据。
+真实基线为 [16 env ×100 step 质量报告](isaac-local-quality.json)：2 秒仿真/env、32 env-seconds，49 次失败 reset、0 timeout，reference-position p95=0.44015 m、tracked-body-position p95=0.25293 m。每个误差有 1600 个有限样本，动作与 root state 均有限；所有视频都有本次 SHA、正时长，17 个 TensorBoard scalar tag 通过真实 EventAccumulator 读取。模型仅训练到 iter1，说明执行通路和质量记录生效，**不说明训练收敛**。100 条 locomotion 源动作被合并为一个 NPZ 后加载；报告的 `available_clip_count=1`、`observed_clip_ids=[0]` 是顶层 loader ID，不表示只加载了一条源动作，也不证明这些源动作被实际遍历。
 
 [教师失败视频（0.70 秒原片）](../isaac/local-teacher-quality.mp4)；[预览](../isaac/local-teacher-quality.png)。第一次配置错误的两份日志保留在 `outputs/research/local-isaac/quality-100/run.log`（实例配置需要属性对象）与 `quality-100-v3/run.log`（Isaac root state 为 proxy，需要 `[:]` 取 tensor）；成功结果使用全新 `quality-100-v4` 目录。回归还覆盖 `reset_all()` 内部的额外 warmup step，确保 100 步没有被误算为 101 步。[23 项目标测试 JUnit](research-quality-training.xml)。
+
+## 合并动作与覆盖字段
+
+`combine_motions()` 将源 NPZ 串接，并用 `motion_ends` 保留各源片段边界；单文件 `MotionLoader.num_motions` 固定为 1，起点为 0、终点为整个合并缓冲长度。当前质量入口从 `motion_ids` 收集 `observed_clip_ids`，从顶层 `motion_end_idx` 数量得到 `available_clip_count`，所以这些字段不能作为源文件数量或源片段覆盖率。`motion_idxs` 标识有序 registry 对应的 expert，也不能替代源片段 ID。[真实 loader 检查与字段解释](official-pilot-quality/coverage-interpretation.json) 同时记录了本地旧基线与新的 teacher pilot；后者合并文件有 100 个源边界，顶层 ID 仍只有 0。
+
+要测源片段覆盖，应在 reset 清除状态前保留每个环境的实际 reference `time_steps`，按本次预处理后 `motion_ends` 的区间定位片段，再关联源文件顺序、registry/expert 与地形变体映射。应分别统计被访问片段、访问帧范围、到达边界及失败/超时，不能把“载入全部文件”“观察到 expert”或一个边界事件数写成完整原片段覆盖。当前 JSON 没有保存足以完成该还原的逐步 reference 时间索引，因此尚未测量原始源片段覆盖。
 
 ## 可复用的原生入口
 
@@ -22,10 +28,10 @@ WBT 的 `env._update_log_dict()` 恰好在 termination / reward 之后、`reset_
 
 - `termination_manager.terminated`、`termination_manager.time_outs`、`episode_length_buf`；分别累积失败和超时，不把 timeout 当成功。
 - `env.log_dict` 中的 `motion/error_*` 张量；原方法已经调用 `motion_command.update_metrics()`，不重复执行 termination 或改变 sampler。
-- `motion_command.motion_ids`、`time_steps`、`motion.motion_idxs[time_steps]`；分别保存 clip ID、帧、expert ID，保证学生五类技能单独报告。
+- `motion_command.motion_ids` 与 `motion.motion_idxs[time_steps]`；当前保存观察到的顶层 motion ID 与 expert ID，供按 expert 分组统计。`time_steps` 用于定位 expert，但没有作为逐步 reference 索引持久化；合并缓冲内的源片段覆盖需另行记录并通过 `motion_ends` 还原。
 - simulator root/body state 的有限性和实际高度；action 有限性在 post callback 从 `actor_state['actions']` 读取。
 
-完成 clip 不一定产生 episode termination：`MotionCommand.step()` 到达 `motion_ends` 时会通过 `motion_end_reset` 重采样 clip 并瞬移 robot state。因此还需在 post callback 读取 `motion_end_reset`，配对之前记录的 clip/expert ID，累计 **clip completion**；不要把这个运动片段边界当作完整 parkour 课程完成，也不要把超时等同 clip completion。当前入口排除同一步发生 failure/timeout 的 completion；评估窗口结束时未完成的片段不算成功。
+到达源片段边界不一定产生 episode termination：`MotionCommand.step()` 检查 `motion_ends`，以 `motion_end_reset` 标记重采样和 robot state 重置。当前 post callback 将该标记累计为 `clip_completions_excluding_failed_timeout_steps`，排除同一步的 failure/timeout。它是边界完成事件计数，没有保存每个事件的原始源片段身份；顶层 motion/expert ID 也不足以还原该身份。不能把它当作完整课程完成、独立源片段覆盖或未结束片段的成功；超时也不等于边界完成。
 
 ## 最小 JSON 指标
 
@@ -34,7 +40,7 @@ WBT 的 `env._update_log_dict()` 恰好在 termination / reward 之后、`reset_
 | checkpoint SHA、iteration、seed、config/registry SHA、expert 顺序 | 输入与 exact saved config |
 | physics/control dt、控制步数、每环境仿真秒、总 env-seconds、墙钟秒 | `env.sim_dt`、`env.dt`、实际 callback 计数；仿真秒=steps×dt |
 | failed / timeout resets，首次失败时间，各环境存活时间 | pre-reset manager flags；分开记录同时触发 |
-| clip completions、censored、unique clip IDs / expert 覆盖数 | pre-reset IDs + post `motion_end_reset` |
+| 边界完成事件数、观察到的顶层 motion IDs / expert IDs | pre-reset IDs + post `motion_end_reset`；不等于源片段覆盖。原片段 ID、访问帧范围与 censored 状态需扩展采样 |
 | reference position error mean/p95/max (m) | `motion/error_ref_pos` |
 | reference rotation error mean/p95/max (rad) | `motion/error_ref_rot` |
 | tracked-body position error mean/p95/max (m) | `motion/error_body_pos`，原生已对 tracked bodies 求均值 |
@@ -50,9 +56,9 @@ native BadTracking 的本配置阈值包含 reference z 误差、投影重力方
 
 每类 teacher 先 64 env ×3000 control steps（dt=0.02 时每环境 60 仿真秒），seed42；student 对五类有序 bundle 同样设置，分别评估 pure / PPO checkpoint。若显存或视频成本要求更小，可用 16 env 增加评估步数，保持总 env-seconds，并明确记录设置变化。
 
-这只是起始窗口，**不能预先宣称覆盖全部 296 条 motion**。native eval 从 motion 第 0 帧开始，但 clip 是随机均匀选择；需以实际 clip coverage 为准。若覆盖不全，应按缺失 clip/不同 seed 补评估，或另设显式 deterministic clip scheduler 并清楚标注。一个随机 seed 的 250-step smoke 只有 5 仿真秒，证明可执行，不证明完整技能或收敛。
+这只是起始窗口，**不能预先宣称覆盖全部 296 条源动作**。已确认的单 loader teacher 路径在每次 native eval reset 时将 phase 置 0，因而回到合并缓冲起点；顶层只有一个 motion ID 时，不能理解为在其中 100 条源动作间均匀随机选择。频繁失败会使评估反复访问开头，增加环境数或更换 seed 也不自动解决源片段覆盖。多 expert 学生另有 `PhpMotionCommand` 均衡抽帧分支，应按实际采样器和保存的 reference 索引解释，不能套用 teacher 的 phase-zero 结论，更不能假设源片段均匀采样。完整覆盖需要显式的源片段调度/逐片段评估及边界与时间索引证据，并清楚标注与原生评估的差异。250-step smoke 每环境只有 5 仿真秒，证明可执行，不证明完整技能或收敛。
 
-基线与正式模型使用相同 registry 顺序、地形预处理 seed、环境数、随机初态及仿真时长，输出并排的失败次数/1000 env-seconds、reference/body p95 error、clip completion 与覆盖率。只有完整日程、finite checkpoint、真实权重更新、长 rollout 与新视频共同成立后，才讨论训练质量；loss 下降尤其不能替代这些指标。
+基线与正式模型使用相同 registry 顺序、地形预处理 seed、环境数、采样/初态设置及仿真时长，输出并排的失败次数/1000 env-seconds、reference/body p95 error、边界完成事件数与已观察到的 expert IDs。源片段覆盖率只有在补齐上述边界映射和 reference 索引后才报告。只有完整日程、finite checkpoint、真实权重更新、长 rollout 与新视频共同成立后，才讨论训练质量；loss 下降尤其不能替代这些指标。
 
 ## 已确认的源码位置
 
@@ -61,6 +67,9 @@ native BadTracking 的本配置阈值包含 reference z 误差、投影重力方
 - [BaseTask](../../thirdparty/holosoma/src/holosoma/holosoma/envs/base_task/base_task.py)：`_post_physics_step` 在 `_update_log_dict` 后才 reset。
 - [WBT manager](../../thirdparty/holosoma/src/holosoma/holosoma/envs/wbt/wbt_manager.py)：`_update_log_dict` 在 reset 前生成原生跟踪指标。
 - [MotionCommand](../../thirdparty/holosoma/src/holosoma/holosoma/managers/command/terms/wbt.py)：`update_metrics`、eval phase=0、`motion_end_reset`。
+- [合并动作预处理](../../wbt_training/utils/multi_motion_helpers.py)：`combine_motions`、`motion_ends` 与按 registry 添加 expert `motion_idxs`。
+- [PHP 学生采样器](../../wbt_training/config_values/motion_command.py)：`_sample_expert_balanced` / `reset`，多 expert 分支与单 loader teacher 评估的区别。
+- [当前质量指标采样](../../scripts/research/eval_quality.py)：顶层 `motion_ids`、expert ID 与边界事件计数的实际保存范围。
 - [TerminationManager](../../thirdparty/holosoma/src/holosoma/holosoma/managers/termination/manager.py)：failed/timeouts 聚合及 reset 清零。
 - [原生 eval recording callback](../../thirdparty/holosoma/src/holosoma/holosoma/agents/callbacks/recording.py)：Isaac 真 root/body NPZ 录制，与部署 SDK 的 zero-root 录制格式不同。
 

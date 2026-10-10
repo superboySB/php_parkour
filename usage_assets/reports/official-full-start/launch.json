@@ -1,0 +1,64 @@
+{
+  "status": "running",
+  "scope": "Canonical five-teacher and two-student schedules; execution completion and policy quality require final artifacts",
+  "command": [
+    "bash",
+    "scripts/research/run_official_acceptance.sh",
+    "/outputs/official-full"
+  ],
+  "output": "/outputs/official-full",
+  "driver_log": "/outputs/official-full-driver.log",
+  "seed": 42,
+  "runtime_source": {
+    "tree_sha256": "0093aa40fbae2bcf219d39ace222e0c4d8a71e305551939a5a1b9c0e40c683ab",
+    "git_commit": "3439cb7",
+    "pipeline_sha256": "5f85596f40b796b8626e05058d54824d93ba97e3788129e1763ba5c461284adb",
+    "driver_sha256": "f2c0eb73772f311487df3e2ccb5b674f34df943abe74a5b41d0e1e6c7b0b0360"
+  },
+  "image": {
+    "local_id": "sha256:88254ac0b90a3056375145601d741aa3e08726e18412d201a3c7e7915a23996f",
+    "remote_id": "sha256:631d9e53768a3cc65372b394d0aa266a34ee92004141a9817824001ade30e3bd",
+    "contents_sha256": "2a43037e2397fac3e343e8d621dd42c41ea7c27da82602789d575fddda112482"
+  },
+  "gpu_uuid": "GPU-27eb1141-ab74-ebdd-42c2-6549fb7253e5",
+  "asset_release_manifest_sha256": "3bea66903fc05034b354519764c6997ce0900dbd32716b0356330b44ee8cc72c",
+  "stages": {
+    "teachers": {
+      "skills": [
+        "locomotion",
+        "low-step",
+        "high-step",
+        "low-climb-76",
+        "high-climb-76"
+      ],
+      "num_envs": 4096,
+      "num_variants": 64,
+      "iterations_each": 20000
+    },
+    "student_pure": {
+      "num_envs": 2048,
+      "num_variants": 3,
+      "iterations": 10000
+    },
+    "student_finetune": {
+      "num_envs": 2048,
+      "num_variants": 3,
+      "iterations": 30000
+    },
+    "save_interval": 500,
+    "eval": {
+      "num_envs": 64,
+      "control_steps": 3000
+    }
+  },
+  "logger": "tensorboard",
+  "wandb_mode": "disabled",
+  "quality_verified": false,
+  "started_utc": "2026-10-10T04:20:56.533400+00:00",
+  "launch_exit_code": 0,
+  "observed_utc": "2026-10-10T04:29:25.400740+00:00",
+  "active_stage": "teacher-locomotion",
+  "last_observed_tensorboard_step": 114,
+  "selected_tensorboard_scalars_finite": true,
+  "configuration_sha256": "f582724c0dccb26cd91e27591534020200ce64124fb4138e32fd6bea145afce3"
+}

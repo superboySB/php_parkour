@@ -1,0 +1,92 @@
+{
+  "schema_version": 1,
+  "interface_compatibility_passed": true,
+  "quality_verified": false,
+  "convergence_demonstrated": false,
+  "local_16GiB_evaluation_proven": false,
+  "cloud_driver_returncode": 0,
+  "checkpoint_iteration": 19,
+  "training_iterations_completed": 20,
+  "source_checkpoint_sha256": "10650ab1c20223b3b9500739b948b5f12724e6cab8a7e6e7970ff99cc9583a4d",
+  "training_to_evaluation_envs": [
+    4096,
+    64
+  ],
+  "training_to_evaluation_terrain_variants": [
+    64,
+    1
+  ],
+  "seed": 42,
+  "control_steps": 250,
+  "sim_seconds_per_env": 5.0,
+  "total_env_seconds": 320.0,
+  "measured_rollout_wall_seconds": 25.208504253067076,
+  "driver_wall_seconds": 49.86056031379849,
+  "failed_terminated_episodes": 3971,
+  "failed_terminated_episodes_by_env_range": [
+    61,
+    63
+  ],
+  "timeout_episodes": 0,
+  "ended_episode_lengths_steps": {
+    "3": 28,
+    "4": 3933,
+    "5": 10
+  },
+  "metric_samples_each": 16000,
+  "all_four_metrics_finite": true,
+  "metrics": {
+    "motion/error_ref_pos": {
+      "unit": "m",
+      "samples": 16000,
+      "finite": true,
+      "mean": 0.08218821883201599,
+      "p95": 0.17318921610713006,
+      "max": 0.2732119560241699
+    },
+    "motion/error_ref_rot": {
+      "unit": "rad",
+      "samples": 16000,
+      "finite": true,
+      "mean": 0.19935034215450287,
+      "p95": 0.4010350421071052,
+      "max": 0.782902181148529
+    },
+    "motion/error_body_pos": {
+      "unit": "m",
+      "samples": 16000,
+      "finite": true,
+      "mean": 0.10999925434589386,
+      "p95": 0.23840132951736448,
+      "max": 0.32623642683029175
+    },
+    "motion/error_joint_pos": {
+      "unit": "rad (joint-vector L2)",
+      "samples": 16000,
+      "finite": true,
+      "mean": 1.181584119796753,
+      "p95": 2.0645816326141357,
+      "max": 2.601691246032715
+    }
+  },
+  "observed_clip_ids_scope": "single combined-NPZ top-level loader index; original source clip coverage not measured",
+  "combined_npz_source_clip_boundary_count": 100,
+  "raw_video_count": 64,
+  "longest_original_video_seconds": 0.08,
+  "longest_original_video_frames": 4,
+  "selected_video": "../../isaac/official-pilot-quality/longest-original.mp4",
+  "selected_frame": "../../isaac/official-pilot-quality/decoded-frame-2.png",
+  "tensorboard_scalar_tags_verified": 17,
+  "artifact_sha_verified_count": 66,
+  "raw_directory": "outputs/research/cloud/results/official-training/official/eval-teacher-locomotion",
+  "limitations": [
+    "20-iteration capacity pilot, not converged official 20000-iteration teacher",
+    "3971 cumulative terminated episodes across 64 resettable environments, not distinct robots or permanent falls",
+    "Four metrics aggregate body error and rotation angle are not identical to every BadTracking predicate; no per-predicate failure counts captured",
+    "One merged NPZ contains 100 original source clips; top-level motion ID count cannot measure source clip coverage",
+    "All recordings end after 3-5-step failures; longest raw MP4 is 0.08 s and has not been stretched or concatenated",
+    "Completed on cloud 72GB GPU; this is not a successful local 16GiB evaluation"
+  ],
+  "video_record_env_id": 0,
+  "video_count_scope": "64 original episode recordings from env 0; not one video per parallel environment"
+}

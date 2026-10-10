@@ -1,0 +1,86 @@
+{
+  "label": "export-student-finetune",
+  "profile": "smoke",
+  "started_utc": "2026-10-10T04:17:52.583287+00:00",
+  "command": [
+    "/isaac-sim/kit/python/bin/python3",
+    "-m",
+    "wbt_training.training_runs.export_distill_onnx",
+    "--training.checkpoint",
+    "/outputs/final-training-acceptance/smoke/student-finetune/PHP-research/20261010_041630-student-finetune-locomotion/model_00001.pt",
+    "--training.registry-name",
+    "file:///data/assets/motions-locomotion,file:///data/assets/motions-low-step,file:///data/assets/motions-high-step,file:///data/assets/motions-low-climb-76,file:///data/assets/motions-high-climb-76",
+    "--training.num-envs",
+    "1",
+    "logger:disabled",
+    "--logger.base-dir",
+    "/outputs/final-training-acceptance/smoke/export-student-finetune"
+  ],
+  "environment": {
+    "LOGGER": "tensorboard",
+    "NGPUS": "1",
+    "CUDA_VISIBLE_DEVICES": "0",
+    "HSSIM_PYTHON": "/opt/php/bin/train-python"
+  },
+  "settings": {
+    "profile": "smoke",
+    "skills": [
+      "locomotion",
+      "low-step",
+      "high-step",
+      "low-climb-76",
+      "high-climb-76"
+    ],
+    "assets": "/data/assets",
+    "num_envs": null,
+    "iterations_target": null,
+    "registries": null,
+    "finetune": null,
+    "source_checkpoints": [
+      {
+        "path": "/outputs/final-training-acceptance/smoke/student-finetune/PHP-research/20261010_041630-student-finetune-locomotion/model_00001.pt",
+        "sha256": "8b7afb88adb5c6cf4ab599bd89a6d8e673695d74d7f9f10fc14fc7aa7e22422a"
+      }
+    ],
+    "eval_steps": null,
+    "eval_quality_schema": null
+  },
+  "overrides": {
+    "num_envs": null,
+    "iterations_target": null
+  },
+  "quality_verified": false,
+  "scope": "execution smoke only",
+  "resume_checkpoint": "/outputs/final-training-acceptance/smoke/student-finetune/PHP-research/20261010_041630-student-finetune-locomotion/model_00001.pt",
+  "status": "passed",
+  "returncode": 0,
+  "finished_utc": "2026-10-10T04:18:15.847292+00:00",
+  "elapsed_seconds": 23.26403886359185,
+  "log": "/outputs/final-training-acceptance/smoke/export-student-finetune-1791605872594064170.log",
+  "onnx_bundle_directories": [
+    "/outputs/final-training-acceptance/smoke/export-student-finetune/PHP-research/20261010_041759-student-finetune-export/model_00001"
+  ],
+  "onnx_validation_reports": [
+    {
+      "bundle": "/outputs/final-training-acceptance/smoke/export-student-finetune/PHP-research/20261010_041759-student-finetune-export/model_00001",
+      "report": "/outputs/final-training-acceptance/smoke/export-student-finetune/onnx-validation-0.json"
+    }
+  ],
+  "artifact_fingerprints": [
+    {
+      "path": "/outputs/final-training-acceptance/smoke/export-student-finetune/PHP-research/20261010_041759-student-finetune-export/model_00001/depth_backbone.onnx",
+      "sha256": "ef8881fe434edf4af19737417e32f5d41ac33eb3bb3e7a19f4769fdbe4c9a52d",
+      "bytes": 105254
+    },
+    {
+      "path": "/outputs/final-training-acceptance/smoke/export-student-finetune/PHP-research/20261010_041759-student-finetune-export/model_00001/student.onnx",
+      "sha256": "dbd1ba1c2f0934eb2d7fcd0ebff584d151b82a9445da8b7ddba80bd0ee468442",
+      "bytes": 14069083
+    },
+    {
+      "path": "/outputs/final-training-acceptance/smoke/export-student-finetune/onnx-validation-0.json",
+      "sha256": "804fb3c06d19fa229133f186bce34a2333d3a23cc47e5442055e17c30220f549",
+      "bytes": 26770
+    }
+  ]
+}

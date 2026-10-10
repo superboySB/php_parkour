@@ -133,13 +133,19 @@ smoke 采用显式缩小的并行环境、布局和迭代数，检查实际梯�
 
 本地 16 GiB 卡已完成 locomotion 教师实际训练：16 环境、2 迭代、768 timesteps，23.376 秒，随后真实加载 checkpoint、完成 100 步评估与 6 段原生录像。未收敛的教师频繁终止，最长片段只有 0.70 秒。[训练与评估报告](usage_assets/reports/runtime-summary.md#本地实际-isaac-smoke)、[示例 MP4](usage_assets/videos/runtime-isaac-smoke.mp4)。这是加载/渲染通路验收，不是成功的跑酷策略演示。
 
-云端已完成 **22/22 项 smoke**：五类教师、六种教师 preset、五类教师评估、两种学生训练、两种学生评估与两种独立导出。每次训练均实际更新权重；两类学生导出的双 ONNX 各通过 30 组真实推理。全部阶段耗时 683.109 秒，13 个训练 run 的 TensorBoard loss/reward 都是有限值。[云端汇总及原始报告](usage_assets/reports/training-cloud-summary.md)保留 checkpoint、源代码快照和模型哈希；两轮训练的录像不能作为技能成功证据。
+初版镜像的云端 **22/22 项 smoke** 已完成：五类教师、六种教师 preset、五类教师评估、两种学生训练、两种学生评估与两种独立导出。每次训练均实际更新权重；两类学生导出的双 ONNX 各通过 30 组真实推理。全部阶段耗时 683.109 秒，13 个训练 run 的 TensorBoard loss/reward 都是有限值。[初版云端汇总及原始报告](usage_assets/reports/training-cloud-summary.md)保留 checkpoint、源代码快照和模型哈希。
+
+最终统一镜像及冻结源码 `3439cb7` 又完整复跑 **22/22 项，通过、退出码 0**，耗时 711.748 秒。13 个训练阶段逐一验证了两轮之间权重的有限性和非零更新；五教师共 60 组真实 ONNX 推理，两学生独立导出各 30 组推理均通过。七次新版质量评估、29 份原始 TensorBoard events、140 个下载产物 SHA 和运行前后 1903 个源码文件均已复核。[最终验收汇总](usage_assets/reports/training-cloud-final/summary.md)、[逐项报告](usage_assets/reports/training-cloud-final/summary.json)、[本轮视频与来源 SHA](usage_assets/reports/training-cloud-final/media.json)。未收敛的失败短片也完整保留，例如[教师 locomotion](usage_assets/videos/final-cloud/eval-teacher-locomotion.mp4)和[学生 finetune](usage_assets/videos/final-cloud/eval-student-finetune.mp4)，不能作为技能成功证据。
 
 另按官方 locomotion 默认并行量和完整预处理运行 **4096 环境、20 迭代 pilot**，保存 iteration 19 的原生 checkpoint。显存采样峰值为 20479 MiB，18 个稳定核心迭代的中位耗时为 2.321 秒；对应 20000 轮的 collection+learning 估算约 12.89 小时，不包括初始化、保存和评估。其他教师和学生的耗时需要分别测量。完整官方日程尚未完成，见[pilot 实测与限制](usage_assets/reports/training-cloud-official-pilot.json)。
 
 两种学生也已按官方并行量和完整学生预处理各运行 **2048 环境、20 迭代容量 pilot**。纯 DAgger / DAgger+PPO 的显存峰值为 11399 / 9063 MiB，去首两轮的核心耗时中位数为 3.4255 / 3.9320 秒；两者实际配置均为 3 variants、96 minibatches、2 epochs、24 steps/env、save interval 500。权重更新、各 30 组双 ONNX 推理和 TensorBoard 0–19 全部通过。[容量实测报告](usage_assets/reports/training-cloud-student-capacity.md)注明旧镜像、未收敛专家与唯一的 20 轮日程缩短；这些数据不证明正式训练质量或已训练专家下的最终吞吐。
 
-独立质量入口还真实复跑本地未收敛教师：16 环境 × 100 control steps，共 32 env-seconds，49 次失败 reset、0 次超时；四项跟踪误差各记录 1600 个有限样本。它在 reset 清除状态前采样，关联 checkpoint SHA、实际录像和 17 个 `Evaluation/*` TensorBoard 标量。[质量 JSON](usage_assets/reports/isaac-local-quality.json)、[测试记录](usage_assets/reports/research-quality-training.xml)、[真实失败短片](usage_assets/isaac/local-teacher-quality.mp4)。该运行仅观察到一个动作片段，没有声称覆盖全部 locomotion 数据。
+**正式完整日程已于北京时间 2026-10-10 12:20 启动，尚未完成。** 使用最终镜像和上述冻结源码，在物理 GPU 1 上依次训练五教师各 20000 轮、纯学生 10000 轮、混合学生 30000 轮，再执行质量评估及导出；保存间隔仍为 500。首教师的实际保存配置确认 4096 环境、64 variants、seed/obstacle_seed 42。12:29 的离线 TensorBoard 已记录 step 0–114，所检查的 loss/reward 全部有限；这只是运行中的证据。[启动、配置与进度快照](usage_assets/reports/official-full-start/summary.md)。本机已建立 SSH 转发，打开 `http://127.0.0.1:6007/` 可看实时曲线；远端事件目录是 `/outputs/official-full`，无需登录。完整训练预计需要多天，最终模型与质量结论需等实际完成后补验。
+
+独立质量入口还真实复跑本地未收敛教师：16 环境 × 100 control steps，共 32 env-seconds，49 次失败 reset、0 次超时；四项跟踪误差各记录 1600 个有限样本。它在 reset 清除状态前采样，关联 checkpoint SHA、实际录像和 17 个 `Evaluation/*` TensorBoard 标量。[质量 JSON](usage_assets/reports/isaac-local-quality.json)、[测试记录](usage_assets/reports/research-quality-training.xml)、[真实失败短片](usage_assets/isaac/local-teacher-quality.mp4)。报告的 motion ID 0 指顶层合并 NPZ，未记录原始动作片段的覆盖范围，不能据此声称覆盖全部 locomotion 数据。
+
+4096 环境、20 轮 pilot 的 checkpoint 也实际通过云端新版入口评估：64 环境 × 250 步，四项误差各有 16000 个有限样本，发生 **3971 次失败 reset、0 次超时**。这是同一批环境反复终止的回合总数；64 段录像均来自配置指定的环境 0，最长仅 0.08 秒，不能称为 64 个环境各录一段或学习成功。合并输入包含 100 个源动作边界，但 native teacher eval 每次从合并库起点重置，这次短回合只反复测试起始部分。[原始评估与语义核验](usage_assets/reports/official-pilot-quality/summary.md)、[最长失败原片](usage_assets/isaac/official-pilot-quality/longest-original.mp4)。
 
 ![本地未收敛教师的实际评估帧](usage_assets/isaac/local-teacher-quality.png)
 

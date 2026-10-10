@@ -1,0 +1,71 @@
+{
+  "label": "teacher-preset-g1-wbt-terrain-ref-pelvis-locomotion",
+  "profile": "smoke",
+  "started_utc": "2026-10-10T04:09:45.695184+00:00",
+  "command": [
+    "bash",
+    "/workspace/php_parkour/scripts/research/run_preset.sh",
+    "exp:g1-wbt-terrain-ref-pelvis",
+    "--training.headless",
+    "True",
+    "--training.num-envs",
+    "64",
+    "--training.name",
+    "teacher-preset-g1-wbt-terrain-ref-pelvis-locomotion",
+    "--training.project",
+    "PHP-research",
+    "--logger.base-dir",
+    "/outputs/final-training-acceptance/smoke/teacher-preset-g1-wbt-terrain-ref-pelvis-locomotion",
+    "--training.seed",
+    "42",
+    "--algo.config.num-learning-iterations",
+    "2",
+    "--algo.config.save-interval",
+    "1",
+    "--algo.config.num-mini-batches",
+    "4",
+    "--training.preprocess-hook-kwargs",
+    "{\"add_onpath_obstacle\": true, \"num_variants\": 1, \"obstacle_seed\": 42}"
+  ],
+  "environment": {
+    "LOGGER": "tensorboard",
+    "NGPUS": "1",
+    "CUDA_VISIBLE_DEVICES": "0",
+    "HSSIM_PYTHON": "/opt/php/bin/train-python",
+    "REGISTRY": "file:///data/assets/motions-locomotion"
+  },
+  "settings": {
+    "profile": "smoke",
+    "skills": [
+      "locomotion"
+    ],
+    "assets": "/data/assets",
+    "num_envs": null,
+    "iterations_target": 2,
+    "registries": "file:///data/assets/motions-locomotion",
+    "finetune": null,
+    "source_checkpoints": [],
+    "eval_steps": null,
+    "eval_quality_schema": null
+  },
+  "overrides": {
+    "num_envs": null,
+    "iterations_target": null
+  },
+  "quality_verified": false,
+  "scope": "execution smoke only",
+  "status": "passed",
+  "returncode": 0,
+  "finished_utc": "2026-10-10T04:10:05.862022+00:00",
+  "elapsed_seconds": 20.166863691993058,
+  "log": "/outputs/final-training-acceptance/smoke/teacher-preset-g1-wbt-terrain-ref-pelvis-locomotion-1791605385705707379.log",
+  "performance": {
+    "iteration_samples": 2,
+    "median_collection_plus_learning_seconds": 0.997,
+    "measured_num_envs": 64,
+    "estimate_scope": "Measured collection+learning only; excludes simulator initialization, exports/checkpoint writes and evaluation. No scaling to another environment count."
+  },
+  "checkpoint": "/outputs/final-training-acceptance/smoke/teacher-preset-g1-wbt-terrain-ref-pelvis-locomotion/PHP-research/20261010_040954-teacher-preset-g1-wbt-terrain-ref-pelvis-locomotion-locomotion/model_00001.pt",
+  "checkpoint_iteration": 1,
+  "checkpoint_sha256": "aa17c4ce7d660d1d895c5965914b83a3e8141684aaf96718151f46ed22496f40"
+}

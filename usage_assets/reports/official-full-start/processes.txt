@@ -1,0 +1,11 @@
+PID                 PPID                COMMAND
+3760878             3760855             /sbin/docker-init -- /opt/php/bin/entrypoint sleep infinity
+3761395             3760878             sleep infinity
+3836889             3760855             bash -c bash scripts/research/run_official_acceptance.sh /outputs/official-full > /outputs/official-full-driver.log 2>&1
+3836896             3836889             bash scripts/research/run_official_acceptance.sh /outputs/official-full
+3836901             3836896             /bin/bash /isaac-sim/python.sh scripts/research/train_pipeline.py teachers --profile official --output /outputs/official-full --skip-completed --resume
+3836907             3836901             /isaac-sim/kit/python/bin/python3 scripts/research/train_pipeline.py teachers --profile official --output /outputs/official-full --skip-completed --resume
+3836908             3836907             /bin/bash /isaac-sim/python.sh -m wbt_training.train_agent exp:g1-wbt-terrain-ref-noscale simulator:isaacsim --training.registry-name file:///data/assets/motions-locomotion logger:disabled --logger.video.enabled False --training.headless True --training.num-envs 4096 --training.name teacher-locomotion --training.project PHP-research --logger.base-dir /outputs/official-full/official/teacher-locomotion --training.seed 42 --algo.config.num-learning-iterations 20000
+3836987             3836908             /isaac-sim/kit/python/bin/python3 -m wbt_training.train_agent exp:g1-wbt-terrain-ref-noscale simulator:isaacsim --training.registry-name file:///data/assets/motions-locomotion logger:disabled --logger.video.enabled False --training.headless True --training.num-envs 4096 --training.name teacher-locomotion --training.project PHP-research --logger.base-dir /outputs/official-full/official/teacher-locomotion --training.seed 42 --algo.config.num-learning-iterations 20000
+3838213             3760855             /bin/bash /isaac-sim/python.sh -m tensorboard.main --logdir /outputs/official-full --host 127.0.0.1 --port 6006 --load_fast false
+3838231             3838213             /isaac-sim/kit/python/bin/python3 -m tensorboard.main --logdir /outputs/official-full --host 127.0.0.1 --port 6006 --load_fast false

@@ -1,0 +1,101 @@
+{
+  "label": "student-finetune",
+  "profile": "smoke",
+  "started_utc": "2026-10-10T04:16:21.556038+00:00",
+  "command": [
+    "bash",
+    "/workspace/php_parkour/wbt_training/training_runs/run_terrain_warp_distill.sh",
+    "--training.headless",
+    "True",
+    "--training.num-envs",
+    "64",
+    "--training.name",
+    "student-finetune",
+    "--training.project",
+    "PHP-research",
+    "--logger.base-dir",
+    "/outputs/final-training-acceptance/smoke/student-finetune",
+    "--training.seed",
+    "42",
+    "--algo.config.num-learning-iterations",
+    "2",
+    "--algo.config.save-interval",
+    "1",
+    "--algo.config.num-mini-batches",
+    "4",
+    "--training.preprocess-hook-kwargs",
+    "{\"add_onpath_obstacle\": true, \"num_variants\": 1, \"obstacle_seed\": 42}"
+  ],
+  "environment": {
+    "LOGGER": "tensorboard",
+    "NGPUS": "1",
+    "CUDA_VISIBLE_DEVICES": "0",
+    "HSSIM_PYTHON": "/opt/php/bin/train-python",
+    "REGISTRY": "file:///data/assets/motions-locomotion,file:///data/assets/motions-low-step,file:///data/assets/motions-high-step,file:///data/assets/motions-low-climb-76,file:///data/assets/motions-high-climb-76",
+    "TEACHER_CHECKPOINT": "/outputs/final-training-acceptance/smoke/teacher-locomotion/PHP-research/20261010_040645-teacher-locomotion-locomotion/model_00001.pt,/outputs/final-training-acceptance/smoke/teacher-low-step/PHP-research/20261010_040712-teacher-low-step-locomotion/model_00001.pt,/outputs/final-training-acceptance/smoke/teacher-high-step/PHP-research/20261010_040732-teacher-high-step-locomotion/model_00001.pt,/outputs/final-training-acceptance/smoke/teacher-low-climb-76/PHP-research/20261010_040751-teacher-low-climb-76-locomotion/model_00001.pt,/outputs/final-training-acceptance/smoke/teacher-high-climb-76/PHP-research/20261010_040811-teacher-high-climb-76-locomotion/model_00001.pt",
+    "FINETUNE": "1"
+  },
+  "settings": {
+    "profile": "smoke",
+    "skills": [
+      "locomotion",
+      "low-step",
+      "high-step",
+      "low-climb-76",
+      "high-climb-76"
+    ],
+    "assets": "/data/assets",
+    "num_envs": null,
+    "iterations_target": 2,
+    "registries": "file:///data/assets/motions-locomotion,file:///data/assets/motions-low-step,file:///data/assets/motions-high-step,file:///data/assets/motions-low-climb-76,file:///data/assets/motions-high-climb-76",
+    "finetune": "1",
+    "source_checkpoints": [
+      {
+        "path": "/outputs/final-training-acceptance/smoke/teacher-locomotion/PHP-research/20261010_040645-teacher-locomotion-locomotion/model_00001.pt",
+        "sha256": "7068e26a93eedb24331975f9dcff824265e2f022eaa89bfb0ee6ba099744a78b"
+      },
+      {
+        "path": "/outputs/final-training-acceptance/smoke/teacher-low-step/PHP-research/20261010_040712-teacher-low-step-locomotion/model_00001.pt",
+        "sha256": "57b2c6589de9ddcaf0879c34384ee2cb6fcf19c32ee0c478a9c0cb9243ee6d3c"
+      },
+      {
+        "path": "/outputs/final-training-acceptance/smoke/teacher-high-step/PHP-research/20261010_040732-teacher-high-step-locomotion/model_00001.pt",
+        "sha256": "e30601af122d6fed98430f23c9a3ba29bd6a55a46610b404cd37eda8df63a9d1"
+      },
+      {
+        "path": "/outputs/final-training-acceptance/smoke/teacher-low-climb-76/PHP-research/20261010_040751-teacher-low-climb-76-locomotion/model_00001.pt",
+        "sha256": "e3065c408b3c3f79147ad6751b2684c2d477b4c3b464ce9d0d7d3692992699ca"
+      },
+      {
+        "path": "/outputs/final-training-acceptance/smoke/teacher-high-climb-76/PHP-research/20261010_040811-teacher-high-climb-76-locomotion/model_00001.pt",
+        "sha256": "a9794a97522986654f268fdd334e84e07cdb26c5c90a565c35e6e0a653999f3f"
+      }
+    ],
+    "eval_steps": null,
+    "eval_quality_schema": null
+  },
+  "overrides": {
+    "num_envs": null,
+    "iterations_target": null
+  },
+  "quality_verified": false,
+  "scope": "execution smoke only",
+  "status": "passed",
+  "returncode": 0,
+  "finished_utc": "2026-10-10T04:16:51.750097+00:00",
+  "elapsed_seconds": 30.194092666730285,
+  "log": "/outputs/final-training-acceptance/smoke/student-finetune-1791605781574231564.log",
+  "performance": {
+    "iteration_samples": 2,
+    "median_collection_plus_learning_seconds": 1.5514999999999999,
+    "measured_num_envs": 64,
+    "estimate_scope": "Measured collection+learning only; excludes simulator initialization, exports/checkpoint writes and evaluation. No scaling to another environment count."
+  },
+  "checkpoint": "/outputs/final-training-acceptance/smoke/student-finetune/PHP-research/20261010_041630-student-finetune-locomotion/model_00001.pt",
+  "checkpoint_iteration": 1,
+  "checkpoint_sha256": "8b7afb88adb5c6cf4ab599bd89a6d8e673695d74d7f9f10fc14fc7aa7e22422a",
+  "onnx_bundle_directories": [
+    "/outputs/final-training-acceptance/smoke/student-finetune/PHP-research/20261010_041630-student-finetune-locomotion/model_00000",
+    "/outputs/final-training-acceptance/smoke/student-finetune/PHP-research/20261010_041630-student-finetune-locomotion/model_00001"
+  ]
+}
