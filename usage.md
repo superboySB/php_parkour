@@ -397,3 +397,9 @@ CPU 测试统一在 Docker 中运行，分别保留根目录/训练和 motion ma
 11:44:49 UTC实际Docker top仍确认原云端driver/train和本地629 wrapper/simulator活跃；固定进度279 completed/1 running/349 planned。11:34:36 UTC首教师step11255，所选奖励/loss历史值有限。这些进度摘要不代替完整终态。适配器须原生629/1258worker/1258host映射/629全片解码/5206冻结及2266输入绑定全通过才完整发布；原observer日志无损连续分块，质量及课程完成标记均false。当前尚未执行真实完整校验或生成629页。
 
 [出版包独立复核](usage_assets/reports/fresh629-publication-package-independent-review/summary.md)确认追加本链接之前的94个暂存文件与Git index逐字节一致、87项外层依赖和原内层清单匹配、42个新增/包内链接有效，README/技术说明/Holosoma身份未变，无必须修正项。此核对不重复物理验收。
+
+### 完整功能复查新增的实测缺口
+
+[29项要求与证据对应清单](usage_assets/reports/final-function-coverage-ledger/index.md)保留了`b5095ba`版本的六份声明文档，核对8个preset、17场景、29技能入口及五组有序数据。复查找到两组尚无实际验收的功能：`s/a/d/q/e/z`完整命名键派发与窗口Backspace重置，以及teacher/pure/finetune原生断点继续训练。此前真实w低/高速、12项API方向和45项恢复控制测试的范围保持原样，不能替代这两组实测。
+
+两个独立补验正在准备，实际执行须等待当前629正常CPU终态及GPU释放。续训需证明原PT/固定专家SHA不变、优化器步数被恢复、之后权重有限且确实更新，并产生新的TensorBoard样本；重置需真实窗口按键、仿真time/状态变化及后续推进、双方原生正常退出。当前这些均未记录为通过。完整官方训练、888逐源尝试、629全量后验、最终学生58项闭环和云端默认镜像接入仍分别等待原任务及真实产物；高层自主长程越障质量也尚未成立。

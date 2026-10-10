@@ -489,3 +489,5 @@ python3 -B usage_assets/reports/fresh629-publication-preparation/adapter/publish
 完整publish命令与固定输出路径见[原计划](usage_assets/reports/fresh629-publication-preparation/adapter/plan.json)，只在真实host和CPU终态、1258正常worker/host映射、629原视频完整解码及冻结SHA全部通过后执行；目前没有完整629结果页。它不重跑仿真或ffmpeg，也不补造旧driver收据。完整原观察日志将以≤25,000,000字节连续块保留offset/各SHA/wholeSHA，失败stage保留；所有跌倒/阈值照实发布，不能据正常退出声称技能成功。
 
 上述三个准备/方案包在出版前另经[94文件Git字节独立核对](usage_assets/reports/fresh629-publication-package-independent-review/summary.md)，原始清单、两次waiting和汇总失败均吻合。该审查绑定追加本链接之前的版本，不代表训练、完整629或云端接入完成。
+
+[完整功能覆盖清单](usage_assets/reports/final-function-coverage-ledger/index.md)逐项对应29项要求及已有证据，列出8个preset、17场景、29技能入口和五组有序训练数据。它封存了`b5095ba`版本的六份声明文档，仅为只读范围核对。复查新增两组实际验收缺口：完整命名方向键及MuJoCo窗口Backspace重置；teacher、pure student、finetune student从原生PT恢复优化器后继续学习。既有w键GUI、API方向扫描、模拟训练子进程的恢复检查及eval/export加载PT都不能关闭这两组缺口。补验将使用独立输出，等待当前629完整CPU终态、原容器停止及同一GPU锁释放后执行；现在尚无补验通过结论。
