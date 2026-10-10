@@ -1,0 +1,276 @@
+{
+  "schema_version": 1,
+  "scope": "GUI wrapper/PTYS; distinct from matrix schema3",
+  "plan_sha256": "95498d688d2fc84d3c0fc7da8d66e63a04ebb59907e3116c0a9ca8f6a1a94aca",
+  "unix": 1791626515.7106206,
+  "workers": [
+    {
+      "role": "simulator",
+      "argv": [
+        "bash",
+        "./run_php_sim.sh",
+        "--terrain.terrain-term.mesh-type",
+        "PLANE",
+        "--simulator.config.bridge.interface",
+        "lo",
+        "--simulator.config.sim.control-decimation",
+        "10",
+        "--simulator.config.virtual-gantry.length",
+        "0.5",
+        "--training.headless",
+        "False",
+        "--training.seed",
+        "42",
+        "--device",
+        "cpu",
+        "--logger.video.enabled",
+        "True",
+        "--logger.video.width",
+        "640",
+        "--logger.video.height",
+        "360",
+        "--logger.video.save-dir",
+        "/outputs/video",
+        "--logger.video.upload-to-wandb",
+        "False"
+      ],
+      "pid": 47,
+      "return_status": {
+        "returncode": 0,
+        "signal_number": null,
+        "signal_name": null,
+        "exit_code": 0,
+        "status": "exited",
+        "scope": "direct Popen process; wrappers may mask a native child signal"
+      },
+      "process_group": {
+        "process_group_id": 47,
+        "session_id": 47,
+        "leader_identity": {
+          "pid": 47,
+          "start_time_clock_ticks": 105448748
+        },
+        "known_members": [
+          {
+            "pid": 47,
+            "start_time_clock_ticks": 105448748
+          },
+          {
+            "pid": 48,
+            "start_time_clock_ticks": 105448748
+          },
+          {
+            "pid": 49,
+            "start_time_clock_ticks": 105448748
+          },
+          {
+            "pid": 52,
+            "start_time_clock_ticks": 105448748
+          },
+          {
+            "pid": 57,
+            "start_time_clock_ticks": 105448748
+          },
+          {
+            "pid": 58,
+            "start_time_clock_ticks": 105448759
+          },
+          {
+            "pid": 86,
+            "start_time_clock_ticks": 105449358
+          },
+          {
+            "pid": 198,
+            "start_time_clock_ticks": 105450837
+          }
+        ],
+        "retired": true,
+        "ownership_lost": false,
+        "ownership_state": "retired_empty",
+        "ownership_reason": null,
+        "live_members": [],
+        "ownership_verified": true
+      },
+      "native_entry": {
+        "schema_version": 1,
+        "role": "simulator",
+        "process": {
+          "pid": 57,
+          "pid_namespace": "current container",
+          "observed_unix": 1791626493.0599563,
+          "proc_status": {
+            "Name": "python3",
+            "Tgid": "57",
+            "Pid": "57",
+            "PPid": "52",
+            "NSpid": "57",
+            "Threads": "1"
+          },
+          "state": "R",
+          "process_group_id": 47,
+          "session_id": 47,
+          "start_time_clock_ticks": 105448748,
+          "cmdline": "/isaac-sim/kit/python/bin/python3 /workspace/php_parkour/thirdparty/holosoma/src/holosoma/holosoma/run_sim.py robot:g1-29dof sensor.d435i_front_depth:g1-d435i-front-depth plugin.depth:depth-shm-d435i terrain:terrain-load-step --robot.asset.xml-file g1/g1_29dof_halfspherehand.xml --simulator.config.bridge.enabled=True --simulator.config.sim.fps=500 --terrain.terrain-term.mesh-type PLANE --simulator.config.bridge.interface lo --simulator.config.sim.control-decimation 10 --simulator.config.virtual-gantry.length 0.5 --training.headless False --training.seed 42 --device cpu --logger.video.enabled True --logger.video.width 640 --logger.video.height 360 --logger.video.save-dir /outputs/video --logger.video.upload-to-wandb False "
+        },
+        "argv": [
+          "/workspace/php_parkour/thirdparty/holosoma/src/holosoma/holosoma/run_sim.py",
+          "robot:g1-29dof",
+          "sensor.d435i_front_depth:g1-d435i-front-depth",
+          "plugin.depth:depth-shm-d435i",
+          "terrain:terrain-load-step",
+          "--robot.asset.xml-file",
+          "g1/g1_29dof_halfspherehand.xml",
+          "--simulator.config.bridge.enabled=True",
+          "--simulator.config.sim.fps=500",
+          "--terrain.terrain-term.mesh-type",
+          "PLANE",
+          "--simulator.config.bridge.interface",
+          "lo",
+          "--simulator.config.sim.control-decimation",
+          "10",
+          "--simulator.config.virtual-gantry.length",
+          "0.5",
+          "--training.headless",
+          "False",
+          "--training.seed",
+          "42",
+          "--device",
+          "cpu",
+          "--logger.video.enabled",
+          "True",
+          "--logger.video.width",
+          "640",
+          "--logger.video.height",
+          "360",
+          "--logger.video.save-dir",
+          "/outputs/video",
+          "--logger.video.upload-to-wandb",
+          "False"
+        ],
+        "original_source": {
+          "path": "/workspace/php_parkour/thirdparty/holosoma/src/holosoma/holosoma/run_sim.gui-original.py",
+          "sha256": "08720f65c163dda0f926b17bf28caa6288614708c6679675f0f2d7e70a27f0ef"
+        },
+        "tty": {
+          "stdin_isatty": true,
+          "ttyname": "/dev/pts/0",
+          "foreground_pgid": 47
+        },
+        "lifecycle": "entry",
+        "observer_sha256": "ee3cd0f0d07fd44069f93facca122e5af35a2d1a8f6521a33e94522845a66a4c"
+      }
+    },
+    {
+      "role": "inference",
+      "argv": [
+        "bash",
+        "./run_php_inference.sh",
+        "--task.velocity-input",
+        "keyboard",
+        "--task.state-input",
+        "keyboard",
+        "--task.record-dir",
+        "/outputs/recordings",
+        "--task.record-label",
+        "090ec9fbc69055aa48531868da0d2904"
+      ],
+      "pid": 125,
+      "return_status": {
+        "returncode": 0,
+        "signal_number": null,
+        "signal_name": null,
+        "exit_code": 0,
+        "status": "exited",
+        "scope": "direct Popen process; wrappers may mask a native child signal"
+      },
+      "process_group": {
+        "process_group_id": 125,
+        "session_id": 125,
+        "leader_identity": {
+          "pid": 125,
+          "start_time_clock_ticks": 105449434
+        },
+        "known_members": [
+          {
+            "pid": 125,
+            "start_time_clock_ticks": 105449434
+          },
+          {
+            "pid": 126,
+            "start_time_clock_ticks": 105449434
+          },
+          {
+            "pid": 131,
+            "start_time_clock_ticks": 105449434
+          },
+          {
+            "pid": 179,
+            "start_time_clock_ticks": 105449561
+          },
+          {
+            "pid": 182,
+            "start_time_clock_ticks": 105450681
+          }
+        ],
+        "retired": true,
+        "ownership_lost": false,
+        "ownership_state": "retired_empty",
+        "ownership_reason": null,
+        "live_members": [],
+        "ownership_verified": true
+      },
+      "native_entry": {
+        "schema_version": 1,
+        "role": "inference",
+        "process": {
+          "pid": 131,
+          "pid_namespace": "current container",
+          "observed_unix": 1791626499.915871,
+          "proc_status": {
+            "Name": "python",
+            "Tgid": "131",
+            "Pid": "131",
+            "PPid": "125",
+            "NSpid": "131",
+            "Threads": "1"
+          },
+          "state": "R",
+          "process_group_id": 125,
+          "session_id": 125,
+          "start_time_clock_ticks": 105449434,
+          "cmdline": "/opt/php/envs/inference/bin/python /workspace/php_parkour/scripts/research/run_native_policy.py /workspace/php_parkour/thirdparty/holosoma/src/holosoma_inference/holosoma_inference/run_policy.py inference:g1-wbt-distillation-d435i --task.interface lo --task.model-path ['/data/assets/student/depth_backbone.onnx','/data/assets/student/student.onnx'] --task.velocity-input keyboard --task.state-input keyboard --task.record-dir /outputs/recordings --task.record-label 090ec9fbc69055aa48531868da0d2904 "
+        },
+        "argv": [
+          "/workspace/php_parkour/scripts/research/run_native_policy.py",
+          "/workspace/php_parkour/thirdparty/holosoma/src/holosoma_inference/holosoma_inference/run_policy.py",
+          "inference:g1-wbt-distillation-d435i",
+          "--task.interface",
+          "lo",
+          "--task.model-path",
+          "['/data/assets/student/depth_backbone.onnx','/data/assets/student/student.onnx']",
+          "--task.velocity-input",
+          "keyboard",
+          "--task.state-input",
+          "keyboard",
+          "--task.record-dir",
+          "/outputs/recordings",
+          "--task.record-label",
+          "090ec9fbc69055aa48531868da0d2904"
+        ],
+        "original_source": {
+          "path": "/workspace/php_parkour/scripts/research/run_native_policy.gui-original.py",
+          "sha256": "bf388b4842a3866eac59d03aacc4afcbff532278d48e1e4f586e707bd64730f0"
+        },
+        "tty": {
+          "stdin_isatty": true,
+          "ttyname": "/dev/pts/1",
+          "foreground_pgid": 125
+        },
+        "lifecycle": "entry",
+        "observer_sha256": "ee3cd0f0d07fd44069f93facca122e5af35a2d1a8f6521a33e94522845a66a4c"
+      }
+    }
+  ],
+  "cleanup_actions": [],
+  "errors": []
+}
