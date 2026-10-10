@@ -338,3 +338,9 @@ CPU 测试统一在 Docker 中运行，分别保留根目录/训练和 motion ma
 本地默认统一容器已采用该SDK0.1.8镜像，原镜像保留；接入前确认只剩本项目TensorBoard与sleep，重建后doctor通过、TensorBoard6006的HTTP检查返回200，其它本地容器保持原身份与状态，云端没有变更。[本地接入原回执](usage_assets/reports/sdk018-local-adoption/summary.md)。
 
 评估重试已补齐与新报告门卫的集成：真正重跑前归档旧quality与其TensorBoard原字节/路径/SHA，保持最终学生回传使用的固定路径；有效skip不动文件，unsafe路径与部分移动/child失败均保留证据。实际CPU重现了旧流程的“已有报告被新门卫拒绝”，修复后58项pipeline加14项既有evalguard共72项通过，其中15项是新增回归；不包含新的GPU/策略训练。[原始复现、补丁与JUnit](usage_assets/reports/eval-quality-retry-integration/summary.md)。
+
+### 逐源执行器的只读资产初始化合同
+
+五个教师preset重载曾暴露RO源码下URDF converter写缓存失败，因此未来296源×三策略的执行器也补齐了独立RW资产根。原始35个URDF/mesh的源/副本SHA、五份harness、原生CLI和实际配置共同绑定到schema2计划，原Python仍RO。116项目标Docker CPU检查通过；初轮110通过、1项异常类型检查失败的原XML保留。[修复源码、最小差异和测试证据](usage_assets/reports/runtime-robot-assets/summary.md)。该项本身不计作888次物理验收。
+
+新技术说明的独立源码复核绑定604行版本SHA，核对115份源码与154个本地链接；未发现新的实质性数学/格式/标签来源错误。[原始复核](usage_assets/reports/technical-pipeline-independent-review/summary.md)。

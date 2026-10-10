@@ -103,6 +103,9 @@ def canonical(tmp_path, monkeypatch):
     log.write_text(pc.MARKER + "\n")
     args = SimpleNamespace(root=tmp_path, official_output=official, driver_log=log, coverage_output=tmp_path / "outputs/coverage",
                            source_tree="b" * 64, image="sha256:accepted", gpu_uuid="GPU-fixed", training_container="training", resume_interrupted=False)
+    # These scheduling fixtures do not represent scientific asset preparation.
+    # Exact filesystem/closure validation has real-file tests of its own.
+    monkeypatch.setattr(pc, "robot_contract", lambda *_a, **_k: {"files": [{}] * 35})
     return args, stages
 
 
@@ -220,11 +223,13 @@ def test_occupied_fixed_uuid_never_selects_other_idle_gpu(monkeypatch):
 
 
 @pytest.fixture
-def attempt(tmp_path):
+def attempt(tmp_path, monkeypatch):
     path = tmp_path / "case.json"
-    case = {"case_id": "pure-e1-000-source", "output": str(tmp_path), "source": {"source_clip_id": "motions-low-step/source_motion.npz"}}
+    case = {"case_id": "pure-e1-000-source", "output": str(tmp_path), "source": {"source_clip_id": "motions-low-step/source_motion.npz"},
+            "runtime_robot_assets": {"fixture": "scheduling only"}}
     save(path, case)
-    return {"input_identity": "f" * 64}, {"case": {"path": str(path), "sha256": pc.digest(path)}}, case
+    monkeypatch.setattr(pc, "verify_selection_robot_assets", lambda *_a, **_k: None)
+    return {"input_identity": "f" * 64, "runtime_robot_assets": case["runtime_robot_assets"]}, {"case": {"path": str(path), "sha256": pc.digest(path)}}, case
 
 
 def test_interrupted_attempt_is_retained_without_rerunning(attempt, monkeypatch):
@@ -267,6 +272,38 @@ def test_stale_attempt_identity_rejected(attempt):
     selection, item, case = attempt
     save(Path(case["output"]) / "posttrain-attempt.json", {"input_identity": "another", "case_sha256": item["case"]["sha256"]})
     with pytest.raises(ValueError): pc.attempt_case(selection, "pure", item, lambda *_: None)
+
+
+def test_attempt_changed_robot_contract_rejected_before_worker(attempt, monkeypatch):
+    selection, item, case = attempt
+    case["runtime_robot_assets"] = {"changed": "another cohort"}
+    save(Path(item["case"]["path"]), case)
+    monkeypatch.setattr(pc.subprocess, "run", lambda *_a, **_k: pytest.fail("Changed asset contract started a worker"))
+    with pytest.raises(ValueError, match="shared robot assets"):
+        pc.attempt_case(selection, "pure", item, lambda *_: None)
+
+
+def test_cpu_prepare_passes_one_sealed_contract_to_all_three_plans(tmp_path, monkeypatch):
+    asset = {"fixture": "preparation forwarding only"}
+    selection = {"input_identity": "f" * 64, "runtime_robot_assets": asset,
+                 "checkpoints": {key: {"path": key + ".pt"} for key in pc.TRAINING}}
+    path = tmp_path / "selection.json"
+    save(path, selection)
+    monkeypatch.setattr(pc, "scientific_check", lambda _: {"status": "cpu_scientific_checks_passed"})
+    def prepare(value):
+        assert value == asset
+        (tmp_path / "runtime-robot-assets").mkdir()
+    monkeypatch.setattr(pc, "prepare_robot_assets", prepare)
+    monkeypatch.setattr(pc, "verify_prepared_plans", lambda _: [{"fixture": "three CPU plans"}])
+    calls = []
+    monkeypatch.setattr(pc.subprocess, "run", lambda argv, **_: calls.append(argv))
+    pc.cpu_prepare(path)
+    plans = [argv for argv in calls if "plan" in argv]
+    assert len(plans) == 3
+    contract_path = str(tmp_path / "runtime-robot-assets/contract.json")
+    assert all(argv[argv.index("--runtime-robot-assets-contract") + 1] == contract_path for argv in plans)
+    assert pc.read(contract_path) == asset
+    assert pc.read(tmp_path / "cpu-ready.json")["runtime_robot_assets"] == asset
 
 
 def test_existing_monitor_lock_cannot_be_acquired_twice(tmp_path):

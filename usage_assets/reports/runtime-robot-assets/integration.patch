@@ -1,0 +1,803 @@
+--- a/scripts/research/source_coverage_probe.py
++++ b/scripts/research/source_coverage_probe.py
+@@ -25,6 +25,7 @@
+ ROOT = Path(__file__).resolve().parents[2]
+ sys.path.insert(0, str(ROOT))
+ from scripts.research.eval_quality import METRICS, atomic_json, sha256
++from scripts.research.runtime_robot_assets import verify as verify_robot_assets, validate_config as validate_robot_config
+ 
+ 
+ def fingerprint(path):
+@@ -200,12 +201,17 @@
+                   "resample_on_motion_end": motion_cfg.resample_on_motion_end,
+                   "control_dt_seconds": env.dt, "source_fps": record["fps"],
+                   "phase_zero_source": "native eval reset; no time_steps assignment by harness"}
++        actual["robot_asset_config"] = validate_robot_config(SimpleNamespace(robot=env.robot_config), self.case["runtime_robot_assets"])
+         if "source_motion" in record:
+             actual["source_table_verification"] = verify_preprocessed_source(self.case, motion_cfg.motion_file)
+         native_config = Path(self.loop.log_dir) / "holosoma_config.yaml"
+         if native_config.exists():
+             import yaml
+             contents = yaml.safe_load(native_config.read_text())
++            robot_asset = contents["robot"]["asset"]
++            expected_asset = actual["robot_asset_config"]
++            if any(robot_asset.get(key) != expected_asset[key] for key in ("asset_root", "urdf_file", "usd_file")):
++                raise ValueError("Saved native YAML robot assets differ from the parsed runtime contract")
+             terrain_obj = contents["terrain"]["terrain_term"]["obj_file_path"]
+             assets = self.directory / "runtime-assets"
+             assets.mkdir(exist_ok=True)
+@@ -341,6 +347,7 @@
+                   "singleton_provenance_sha256": self.case.get("singleton_provenance_sha256"),
+                   "inventory_identity_sha256": self.case["inventory_sha256"],
+                   "source_inventory": self.case.get("source_inventory"), "harness_sources": self.case.get("harness_sources"),
++                  "runtime_robot_assets": self.case["runtime_robot_assets"],
+                   "callback_target": "scripts.research.source_coverage_probe.SourceCoverageProbe",
+                   "checkpoint": fingerprint(self.case["checkpoint"]),
+                   "checkpoint_iteration": int(self.loop.current_learning_iteration),
+@@ -388,6 +395,7 @@
+     return ["--training.num-envs", "1", "--training.headless", "True", "--training.seed", "42",
+             "--training.max-eval-steps", str(case["max_steps"]), "--training.export-onnx", "False",
+             "--training.registry-name", case["registry_uri"],
++            "--robot.asset.asset-root", case["runtime_robot_assets"]["runtime_root"],
+             "--training.preprocess-hook-kwargs", json.dumps({"add_onpath_obstacle": True, "num_variants": 1, "obstacle_seed": 42}),
+             "--terrain.terrain-term.spawn.randomize-tiles", "True", "logger:disabled",
+             "--logger.base-dir", str(Path(case["output"]) / "native"), "--logger.video.enabled", "True",
+@@ -403,6 +411,7 @@
+     if saved.algo._target_ != targets[case["policy"]]:
+         raise ValueError(f"Checkpoint algorithm {saved.algo._target_!r} is not policy {case['policy']!r}")
+     cfg = parse_saved_config_overrides(saved.get_eval_config(), native_arguments(case))
++    validate_robot_config(cfg, case["runtime_robot_assets"])
+     if preprocess:
+         cfg = apply_preprocess_hook(cfg)
+     return saved, cfg
+@@ -434,6 +443,8 @@
+               "checkpoint": fingerprint(case["checkpoint"]), "source": case["source"],
+               "registry_uri": case["registry_uri"], "inventory_identity_sha256": case["inventory_sha256"],
+               "harness_sources": case.get("harness_sources"),
++              "runtime_robot_assets": case["runtime_robot_assets"],
++              "robot_asset_config": validate_robot_config(cfg, case["runtime_robot_assets"]),
+               "planned_eval_only_warmup_cache_repair": native_alignment_formula()[1],
+               "saved_algorithm_target": saved.algo._target_, "num_envs": cfg.training.num_envs,
+               "actual_frames": motion.time_step_total, "actual_boundary_indices_inclusive": ends,
+@@ -512,6 +523,9 @@
+ 
+ 
+ def verify_case(case):
++    if case.get("schema_version") != 2:
++        raise ValueError("Prepare a new schema2 case with a sealed writable robot asset root")
++    verify_robot_assets(case["runtime_robot_assets"])
+     if sha256(case["checkpoint"]) != case["checkpoint_sha256"]:
+         raise ValueError("Checkpoint changed after plan creation")
+     if sha256(case["singleton_provenance"]) != case["singleton_provenance_sha256"]:
+--- a/scripts/research/eval_source_coverage.py
++++ b/scripts/research/eval_source_coverage.py
+@@ -23,6 +23,8 @@
+ ROOT = Path(__file__).resolve().parents[2]
+ sys.path.insert(0, str(ROOT))
+ from scripts.research.eval_quality import atomic_json, sha256
++from scripts.research.runtime_robot_assets import (SOURCE_RELATIVE, contract as robot_contract,
++    prepare as prepare_robot_assets, verify as verify_robot_assets)
+ 
+ 
+ def now():
+@@ -65,11 +67,17 @@
+         raise ValueError("Student evaluation requires its own local --checkpoint, without teacher checkpoints")
+     student = file_record(args.checkpoint) if args.policy != "teacher" else None
+     args.output.mkdir(parents=True)
++    if args.runtime_robot_assets_contract:
++        robot_assets = json.loads(args.runtime_robot_assets_contract.read_text())
++        verify_robot_assets(robot_assets)
++    else:
++        robot_assets = robot_contract(ROOT / SOURCE_RELATIVE, args.output.resolve() / "runtime-robot-assets/robots")
++        prepare_robot_assets(robot_assets)
+     data["created_at_utc"] = now()
+     atomic_json(args.output / "inventory.json", data)
+     source_inventory = file_record(args.output / "inventory.json")
+     harness_sources = [file_record(ROOT / "scripts/research" / name) for name in
+-                       ("eval_source_coverage.py", "source_coverage_probe.py", "motion_coverage.py", "eval_quality.py")]
++                       ("eval_source_coverage.py", "source_coverage_probe.py", "motion_coverage.py", "eval_quality.py", "runtime_robot_assets.py")]
+     cases = []
+     for record in records:
+         case_id = f"{args.policy}-e{record['expert_ordinal']}-{record['source_ordinal']:03d}-{record['source_motion_sha256'][:12]}"
+@@ -77,10 +85,11 @@
+         directory.mkdir(parents=True)
+         singleton = materialize(record, directory / "singleton")
+         checkpoint = teacher_paths[record["skill"]] if args.policy == "teacher" else student
+-        case = {"schema_version": 1, "case_id": case_id, "policy": args.policy,
++        case = {"schema_version": 2, "case_id": case_id, "policy": args.policy,
+                 "output": str(directory.resolve()), "source": record,
+                 "inventory_sha256": data["inventory_sha256"], "checkpoint": checkpoint["path"],
+                 "source_inventory": source_inventory, "harness_sources": harness_sources,
++                "runtime_robot_assets": robot_assets,
+                 "checkpoint_sha256": checkpoint["sha256"], "registry_uri": singleton["registry_uri"],
+                 "singleton_provenance": singleton["provenance_path"],
+                 "singleton_provenance_sha256": sha256(singleton["provenance_path"]),
+@@ -102,13 +111,14 @@
+         atomic_json(path, case)
+         cases.append({"case_id": case_id, "case": file_record(path), "source_clip_id": record["source_clip_id"],
+                       "original_expert_ordinal": record["expert_ordinal"], "checkpoint": checkpoint})
+-    plan = {"schema_version": 1, "status": "prepared_gpu_not_run", "created_at_utc": now(), "policy": args.policy,
++    plan = {"schema_version": 2, "status": "prepared_gpu_not_run", "created_at_utc": now(), "policy": args.policy,
+             "scope": "Each selected original source is attempted independently on one generated terrain variant, seed42. Execution and skill quality are separate. No GPU run by plan/preflight.",
+             "source_inventory": file_record(args.output / "inventory.json"), "inventory_sha256": data["inventory_sha256"],
+             "inventory_total_sources": data["total_files"], "selected_sources": len(cases),
+             "stop_rules": ["first native failed", "first native timeout", "first native motion boundary", "max policy steps"],
+             "native_warmup_semantics": "reset_all A initializes; reset_all B is first attempt zero-action warmup at frame0; first policy frame1, last potential frameT-2; boundaryT-1 is sentinel",
+             "harness_sources": harness_sources,
++            "runtime_robot_assets": robot_assets,
+             "cases": cases, "quality_verified": False, "simulation_started": False}
+     atomic_json(args.output / "plan.json", plan)
+     return {key: plan[key] for key in ("status", "inventory_total_sources", "selected_sources", "inventory_sha256")}
+@@ -118,11 +128,16 @@
+     from scripts.research.motion_coverage import validate_inventory
+     from scripts.research.source_coverage_probe import native_arguments, verify_case
+     plan = json.loads(path.read_text())
+-    if (plan.get("schema_version") != 1 or plan.get("policy") not in ("teacher", "pure", "finetune")
++    if (plan.get("schema_version") != 2 or plan.get("policy") not in ("teacher", "pure", "finetune")
+             or not plan.get("cases") or len(plan["cases"]) != plan.get("selected_sources")
+             or len({item["case_id"] for item in plan["cases"]}) != len(plan["cases"])
+             or len({item["source_clip_id"] for item in plan["cases"]}) != len(plan["cases"])):
+         raise ValueError("Invalid plan schema, policy, counts or duplicate case/source identity")
++    verify_robot_assets(plan["runtime_robot_assets"])
++    expected_harness = [file_record(ROOT / "scripts/research" / name) for name in
++                        ("eval_source_coverage.py", "source_coverage_probe.py", "motion_coverage.py", "eval_quality.py", "runtime_robot_assets.py")]
++    if plan["harness_sources"] != expected_harness:
++        raise ValueError("Plan does not bind the complete current five-source harness")
+     for item in [plan["source_inventory"], *plan["harness_sources"]]:
+         if sha256(item["path"]) != item["sha256"]:
+             raise ValueError(f"Planned input changed: {item['path']}; prepare a fresh plan")
+@@ -136,7 +151,8 @@
+             if sha256(artifact["path"]) != artifact["sha256"]:
+                 raise ValueError(f"Planned case/checkpoint changed: {artifact['path']}")
+         case = json.loads(Path(item["case"]["path"]).read_text())
+-        if (case["source"] != records[item["source_clip_id"]] or case["inventory_sha256"] != plan["inventory_sha256"]
++        if (case.get("schema_version") != 2 or case["runtime_robot_assets"] != plan["runtime_robot_assets"]
++                or case["source"] != records[item["source_clip_id"]] or case["inventory_sha256"] != plan["inventory_sha256"]
+                 or case["case_id"] != item["case_id"] or case["checkpoint_sha256"] != item["checkpoint"]["sha256"]
+                 or case["checkpoint"] != item["checkpoint"]["path"] or case["policy"] != plan["policy"]
+                 or case["source_inventory"] != plan["source_inventory"] or case["harness_sources"] != plan["harness_sources"]
+@@ -157,9 +173,12 @@
+             or quality.get("inventory_identity_sha256") != case["inventory_sha256"]
+             or quality.get("source_inventory") != case.get("source_inventory")
+             or quality.get("harness_sources") != case.get("harness_sources")
++            or quality.get("runtime_robot_assets") != case["runtime_robot_assets"]
+             or quality.get("native_argv") != case["native_argv"]):
+         raise ValueError("Native quality identity/status does not match this case")
++    verify_robot_assets(case["runtime_robot_assets"])
+     runtime = quality["actual_native"]
++    validate_robot_report(runtime.get("robot_asset_config"), case["runtime_robot_assets"])
+     if runtime.get("source_table_verification", {}).get("status") != "matched_selected_source":
+         raise ValueError("Actual reference table was not checked against the selected source")
+     retained = [quality["trajectory"]]
+@@ -191,6 +210,10 @@
+             or report.get("inventory_identity_sha256") != case["inventory_sha256"]
+             or report.get("harness_sources") != case["harness_sources"]):
+         raise ValueError("CPU report identity does not match this planned case")
++    if report.get("runtime_robot_assets") != case["runtime_robot_assets"]:
++        raise ValueError("CPU report robot asset contract differs")
++    verify_robot_assets(case["runtime_robot_assets"])
++    validate_robot_report(report.get("robot_asset_config"), case["runtime_robot_assets"])
+     if (report.get("num_envs") != 1 or report.get("actual_frames") != case["source"]["frames"]
+             or report.get("actual_boundary_indices_inclusive") != [case["source"]["frames"] - 1]
+             or report.get("actual_native_expert_ids") != [0] or report.get("expert_balancing_active") is not False
+@@ -203,6 +226,12 @@
+     for item in artifacts:
+         if sha256(item["path"]) != item["sha256"]:
+             raise ValueError("CPU preflight retained asset changed")
++
++
++def validate_robot_report(actual, expected):
++    if actual != {"asset_root": expected["runtime_root"], "urdf_file": expected["urdf_file"], "usd_file": None,
++                  "manifest_sha256": expected["manifest"]["sha256"], "original_files": len(expected["files"])}:
++        raise ValueError("Reported parsed robot asset configuration differs from the sealed contract")
+ 
+ 
+ def execute(args):
+@@ -288,6 +317,8 @@
+     plan.add_argument("--teacher-checkpoint", action="append", default=[], metavar="SKILL=LOCAL_PT")
+     plan.add_argument("--assets-root", type=Path, default=Path("/data/assets"))
+     plan.add_argument("--output", type=Path, required=True)
++    plan.add_argument("--runtime-robot-assets-contract", type=Path,
++                      help="Use a shared previously CPU-prepared contract; default copies into this new plan output")
+     plan.add_argument("--source-clip-id", action="append", default=[])
+     plan.add_argument("--max-steps", type=int, help="Override policy-step cap; default is source frame count")
+     for action in ("preflight", "run"):
+--- a/scripts/research/posttrain_coverage.py
++++ b/scripts/research/posttrain_coverage.py
+@@ -21,6 +21,11 @@
+ import sys
+ import time
+ import uuid
++
++ROOT = Path(__file__).resolve().parents[2]
++sys.path.insert(0, str(ROOT))
++from scripts.research.runtime_robot_assets import (PRIMARY_URDF, SOURCE_RELATIVE,
++    contract as robot_contract, prepare as prepare_robot_assets, verify as verify_robot_assets)
+ 
+ SKILLS = ("locomotion", "low-step", "high-step", "low-climb-76", "high-climb-76")
+ POLICIES = ("teacher", "pure", "finetune")
+@@ -357,11 +362,14 @@
+         return process
+     artifacts = inspect_artifacts(args.official_output, stages)
+     source = verify_snapshot(args)
+-    selection = {"schema_version": 1, "training_source_tree": TRAIN_TREE, "coverage_source_tree": args.source_tree,
++    robot_assets = robot_contract(source / SOURCE_RELATIVE, Path(COVERAGE) / "runtime-robot-assets/robots",
++                                  source_path=Path("/workspace/php_parkour") / SOURCE_RELATIVE)
++    require(len(robot_assets["files"]) == 35, "Canonical G1 URDF must have exactly 35 original asset files")
++    selection = {"schema_version": 2, "training_source_tree": TRAIN_TREE, "coverage_source_tree": args.source_tree,
+                  "image": args.image, "image_contents_sha256": IMAGE_CONTENTS, "gpu_uuid": args.gpu_uuid,
+                  "official_output": OFFICIAL, "coverage_output": COVERAGE,
+                  "host_coverage_output": str(args.coverage_output), "driver_log_sha256": digest(args.driver_log),
+-                 "driver_completion": process, **artifacts}
++                 "driver_completion": process, "runtime_robot_assets": robot_assets, **artifacts}
+     selection["input_identity"] = identity(selection)
+     return {"status": "ready_for_cpu_verification_gpu_not_started", "selection": selection, "source": str(source),
+             "cpu_command": docker_command(args, source, "cpu", selection["input_identity"])[1],
+@@ -400,13 +408,16 @@
+                     return str(destination / path.relative_to(prefix))
+         return value
+     ready = read(args.coverage_output / "cpu-ready.json")
+-    require(ready["input_identity"] == selection["input_identity"] and len(ready["plans"]) == 3, "CPU cohort changed after execution")
++    verify_robot_assets(translate(selection["runtime_robot_assets"]))
++    require(ready["input_identity"] == selection["input_identity"] and len(ready["plans"]) == 3
++            and ready["runtime_robot_assets"] == selection["runtime_robot_assets"], "CPU cohort changed after execution")
+     results = {(item["policy"], item["case_id"]): item for item in summary["cases"]}
+     require(len(results) == 888, "Duplicate final attempt IDs")
+     for policy, plan_record in zip(POLICIES, ready["plans"]):
+         plan_path = args.coverage_output / policy / "plan.json"
+         require(plan_record["policy"] == policy and digest(plan_path) == plan_record["sha256"], "Final source plan changed")
+         plan = read(plan_path)
++        require(plan["runtime_robot_assets"] == selection["runtime_robot_assets"], "Final robot asset contract changed")
+         require(plan["selected_sources"] == plan["inventory_total_sources"] == len(plan["cases"]) == 296, "Filtered final source coverage")
+         for item in plan["cases"]:
+             case_path = Path(translate(item["case"]["path"]))
+@@ -437,6 +448,7 @@
+     from wbt_training.utils.checkpoint import load_saved_experiment_config
+     from scripts.research.motion_coverage import inventory
+     require(not torch.cuda.is_initialized(), "CPU gate unexpectedly initialized CUDA")
++    verify_selection_robot_assets(selection, copied=False)
+     targets = {"teacher": "holosoma.agents.ppo.ppo.PPO", "pure": "wbt_training.utils.student_teacher.PhpDistillation",
+                "finetune": "wbt_training.utils.student_teacher.PhpDistillationPPO"}
+     teachers, reports = [], []
+@@ -451,6 +463,8 @@
+         require(loaded.get("iter") == loaded.get("iteration") == expected["iteration"], f"Embedded PT iteration mismatch: {label}")
+         require(isinstance(loaded.get("experiment_config"), dict), f"Final PT lacks embedded config: {label}")
+         saved, _ = load_saved_experiment_config(CheckpointConfig(checkpoint=expected["path"]))
++        require(saved.robot.asset.urdf_file == selection["runtime_robot_assets"]["urdf_file"]
++                and saved.robot.asset.usd_file is None, f"Saved robot is not the sealed source URDF: {label}")
+         policy = "teacher" if label.startswith("teacher-") else label.removeprefix("student-")
+         registry = f"file:///data/assets/motions-{label.removeprefix('teacher-')}" if policy == "teacher" else ",".join(f"file:///data/assets/motions-{s}" for s in SKILLS)
+         kwargs = json.loads(saved.training.preprocess_hook_kwargs)
+@@ -517,9 +531,16 @@
+     selection = read(selection_path)
+     base = Path(selection_path).parent
+     report = scientific_check(selection)
++    prepare_robot_assets(selection["runtime_robot_assets"])
++    robot_contract_path = base / "runtime-robot-assets/contract.json"
++    if robot_contract_path.exists():
++        require(read(robot_contract_path) == selection["runtime_robot_assets"], "Existing runtime robot contract changed")
++    else:
++        write(robot_contract_path, selection["runtime_robot_assets"])
+     script = "scripts/research/eval_source_coverage.py"
+     for policy in POLICIES:
+-        command = [sys.executable, script, "plan", "--policy", policy, "--output", f"{COVERAGE}/{policy}"]
++        command = [sys.executable, script, "plan", "--policy", policy, "--output", f"{COVERAGE}/{policy}",
++                   "--runtime-robot-assets-contract", str(robot_contract_path)]
+         if policy == "teacher":
+             for skill in SKILLS:
+                 command += ["--teacher-checkpoint", f"{skill}={selection['checkpoints'][f'teacher-{skill}']['path']}"]
+@@ -528,16 +549,28 @@
+         subprocess.run(command, check=True)
+         subprocess.run([sys.executable, script, "preflight", "--plan", f"{COVERAGE}/{policy}/plan.json"], check=True)
+     reports = verify_prepared_plans(selection)
+-    write(base / "cpu-ready.json", {**report, "input_identity": selection["input_identity"], "finished_utc": now(), "plans": reports})
++    write(base / "cpu-ready.json", {**report, "input_identity": selection["input_identity"], "finished_utc": now(),
++                                  "runtime_robot_assets": selection["runtime_robot_assets"], "plans": reports})
++
++
++def verify_selection_robot_assets(selection, copied=True):
++    value = selection["runtime_robot_assets"]
++    require(selection["schema_version"] == 2 and value["urdf_file"] == PRIMARY_URDF and len(value["files"]) == 35
++            and value["runtime_root"] == f"{COVERAGE}/runtime-robot-assets/robots"
++            and value["source_root"] == str(Path("/workspace/php_parkour") / SOURCE_RELATIVE),
++            "Post-train robot asset contract is not the independent canonical 35-file G1 root")
++    return verify_robot_assets(value, copied=copied)
+ 
+ 
+ def verify_prepared_plans(selection):
+     from scripts.research.eval_source_coverage import verify_plan, validate_cpu_report
+     reports = []
++    verify_selection_robot_assets(selection)
+     source_ids = None
+     for policy in POLICIES:
+         path = Path(COVERAGE) / policy / "plan.json"
+         plan = verify_plan(path)
++        require(plan["runtime_robot_assets"] == selection["runtime_robot_assets"], "Policy plan changed the shared robot assets")
+         require(plan["policy"] == policy and plan["selected_sources"] == plan["inventory_total_sources"] == 296, "A post-train plan filtered source coverage")
+         inventory = read(plan["source_inventory"]["path"])
+         ids = [item["source_clip_id"] for item in plan["cases"]]
+@@ -559,6 +592,8 @@
+ 
+ def attempt_case(selection, policy, item, validate_native_report):
+     case = read(item["case"]["path"])
++    require(case["runtime_robot_assets"] == selection["runtime_robot_assets"], "Attempt changed the shared robot assets")
++    verify_selection_robot_assets(selection)
+     output = Path(case["output"])
+     record_path, started_path, log = output / "posttrain-attempt.json", output / "posttrain-started.json", output / "posttrain-native.log"
+     if record_path.exists():
+@@ -606,6 +641,7 @@
+     base = Path(selection_path).parent
+     ready = read(base / "cpu-ready.json")
+     require(ready["status"] == "cpu_scientific_checks_passed" and ready["input_identity"] == selection["input_identity"]
++            and ready["runtime_robot_assets"] == selection["runtime_robot_assets"]
+             and ready["plans"] == verify_prepared_plans(selection), "CPU preparation/input identity changed")
+     write(base / f"actual-gpu-{time.time_ns()}.json", verify_gpu_mapping(selection))
+     summary = {"schema_version": 1, "input_identity": selection["input_identity"], "status": "running", "scope": "296 original sources per teacher/pure/finetune; one variant/seed42/first attempt, not skill success", "quality_verified": False, "cases": []}
+--- a/tests/test_source_coverage.py
++++ b/tests/test_source_coverage.py
+@@ -19,6 +19,17 @@
+ from holosoma.agents.distillation_ppo.distillation_ppo import DistillationPPO
+ from holosoma.envs.base_task.base_task import BaseTask
+ from scripts.research import source_coverage_probe as coverage
++from scripts.research import runtime_robot_assets as robot_assets
++
++
++def asset_fixture(tmp_path):
++    source = tmp_path / "robot-source"
++    urdf = source / robot_assets.PRIMARY_URDF
++    urdf.parent.mkdir(parents=True, exist_ok=True)
++    urdf.write_text('<robot name="fixture"><link name="body"/></robot>')
++    value = robot_assets.contract(source, tmp_path / "runtime-robot-assets/robots")
++    robot_assets.prepare(value)
++    return value
+ 
+ 
+ class CPUEnv:
+@@ -93,9 +104,13 @@
+ def native_fixture(tmp_path, cls, outcome="boundary", frames=4):
+     checkpoint = tmp_path / "model.pt"
+     torch.save({"iter": 500}, checkpoint)
+-    case = {"output": str(tmp_path), "source": {"frames": frames, "fps": 50, "expert_ordinal": 2},
++    value = asset_fixture(tmp_path)
++    case = {"schema_version": 2, "runtime_robot_assets": value,
++            "output": str(tmp_path), "source": {"frames": frames, "fps": 50, "expert_ordinal": 2},
+             "case_id": "cpu-test", "inventory_sha256": "inventory", "checkpoint": str(checkpoint), "native_argv": []}
+     env = CPUEnv(outcome, frames)
++    env.robot_config = SimpleNamespace(asset=SimpleNamespace(asset_root=value["runtime_root"],
++        urdf_file=value["urdf_file"], usd_file=None))
+     loop = SimpleNamespace(device="cpu", num_act=29, env=env, actor_obs_keys=["actor_obs"], critic_obs_keys=["critic_obs"],
+                            eval_callbacks=[], log_dir=str(tmp_path / "unused-log"), current_learning_iteration=500,
+                            config=SimpleNamespace(eval_callbacks={"coverage": SimpleNamespace(
+@@ -177,7 +192,8 @@
+                   "files": [{"path": str(asset), "sha256": coverage.sha256(asset)}]}
+     path = tmp_path / "provenance.json"
+     coverage.atomic_json(path, provenance)
+-    case = {"checkpoint": str(checkpoint), "checkpoint_sha256": coverage.sha256(checkpoint),
++    case = {"schema_version": 2, "runtime_robot_assets": asset_fixture(tmp_path),
++            "checkpoint": str(checkpoint), "checkpoint_sha256": coverage.sha256(checkpoint),
+             "singleton_provenance": str(path), "singleton_provenance_sha256": coverage.sha256(path),
+             "source": provenance["record"], "registry_uri": provenance["registry_uri"],
+             "original_expert_ordinal": 1, "singleton_native_expert_ordinal": 0}
+@@ -204,7 +220,7 @@
+     assert loop.env.step == original_step
+ 
+ 
+-@pytest.mark.parametrize("change", ("missing_tensorboard", "missing_yaml", "changed_motion"))
++@pytest.mark.parametrize("change", ("missing_tensorboard", "missing_yaml", "changed_motion", "wrong_robot_config", "wrong_robot_contract"))
+ def test_report_validation_requires_retained_native_evidence(tmp_path, change):
+     from scripts.research.eval_source_coverage import validate_native_report
+     loop = native_fixture(tmp_path, PPO)
+@@ -225,6 +241,10 @@
+         report["tensorboard_events"] = []
+     elif change == "missing_yaml":
+         Path(report["actual_native"]["saved_eval_config"]["retained"]["path"]).unlink()
++    elif change == "wrong_robot_config":
++        report["actual_native"]["robot_asset_config"]["asset_root"] = case["runtime_robot_assets"]["source_root"]
++    elif change == "wrong_robot_contract":
++        report["runtime_robot_assets"] = {**report["runtime_robot_assets"], "runtime_root": "/wrong/runtime-robot-assets/robots"}
+     else:
+         Path(report["actual_native"]["motion"]["retained"]["path"]).write_bytes(b"changed")
+     with pytest.raises((ValueError, OSError)):
+--- a/tests/test_posttrain_coverage.py
++++ b/tests/test_posttrain_coverage.py
+@@ -103,6 +103,9 @@
+     log.write_text(pc.MARKER + "\n")
+     args = SimpleNamespace(root=tmp_path, official_output=official, driver_log=log, coverage_output=tmp_path / "outputs/coverage",
+                            source_tree="b" * 64, image="sha256:accepted", gpu_uuid="GPU-fixed", training_container="training", resume_interrupted=False)
++    # These scheduling fixtures do not represent scientific asset preparation.
++    # Exact filesystem/closure validation has real-file tests of its own.
++    monkeypatch.setattr(pc, "robot_contract", lambda *_a, **_k: {"files": [{}] * 35})
+     return args, stages
+ 
+ 
+@@ -220,11 +223,13 @@
+ 
+ 
+ @pytest.fixture
+-def attempt(tmp_path):
++def attempt(tmp_path, monkeypatch):
+     path = tmp_path / "case.json"
+-    case = {"case_id": "pure-e1-000-source", "output": str(tmp_path), "source": {"source_clip_id": "motions-low-step/source_motion.npz"}}
++    case = {"case_id": "pure-e1-000-source", "output": str(tmp_path), "source": {"source_clip_id": "motions-low-step/source_motion.npz"},
++            "runtime_robot_assets": {"fixture": "scheduling only"}}
+     save(path, case)
+-    return {"input_identity": "f" * 64}, {"case": {"path": str(path), "sha256": pc.digest(path)}}, case
++    monkeypatch.setattr(pc, "verify_selection_robot_assets", lambda *_a, **_k: None)
++    return {"input_identity": "f" * 64, "runtime_robot_assets": case["runtime_robot_assets"]}, {"case": {"path": str(path), "sha256": pc.digest(path)}}, case
+ 
+ 
+ def test_interrupted_attempt_is_retained_without_rerunning(attempt, monkeypatch):
+@@ -267,6 +272,38 @@
+     selection, item, case = attempt
+     save(Path(case["output"]) / "posttrain-attempt.json", {"input_identity": "another", "case_sha256": item["case"]["sha256"]})
+     with pytest.raises(ValueError): pc.attempt_case(selection, "pure", item, lambda *_: None)
++
++
++def test_attempt_changed_robot_contract_rejected_before_worker(attempt, monkeypatch):
++    selection, item, case = attempt
++    case["runtime_robot_assets"] = {"changed": "another cohort"}
++    save(Path(item["case"]["path"]), case)
++    monkeypatch.setattr(pc.subprocess, "run", lambda *_a, **_k: pytest.fail("Changed asset contract started a worker"))
++    with pytest.raises(ValueError, match="shared robot assets"):
++        pc.attempt_case(selection, "pure", item, lambda *_: None)
++
++
++def test_cpu_prepare_passes_one_sealed_contract_to_all_three_plans(tmp_path, monkeypatch):
++    asset = {"fixture": "preparation forwarding only"}
++    selection = {"input_identity": "f" * 64, "runtime_robot_assets": asset,
++                 "checkpoints": {key: {"path": key + ".pt"} for key in pc.TRAINING}}
++    path = tmp_path / "selection.json"
++    save(path, selection)
++    monkeypatch.setattr(pc, "scientific_check", lambda _: {"status": "cpu_scientific_checks_passed"})
++    def prepare(value):
++        assert value == asset
++        (tmp_path / "runtime-robot-assets").mkdir()
++    monkeypatch.setattr(pc, "prepare_robot_assets", prepare)
++    monkeypatch.setattr(pc, "verify_prepared_plans", lambda _: [{"fixture": "three CPU plans"}])
++    calls = []
++    monkeypatch.setattr(pc.subprocess, "run", lambda argv, **_: calls.append(argv))
++    pc.cpu_prepare(path)
++    plans = [argv for argv in calls if "plan" in argv]
++    assert len(plans) == 3
++    contract_path = str(tmp_path / "runtime-robot-assets/contract.json")
++    assert all(argv[argv.index("--runtime-robot-assets-contract") + 1] == contract_path for argv in plans)
++    assert pc.read(contract_path) == asset
++    assert pc.read(tmp_path / "cpu-ready.json")["runtime_robot_assets"] == asset
+ 
+ 
+ def test_existing_monitor_lock_cannot_be_acquired_twice(tmp_path):
+--- /dev/null
++++ b/scripts/research/runtime_robot_assets.py
+@@ -0,0 +1,170 @@
++#!/usr/bin/env python3
++"""Seal and verify a writable URDF conversion root without writable Python source.
++
++Only the exact source URDF and its local mesh/texture dependencies are copied.
++The immutable manifest uses relative paths so host-side evidence verification
++can translate mount paths in memory without rewriting the original manifest.
++"""
++from __future__ import annotations
++
++import hashlib
++import json
++from pathlib import Path, PurePosixPath
++import re
++import shutil
++import stat
++import xml.etree.ElementTree as ET
++
++PRIMARY_URDF = "g1/main_mesh_arm_collision_halfspherehand.urdf"
++SOURCE_RELATIVE = "thirdparty/holosoma/src/holosoma/holosoma/data/robots"
++GENERATED_DIRECTORY = r"converted_rank[0-9]+_pid[0-9]+"
++GENERATED_FILES = "USD (.usd/.usda/.usdc), root config.yaml/.asset_hash, optional configuration directory"
++
++
++def require(condition, message):
++    if not condition:
++        raise ValueError(message)
++
++
++def digest(path):
++    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
++
++
++def encoded(value):
++    return (json.dumps(value, sort_keys=True, indent=2, allow_nan=False) + "\n").encode()
++
++
++def relative(value):
++    path = PurePosixPath(value)
++    require(isinstance(value, str) and path.parts and not path.is_absolute()
++            and ".." not in path.parts and path.as_posix() == value and ":" not in value,
++            "Unsafe robot asset relative path")
++    return path
++
++
++def regular(root, name):
++    """Reject links in every component, even when their resolved target is local."""
++    root = Path(root)
++    require(root.is_absolute(), "Robot asset root must be absolute")
++    for parent in [root, *root.parents]:
++        require(not parent.is_symlink(), "Robot asset root has a symlink component")
++    path = root
++    for part in relative(name).parts:
++        path = path / part
++        require(not path.is_symlink(), "Robot asset path has a symlink component")
++    require(stat.S_ISREG(path.stat().st_mode), "Robot asset must be a regular file")
++    return path
++
++
++def closure(source_root, urdf_file=PRIMARY_URDF):
++    urdf = regular(source_root, urdf_file)
++    names = {relative(urdf_file).as_posix()}
++    try:
++        tree = ET.parse(urdf)
++    except ET.ParseError as error:
++        raise ValueError("Original robot URDF is malformed or changed") from error
++    for node in tree.iter():
++        if node.tag in ("mesh", "texture") and node.get("filename"):
++            reference = relative(node.get("filename"))
++            name = (relative(urdf_file).parent / reference).as_posix()
++            regular(source_root, name)
++            names.add(name)
++    return [{"relative_path": name, "bytes": regular(source_root, name).stat().st_size,
++             "source_sha256": digest(regular(source_root, name)),
++             "copy_sha256": digest(regular(source_root, name))} for name in sorted(names)]
++
++
++def contract(source_root, runtime_root, *, source_path=None, urdf_file=PRIMARY_URDF):
++    """Read-only preparation: expected copy hashes are sealed before any copy."""
++    payload = {"schema_version": 1, "urdf_file": urdf_file,
++               "generated_directory_pattern": GENERATED_DIRECTORY, "generated_file_policy": GENERATED_FILES,
++               "files": closure(source_root, urdf_file)}
++    raw = encoded(payload)
++    target = Path(runtime_root)
++    require(target.is_absolute() and target.name == "robots" and target.parent.name == "runtime-robot-assets",
++            "Use the independent cohort runtime-robot-assets/robots directory")
++    return {**payload, "source_root": str(Path(source_path or source_root)), "runtime_root": str(target),
++            "manifest": {"path": str(target.parent / "manifest.json"), "bytes": len(raw),
++                         "sha256": hashlib.sha256(raw).hexdigest()}}
++
++
++def payload(value):
++    require(value.get("schema_version") == 1 and value.get("generated_directory_pattern") == GENERATED_DIRECTORY,
++            "Unsupported runtime robot asset contract")
++    require(value.get("generated_file_policy") == GENERATED_FILES, "Unsupported converter output policy")
++    rows = value["files"]
++    names = [relative(row["relative_path"]).as_posix() for row in rows]
++    require(names and names == sorted(set(names)) and value["urdf_file"] in names,
++            "Robot asset contract must contain unique sorted dependencies and its URDF")
++    for row in rows:
++        require(type(row["bytes"]) is int and row["bytes"] > 0
++                and re.fullmatch(r"[0-9a-f]{64}", row["source_sha256"])
++                and row["source_sha256"] == row["copy_sha256"], "Robot source/copy identity differs")
++    return {key: value[key] for key in ("schema_version", "urdf_file", "generated_directory_pattern", "generated_file_policy", "files")}
++
++
++def verify(value, *, copied=True):
++    expected = payload(value)
++    raw = encoded(expected)
++    root = Path(value["runtime_root"])
++    require(root.is_absolute() and root.name == "robots" and root.parent.name == "runtime-robot-assets",
++            "Runtime robot root escaped the dedicated cohort directory")
++    manifest = value["manifest"]
++    require(Path(manifest["path"]) == root.parent / "manifest.json"
++            and manifest["bytes"] == len(raw) and manifest["sha256"] == hashlib.sha256(raw).hexdigest(),
++            "Runtime robot asset manifest identity differs")
++    require(closure(value["source_root"], value["urdf_file"]) == expected["files"],
++            "Original robot URDF dependency closure changed")
++    if not copied:
++        return value
++    path = regular(root.parent, "manifest.json")
++    require(path.read_bytes() == raw, "Runtime robot asset manifest changed")
++    originals = {row["relative_path"] for row in expected["files"]}
++    for row in expected["files"]:
++        path = regular(root, row["relative_path"])
++        require(path.stat().st_size == row["bytes"] and digest(path) == row["copy_sha256"],
++                "Copied robot asset changed")
++    for path in root.rglob("*"):
++        name = path.relative_to(root).as_posix()
++        require(not path.is_symlink(), "Runtime conversion tree contains a symlink")
++        mode = path.stat().st_mode
++        require(stat.S_ISREG(mode) or stat.S_ISDIR(mode), "Runtime conversion tree contains a special file")
++        if stat.S_ISDIR(mode):
++            require(any(original.startswith(name + "/") for original in originals)
++                    or re.fullmatch(GENERATED_DIRECTORY, path.relative_to(root).parts[0]),
++                    "Unexpected directory outside generated conversion outputs")
++        else:
++            generated = path.relative_to(root).parts
++            allowed_output = (re.fullmatch(GENERATED_DIRECTORY, generated[0]) and len(generated) >= 2
++                              and (path.suffix.lower() in (".usd", ".usda", ".usdc")
++                                   or (len(generated) == 2 and path.name in ("config.yaml", ".asset_hash"))))
++            require(name in originals or allowed_output,
++                    "Unexpected file outside generated conversion outputs")
++    return value
++
++
++def prepare(value):
++    """First CPU preparation copies once; subsequent entry only verifies bytes."""
++    verify(value, copied=False)
++    root = Path(value["runtime_root"])
++    if root.parent.exists():
++        return verify(value)
++    root.mkdir(parents=True, exist_ok=False)
++    for row in value["files"]:
++        target = root / row["relative_path"]
++        target.parent.mkdir(parents=True, exist_ok=True)
++        shutil.copyfile(regular(value["source_root"], row["relative_path"]), target)
++        target.chmod(0o644)
++    with (root.parent / "manifest.json").open("xb") as stream:
++        stream.write(encoded(payload(value)))
++    return verify(value)
++
++
++def validate_config(config, value):
++    """Check the public override after actual native saved-config parsing."""
++    verify(value)
++    asset = config.robot.asset
++    require(asset.asset_root == value["runtime_root"] and asset.urdf_file == value["urdf_file"]
++            and asset.usd_file is None, "Parsed robot asset configuration differs from the sealed URDF contract")
++    return {"asset_root": asset.asset_root, "urdf_file": asset.urdf_file, "usd_file": asset.usd_file,
++            "manifest_sha256": value["manifest"]["sha256"], "original_files": len(value["files"])}
+--- /dev/null
++++ b/tests/test_runtime_robot_assets.py
+@@ -0,0 +1,159 @@
++"""Filesystem and native parser regressions for the writable conversion root.
++
++No Robot, simulator, CUDA context, or DDS listener is constructed here.
++"""
++from __future__ import annotations
++
++import copy
++import json
++from pathlib import Path
++from types import SimpleNamespace
++
++import pytest
++
++from scripts.research import runtime_robot_assets as assets
++
++
++@pytest.fixture
++def sealed(tmp_path):
++    source = tmp_path / "source"
++    urdf = source / assets.PRIMARY_URDF
++    urdf.parent.mkdir(parents=True)
++    urdf.write_text('<robot name="fixture"><link name="body"><visual><geometry>'
++                    '<mesh filename="meshes/a.STL"/></geometry></visual><collision><geometry>'
++                    '<mesh filename="meshes/a.STL"/></geometry></collision></link></robot>')
++    (urdf.parent / "meshes").mkdir()
++    (urdf.parent / "meshes/a.STL").write_bytes(b"mesh fixture bytes\x00\x01")
++    value = assets.contract(source, tmp_path / "cohort/runtime-robot-assets/robots")
++    return value
++
++
++def test_copy_preserves_original_bytes_deduplicates_mesh_and_seals_once(sealed):
++    assert len(sealed["files"]) == 2
++    before = {row["relative_path"]: (Path(sealed["source_root"]) / row["relative_path"]).read_bytes() for row in sealed["files"]}
++    assets.prepare(sealed)
++    original_manifest = Path(sealed["manifest"]["path"]).read_bytes()
++    for name, raw in before.items():
++        assert (Path(sealed["runtime_root"]) / name).read_bytes() == raw
++        assert (Path(sealed["source_root"]) / name).read_bytes() == raw
++    assets.prepare(sealed)
++    assert Path(sealed["manifest"]["path"]).read_bytes() == original_manifest
++
++
++@pytest.mark.parametrize("location", ("source_root", "runtime_root"))
++def test_changed_original_or_copy_is_rejected_without_recopied_repair(sealed, location):
++    assets.prepare(sealed)
++    path = Path(sealed[location]) / sealed["files"][0]["relative_path"]
++    path.write_bytes(b"tampered")
++    with pytest.raises(ValueError):
++        assets.prepare(sealed)
++    assert path.read_bytes() == b"tampered"
++
++
++def test_partial_first_copy_is_retained_and_not_overwritten(sealed):
++    root = Path(sealed["runtime_root"])
++    root.mkdir(parents=True)
++    (root / "partial.txt").write_bytes(b"retain")
++    with pytest.raises(OSError):
++        assets.prepare(sealed)
++    assert (root / "partial.txt").read_bytes() == b"retain"
++
++
++def test_native_converter_outputs_may_accumulate_but_original_hashes_stay_fixed(sealed):
++    assets.prepare(sealed)
++    root = Path(sealed["runtime_root"])
++    for pid in (17, 239):
++        directory = root / f"converted_rank0_pid{pid}"
++        (directory / "configuration").mkdir(parents=True)
++        for relative in ("robot.usd", "configuration/robot_physics.usd", "config.yaml", ".asset_hash"):
++            (directory / relative).write_bytes(b"native converter output placeholder; no physics claimed")
++    assets.verify(sealed)
++
++
++@pytest.mark.parametrize("name", ("g1/rogue.usd", "converted_rankx_pid1/robot.usd", "converted_rank0_pid2/code.py",
++                                  "converted_rank0_pid2/subdir/config.yaml"))
++def test_unrelated_or_executable_additions_rejected(sealed, name):
++    assets.prepare(sealed)
++    path = Path(sealed["runtime_root"]) / name
++    path.parent.mkdir(parents=True, exist_ok=True)
++    path.write_bytes(b"unapproved addition")
++    with pytest.raises(ValueError):
++        assets.verify(sealed)
++
++
++@pytest.mark.parametrize("reference", ("../../escape.STL", "/tmp/absolute.STL", "package://robot/mesh.STL"))
++def test_urdf_external_or_parent_references_rejected(sealed, reference):
++    path = Path(sealed["source_root"]) / sealed["urdf_file"]
++    path.write_text(f'<robot><mesh filename="{reference}"/></robot>')
++    with pytest.raises(ValueError):
++        assets.closure(sealed["source_root"])
++
++
++def test_generated_symlink_is_rejected(sealed, tmp_path):
++    assets.prepare(sealed)
++    directory = Path(sealed["runtime_root"]) / "converted_rank0_pid19"
++    directory.mkdir()
++    (directory / "robot.usd").symlink_to(Path(sealed["source_root"]) / sealed["urdf_file"])
++    with pytest.raises(ValueError, match="symlink"):
++        assets.verify(sealed)
++
++
++def test_source_parent_symlink_is_rejected(sealed, tmp_path):
++    source = Path(sealed["source_root"])
++    alias = tmp_path / "source-link"
++    alias.symlink_to(source, target_is_directory=True)
++    with pytest.raises(ValueError, match="symlink"):
++        assets.contract(alias, Path(sealed["runtime_root"]))
++
++
++def test_manifest_and_config_mismatch_rejected(sealed):
++    assets.prepare(sealed)
++    config = SimpleNamespace(robot=SimpleNamespace(asset=SimpleNamespace(
++        asset_root=sealed["runtime_root"], urdf_file=sealed["urdf_file"], usd_file=None)))
++    assert assets.validate_config(config, sealed)["original_files"] == 2
++    config.robot.asset.asset_root = sealed["source_root"]
++    with pytest.raises(ValueError, match="Parsed robot"):
++        assets.validate_config(config, sealed)
++    Path(sealed["manifest"]["path"]).write_bytes(b"changed manifest")
++    with pytest.raises(ValueError, match="manifest changed"):
++        assets.verify(sealed)
++
++
++def test_host_path_translation_does_not_rewrite_manifest(sealed, tmp_path):
++    assets.prepare(sealed)
++    raw = Path(sealed["manifest"]["path"]).read_bytes()
++    # Manifest is deliberately path independent; case/selection fingerprints
++    # bind the actual roots, which the host translates only in memory.
++    assert "source_root" not in json.loads(raw) and "runtime_root" not in json.loads(raw)
++    translated = copy.deepcopy(sealed)
++    translated["source_root"] = str(tmp_path / "translated-source")
++    translated["runtime_root"] = str(tmp_path / "translated/runtime-robot-assets/robots")
++    import shutil
++    shutil.copytree(sealed["source_root"], translated["source_root"])
++    shutil.copytree(Path(sealed["runtime_root"]).parent, Path(translated["runtime_root"]).parent)
++    translated["manifest"]["path"] = str(Path(translated["runtime_root"]).parent / "manifest.json")
++    assets.verify(translated)
++    assert Path(translated["manifest"]["path"]).read_bytes() == raw
++    assert Path(sealed["manifest"]["path"]).read_bytes() == raw
++
++
++def test_real_g1_closure_is_exact_35_with_referenced_half_sphere():
++    root = Path(__file__).resolve().parents[1]
++    rows = assets.closure(root / assets.SOURCE_RELATIVE)
++    assert len(rows) == 35
++    assert any(row["relative_path"] == "g1/meshes/half_sphere.obj" for row in rows)
++    urdf = next(row for row in rows if row["relative_path"] == assets.PRIMARY_URDF)
++    assert urdf["source_sha256"] == "0ce8a53a9bd2751d890a037aa9cc4cde3677832bbe779ff5de92349ff9af648d"
++
++
++def test_actual_native_parser_public_override_changes_only_asset_root(sealed):
++    from dataclasses import asdict
++    from wbt_training.config_values.experiment import g1_wbt_terrain_ref_noscale
++    from wbt_training.utils.checkpoint import parse_saved_config_overrides
++    assets.prepare(sealed)
++    original = g1_wbt_terrain_ref_noscale.get_eval_config()
++    parsed = parse_saved_config_overrides(original, ["--robot.asset.asset-root", sealed["runtime_root"]])
++    actual, expected = asdict(parsed), asdict(original)
++    expected["robot"]["asset"]["asset_root"] = sealed["runtime_root"]
++    assert actual == expected
++    assert assets.validate_config(parsed, sealed)["asset_root"] == sealed["runtime_root"]

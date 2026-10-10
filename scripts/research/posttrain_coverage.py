@@ -22,6 +22,11 @@ import sys
 import time
 import uuid
 
+ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT))
+from scripts.research.runtime_robot_assets import (PRIMARY_URDF, SOURCE_RELATIVE,
+    contract as robot_contract, prepare as prepare_robot_assets, verify as verify_robot_assets)
+
 SKILLS = ("locomotion", "low-step", "high-step", "low-climb-76", "high-climb-76")
 POLICIES = ("teacher", "pure", "finetune")
 TRAINING = {**{f"teacher-{skill}": (20000, 4096, 64) for skill in SKILLS},
@@ -357,11 +362,14 @@ def observe(args):
         return process
     artifacts = inspect_artifacts(args.official_output, stages)
     source = verify_snapshot(args)
-    selection = {"schema_version": 1, "training_source_tree": TRAIN_TREE, "coverage_source_tree": args.source_tree,
+    robot_assets = robot_contract(source / SOURCE_RELATIVE, Path(COVERAGE) / "runtime-robot-assets/robots",
+                                  source_path=Path("/workspace/php_parkour") / SOURCE_RELATIVE)
+    require(len(robot_assets["files"]) == 35, "Canonical G1 URDF must have exactly 35 original asset files")
+    selection = {"schema_version": 2, "training_source_tree": TRAIN_TREE, "coverage_source_tree": args.source_tree,
                  "image": args.image, "image_contents_sha256": IMAGE_CONTENTS, "gpu_uuid": args.gpu_uuid,
                  "official_output": OFFICIAL, "coverage_output": COVERAGE,
                  "host_coverage_output": str(args.coverage_output), "driver_log_sha256": digest(args.driver_log),
-                 "driver_completion": process, **artifacts}
+                 "driver_completion": process, "runtime_robot_assets": robot_assets, **artifacts}
     selection["input_identity"] = identity(selection)
     return {"status": "ready_for_cpu_verification_gpu_not_started", "selection": selection, "source": str(source),
             "cpu_command": docker_command(args, source, "cpu", selection["input_identity"])[1],
@@ -400,13 +408,16 @@ def verify_finished_batch(args, selection, summary):
                     return str(destination / path.relative_to(prefix))
         return value
     ready = read(args.coverage_output / "cpu-ready.json")
-    require(ready["input_identity"] == selection["input_identity"] and len(ready["plans"]) == 3, "CPU cohort changed after execution")
+    verify_robot_assets(translate(selection["runtime_robot_assets"]))
+    require(ready["input_identity"] == selection["input_identity"] and len(ready["plans"]) == 3
+            and ready["runtime_robot_assets"] == selection["runtime_robot_assets"], "CPU cohort changed after execution")
     results = {(item["policy"], item["case_id"]): item for item in summary["cases"]}
     require(len(results) == 888, "Duplicate final attempt IDs")
     for policy, plan_record in zip(POLICIES, ready["plans"]):
         plan_path = args.coverage_output / policy / "plan.json"
         require(plan_record["policy"] == policy and digest(plan_path) == plan_record["sha256"], "Final source plan changed")
         plan = read(plan_path)
+        require(plan["runtime_robot_assets"] == selection["runtime_robot_assets"], "Final robot asset contract changed")
         require(plan["selected_sources"] == plan["inventory_total_sources"] == len(plan["cases"]) == 296, "Filtered final source coverage")
         for item in plan["cases"]:
             case_path = Path(translate(item["case"]["path"]))
@@ -437,6 +448,7 @@ def scientific_check(selection):
     from wbt_training.utils.checkpoint import load_saved_experiment_config
     from scripts.research.motion_coverage import inventory
     require(not torch.cuda.is_initialized(), "CPU gate unexpectedly initialized CUDA")
+    verify_selection_robot_assets(selection, copied=False)
     targets = {"teacher": "holosoma.agents.ppo.ppo.PPO", "pure": "wbt_training.utils.student_teacher.PhpDistillation",
                "finetune": "wbt_training.utils.student_teacher.PhpDistillationPPO"}
     teachers, reports = [], []
@@ -451,6 +463,8 @@ def scientific_check(selection):
         require(loaded.get("iter") == loaded.get("iteration") == expected["iteration"], f"Embedded PT iteration mismatch: {label}")
         require(isinstance(loaded.get("experiment_config"), dict), f"Final PT lacks embedded config: {label}")
         saved, _ = load_saved_experiment_config(CheckpointConfig(checkpoint=expected["path"]))
+        require(saved.robot.asset.urdf_file == selection["runtime_robot_assets"]["urdf_file"]
+                and saved.robot.asset.usd_file is None, f"Saved robot is not the sealed source URDF: {label}")
         policy = "teacher" if label.startswith("teacher-") else label.removeprefix("student-")
         registry = f"file:///data/assets/motions-{label.removeprefix('teacher-')}" if policy == "teacher" else ",".join(f"file:///data/assets/motions-{s}" for s in SKILLS)
         kwargs = json.loads(saved.training.preprocess_hook_kwargs)
@@ -517,9 +531,16 @@ def cpu_prepare(selection_path):
     selection = read(selection_path)
     base = Path(selection_path).parent
     report = scientific_check(selection)
+    prepare_robot_assets(selection["runtime_robot_assets"])
+    robot_contract_path = base / "runtime-robot-assets/contract.json"
+    if robot_contract_path.exists():
+        require(read(robot_contract_path) == selection["runtime_robot_assets"], "Existing runtime robot contract changed")
+    else:
+        write(robot_contract_path, selection["runtime_robot_assets"])
     script = "scripts/research/eval_source_coverage.py"
     for policy in POLICIES:
-        command = [sys.executable, script, "plan", "--policy", policy, "--output", f"{COVERAGE}/{policy}"]
+        command = [sys.executable, script, "plan", "--policy", policy, "--output", f"{COVERAGE}/{policy}",
+                   "--runtime-robot-assets-contract", str(robot_contract_path)]
         if policy == "teacher":
             for skill in SKILLS:
                 command += ["--teacher-checkpoint", f"{skill}={selection['checkpoints'][f'teacher-{skill}']['path']}"]
@@ -528,16 +549,28 @@ def cpu_prepare(selection_path):
         subprocess.run(command, check=True)
         subprocess.run([sys.executable, script, "preflight", "--plan", f"{COVERAGE}/{policy}/plan.json"], check=True)
     reports = verify_prepared_plans(selection)
-    write(base / "cpu-ready.json", {**report, "input_identity": selection["input_identity"], "finished_utc": now(), "plans": reports})
+    write(base / "cpu-ready.json", {**report, "input_identity": selection["input_identity"], "finished_utc": now(),
+                                  "runtime_robot_assets": selection["runtime_robot_assets"], "plans": reports})
+
+
+def verify_selection_robot_assets(selection, copied=True):
+    value = selection["runtime_robot_assets"]
+    require(selection["schema_version"] == 2 and value["urdf_file"] == PRIMARY_URDF and len(value["files"]) == 35
+            and value["runtime_root"] == f"{COVERAGE}/runtime-robot-assets/robots"
+            and value["source_root"] == str(Path("/workspace/php_parkour") / SOURCE_RELATIVE),
+            "Post-train robot asset contract is not the independent canonical 35-file G1 root")
+    return verify_robot_assets(value, copied=copied)
 
 
 def verify_prepared_plans(selection):
     from scripts.research.eval_source_coverage import verify_plan, validate_cpu_report
     reports = []
+    verify_selection_robot_assets(selection)
     source_ids = None
     for policy in POLICIES:
         path = Path(COVERAGE) / policy / "plan.json"
         plan = verify_plan(path)
+        require(plan["runtime_robot_assets"] == selection["runtime_robot_assets"], "Policy plan changed the shared robot assets")
         require(plan["policy"] == policy and plan["selected_sources"] == plan["inventory_total_sources"] == 296, "A post-train plan filtered source coverage")
         inventory = read(plan["source_inventory"]["path"])
         ids = [item["source_clip_id"] for item in plan["cases"]]
@@ -559,6 +592,8 @@ def verify_prepared_plans(selection):
 
 def attempt_case(selection, policy, item, validate_native_report):
     case = read(item["case"]["path"])
+    require(case["runtime_robot_assets"] == selection["runtime_robot_assets"], "Attempt changed the shared robot assets")
+    verify_selection_robot_assets(selection)
     output = Path(case["output"])
     record_path, started_path, log = output / "posttrain-attempt.json", output / "posttrain-started.json", output / "posttrain-native.log"
     if record_path.exists():
@@ -606,6 +641,7 @@ def batch(selection_path):
     base = Path(selection_path).parent
     ready = read(base / "cpu-ready.json")
     require(ready["status"] == "cpu_scientific_checks_passed" and ready["input_identity"] == selection["input_identity"]
+            and ready["runtime_robot_assets"] == selection["runtime_robot_assets"]
             and ready["plans"] == verify_prepared_plans(selection), "CPU preparation/input identity changed")
     write(base / f"actual-gpu-{time.time_ns()}.json", verify_gpu_mapping(selection))
     summary = {"schema_version": 1, "input_identity": selection["input_identity"], "status": "running", "scope": "296 original sources per teacher/pure/finetune; one variant/seed42/first attempt, not skill success", "quality_verified": False, "cases": []}

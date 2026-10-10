@@ -19,6 +19,17 @@ from holosoma.agents.distillation.distillation import Distillation
 from holosoma.agents.distillation_ppo.distillation_ppo import DistillationPPO
 from holosoma.envs.base_task.base_task import BaseTask
 from scripts.research import source_coverage_probe as coverage
+from scripts.research import runtime_robot_assets as robot_assets
+
+
+def asset_fixture(tmp_path):
+    source = tmp_path / "robot-source"
+    urdf = source / robot_assets.PRIMARY_URDF
+    urdf.parent.mkdir(parents=True, exist_ok=True)
+    urdf.write_text('<robot name="fixture"><link name="body"/></robot>')
+    value = robot_assets.contract(source, tmp_path / "runtime-robot-assets/robots")
+    robot_assets.prepare(value)
+    return value
 
 
 class CPUEnv:
@@ -93,9 +104,13 @@ class CPUEnv:
 def native_fixture(tmp_path, cls, outcome="boundary", frames=4):
     checkpoint = tmp_path / "model.pt"
     torch.save({"iter": 500}, checkpoint)
-    case = {"output": str(tmp_path), "source": {"frames": frames, "fps": 50, "expert_ordinal": 2},
+    value = asset_fixture(tmp_path)
+    case = {"schema_version": 2, "runtime_robot_assets": value,
+            "output": str(tmp_path), "source": {"frames": frames, "fps": 50, "expert_ordinal": 2},
             "case_id": "cpu-test", "inventory_sha256": "inventory", "checkpoint": str(checkpoint), "native_argv": []}
     env = CPUEnv(outcome, frames)
+    env.robot_config = SimpleNamespace(asset=SimpleNamespace(asset_root=value["runtime_root"],
+        urdf_file=value["urdf_file"], usd_file=None))
     loop = SimpleNamespace(device="cpu", num_act=29, env=env, actor_obs_keys=["actor_obs"], critic_obs_keys=["critic_obs"],
                            eval_callbacks=[], log_dir=str(tmp_path / "unused-log"), current_learning_iteration=500,
                            config=SimpleNamespace(eval_callbacks={"coverage": SimpleNamespace(
@@ -177,7 +192,8 @@ def test_case_identity_and_byte_changes_are_refused(tmp_path):
                   "files": [{"path": str(asset), "sha256": coverage.sha256(asset)}]}
     path = tmp_path / "provenance.json"
     coverage.atomic_json(path, provenance)
-    case = {"checkpoint": str(checkpoint), "checkpoint_sha256": coverage.sha256(checkpoint),
+    case = {"schema_version": 2, "runtime_robot_assets": asset_fixture(tmp_path),
+            "checkpoint": str(checkpoint), "checkpoint_sha256": coverage.sha256(checkpoint),
             "singleton_provenance": str(path), "singleton_provenance_sha256": coverage.sha256(path),
             "source": provenance["record"], "registry_uri": provenance["registry_uri"],
             "original_expert_ordinal": 1, "singleton_native_expert_ordinal": 0}
@@ -204,7 +220,7 @@ def test_wrong_control_frequency_fails_before_installing_hooks(tmp_path):
     assert loop.env.step == original_step
 
 
-@pytest.mark.parametrize("change", ("missing_tensorboard", "missing_yaml", "changed_motion"))
+@pytest.mark.parametrize("change", ("missing_tensorboard", "missing_yaml", "changed_motion", "wrong_robot_config", "wrong_robot_contract"))
 def test_report_validation_requires_retained_native_evidence(tmp_path, change):
     from scripts.research.eval_source_coverage import validate_native_report
     loop = native_fixture(tmp_path, PPO)
@@ -225,6 +241,10 @@ def test_report_validation_requires_retained_native_evidence(tmp_path, change):
         report["tensorboard_events"] = []
     elif change == "missing_yaml":
         Path(report["actual_native"]["saved_eval_config"]["retained"]["path"]).unlink()
+    elif change == "wrong_robot_config":
+        report["actual_native"]["robot_asset_config"]["asset_root"] = case["runtime_robot_assets"]["source_root"]
+    elif change == "wrong_robot_contract":
+        report["runtime_robot_assets"] = {**report["runtime_robot_assets"], "runtime_root": "/wrong/runtime-robot-assets/robots"}
     else:
         Path(report["actual_native"]["motion"]["retained"]["path"]).write_bytes(b"changed")
     with pytest.raises((ValueError, OSError)):

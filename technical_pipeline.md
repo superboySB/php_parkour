@@ -602,3 +602,7 @@ IsaacLab的URDF converter会在asset_root下生成USD缓存。五个非默认教
 新统一SDK0.1.8镜像的12个原平地方向指令另已完成真实复测：每例400ticks/8仿真秒，全部24worker正常退出/进程组为空、24精确host线程映射、12原MP4完整解码；同一发布ONNX pair、原命令/seed/配置和默认wall373秒均保持。路径和转角按真实轨迹报告，例如连续left90指令会累积绕圈，不能把指令名解释为固定终点90度旋转。[完整逐例表与原视频](usage_assets/reports/sdk018-directions/summary.md)。本地默认容器也已实际采用新镜像；云端长训练保留原冻结版本直到完成。[接入与版本边界](usage_assets/reports/sdk018-local-adoption/summary.md)。
 
 评估重试另保存独立证据：旧quality及其同级TensorBoard先原字节归档并记录路径/SHA映射，新报告仍位于固定stage路径；有效skip不修改历史，重跑不混入旧事件。58项pipeline加14项既有exit-guard共72项目标CPU测试通过。该改动影响证据与恢复流程，不改变参考动作、教师label、reward或loss。[重试缺口实证与修复](usage_assets/reports/eval-quality-retry-integration/summary.md)。
+
+独立只读复核已逐段核对本说明604行版本的数学、维度、数据格式与实机边界，115份源码身份和154个本地引用通过；原报告绑定该版本SHA，后续追加的运行状态单独验收。[复核记录](usage_assets/reports/technical-pipeline-independent-review/summary.md)。
+
+逐源验收的后续执行器现采用schema2 selection/plan/case，明确绑定35个原始G1 URDF/mesh与独立RW转换根、五份harness源码SHA、原生参数及解析后配置。首次CPU准备复制资产，之后只校验，源码保持RO；原始资产或副本改变即拒绝。116项目标CPU回归通过，真实Isaac转换与运行证据另行记录。这只改变资产初始化与证据合同，不改变reference frame推进、暖身缓存公式、reward、label、loss或首次尝试停止规则。[修复与原始测试](usage_assets/reports/runtime-robot-assets/summary.md)。

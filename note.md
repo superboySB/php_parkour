@@ -448,3 +448,9 @@ Isaac评估将URDF转换缓存写在`robot.asset.asset_root`下。源码只读�
 新统一镜像已完整传输并在远端加载，10.90GB归档两端SHA和层内容一致；原训练容器及research tag保留。[实际上传回执](usage_assets/reports/sdk018-canonical-upload/summary.md)。
 
 评估`--skip-completed`核验产物失败而需要重跑时，pipeline会先把旧`quality.json`与同级`tensorboard/`按原字节移到`quality-history/<time_ns>/`，在新manifest保存路径与SHA映射，再启动固定路径的新报告。旧视频/原生日志保留；有效跳过不移动文件，异常归档或child失败不删除历史。这样既满足新报告门卫，也不把旧TensorBoard事件混进新评估。[实际CPU缺口复现、72项目标测试与修复](usage_assets/reports/eval-quality-retry-integration/summary.md)。
+
+### 只读源码的逐源验收资产根
+
+`eval_source_coverage.py plan`会从原始G1 URDF解析35个依赖文件，复制到本次输出的`runtime-robot-assets/robots`，并通过公开参数`--robot.asset.asset-root`传给原生Isaac。三策略正式逐源执行器共享本次coverage输出内的一份副本，使用已有RW输出挂载，不开放Python源码写入。新selection/plan/case使用schema2；旧schema1计划需保留并重新准备，不能混入新结果。每次执行会校验原文件/副本SHA、解析后的asset_root/urdf_file及完整harness，已有不完整或改变的副本会拒绝，不自动覆盖。
+
+[116项目标Docker CPU测试和初轮失败原记录](usage_assets/reports/runtime-robot-assets/summary.md)已保存；真实RO源码的Isaac初始化另有独立验收，不能从CPU测试推断仿真或技能成功。

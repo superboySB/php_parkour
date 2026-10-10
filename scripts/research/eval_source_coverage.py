@@ -23,6 +23,8 @@ import time
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 from scripts.research.eval_quality import atomic_json, sha256
+from scripts.research.runtime_robot_assets import (SOURCE_RELATIVE, contract as robot_contract,
+    prepare as prepare_robot_assets, verify as verify_robot_assets)
 
 
 def now():
@@ -65,11 +67,17 @@ def prepare(args):
         raise ValueError("Student evaluation requires its own local --checkpoint, without teacher checkpoints")
     student = file_record(args.checkpoint) if args.policy != "teacher" else None
     args.output.mkdir(parents=True)
+    if args.runtime_robot_assets_contract:
+        robot_assets = json.loads(args.runtime_robot_assets_contract.read_text())
+        verify_robot_assets(robot_assets)
+    else:
+        robot_assets = robot_contract(ROOT / SOURCE_RELATIVE, args.output.resolve() / "runtime-robot-assets/robots")
+        prepare_robot_assets(robot_assets)
     data["created_at_utc"] = now()
     atomic_json(args.output / "inventory.json", data)
     source_inventory = file_record(args.output / "inventory.json")
     harness_sources = [file_record(ROOT / "scripts/research" / name) for name in
-                       ("eval_source_coverage.py", "source_coverage_probe.py", "motion_coverage.py", "eval_quality.py")]
+                       ("eval_source_coverage.py", "source_coverage_probe.py", "motion_coverage.py", "eval_quality.py", "runtime_robot_assets.py")]
     cases = []
     for record in records:
         case_id = f"{args.policy}-e{record['expert_ordinal']}-{record['source_ordinal']:03d}-{record['source_motion_sha256'][:12]}"
@@ -77,10 +85,11 @@ def prepare(args):
         directory.mkdir(parents=True)
         singleton = materialize(record, directory / "singleton")
         checkpoint = teacher_paths[record["skill"]] if args.policy == "teacher" else student
-        case = {"schema_version": 1, "case_id": case_id, "policy": args.policy,
+        case = {"schema_version": 2, "case_id": case_id, "policy": args.policy,
                 "output": str(directory.resolve()), "source": record,
                 "inventory_sha256": data["inventory_sha256"], "checkpoint": checkpoint["path"],
                 "source_inventory": source_inventory, "harness_sources": harness_sources,
+                "runtime_robot_assets": robot_assets,
                 "checkpoint_sha256": checkpoint["sha256"], "registry_uri": singleton["registry_uri"],
                 "singleton_provenance": singleton["provenance_path"],
                 "singleton_provenance_sha256": sha256(singleton["provenance_path"]),
@@ -102,13 +111,14 @@ def prepare(args):
         atomic_json(path, case)
         cases.append({"case_id": case_id, "case": file_record(path), "source_clip_id": record["source_clip_id"],
                       "original_expert_ordinal": record["expert_ordinal"], "checkpoint": checkpoint})
-    plan = {"schema_version": 1, "status": "prepared_gpu_not_run", "created_at_utc": now(), "policy": args.policy,
+    plan = {"schema_version": 2, "status": "prepared_gpu_not_run", "created_at_utc": now(), "policy": args.policy,
             "scope": "Each selected original source is attempted independently on one generated terrain variant, seed42. Execution and skill quality are separate. No GPU run by plan/preflight.",
             "source_inventory": file_record(args.output / "inventory.json"), "inventory_sha256": data["inventory_sha256"],
             "inventory_total_sources": data["total_files"], "selected_sources": len(cases),
             "stop_rules": ["first native failed", "first native timeout", "first native motion boundary", "max policy steps"],
             "native_warmup_semantics": "reset_all A initializes; reset_all B is first attempt zero-action warmup at frame0; first policy frame1, last potential frameT-2; boundaryT-1 is sentinel",
             "harness_sources": harness_sources,
+            "runtime_robot_assets": robot_assets,
             "cases": cases, "quality_verified": False, "simulation_started": False}
     atomic_json(args.output / "plan.json", plan)
     return {key: plan[key] for key in ("status", "inventory_total_sources", "selected_sources", "inventory_sha256")}
@@ -118,11 +128,16 @@ def verify_plan(path):
     from scripts.research.motion_coverage import validate_inventory
     from scripts.research.source_coverage_probe import native_arguments, verify_case
     plan = json.loads(path.read_text())
-    if (plan.get("schema_version") != 1 or plan.get("policy") not in ("teacher", "pure", "finetune")
+    if (plan.get("schema_version") != 2 or plan.get("policy") not in ("teacher", "pure", "finetune")
             or not plan.get("cases") or len(plan["cases"]) != plan.get("selected_sources")
             or len({item["case_id"] for item in plan["cases"]}) != len(plan["cases"])
             or len({item["source_clip_id"] for item in plan["cases"]}) != len(plan["cases"])):
         raise ValueError("Invalid plan schema, policy, counts or duplicate case/source identity")
+    verify_robot_assets(plan["runtime_robot_assets"])
+    expected_harness = [file_record(ROOT / "scripts/research" / name) for name in
+                        ("eval_source_coverage.py", "source_coverage_probe.py", "motion_coverage.py", "eval_quality.py", "runtime_robot_assets.py")]
+    if plan["harness_sources"] != expected_harness:
+        raise ValueError("Plan does not bind the complete current five-source harness")
     for item in [plan["source_inventory"], *plan["harness_sources"]]:
         if sha256(item["path"]) != item["sha256"]:
             raise ValueError(f"Planned input changed: {item['path']}; prepare a fresh plan")
@@ -136,7 +151,8 @@ def verify_plan(path):
             if sha256(artifact["path"]) != artifact["sha256"]:
                 raise ValueError(f"Planned case/checkpoint changed: {artifact['path']}")
         case = json.loads(Path(item["case"]["path"]).read_text())
-        if (case["source"] != records[item["source_clip_id"]] or case["inventory_sha256"] != plan["inventory_sha256"]
+        if (case.get("schema_version") != 2 or case["runtime_robot_assets"] != plan["runtime_robot_assets"]
+                or case["source"] != records[item["source_clip_id"]] or case["inventory_sha256"] != plan["inventory_sha256"]
                 or case["case_id"] != item["case_id"] or case["checkpoint_sha256"] != item["checkpoint"]["sha256"]
                 or case["checkpoint"] != item["checkpoint"]["path"] or case["policy"] != plan["policy"]
                 or case["source_inventory"] != plan["source_inventory"] or case["harness_sources"] != plan["harness_sources"]
@@ -157,9 +173,12 @@ def validate_native_report(quality, case):
             or quality.get("inventory_identity_sha256") != case["inventory_sha256"]
             or quality.get("source_inventory") != case.get("source_inventory")
             or quality.get("harness_sources") != case.get("harness_sources")
+            or quality.get("runtime_robot_assets") != case["runtime_robot_assets"]
             or quality.get("native_argv") != case["native_argv"]):
         raise ValueError("Native quality identity/status does not match this case")
+    verify_robot_assets(case["runtime_robot_assets"])
     runtime = quality["actual_native"]
+    validate_robot_report(runtime.get("robot_asset_config"), case["runtime_robot_assets"])
     if runtime.get("source_table_verification", {}).get("status") != "matched_selected_source":
         raise ValueError("Actual reference table was not checked against the selected source")
     retained = [quality["trajectory"]]
@@ -191,6 +210,10 @@ def validate_cpu_report(report, case):
             or report.get("inventory_identity_sha256") != case["inventory_sha256"]
             or report.get("harness_sources") != case["harness_sources"]):
         raise ValueError("CPU report identity does not match this planned case")
+    if report.get("runtime_robot_assets") != case["runtime_robot_assets"]:
+        raise ValueError("CPU report robot asset contract differs")
+    verify_robot_assets(case["runtime_robot_assets"])
+    validate_robot_report(report.get("robot_asset_config"), case["runtime_robot_assets"])
     if (report.get("num_envs") != 1 or report.get("actual_frames") != case["source"]["frames"]
             or report.get("actual_boundary_indices_inclusive") != [case["source"]["frames"] - 1]
             or report.get("actual_native_expert_ids") != [0] or report.get("expert_balancing_active") is not False
@@ -203,6 +226,12 @@ def validate_cpu_report(report, case):
     for item in artifacts:
         if sha256(item["path"]) != item["sha256"]:
             raise ValueError("CPU preflight retained asset changed")
+
+
+def validate_robot_report(actual, expected):
+    if actual != {"asset_root": expected["runtime_root"], "urdf_file": expected["urdf_file"], "usd_file": None,
+                  "manifest_sha256": expected["manifest"]["sha256"], "original_files": len(expected["files"])}:
+        raise ValueError("Reported parsed robot asset configuration differs from the sealed contract")
 
 
 def execute(args):
@@ -288,6 +317,8 @@ def main():
     plan.add_argument("--teacher-checkpoint", action="append", default=[], metavar="SKILL=LOCAL_PT")
     plan.add_argument("--assets-root", type=Path, default=Path("/data/assets"))
     plan.add_argument("--output", type=Path, required=True)
+    plan.add_argument("--runtime-robot-assets-contract", type=Path,
+                      help="Use a shared previously CPU-prepared contract; default copies into this new plan output")
     plan.add_argument("--source-clip-id", action="append", default=[])
     plan.add_argument("--max-steps", type=int, help="Override policy-step cap; default is source frame count")
     for action in ("preflight", "run"):

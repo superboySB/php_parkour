@@ -25,6 +25,7 @@ from types import SimpleNamespace
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 from scripts.research.eval_quality import METRICS, atomic_json, sha256
+from scripts.research.runtime_robot_assets import verify as verify_robot_assets, validate_config as validate_robot_config
 
 
 def fingerprint(path):
@@ -200,12 +201,17 @@ class SourceCoverageProbe:
                   "resample_on_motion_end": motion_cfg.resample_on_motion_end,
                   "control_dt_seconds": env.dt, "source_fps": record["fps"],
                   "phase_zero_source": "native eval reset; no time_steps assignment by harness"}
+        actual["robot_asset_config"] = validate_robot_config(SimpleNamespace(robot=env.robot_config), self.case["runtime_robot_assets"])
         if "source_motion" in record:
             actual["source_table_verification"] = verify_preprocessed_source(self.case, motion_cfg.motion_file)
         native_config = Path(self.loop.log_dir) / "holosoma_config.yaml"
         if native_config.exists():
             import yaml
             contents = yaml.safe_load(native_config.read_text())
+            robot_asset = contents["robot"]["asset"]
+            expected_asset = actual["robot_asset_config"]
+            if any(robot_asset.get(key) != expected_asset[key] for key in ("asset_root", "urdf_file", "usd_file")):
+                raise ValueError("Saved native YAML robot assets differ from the parsed runtime contract")
             terrain_obj = contents["terrain"]["terrain_term"]["obj_file_path"]
             assets = self.directory / "runtime-assets"
             assets.mkdir(exist_ok=True)
@@ -341,6 +347,7 @@ class SourceCoverageProbe:
                   "singleton_provenance_sha256": self.case.get("singleton_provenance_sha256"),
                   "inventory_identity_sha256": self.case["inventory_sha256"],
                   "source_inventory": self.case.get("source_inventory"), "harness_sources": self.case.get("harness_sources"),
+                  "runtime_robot_assets": self.case["runtime_robot_assets"],
                   "callback_target": "scripts.research.source_coverage_probe.SourceCoverageProbe",
                   "checkpoint": fingerprint(self.case["checkpoint"]),
                   "checkpoint_iteration": int(self.loop.current_learning_iteration),
@@ -388,6 +395,7 @@ def native_arguments(case):
     return ["--training.num-envs", "1", "--training.headless", "True", "--training.seed", "42",
             "--training.max-eval-steps", str(case["max_steps"]), "--training.export-onnx", "False",
             "--training.registry-name", case["registry_uri"],
+            "--robot.asset.asset-root", case["runtime_robot_assets"]["runtime_root"],
             "--training.preprocess-hook-kwargs", json.dumps({"add_onpath_obstacle": True, "num_variants": 1, "obstacle_seed": 42}),
             "--terrain.terrain-term.spawn.randomize-tiles", "True", "logger:disabled",
             "--logger.base-dir", str(Path(case["output"]) / "native"), "--logger.video.enabled", "True",
@@ -403,6 +411,7 @@ def recover_config(case, preprocess=False):
     if saved.algo._target_ != targets[case["policy"]]:
         raise ValueError(f"Checkpoint algorithm {saved.algo._target_!r} is not policy {case['policy']!r}")
     cfg = parse_saved_config_overrides(saved.get_eval_config(), native_arguments(case))
+    validate_robot_config(cfg, case["runtime_robot_assets"])
     if preprocess:
         cfg = apply_preprocess_hook(cfg)
     return saved, cfg
@@ -434,6 +443,8 @@ def cpu_preflight(case):
               "checkpoint": fingerprint(case["checkpoint"]), "source": case["source"],
               "registry_uri": case["registry_uri"], "inventory_identity_sha256": case["inventory_sha256"],
               "harness_sources": case.get("harness_sources"),
+              "runtime_robot_assets": case["runtime_robot_assets"],
+              "robot_asset_config": validate_robot_config(cfg, case["runtime_robot_assets"]),
               "planned_eval_only_warmup_cache_repair": native_alignment_formula()[1],
               "saved_algorithm_target": saved.algo._target_, "num_envs": cfg.training.num_envs,
               "actual_frames": motion.time_step_total, "actual_boundary_indices_inclusive": ends,
@@ -512,6 +523,9 @@ def main():
 
 
 def verify_case(case):
+    if case.get("schema_version") != 2:
+        raise ValueError("Prepare a new schema2 case with a sealed writable robot asset root")
+    verify_robot_assets(case["runtime_robot_assets"])
     if sha256(case["checkpoint"]) != case["checkpoint_sha256"]:
         raise ValueError("Checkpoint changed after plan creation")
     if sha256(case["singleton_provenance"]) != case["singleton_provenance_sha256"]:

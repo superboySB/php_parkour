@@ -1,0 +1,95 @@
+{
+  "schema_version": 1,
+  "status": "cpu_integration_passed_gpu_not_run",
+  "created_utc": "2026-10-10T09:55:53.941917+00:00",
+  "scope": "Future source-coverage only; no active official source/watch/raw changed. No simulator, DDS, CUDA job, SSH, installation, or training ran.",
+  "root_cause": {
+    "source": "thirdparty/holosoma/src/holosoma/holosoma/simulator/isaacsim/isaacsim.py",
+    "lines": [
+      344,
+      362
+    ],
+    "behavior": "URDF converter force-writes asset_root/converted_rank{LOCAL_RANK}_pid{pid}; source-only RO mount made the old default unwritable"
+  },
+  "solution": {
+    "new_helper": "scripts/research/runtime_robot_assets.py",
+    "selection_plan_case_schema": 2,
+    "asset_contract_schema": 1,
+    "runtime_root": "/outputs/posttrain-coverage/runtime-robot-assets/robots",
+    "original_file_count": 35,
+    "primary_urdf": "g1/main_mesh_arm_collision_halfspherehand.urdf",
+    "source_mount": "/workspace/php_parkour remains RO",
+    "mounts_added": 0,
+    "copy_timing": "CPU prepare only, once; missing/partial/changed copies fail closed, never repaired by overwriting",
+    "public_override": "--robot.asset.asset-root <sealed independent RW root>",
+    "allowed_new_files": "Only converted_rankN_pidN USD files and converter root config.yaml/.asset_hash; regular files/directories only",
+    "identity_binding": [
+      "host selection/input_identity",
+      "per-policy plan",
+      "per-case schema2 and native argv",
+      "five-source harness SHA",
+      "actual parsed config",
+      "CPU report and saved YAML",
+      "native environment robot_config and saved YAML",
+      "native quality JSON",
+      "shared manifest original source/copy SHA"
+    ],
+    "preserved": [
+      "native alignment formula",
+      "RNG and command clock",
+      "source frame cap",
+      "seed42",
+      "one variant",
+      "first-attempt terminal retention/no failed retry",
+      "official 631 image identity/IMAGE_CONTENTS fingerprint/TRAIN_TREE0093",
+      "four mount contract"
+    ]
+  },
+  "tests": [
+    {
+      "file": "runtime-robot-assets-integration-tests-initial.xml",
+      "name": "pytest",
+      "errors": "0",
+      "failures": "1",
+      "skipped": "0",
+      "tests": "111",
+      "time": "5.081",
+      "timestamp": "2026-10-10T09:51:58.599612+00:00",
+      "hostname": "dzp-MS-7E30"
+    },
+    {
+      "file": "runtime-robot-assets-integration-tests-final.xml",
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "116",
+      "time": "3.377",
+      "timestamp": "2026-10-10T09:54:01.974410+00:00",
+      "hostname": "dzp-MS-7E30"
+    }
+  ],
+  "test_command": [
+    "docker",
+    "exec",
+    "-e",
+    "CUDA_VISIBLE_DEVICES=",
+    "-e",
+    "OMP_NUM_THREADS=1",
+    "php-parkour-research",
+    "/opt/php/bin/train-python",
+    "-m",
+    "pytest",
+    "-q",
+    "tests/test_runtime_robot_assets.py",
+    "tests/test_source_coverage.py",
+    "tests/test_posttrain_coverage.py",
+    "--junitxml=/outputs/runtime-robot-assets-integration-tests-final.xml"
+  ],
+  "initial_failure": "Changed source URDF produced ET.ParseError instead of the expected ValueError; normalized malformed-URDF rejection, retained initial XML. The failed run is not an actual native initialization test.",
+  "limitations": [
+    "No claim of GPU initialization, USD conversion, physics, or skill quality from CPU tests.",
+    "Fresh RO-source one-clip CPU plan/preflight and later root-authorized GPU initialization are separate evidence.",
+    "Shared conversion root accumulates per-PID converter outputs; copied 35 originals remain immutable."
+  ]
+}
