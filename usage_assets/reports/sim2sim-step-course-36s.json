@@ -1,0 +1,113 @@
+{
+  "status": "completed",
+  "elapsed_seconds": 51.05461120302789,
+  "config": {
+    "models": "/data/assets/student",
+    "terrain": "step",
+    "mesh": null,
+    "model_sha256": {
+      "depth_backbone.onnx": "5b22466a218944e3b0ab0f4f82a910e3eec35375ee03e7fb94eb65fa88431b56",
+      "student.onnx": "e426c4206181d511b838c76efc48e43636299b76cb5a15183977011589931628"
+    },
+    "mesh_sha256": null,
+    "commands": [
+      6
+    ],
+    "duration": 36.0,
+    "seconds_per_command": 36.0,
+    "record_policy": true,
+    "settle_seconds": 3,
+    "startup_timeout": 180,
+    "seed": 42,
+    "gl": "egl",
+    "ort_threads": 1,
+    "egl_device_id": "0",
+    "wall_timeout": 933.0,
+    "scope": "native closed-loop rollout, not an assertion of skill success"
+  },
+  "simulation": {
+    "status": "completed",
+    "physics_steps": 20091,
+    "active_samples": 1801,
+    "policy_simulation_seconds": 36.006,
+    "simulation_seconds": 40.182,
+    "wall_seconds": 46.128700389992446,
+    "physics_fps_measured": 435.5422888970491,
+    "displacement_xy_m": [
+      52.22834697365761,
+      18.216242283815518
+    ],
+    "path_length_xy_m": 64.10973136190503,
+    "heading_change_deg": 77.81459768408558,
+    "minimum_pelvis_height_m": 0.6286526918411255,
+    "minimum_base_up_z": 0.25523024797439575,
+    "fall_detected": true,
+    "fall_criterion": "pelvis height < 0.4 m OR base upright cosine < 0.35 after gantry release",
+    "gantry_disabled_during_policy": true
+  },
+  "inference": {
+    "status": "completed",
+    "ticks": 1800,
+    "commands": [
+      {
+        "seconds": 0.006,
+        "code": 6,
+        "name": "forward"
+      }
+    ],
+    "control_period_simulation_seconds": 0.02,
+    "onnxruntime_intra_op_threads": 1,
+    "lifecycle": {
+      "damping_mode_active": true,
+      "policy_action_disabled": true,
+      "damping_command_sent": true,
+      "damping_kp_max": 0.0,
+      "damping_kd_min": 3.0,
+      "recording_toggle_and_stop_autosave": [
+        {
+          "file": "policy-recording/rollout_duration36.0s_motion.npz",
+          "frames": 1800,
+          "fps": 50,
+          "qpos_shape": [
+            1800,
+            36
+          ],
+          "vel_cmd_shape": [
+            1800,
+            15
+          ],
+          "qpos_layout": "xyzw quaternion, xyz root, 29 joints; inference recording format"
+        }
+      ]
+    },
+    "transport": "official Unitree SDK DDS on lo; official depth shared memory",
+    "input": "automated injected commands"
+  },
+  "videos": [
+    "video/episode_0_1791600075.mp4"
+  ],
+  "quality_verified": false,
+  "obstacle_course_completion_verified": false,
+  "video_checks": [
+    {
+      "video": "video/episode_0_1791600075.mp4",
+      "probe": {
+        "programs": [],
+        "streams": [
+          {
+            "codec_name": "h264",
+            "width": 640,
+            "height": 360,
+            "avg_frame_rate": "50/1",
+            "nb_frames": "2010"
+          }
+        ],
+        "format": {
+          "duration": "40.200000"
+        }
+      },
+      "thumbnail": "video/episode_0_1791600075.png"
+    }
+  ],
+  "survival_passed": false
+}

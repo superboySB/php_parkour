@@ -9,6 +9,11 @@
 # Source it, don't execute it:
 #   source scripts/source_isaacsim_setup.sh
 
+if [[ "${PHP_DOCKER:-0}" == 1 ]]; then
+    source /opt/php/bin/activate train
+    return
+fi
+
 _resolve_script_dir() {
   local source="${BASH_SOURCE[0]:-${(%):-%x}}"
   while [ -h "$source" ]; do

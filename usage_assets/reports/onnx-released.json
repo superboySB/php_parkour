@@ -1,0 +1,1458 @@
+{
+  "status": "passed",
+  "scope": "ONNX structure, metadata and synthetic inference; not locomotion quality",
+  "seed": 2026,
+  "python": "3.12.3",
+  "numpy": "2.3.5",
+  "onnx": "1.23.2",
+  "onnxruntime": "1.31.0",
+  "models": [
+    {
+      "path": "/data/assets/student/depth_backbone.onnx",
+      "bytes": 105240,
+      "sha256": "5b22466a218944e3b0ab0f4f82a910e3eec35375ee03e7fb94eb65fa88431b56",
+      "inputs": [
+        {
+          "name": "depth_image",
+          "shape": [
+            1,
+            58,
+            87
+          ],
+          "dtype": "tensor(float)"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "depth_latent",
+          "shape": [
+            1,
+            32
+          ],
+          "dtype": "tensor(float)"
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "path": "/data/assets/student/student.onnx",
+      "bytes": 13841549,
+      "sha256": "e426c4206181d511b838c76efc48e43636299b76cb5a15183977011589931628",
+      "inputs": [
+        {
+          "name": "obs",
+          "shape": [
+            1,
+            140
+          ],
+          "dtype": "tensor(float)"
+        },
+        {
+          "name": "time_step",
+          "shape": [
+            1,
+            1
+          ],
+          "dtype": "tensor(float)"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "actions",
+          "shape": [
+            1,
+            29
+          ],
+          "dtype": "tensor(float)"
+        },
+        {
+          "name": "joint_pos",
+          "shape": [
+            1,
+            29
+          ],
+          "dtype": "tensor(float)"
+        },
+        {
+          "name": "joint_vel",
+          "shape": [
+            1,
+            29
+          ],
+          "dtype": "tensor(float)"
+        },
+        {
+          "name": "body_pos_w",
+          "shape": [
+            1,
+            32,
+            3
+          ],
+          "dtype": "tensor(float)"
+        },
+        {
+          "name": "body_quat_w",
+          "shape": [
+            1,
+            32,
+            4
+          ],
+          "dtype": "tensor(float)"
+        },
+        {
+          "name": "body_lin_vel_w",
+          "shape": [
+            1,
+            32,
+            3
+          ],
+          "dtype": "tensor(float)"
+        },
+        {
+          "name": "body_ang_vel_w",
+          "shape": [
+            1,
+            32,
+            3
+          ],
+          "dtype": "tensor(float)"
+        }
+      ],
+      "metadata": {
+        "joint_names": "left_hip_pitch_joint,left_hip_roll_joint,left_hip_yaw_joint,left_knee_joint,left_ankle_pitch_joint,left_ankle_roll_joint,right_hip_pitch_joint,right_hip_roll_joint,right_hip_yaw_joint,right_knee_joint,right_ankle_pitch_joint,right_ankle_roll_joint,waist_yaw_joint,waist_roll_joint,waist_pitch_joint,left_shoulder_pitch_joint,left_shoulder_roll_joint,left_shoulder_yaw_joint,left_elbow_joint,left_wrist_roll_joint,left_wrist_pitch_joint,left_wrist_yaw_joint,right_shoulder_pitch_joint,right_shoulder_roll_joint,right_shoulder_yaw_joint,right_elbow_joint,right_wrist_roll_joint,right_wrist_pitch_joint,right_wrist_yaw_joint",
+        "action_scale": "1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000",
+        "default_joint_pos": "-0.312,0.000,0.000,0.669,-0.363,0.000,-0.312,0.000,0.000,0.669,-0.363,0.000,0.000,0.000,0.000,0.200,0.200,0.000,0.600,0.000,0.000,0.000,0.200,-0.200,0.000,0.600,0.000,0.000,0.000",
+        "joint_stiffness": "40.179,99.098,40.179,99.098,28.501,28.501,40.179,99.098,40.179,99.098,28.501,28.501,40.179,28.501,28.501,14.251,14.251,14.251,14.251,14.251,16.778,16.778,14.251,14.251,14.251,14.251,14.251,16.778,16.778",
+        "joint_damping": "2.558,6.309,2.558,6.309,1.814,1.814,2.558,6.309,2.558,6.309,1.814,1.814,2.558,1.814,1.814,0.907,0.907,0.907,0.907,0.907,1.068,1.068,0.907,0.907,0.907,0.907,0.907,1.068,1.068",
+        "kp": "40.179,99.098,40.179,99.098,28.501,28.501,40.179,99.098,40.179,99.098,28.501,28.501,40.179,28.501,28.501,14.251,14.251,14.251,14.251,14.251,16.778,16.778,14.251,14.251,14.251,14.251,14.251,16.778,16.778",
+        "kd": "2.558,6.309,2.558,6.309,1.814,1.814,2.558,6.309,2.558,6.309,1.814,1.814,2.558,1.814,1.814,0.907,0.907,0.907,0.907,0.907,1.068,1.068,0.907,0.907,0.907,0.907,0.907,1.068,1.068",
+        "command_names": "motion_command",
+        "observation_names": "robot_anchor_projected_gravity,base_ang_vel,dof_pos,dof_vel,actions,velocity_command,placeholder",
+        "anchor_body_name": "torso_link",
+        "body_names": "pelvis,left_hip_roll_link,left_knee_link,left_ankle_roll_link,right_hip_roll_link,right_knee_link,right_ankle_roll_link,torso_link,left_shoulder_roll_link,left_elbow_link,left_wrist_yaw_link,right_shoulder_roll_link,right_elbow_link,right_wrist_yaw_link"
+      }
+    }
+  ],
+  "cases": [
+    {
+      "depth_case": "zero_depth",
+      "command_index": 0,
+      "command": "stand",
+      "deployed_command": true,
+      "seconds": 0.00038918701466172934,
+      "action_min": -0.22774209082126617,
+      "action_max": 0.42154213786125183,
+      "action_l2": 1.0641945600509644,
+      "output_shapes": [
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          4
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          3
+        ]
+      ]
+    },
+    {
+      "depth_case": "zero_depth",
+      "command_index": 1,
+      "command": "low_forward",
+      "deployed_command": true,
+      "seconds": 0.00015279301442205906,
+      "action_min": -0.24250130355358124,
+      "action_max": 0.5519362688064575,
+      "action_l2": 0.9541880488395691,
+      "output_shapes": [
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          4
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          3
+        ]
+      ]
+    },
+    {
+      "depth_case": "zero_depth",
+      "command_index": 2,
+      "command": "low_left_45",
+      "deployed_command": true,
+      "seconds": 0.00011839193757623434,
+      "action_min": -0.46342313289642334,
+      "action_max": 0.394085168838501,
+      "action_l2": 1.0503650903701782,
+      "output_shapes": [
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          4
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          3
+        ]
+      ]
+    },
+    {
+      "depth_case": "zero_depth",
+      "command_index": 3,
+      "command": "low_left_90",
+      "deployed_command": true,
+      "seconds": 0.00011538201943039894,
+      "action_min": -0.4276900887489319,
+      "action_max": 0.3294929563999176,
+      "action_l2": 0.9373816847801208,
+      "output_shapes": [
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          4
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          3
+        ]
+      ]
+    },
+    {
+      "depth_case": "zero_depth",
+      "command_index": 4,
+      "command": "low_right_45",
+      "deployed_command": true,
+      "seconds": 0.0001152621116489172,
+      "action_min": -0.5665292739868164,
+      "action_max": 0.3384181559085846,
+      "action_l2": 1.1493446826934814,
+      "output_shapes": [
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          4
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          3
+        ]
+      ]
+    },
+    {
+      "depth_case": "zero_depth",
+      "command_index": 5,
+      "command": "low_right_90",
+      "deployed_command": true,
+      "seconds": 0.00011788203846663237,
+      "action_min": -0.5116082429885864,
+      "action_max": 0.4006257653236389,
+      "action_l2": 1.2389718294143677,
+      "output_shapes": [
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          4
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          3
+        ]
+      ]
+    },
+    {
+      "depth_case": "zero_depth",
+      "command_index": 6,
+      "command": "high_forward",
+      "deployed_command": true,
+      "seconds": 0.00011394207831472158,
+      "action_min": -0.5011360049247742,
+      "action_max": 0.49514681100845337,
+      "action_l2": 1.0101211071014404,
+      "output_shapes": [
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          4
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          3
+        ]
+      ]
+    },
+    {
+      "depth_case": "zero_depth",
+      "command_index": 7,
+      "command": "high_left_45",
+      "deployed_command": true,
+      "seconds": 0.00011372193694114685,
+      "action_min": -0.4361286759376526,
+      "action_max": 0.4328882694244385,
+      "action_l2": 1.1403850317001343,
+      "output_shapes": [
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          4
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          3
+        ]
+      ]
+    },
+    {
+      "depth_case": "zero_depth",
+      "command_index": 8,
+      "command": "high_left_90",
+      "deployed_command": true,
+      "seconds": 0.00011411099694669247,
+      "action_min": -0.43240833282470703,
+      "action_max": 0.5234400033950806,
+      "action_l2": 1.1554721593856812,
+      "output_shapes": [
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          4
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          3
+        ]
+      ]
+    },
+    {
+      "depth_case": "zero_depth",
+      "command_index": 9,
+      "command": "high_right_45",
+      "deployed_command": true,
+      "seconds": 0.00011664198245853186,
+      "action_min": -0.4668809175491333,
+      "action_max": 0.3423551321029663,
+      "action_l2": 1.1890918016433716,
+      "output_shapes": [
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          4
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          3
+        ]
+      ]
+    },
+    {
+      "depth_case": "zero_depth",
+      "command_index": 10,
+      "command": "high_right_90",
+      "deployed_command": true,
+      "seconds": 0.00011521205306053162,
+      "action_min": -0.3450798988342285,
+      "action_max": 0.4555404484272003,
+      "action_l2": 1.1712851524353027,
+      "output_shapes": [
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          4
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          3
+        ]
+      ]
+    },
+    {
+      "depth_case": "zero_depth",
+      "command_index": 11,
+      "command": "back",
+      "deployed_command": true,
+      "seconds": 0.00011452194303274155,
+      "action_min": -0.43475252389907837,
+      "action_max": 0.38392460346221924,
+      "action_l2": 1.0673710107803345,
+      "output_shapes": [
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          4
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          3
+        ]
+      ]
+    },
+    {
+      "depth_case": "zero_depth",
+      "command_index": 12,
+      "command": "reserved_12",
+      "deployed_command": false,
+      "seconds": 0.00011248199734836817,
+      "action_min": -0.43060779571533203,
+      "action_max": 0.39085298776626587,
+      "action_l2": 1.0504308938980103,
+      "output_shapes": [
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          4
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          3
+        ]
+      ]
+    },
+    {
+      "depth_case": "zero_depth",
+      "command_index": 13,
+      "command": "reserved_13",
+      "deployed_command": false,
+      "seconds": 0.0001156519865617156,
+      "action_min": -0.4170411229133606,
+      "action_max": 0.3950343728065491,
+      "action_l2": 1.063693642616272,
+      "output_shapes": [
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          4
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          3
+        ]
+      ]
+    },
+    {
+      "depth_case": "zero_depth",
+      "command_index": 14,
+      "command": "reserved_14",
+      "deployed_command": false,
+      "seconds": 0.00011200201697647572,
+      "action_min": -0.423659086227417,
+      "action_max": 0.3885911703109741,
+      "action_l2": 1.042604923248291,
+      "output_shapes": [
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          4
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          3
+        ]
+      ]
+    },
+    {
+      "depth_case": "random_normalized_depth",
+      "command_index": 0,
+      "command": "stand",
+      "deployed_command": true,
+      "seconds": 0.00011782196816056967,
+      "action_min": -0.25588059425354004,
+      "action_max": 0.27691254019737244,
+      "action_l2": 0.7959473133087158,
+      "output_shapes": [
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          4
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          3
+        ]
+      ]
+    },
+    {
+      "depth_case": "random_normalized_depth",
+      "command_index": 1,
+      "command": "low_forward",
+      "deployed_command": true,
+      "seconds": 0.00011411204468458891,
+      "action_min": -0.23482729494571686,
+      "action_max": 0.436784565448761,
+      "action_l2": 0.7820389270782471,
+      "output_shapes": [
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          4
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          3
+        ]
+      ]
+    },
+    {
+      "depth_case": "random_normalized_depth",
+      "command_index": 2,
+      "command": "low_left_45",
+      "deployed_command": true,
+      "seconds": 0.00011269096285104752,
+      "action_min": -0.391828715801239,
+      "action_max": 0.3581930696964264,
+      "action_l2": 0.9497097134590149,
+      "output_shapes": [
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          4
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          3
+        ]
+      ]
+    },
+    {
+      "depth_case": "random_normalized_depth",
+      "command_index": 3,
+      "command": "low_left_90",
+      "deployed_command": true,
+      "seconds": 0.00011385197285562754,
+      "action_min": -0.46323373913764954,
+      "action_max": 0.3534110188484192,
+      "action_l2": 0.9747011661529541,
+      "output_shapes": [
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          4
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          3
+        ]
+      ]
+    },
+    {
+      "depth_case": "random_normalized_depth",
+      "command_index": 4,
+      "command": "low_right_45",
+      "deployed_command": true,
+      "seconds": 0.00011296197772026062,
+      "action_min": -0.5463663339614868,
+      "action_max": 0.3649986982345581,
+      "action_l2": 1.0756275653839111,
+      "output_shapes": [
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          4
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          3
+        ]
+      ]
+    },
+    {
+      "depth_case": "random_normalized_depth",
+      "command_index": 5,
+      "command": "low_right_90",
+      "deployed_command": true,
+      "seconds": 0.00011308200191706419,
+      "action_min": -0.41708528995513916,
+      "action_max": 0.39313992857933044,
+      "action_l2": 1.0884712934494019,
+      "output_shapes": [
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          4
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          3
+        ]
+      ]
+    },
+    {
+      "depth_case": "random_normalized_depth",
+      "command_index": 6,
+      "command": "high_forward",
+      "deployed_command": true,
+      "seconds": 0.00011257093865424395,
+      "action_min": -0.36513933539390564,
+      "action_max": 0.4246550500392914,
+      "action_l2": 0.8693385124206543,
+      "output_shapes": [
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          4
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          3
+        ]
+      ]
+    },
+    {
+      "depth_case": "random_normalized_depth",
+      "command_index": 7,
+      "command": "high_left_45",
+      "deployed_command": true,
+      "seconds": 0.00011230201926082373,
+      "action_min": -0.37751370668411255,
+      "action_max": 0.3506021499633789,
+      "action_l2": 0.8537039756774902,
+      "output_shapes": [
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          4
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          3
+        ]
+      ]
+    },
+    {
+      "depth_case": "random_normalized_depth",
+      "command_index": 8,
+      "command": "high_left_90",
+      "deployed_command": true,
+      "seconds": 0.00011167197953909636,
+      "action_min": -0.4258272349834442,
+      "action_max": 0.3943614363670349,
+      "action_l2": 1.0408722162246704,
+      "output_shapes": [
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          4
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          3
+        ]
+      ]
+    },
+    {
+      "depth_case": "random_normalized_depth",
+      "command_index": 9,
+      "command": "high_right_45",
+      "deployed_command": true,
+      "seconds": 0.00011117197573184967,
+      "action_min": -0.5324923396110535,
+      "action_max": 0.5433335900306702,
+      "action_l2": 1.3048081398010254,
+      "output_shapes": [
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          4
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          3
+        ]
+      ]
+    },
+    {
+      "depth_case": "random_normalized_depth",
+      "command_index": 10,
+      "command": "high_right_90",
+      "deployed_command": true,
+      "seconds": 0.00011450203601270914,
+      "action_min": -0.5023813843727112,
+      "action_max": 0.4171276092529297,
+      "action_l2": 1.247618317604065,
+      "output_shapes": [
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          4
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          3
+        ]
+      ]
+    },
+    {
+      "depth_case": "random_normalized_depth",
+      "command_index": 11,
+      "command": "back",
+      "deployed_command": true,
+      "seconds": 0.00011184194590896368,
+      "action_min": -0.3777236342430115,
+      "action_max": 0.3567030727863312,
+      "action_l2": 0.9373894333839417,
+      "output_shapes": [
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          4
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          3
+        ]
+      ]
+    },
+    {
+      "depth_case": "random_normalized_depth",
+      "command_index": 12,
+      "command": "reserved_12",
+      "deployed_command": false,
+      "seconds": 0.0001295220572501421,
+      "action_min": -0.3696568012237549,
+      "action_max": 0.3552680015563965,
+      "action_l2": 0.9284235239028931,
+      "output_shapes": [
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          4
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          3
+        ]
+      ]
+    },
+    {
+      "depth_case": "random_normalized_depth",
+      "command_index": 13,
+      "command": "reserved_13",
+      "deployed_command": false,
+      "seconds": 0.00012587197124958038,
+      "action_min": -0.3598639965057373,
+      "action_max": 0.3681009113788605,
+      "action_l2": 0.941789448261261,
+      "output_shapes": [
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          4
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          3
+        ]
+      ]
+    },
+    {
+      "depth_case": "random_normalized_depth",
+      "command_index": 14,
+      "command": "reserved_14",
+      "deployed_command": false,
+      "seconds": 0.00011410203296691179,
+      "action_min": -0.3543803095817566,
+      "action_max": 0.3521537780761719,
+      "action_l2": 0.9397855997085571,
+      "output_shapes": [
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          4
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          3
+        ]
+      ]
+    }
+  ]
+}

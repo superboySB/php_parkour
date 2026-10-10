@@ -1,0 +1,15 @@
+{
+  "program": "import datetime,json,os,subprocess,time\nfrom pathlib import Path\nroot=Path(\"/outputs/training-acceptance\"); root.mkdir(parents=True,exist_ok=True)\nstatus=root/\"driver-status.json\"\nstarted=datetime.datetime.now(datetime.timezone.utc).isoformat(); timer=time.monotonic()\nrecord={\"status\":\"running\",\"started_utc\":started,\"profile\":\"smoke\",\"scope\":\"execution acceptance, not convergence\",\"command\":[\"bash\",\"scripts/research/run_training_acceptance.sh\"]}\nstatus.write_text(json.dumps(record,indent=2)+\"\\n\")\nwith (root/\"driver.log\").open(\"w\") as log:\n result=subprocess.run(record[\"command\"],cwd=\"/workspace/php_parkour\",env=os.environ|{\"PHP_ACCEPTANCE_OUTPUT\":str(root),\"NGPUS\":\"1\"},stdout=log,stderr=subprocess.STDOUT)\nrecord.update(status=\"passed\" if result.returncode==0 else \"failed\",returncode=result.returncode,finished_utc=datetime.datetime.now(datetime.timezone.utc).isoformat(),elapsed_seconds=time.monotonic()-timer)\nstatus.write_text(json.dumps(record,indent=2)+\"\\n\")\nraise SystemExit(result.returncode)\n",
+  "deployment_source_tree_sha256": "cbdb6ef45a8b19a46ee968d1c6f57d7952de983b1980829ef6847b290a3ac6d9",
+  "remote_image_id": "sha256:707065aebca88043d1ca4742d3112e7f3cdcf5148b09eff4333f58e0d1e967b0",
+  "gpu": {
+    "index": 1,
+    "minor_number": "6",
+    "uuid": "GPU-27eb1141-ab74-ebdd-42c2-6549fb7253e5",
+    "name": "NVIDIA RTX PRO 5000 72GB Blackwell",
+    "memory_used_mib": 1.0,
+    "utilization_percent": 0.0,
+    "pids": [],
+    "idle": true
+  }
+}

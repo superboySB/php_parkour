@@ -1,0 +1,1416 @@
+{
+  "schema_version": 1,
+  "status": "planned",
+  "seed": 42,
+  "image_id": "unrecorded; record Docker image ID externally",
+  "source_matrix": "/outputs/motion-matching/matrix.json",
+  "source_matrix_sha256": "ed413845f4b82156964e11ad6ee3faca30e3c0b10dbfdc295a8284f9ee3308ed",
+  "model_sha256": {
+    "depth_backbone.onnx": "5b22466a218944e3b0ab0f4f82a910e3eec35375ee03e7fb94eb65fa88431b56",
+    "student.onnx": "e426c4206181d511b838c76efc48e43636299b76cb5a15183977011589931628"
+  },
+  "scope": "17 scenarios, exactly one complete generated geometry per scenario; constant forward command; not 629 policy rollouts or reference-motion replay",
+  "seconds_per_scenario": 10.0,
+  "planned_scenarios": 17,
+  "selections": [
+    {
+      "scenario": "random_locomotion",
+      "configuration": "cfg0035_stand_2.0s_run_forward_1.2s_stand_2.0s",
+      "configuration_index": 35,
+      "available_configurations": 100,
+      "reference_clip_seconds": 5.2,
+      "reference_steps": [
+        {
+          "type": "locomotion",
+          "speed": 0.0,
+          "angle": 0.0,
+          "duration": 2.0,
+          "vel_cmd_idx": 0
+        },
+        {
+          "type": "locomotion",
+          "speed": 2.2,
+          "angle": 0.0,
+          "duration": 1.2,
+          "vel_cmd_idx": 6
+        },
+        {
+          "type": "locomotion",
+          "speed": 0.0,
+          "angle": 0.0,
+          "duration": 2.0,
+          "vel_cmd_idx": 0
+        }
+      ],
+      "terrain_vertices": 80,
+      "mesh": "/workspace/php_parkour/outputs/research/motion-matching/scenarios/random_locomotion/cfg0035_stand_2.0s_run_forward_1.2s_stand_2.0s_terrain.obj",
+      "mesh_sha256": "354c04a1740902aa401aac2b8227b71a8c88afce5d3821ffb6c318de77d10ba7",
+      "command": 6,
+      "matching_released_training_bundle_available": true,
+      "quality_verified": false,
+      "obstacle_course_completion_verified": false,
+      "output": "/outputs/sim2sim/scene-matrix-final/random_locomotion",
+      "launch": [
+        "/isaac-sim/kit/python/bin/python3",
+        "/workspace/php_parkour/scripts/research/sim2sim.py",
+        "--models",
+        "/data/assets/student",
+        "--terrain",
+        "custom",
+        "--mesh",
+        "/workspace/php_parkour/outputs/research/motion-matching/scenarios/random_locomotion/cfg0035_stand_2.0s_run_forward_1.2s_stand_2.0s_terrain.obj",
+        "--commands",
+        "6",
+        "--seconds-per-command",
+        "10.0",
+        "--seed",
+        "42",
+        "--gl",
+        "egl",
+        "--output",
+        "/outputs/sim2sim/scene-matrix-final/random_locomotion"
+      ]
+    },
+    {
+      "scenario": "low_speed_step",
+      "configuration": "forward_walk0.5s_step0s",
+      "configuration_index": 0,
+      "available_configurations": 56,
+      "reference_clip_seconds": 7.28,
+      "reference_steps": [
+        {
+          "type": "segment",
+          "speed": 0.0,
+          "angle": 0.0,
+          "duration": 1.0,
+          "vel_cmd_idx": 0
+        },
+        {
+          "type": "locomotion",
+          "speed": 0.8,
+          "angle": 0.0,
+          "duration": 0.5,
+          "vel_cmd_idx": 1
+        },
+        {
+          "type": "skill",
+          "skill_name": "step",
+          "vel_cmd_idx": 1
+        },
+        {
+          "type": "locomotion",
+          "speed": 0.8,
+          "angle": 0.0,
+          "duration": 1.1872700594236814,
+          "vel_cmd_idx": 1
+        },
+        {
+          "type": "segment",
+          "speed": 0.0,
+          "angle": 0.0,
+          "duration": 2.5,
+          "vel_cmd_idx": 0
+        }
+      ],
+      "terrain_vertices": 16,
+      "mesh": "/workspace/php_parkour/outputs/research/motion-matching/scenarios/low_speed_step/forward_walk0.5s_step0s_terrain.obj",
+      "mesh_sha256": "dce4eacd1b9df5b8614c2b37242f5c826a72872c10acc745b1e91935779d2a21",
+      "command": 1,
+      "matching_released_training_bundle_available": true,
+      "quality_verified": false,
+      "obstacle_course_completion_verified": false,
+      "output": "/outputs/sim2sim/scene-matrix-final/low_speed_step",
+      "launch": [
+        "/isaac-sim/kit/python/bin/python3",
+        "/workspace/php_parkour/scripts/research/sim2sim.py",
+        "--models",
+        "/data/assets/student",
+        "--terrain",
+        "custom",
+        "--mesh",
+        "/workspace/php_parkour/outputs/research/motion-matching/scenarios/low_speed_step/forward_walk0.5s_step0s_terrain.obj",
+        "--commands",
+        "1",
+        "--seconds-per-command",
+        "10.0",
+        "--seed",
+        "42",
+        "--gl",
+        "egl",
+        "--output",
+        "/outputs/sim2sim/scene-matrix-final/low_speed_step"
+      ]
+    },
+    {
+      "scenario": "high_speed_step",
+      "configuration": "run_forward_0.6s_step0s",
+      "configuration_index": 0,
+      "available_configurations": 60,
+      "reference_clip_seconds": 7.72,
+      "reference_steps": [
+        {
+          "type": "segment",
+          "speed": 0.0,
+          "angle": 0.0,
+          "duration": 1.0,
+          "vel_cmd_idx": 0
+        },
+        {
+          "type": "locomotion",
+          "speed": 2.2,
+          "angle": 0.0,
+          "duration": 1,
+          "vel_cmd_idx": 6
+        },
+        {
+          "type": "locomotion",
+          "speed": 2.2,
+          "angle": 0.0,
+          "duration": 0.6,
+          "vel_cmd_idx": 6
+        },
+        {
+          "type": "skill",
+          "skill_name": "step_high_speed",
+          "vel_cmd_idx": 6
+        },
+        {
+          "type": "locomotion",
+          "speed": 2.2,
+          "angle": 0.0,
+          "duration": 1.1872700594236814,
+          "vel_cmd_idx": 6
+        },
+        {
+          "type": "segment",
+          "speed": 0.0,
+          "angle": 0.0,
+          "duration": 2.5,
+          "vel_cmd_idx": 0
+        }
+      ],
+      "terrain_vertices": 16,
+      "mesh": "/workspace/php_parkour/outputs/research/motion-matching/scenarios/high_speed_step/run_forward_0.6s_step0s_terrain.obj",
+      "mesh_sha256": "aa9b612e9a9e86a79d2d6a781f582660ee6a9aef450fb0d50d30388913e1ba94",
+      "command": 6,
+      "matching_released_training_bundle_available": true,
+      "quality_verified": false,
+      "obstacle_course_completion_verified": false,
+      "output": "/outputs/sim2sim/scene-matrix-final/high_speed_step",
+      "launch": [
+        "/isaac-sim/kit/python/bin/python3",
+        "/workspace/php_parkour/scripts/research/sim2sim.py",
+        "--models",
+        "/data/assets/student",
+        "--terrain",
+        "custom",
+        "--mesh",
+        "/workspace/php_parkour/outputs/research/motion-matching/scenarios/high_speed_step/run_forward_0.6s_step0s_terrain.obj",
+        "--commands",
+        "6",
+        "--seconds-per-command",
+        "10.0",
+        "--seed",
+        "42",
+        "--gl",
+        "egl",
+        "--output",
+        "/outputs/sim2sim/scene-matrix-final/high_speed_step"
+      ]
+    },
+    {
+      "scenario": "low_speed_climb_58",
+      "configuration": "forward_walk0.5s_plat0s",
+      "configuration_index": 0,
+      "available_configurations": 40,
+      "reference_clip_seconds": 11.4,
+      "reference_steps": [
+        {
+          "type": "segment",
+          "speed": 0.0,
+          "angle": 0.0,
+          "duration": 1.0,
+          "vel_cmd_idx": 0
+        },
+        {
+          "type": "locomotion",
+          "speed": 0.8,
+          "angle": 0.0,
+          "duration": 1,
+          "vel_cmd_idx": 1
+        },
+        {
+          "type": "locomotion",
+          "speed": 0.8,
+          "angle": 0.0,
+          "duration": 0.5,
+          "vel_cmd_idx": 1
+        },
+        {
+          "type": "skill",
+          "skill_name": "climb_58_up",
+          "vel_cmd_idx": 1
+        },
+        {
+          "type": "skill",
+          "skill_name": "climb_58_down",
+          "vel_cmd_idx": 1
+        },
+        {
+          "type": "locomotion",
+          "speed": 0.8,
+          "angle": 0.0,
+          "duration": 1.1872700594236814,
+          "vel_cmd_idx": 1
+        },
+        {
+          "type": "segment",
+          "speed": 0.0,
+          "angle": 0.0,
+          "duration": 2.5,
+          "vel_cmd_idx": 0
+        }
+      ],
+      "terrain_vertices": 24,
+      "mesh": "/workspace/php_parkour/outputs/research/motion-matching/scenarios/low_speed_climb_58/forward_walk0.5s_plat0s_terrain.obj",
+      "mesh_sha256": "36a9bf749b161e80fc98e4ba7988bc7cf44a0f290706bf481607629eb68c6518",
+      "command": 1,
+      "matching_released_training_bundle_available": false,
+      "quality_verified": false,
+      "obstacle_course_completion_verified": false,
+      "output": "/outputs/sim2sim/scene-matrix-final/low_speed_climb_58",
+      "launch": [
+        "/isaac-sim/kit/python/bin/python3",
+        "/workspace/php_parkour/scripts/research/sim2sim.py",
+        "--models",
+        "/data/assets/student",
+        "--terrain",
+        "custom",
+        "--mesh",
+        "/workspace/php_parkour/outputs/research/motion-matching/scenarios/low_speed_climb_58/forward_walk0.5s_plat0s_terrain.obj",
+        "--commands",
+        "1",
+        "--seconds-per-command",
+        "10.0",
+        "--seed",
+        "42",
+        "--gl",
+        "egl",
+        "--output",
+        "/outputs/sim2sim/scene-matrix-final/low_speed_climb_58"
+      ]
+    },
+    {
+      "scenario": "high_speed_climb_58",
+      "configuration": "run_forward_0.6s_step0.1s",
+      "configuration_index": 0,
+      "available_configurations": 40,
+      "reference_clip_seconds": 11.34,
+      "reference_steps": [
+        {
+          "type": "segment",
+          "speed": 0.0,
+          "angle": 0.0,
+          "duration": 1.0,
+          "vel_cmd_idx": 0
+        },
+        {
+          "type": "locomotion",
+          "speed": 2.2,
+          "angle": 0.0,
+          "duration": 1,
+          "vel_cmd_idx": 6
+        },
+        {
+          "type": "locomotion",
+          "speed": 2.2,
+          "angle": 0.0,
+          "duration": 0.6,
+          "vel_cmd_idx": 6
+        },
+        {
+          "type": "skill",
+          "skill_name": "climb_58_up",
+          "vel_cmd_idx": 6
+        },
+        {
+          "type": "locomotion",
+          "speed": 2.2,
+          "angle": 0.0,
+          "duration": 0.1,
+          "vel_cmd_idx": 6
+        },
+        {
+          "type": "skill",
+          "skill_name": "climb_58_down",
+          "vel_cmd_idx": 6
+        },
+        {
+          "type": "locomotion",
+          "speed": 2.2,
+          "angle": 0.0,
+          "duration": 1.1872700594236814,
+          "vel_cmd_idx": 6
+        },
+        {
+          "type": "segment",
+          "speed": 0.0,
+          "angle": 0.0,
+          "duration": 2.5,
+          "vel_cmd_idx": 0
+        }
+      ],
+      "terrain_vertices": 24,
+      "mesh": "/workspace/php_parkour/outputs/research/motion-matching/scenarios/high_speed_climb_58/run_forward_0.6s_step0.1s_terrain.obj",
+      "mesh_sha256": "0f6d219f6886ae6683c4e6ee759ee49f6c05dfe2157795f7db15f7a7124688d1",
+      "command": 6,
+      "matching_released_training_bundle_available": false,
+      "quality_verified": false,
+      "obstacle_course_completion_verified": false,
+      "output": "/outputs/sim2sim/scene-matrix-final/high_speed_climb_58",
+      "launch": [
+        "/isaac-sim/kit/python/bin/python3",
+        "/workspace/php_parkour/scripts/research/sim2sim.py",
+        "--models",
+        "/data/assets/student",
+        "--terrain",
+        "custom",
+        "--mesh",
+        "/workspace/php_parkour/outputs/research/motion-matching/scenarios/high_speed_climb_58/run_forward_0.6s_step0.1s_terrain.obj",
+        "--commands",
+        "6",
+        "--seconds-per-command",
+        "10.0",
+        "--seed",
+        "42",
+        "--gl",
+        "egl",
+        "--output",
+        "/outputs/sim2sim/scene-matrix-final/high_speed_climb_58"
+      ]
+    },
+    {
+      "scenario": "low_speed_climb_76",
+      "configuration": "forward_walk0.6s_step0.7s",
+      "configuration_index": 0,
+      "available_configurations": 40,
+      "reference_clip_seconds": 15.3,
+      "reference_steps": [
+        {
+          "type": "segment",
+          "speed": 0.0,
+          "angle": 0.0,
+          "duration": 1.0,
+          "vel_cmd_idx": 0
+        },
+        {
+          "type": "locomotion",
+          "speed": 0.8,
+          "angle": 0.0,
+          "duration": 1,
+          "vel_cmd_idx": 1
+        },
+        {
+          "type": "locomotion",
+          "speed": 0.8,
+          "angle": 0.0,
+          "duration": 0.6,
+          "vel_cmd_idx": 1
+        },
+        {
+          "type": "locomotion",
+          "speed": 0,
+          "angle": 0,
+          "duration": 0.4,
+          "vel_cmd_idx": 1
+        },
+        {
+          "type": "skill",
+          "skill_name": "climb_76_up",
+          "vel_cmd_idx": 1
+        },
+        {
+          "type": "locomotion",
+          "speed": 0.8,
+          "angle": 0.0,
+          "duration": 0.7,
+          "vel_cmd_idx": 1
+        },
+        {
+          "type": "skill",
+          "skill_name": "climb_76_down",
+          "vel_cmd_idx": 1
+        },
+        {
+          "type": "locomotion",
+          "speed": 0.8,
+          "angle": 0.0,
+          "duration": 1.749080237694725,
+          "vel_cmd_idx": 1
+        },
+        {
+          "type": "segment",
+          "speed": 0.0,
+          "angle": 0.0,
+          "duration": 2.5,
+          "vel_cmd_idx": 0
+        }
+      ],
+      "terrain_vertices": 24,
+      "mesh": "/workspace/php_parkour/outputs/research/motion-matching/scenarios/low_speed_climb_76/forward_walk0.6s_step0.7s_terrain.obj",
+      "mesh_sha256": "caef86b7db9c4ac86430eba949985e030605a59118d6ec969103b1d7016cecae",
+      "command": 1,
+      "matching_released_training_bundle_available": true,
+      "quality_verified": false,
+      "obstacle_course_completion_verified": false,
+      "output": "/outputs/sim2sim/scene-matrix-final/low_speed_climb_76",
+      "launch": [
+        "/isaac-sim/kit/python/bin/python3",
+        "/workspace/php_parkour/scripts/research/sim2sim.py",
+        "--models",
+        "/data/assets/student",
+        "--terrain",
+        "custom",
+        "--mesh",
+        "/workspace/php_parkour/outputs/research/motion-matching/scenarios/low_speed_climb_76/forward_walk0.6s_step0.7s_terrain.obj",
+        "--commands",
+        "1",
+        "--seconds-per-command",
+        "10.0",
+        "--seed",
+        "42",
+        "--gl",
+        "egl",
+        "--output",
+        "/outputs/sim2sim/scene-matrix-final/low_speed_climb_76"
+      ]
+    },
+    {
+      "scenario": "high_speed_climb_76",
+      "configuration": "run_forward_0.6s_step0s",
+      "configuration_index": 0,
+      "available_configurations": 40,
+      "reference_clip_seconds": 11.4,
+      "reference_steps": [
+        {
+          "type": "segment",
+          "speed": 0.0,
+          "angle": 0.0,
+          "duration": 1.0,
+          "vel_cmd_idx": 0
+        },
+        {
+          "type": "locomotion",
+          "speed": 2.2,
+          "angle": 0.0,
+          "duration": 1,
+          "vel_cmd_idx": 6
+        },
+        {
+          "type": "locomotion",
+          "speed": 2.2,
+          "angle": 0.0,
+          "duration": 0.6,
+          "vel_cmd_idx": 6
+        },
+        {
+          "type": "skill",
+          "skill_name": "climb_76_high_speed_up",
+          "vel_cmd_idx": 6
+        },
+        {
+          "type": "locomotion",
+          "speed": 1.5,
+          "angle": 0.0,
+          "duration": 0.3,
+          "vel_cmd_idx": 6
+        },
+        {
+          "type": "locomotion",
+          "speed": 0.2,
+          "angle": 0.0,
+          "duration": 0.8,
+          "vel_cmd_idx": 6
+        },
+        {
+          "type": "skill",
+          "skill_name": "climb_76_high_speed_down",
+          "vel_cmd_idx": 6
+        },
+        {
+          "type": "locomotion",
+          "speed": 2.2,
+          "angle": 0.0,
+          "duration": 1.0,
+          "vel_cmd_idx": 6
+        },
+        {
+          "type": "segment",
+          "speed": 0.0,
+          "angle": 0.0,
+          "duration": 2.5,
+          "vel_cmd_idx": 0
+        }
+      ],
+      "terrain_vertices": 24,
+      "mesh": "/workspace/php_parkour/outputs/research/motion-matching/scenarios/high_speed_climb_76/run_forward_0.6s_step0s_terrain.obj",
+      "mesh_sha256": "8ef153b4c79e73d3bd96228ea517cb3825d4652d231e8080ee1d4a98e6a2763e",
+      "command": 6,
+      "matching_released_training_bundle_available": true,
+      "quality_verified": false,
+      "obstacle_course_completion_verified": false,
+      "output": "/outputs/sim2sim/scene-matrix-final/high_speed_climb_76",
+      "launch": [
+        "/isaac-sim/kit/python/bin/python3",
+        "/workspace/php_parkour/scripts/research/sim2sim.py",
+        "--models",
+        "/data/assets/student",
+        "--terrain",
+        "custom",
+        "--mesh",
+        "/workspace/php_parkour/outputs/research/motion-matching/scenarios/high_speed_climb_76/run_forward_0.6s_step0s_terrain.obj",
+        "--commands",
+        "6",
+        "--seconds-per-command",
+        "10.0",
+        "--seed",
+        "42",
+        "--gl",
+        "egl",
+        "--output",
+        "/outputs/sim2sim/scene-matrix-final/high_speed_climb_76"
+      ]
+    },
+    {
+      "scenario": "low_speed_climb_94",
+      "configuration": "forward_walk0.7s_step0.5s",
+      "configuration_index": 0,
+      "available_configurations": 20,
+      "reference_clip_seconds": 13.8,
+      "reference_steps": [
+        {
+          "type": "segment",
+          "speed": 0.0,
+          "angle": 0.0,
+          "duration": 1.0,
+          "vel_cmd_idx": 0
+        },
+        {
+          "type": "locomotion",
+          "speed": 0.8,
+          "angle": 0.0,
+          "duration": 1,
+          "vel_cmd_idx": 1
+        },
+        {
+          "type": "locomotion",
+          "speed": 0.8,
+          "angle": 0.0,
+          "duration": 0.7,
+          "vel_cmd_idx": 1
+        },
+        {
+          "type": "skill",
+          "skill_name": "climb_94_up",
+          "vel_cmd_idx": 1
+        },
+        {
+          "type": "locomotion",
+          "speed": 0.8,
+          "angle": 0.0,
+          "duration": 0.5,
+          "vel_cmd_idx": 1
+        },
+        {
+          "type": "skill",
+          "skill_name": "climb_94_down",
+          "vel_cmd_idx": 1
+        },
+        {
+          "type": "locomotion",
+          "speed": 0.8,
+          "angle": 0.0,
+          "duration": 0.5,
+          "vel_cmd_idx": 1
+        },
+        {
+          "type": "segment",
+          "speed": 0.0,
+          "angle": 0.0,
+          "duration": 2.5,
+          "vel_cmd_idx": 0
+        }
+      ],
+      "terrain_vertices": 24,
+      "mesh": "/workspace/php_parkour/outputs/research/motion-matching/scenarios/low_speed_climb_94/forward_walk0.7s_step0.5s_terrain.obj",
+      "mesh_sha256": "a42b90f17d6a334dfec36a7e2afe7190464a5bea8163c3bf5d4335827c0a8895",
+      "command": 1,
+      "matching_released_training_bundle_available": false,
+      "quality_verified": false,
+      "obstacle_course_completion_verified": false,
+      "output": "/outputs/sim2sim/scene-matrix-final/low_speed_climb_94",
+      "launch": [
+        "/isaac-sim/kit/python/bin/python3",
+        "/workspace/php_parkour/scripts/research/sim2sim.py",
+        "--models",
+        "/data/assets/student",
+        "--terrain",
+        "custom",
+        "--mesh",
+        "/workspace/php_parkour/outputs/research/motion-matching/scenarios/low_speed_climb_94/forward_walk0.7s_step0.5s_terrain.obj",
+        "--commands",
+        "1",
+        "--seconds-per-command",
+        "10.0",
+        "--seed",
+        "42",
+        "--gl",
+        "egl",
+        "--output",
+        "/outputs/sim2sim/scene-matrix-final/low_speed_climb_94"
+      ]
+    },
+    {
+      "scenario": "high_speed_climb_94",
+      "configuration": "run_forward_0.6s_step0s",
+      "configuration_index": 0,
+      "available_configurations": 15,
+      "reference_clip_seconds": 10.54,
+      "reference_steps": [
+        {
+          "type": "segment",
+          "speed": 0.0,
+          "angle": 0.0,
+          "duration": 1.0,
+          "vel_cmd_idx": 0
+        },
+        {
+          "type": "locomotion",
+          "speed": 2.2,
+          "angle": 0.0,
+          "duration": 1,
+          "vel_cmd_idx": 6
+        },
+        {
+          "type": "locomotion",
+          "speed": 2.2,
+          "angle": 0.0,
+          "duration": 0.6,
+          "vel_cmd_idx": 6
+        },
+        {
+          "type": "skill",
+          "skill_name": "climb_94_high_speed_up",
+          "vel_cmd_idx": 6
+        },
+        {
+          "type": "locomotion",
+          "speed": 0.5,
+          "angle": 0.0,
+          "duration": 0.8,
+          "vel_cmd_idx": 6
+        },
+        {
+          "type": "skill",
+          "skill_name": "climb_94_high_speed_down",
+          "vel_cmd_idx": 6
+        },
+        {
+          "type": "locomotion",
+          "speed": 2.2,
+          "angle": 0.0,
+          "duration": 1.0,
+          "vel_cmd_idx": 6
+        },
+        {
+          "type": "segment",
+          "speed": 0.0,
+          "angle": 0.0,
+          "duration": 2.5,
+          "vel_cmd_idx": 0
+        }
+      ],
+      "terrain_vertices": 24,
+      "mesh": "/workspace/php_parkour/outputs/research/motion-matching/scenarios/high_speed_climb_94/run_forward_0.6s_step0s_terrain.obj",
+      "mesh_sha256": "aad1ca0f4c6ed90b44b03508d38207c6881166fd130cc8258042d2ba1d339a91",
+      "command": 6,
+      "matching_released_training_bundle_available": false,
+      "quality_verified": false,
+      "obstacle_course_completion_verified": false,
+      "output": "/outputs/sim2sim/scene-matrix-final/high_speed_climb_94",
+      "launch": [
+        "/isaac-sim/kit/python/bin/python3",
+        "/workspace/php_parkour/scripts/research/sim2sim.py",
+        "--models",
+        "/data/assets/student",
+        "--terrain",
+        "custom",
+        "--mesh",
+        "/workspace/php_parkour/outputs/research/motion-matching/scenarios/high_speed_climb_94/run_forward_0.6s_step0s_terrain.obj",
+        "--commands",
+        "6",
+        "--seconds-per-command",
+        "10.0",
+        "--seed",
+        "42",
+        "--gl",
+        "egl",
+        "--output",
+        "/outputs/sim2sim/scene-matrix-final/high_speed_climb_94"
+      ]
+    },
+    {
+      "scenario": "low_speed_roll_78",
+      "configuration": "roll_78",
+      "configuration_index": 0,
+      "available_configurations": 1,
+      "reference_clip_seconds": 14.04,
+      "reference_steps": [
+        {
+          "type": "skill",
+          "skill_name": "climb_76_up",
+          "vel_cmd_idx": 1
+        },
+        {
+          "type": "locomotion",
+          "speed": 0.8,
+          "angle": 0.0,
+          "duration": 1.0,
+          "vel_cmd_idx": 1
+        },
+        {
+          "type": "segment",
+          "speed": 0.0,
+          "angle": 0.0,
+          "duration": 0.8,
+          "vel_cmd_idx": 1
+        },
+        {
+          "type": "skill",
+          "skill_name": "roll_78",
+          "vel_cmd_idx": 11
+        },
+        {
+          "type": "locomotion",
+          "speed": 0.8,
+          "angle": 0.0,
+          "duration": 1.0,
+          "vel_cmd_idx": 1
+        },
+        {
+          "type": "segment",
+          "speed": 0.0,
+          "angle": 0.0,
+          "duration": 2.5,
+          "vel_cmd_idx": 0
+        }
+      ],
+      "terrain_vertices": 32,
+      "mesh": "/workspace/php_parkour/outputs/research/motion-matching/scenarios/low_speed_roll_78/roll_78_terrain.obj",
+      "mesh_sha256": "b00486a4cfe305677eec73e2969de27861d02b5e33f74d23b423a089499944af",
+      "command": 1,
+      "matching_released_training_bundle_available": false,
+      "quality_verified": false,
+      "obstacle_course_completion_verified": false,
+      "output": "/outputs/sim2sim/scene-matrix-final/low_speed_roll_78",
+      "launch": [
+        "/isaac-sim/kit/python/bin/python3",
+        "/workspace/php_parkour/scripts/research/sim2sim.py",
+        "--models",
+        "/data/assets/student",
+        "--terrain",
+        "custom",
+        "--mesh",
+        "/workspace/php_parkour/outputs/research/motion-matching/scenarios/low_speed_roll_78/roll_78_terrain.obj",
+        "--commands",
+        "1",
+        "--seconds-per-command",
+        "10.0",
+        "--seed",
+        "42",
+        "--gl",
+        "egl",
+        "--output",
+        "/outputs/sim2sim/scene-matrix-final/low_speed_roll_78"
+      ]
+    },
+    {
+      "scenario": "low_speed_roll_90",
+      "configuration": "roll_90_walk0.4s",
+      "configuration_index": 0,
+      "available_configurations": 3,
+      "reference_clip_seconds": 12.94,
+      "reference_steps": [
+        {
+          "type": "skill",
+          "skill_name": "climb_94_up",
+          "vel_cmd_idx": 1
+        },
+        {
+          "type": "locomotion",
+          "speed": 0.8,
+          "angle": 0.0,
+          "duration": 0.4,
+          "vel_cmd_idx": 1
+        },
+        {
+          "type": "segment",
+          "speed": 0.0,
+          "angle": 0.0,
+          "duration": 0.8,
+          "vel_cmd_idx": 1
+        },
+        {
+          "type": "skill",
+          "skill_name": "roll_90",
+          "vel_cmd_idx": 11
+        },
+        {
+          "type": "locomotion",
+          "speed": 0.8,
+          "angle": 0.0,
+          "duration": 1.0,
+          "vel_cmd_idx": 1
+        },
+        {
+          "type": "segment",
+          "speed": 0.0,
+          "angle": 0.0,
+          "duration": 2.5,
+          "vel_cmd_idx": 0
+        }
+      ],
+      "terrain_vertices": 24,
+      "mesh": "/workspace/php_parkour/outputs/research/motion-matching/scenarios/low_speed_roll_90/roll_90_walk0.4s_terrain.obj",
+      "mesh_sha256": "084c54e11aabe8f5ff15ae4a7a9ece6981fa7d61ffc8ab58a2119c3032a2f419",
+      "command": 1,
+      "matching_released_training_bundle_available": false,
+      "quality_verified": false,
+      "obstacle_course_completion_verified": false,
+      "output": "/outputs/sim2sim/scene-matrix-final/low_speed_roll_90",
+      "launch": [
+        "/isaac-sim/kit/python/bin/python3",
+        "/workspace/php_parkour/scripts/research/sim2sim.py",
+        "--models",
+        "/data/assets/student",
+        "--terrain",
+        "custom",
+        "--mesh",
+        "/workspace/php_parkour/outputs/research/motion-matching/scenarios/low_speed_roll_90/roll_90_walk0.4s_terrain.obj",
+        "--commands",
+        "1",
+        "--seconds-per-command",
+        "10.0",
+        "--seed",
+        "42",
+        "--gl",
+        "egl",
+        "--output",
+        "/outputs/sim2sim/scene-matrix-final/low_speed_roll_90"
+      ]
+    },
+    {
+      "scenario": "high_speed_roll_134",
+      "configuration": "run_forward_0.5s_step1.0s",
+      "configuration_index": 0,
+      "available_configurations": 40,
+      "reference_clip_seconds": 12.42,
+      "reference_steps": [
+        {
+          "type": "segment",
+          "speed": 0.0,
+          "angle": 0.0,
+          "duration": 1.0,
+          "vel_cmd_idx": 0
+        },
+        {
+          "type": "locomotion",
+          "speed": 2.2,
+          "angle": 0.0,
+          "duration": 1,
+          "vel_cmd_idx": 6
+        },
+        {
+          "type": "locomotion",
+          "speed": 2.2,
+          "angle": 0.0,
+          "duration": 0.5,
+          "vel_cmd_idx": 6
+        },
+        {
+          "type": "skill",
+          "skill_name": "climb_134_up",
+          "vel_cmd_idx": 6
+        },
+        {
+          "type": "locomotion",
+          "speed": 0.8,
+          "angle": 0.0,
+          "duration": 1.0,
+          "vel_cmd_idx": 6
+        },
+        {
+          "type": "segment",
+          "speed": 0.0,
+          "angle": 0.0,
+          "duration": 0.5,
+          "vel_cmd_idx": 6
+        },
+        {
+          "type": "skill",
+          "skill_name": "roll_136",
+          "vel_cmd_idx": 6
+        },
+        {
+          "type": "locomotion",
+          "speed": 2.2,
+          "angle": 0.0,
+          "duration": 1.0,
+          "vel_cmd_idx": 6
+        },
+        {
+          "type": "segment",
+          "speed": 0.0,
+          "angle": 0.0,
+          "duration": 2.5,
+          "vel_cmd_idx": 0
+        }
+      ],
+      "terrain_vertices": 32,
+      "mesh": "/workspace/php_parkour/outputs/research/motion-matching/scenarios/high_speed_roll_134/run_forward_0.5s_step1.0s_terrain.obj",
+      "mesh_sha256": "0cb2e95f76afafd5796ab976e2999fe201ae9dfd4946772b8ed05a7b373989be",
+      "command": 6,
+      "matching_released_training_bundle_available": false,
+      "quality_verified": false,
+      "obstacle_course_completion_verified": false,
+      "output": "/outputs/sim2sim/scene-matrix-final/high_speed_roll_134",
+      "launch": [
+        "/isaac-sim/kit/python/bin/python3",
+        "/workspace/php_parkour/scripts/research/sim2sim.py",
+        "--models",
+        "/data/assets/student",
+        "--terrain",
+        "custom",
+        "--mesh",
+        "/workspace/php_parkour/outputs/research/motion-matching/scenarios/high_speed_roll_134/run_forward_0.5s_step1.0s_terrain.obj",
+        "--commands",
+        "6",
+        "--seconds-per-command",
+        "10.0",
+        "--seed",
+        "42",
+        "--gl",
+        "egl",
+        "--output",
+        "/outputs/sim2sim/scene-matrix-final/high_speed_roll_134"
+      ]
+    },
+    {
+      "scenario": "high_speed_hurdle",
+      "configuration": "run_forward_0.3s",
+      "configuration_index": 0,
+      "available_configurations": 51,
+      "reference_clip_seconds": 6.54,
+      "reference_steps": [
+        {
+          "type": "segment",
+          "speed": 0.0,
+          "angle": 0.0,
+          "duration": 1.0,
+          "vel_cmd_idx": 0
+        },
+        {
+          "type": "locomotion",
+          "speed": 2.2,
+          "angle": 0.0,
+          "duration": 0.5,
+          "vel_cmd_idx": 6
+        },
+        {
+          "type": "locomotion",
+          "speed": 2.2,
+          "angle": 0.0,
+          "duration": 0.3,
+          "vel_cmd_idx": 6
+        },
+        {
+          "type": "skill",
+          "skill_name": "hurdle",
+          "vel_cmd_idx": 6
+        },
+        {
+          "type": "locomotion",
+          "speed": 2.2,
+          "angle": 0.0,
+          "duration": 0.5,
+          "vel_cmd_idx": 6
+        },
+        {
+          "type": "segment",
+          "speed": 0.0,
+          "angle": 0.0,
+          "duration": 2.5,
+          "vel_cmd_idx": 0
+        }
+      ],
+      "terrain_vertices": 16,
+      "mesh": "/workspace/php_parkour/outputs/research/motion-matching/scenarios/high_speed_hurdle/run_forward_0.3s_terrain.obj",
+      "mesh_sha256": "af8c92f7b9ccadb512ced0300325509e628cec4d86a1aca0604ca9f011846e8e",
+      "command": 6,
+      "matching_released_training_bundle_available": false,
+      "quality_verified": false,
+      "obstacle_course_completion_verified": false,
+      "output": "/outputs/sim2sim/scene-matrix-final/high_speed_hurdle",
+      "launch": [
+        "/isaac-sim/kit/python/bin/python3",
+        "/workspace/php_parkour/scripts/research/sim2sim.py",
+        "--models",
+        "/data/assets/student",
+        "--terrain",
+        "custom",
+        "--mesh",
+        "/workspace/php_parkour/outputs/research/motion-matching/scenarios/high_speed_hurdle/run_forward_0.3s_terrain.obj",
+        "--commands",
+        "6",
+        "--seconds-per-command",
+        "10.0",
+        "--seed",
+        "42",
+        "--gl",
+        "egl",
+        "--output",
+        "/outputs/sim2sim/scene-matrix-final/high_speed_hurdle"
+      ]
+    },
+    {
+      "scenario": "high_speed_dash_vault",
+      "configuration": "run_forward_0.3s",
+      "configuration_index": 0,
+      "available_configurations": 51,
+      "reference_clip_seconds": 6.36,
+      "reference_steps": [
+        {
+          "type": "segment",
+          "speed": 0.0,
+          "angle": 0.0,
+          "duration": 1.0,
+          "vel_cmd_idx": 0
+        },
+        {
+          "type": "locomotion",
+          "speed": 2.0,
+          "angle": 0.0,
+          "duration": 0.5,
+          "vel_cmd_idx": 6
+        },
+        {
+          "type": "locomotion",
+          "speed": 2.0,
+          "angle": 0.0,
+          "duration": 0.3,
+          "vel_cmd_idx": 6
+        },
+        {
+          "type": "skill",
+          "skill_name": "dash_vault",
+          "vel_cmd_idx": 6
+        },
+        {
+          "type": "locomotion",
+          "speed": 2.3,
+          "angle": 0.0,
+          "duration": 0.5,
+          "vel_cmd_idx": 6
+        },
+        {
+          "type": "segment",
+          "speed": 0.0,
+          "angle": 0.0,
+          "duration": 2.5,
+          "vel_cmd_idx": 0
+        }
+      ],
+      "terrain_vertices": 16,
+      "mesh": "/workspace/php_parkour/outputs/research/motion-matching/scenarios/high_speed_dash_vault/run_forward_0.3s_terrain.obj",
+      "mesh_sha256": "656464b90582b0d8a2043c4e8fe8535be04df8478c029272299a9ec2eda5e3bc",
+      "command": 6,
+      "matching_released_training_bundle_available": false,
+      "quality_verified": false,
+      "obstacle_course_completion_verified": false,
+      "output": "/outputs/sim2sim/scene-matrix-final/high_speed_dash_vault",
+      "launch": [
+        "/isaac-sim/kit/python/bin/python3",
+        "/workspace/php_parkour/scripts/research/sim2sim.py",
+        "--models",
+        "/data/assets/student",
+        "--terrain",
+        "custom",
+        "--mesh",
+        "/workspace/php_parkour/outputs/research/motion-matching/scenarios/high_speed_dash_vault/run_forward_0.3s_terrain.obj",
+        "--commands",
+        "6",
+        "--seconds-per-command",
+        "10.0",
+        "--seed",
+        "42",
+        "--gl",
+        "egl",
+        "--output",
+        "/outputs/sim2sim/scene-matrix-final/high_speed_dash_vault"
+      ]
+    },
+    {
+      "scenario": "high_speed_speed_vault",
+      "configuration": "run_forward_0.3s",
+      "configuration_index": 0,
+      "available_configurations": 20,
+      "reference_clip_seconds": 6.7,
+      "reference_steps": [
+        {
+          "type": "segment",
+          "speed": 0.0,
+          "angle": 0.0,
+          "duration": 1.0,
+          "vel_cmd_idx": 0
+        },
+        {
+          "type": "locomotion",
+          "speed": 2.2,
+          "angle": 0.0,
+          "duration": 1,
+          "vel_cmd_idx": 6
+        },
+        {
+          "type": "locomotion",
+          "speed": 2.2,
+          "angle": 0.0,
+          "duration": 0.3,
+          "vel_cmd_idx": 6
+        },
+        {
+          "type": "skill",
+          "skill_name": "speed_vault",
+          "vel_cmd_idx": 6
+        },
+        {
+          "type": "locomotion",
+          "speed": 2.2,
+          "angle": 0.0,
+          "duration": 0.5,
+          "vel_cmd_idx": 6
+        },
+        {
+          "type": "segment",
+          "speed": 0.0,
+          "angle": 0.0,
+          "duration": 2.5,
+          "vel_cmd_idx": 0
+        }
+      ],
+      "terrain_vertices": 16,
+      "mesh": "/workspace/php_parkour/outputs/research/motion-matching/scenarios/high_speed_speed_vault/run_forward_0.3s_terrain.obj",
+      "mesh_sha256": "1829ea280616ae3cb09ea58909b8303f53eadc0213dfe7b63019a4bce750a77b",
+      "command": 6,
+      "matching_released_training_bundle_available": false,
+      "quality_verified": false,
+      "obstacle_course_completion_verified": false,
+      "output": "/outputs/sim2sim/scene-matrix-final/high_speed_speed_vault",
+      "launch": [
+        "/isaac-sim/kit/python/bin/python3",
+        "/workspace/php_parkour/scripts/research/sim2sim.py",
+        "--models",
+        "/data/assets/student",
+        "--terrain",
+        "custom",
+        "--mesh",
+        "/workspace/php_parkour/outputs/research/motion-matching/scenarios/high_speed_speed_vault/run_forward_0.3s_terrain.obj",
+        "--commands",
+        "6",
+        "--seconds-per-command",
+        "10.0",
+        "--seed",
+        "42",
+        "--gl",
+        "egl",
+        "--output",
+        "/outputs/sim2sim/scene-matrix-final/high_speed_speed_vault"
+      ]
+    },
+    {
+      "scenario": "high_speed_cat_vault",
+      "configuration": "run_forward_0.3s",
+      "configuration_index": 0,
+      "available_configurations": 51,
+      "reference_clip_seconds": 6.04,
+      "reference_steps": [
+        {
+          "type": "segment",
+          "speed": 0.0,
+          "angle": 0.0,
+          "duration": 1.0,
+          "vel_cmd_idx": 0
+        },
+        {
+          "type": "locomotion",
+          "speed": 2.2,
+          "angle": 0.0,
+          "duration": 0.5,
+          "vel_cmd_idx": 6
+        },
+        {
+          "type": "locomotion",
+          "speed": 2.2,
+          "angle": 0.0,
+          "duration": 0.3,
+          "vel_cmd_idx": 6
+        },
+        {
+          "type": "skill",
+          "skill_name": "cat_vault",
+          "vel_cmd_idx": 6
+        },
+        {
+          "type": "locomotion",
+          "speed": 2.2,
+          "angle": 0.0,
+          "duration": 0.5,
+          "vel_cmd_idx": 6
+        },
+        {
+          "type": "segment",
+          "speed": 0.0,
+          "angle": 0.0,
+          "duration": 2.5,
+          "vel_cmd_idx": 0
+        }
+      ],
+      "terrain_vertices": 16,
+      "mesh": "/workspace/php_parkour/outputs/research/motion-matching/scenarios/high_speed_cat_vault/run_forward_0.3s_terrain.obj",
+      "mesh_sha256": "d4e87ba27fcbab7d646aedee6db707a589318696e1fb9b69be95a0bfc9e03e91",
+      "command": 6,
+      "matching_released_training_bundle_available": false,
+      "quality_verified": false,
+      "obstacle_course_completion_verified": false,
+      "output": "/outputs/sim2sim/scene-matrix-final/high_speed_cat_vault",
+      "launch": [
+        "/isaac-sim/kit/python/bin/python3",
+        "/workspace/php_parkour/scripts/research/sim2sim.py",
+        "--models",
+        "/data/assets/student",
+        "--terrain",
+        "custom",
+        "--mesh",
+        "/workspace/php_parkour/outputs/research/motion-matching/scenarios/high_speed_cat_vault/run_forward_0.3s_terrain.obj",
+        "--commands",
+        "6",
+        "--seconds-per-command",
+        "10.0",
+        "--seed",
+        "42",
+        "--gl",
+        "egl",
+        "--output",
+        "/outputs/sim2sim/scene-matrix-final/high_speed_cat_vault"
+      ]
+    },
+    {
+      "scenario": "high_speed_jump_35",
+      "configuration": "jump_35",
+      "configuration_index": 0,
+      "available_configurations": 1,
+      "reference_clip_seconds": 7.8,
+      "reference_steps": [
+        {
+          "type": "segment",
+          "speed": 0.0,
+          "angle": 0.0,
+          "duration": 1.0,
+          "vel_cmd_idx": 0
+        },
+        {
+          "type": "skill",
+          "skill_name": "step_high_speed_up",
+          "vel_cmd_idx": 6
+        },
+        {
+          "type": "locomotion",
+          "speed": 2.2,
+          "angle": 0.0,
+          "duration": 1.2,
+          "vel_cmd_idx": 6
+        },
+        {
+          "type": "skill",
+          "skill_name": "jump_35",
+          "vel_cmd_idx": 6
+        },
+        {
+          "type": "skill",
+          "skill_name": "jump_35",
+          "vel_cmd_idx": 6
+        },
+        {
+          "type": "locomotion",
+          "speed": 2.2,
+          "angle": 0.0,
+          "duration": 0.8,
+          "vel_cmd_idx": 6
+        },
+        {
+          "type": "skill",
+          "skill_name": "step_high_speed_down",
+          "vel_cmd_idx": 6
+        },
+        {
+          "type": "locomotion",
+          "speed": 2.2,
+          "angle": 0.0,
+          "duration": 0.2,
+          "vel_cmd_idx": 6
+        },
+        {
+          "type": "segment",
+          "speed": 0.0,
+          "angle": 0.0,
+          "duration": 2.5,
+          "vel_cmd_idx": 0
+        }
+      ],
+      "terrain_vertices": 88,
+      "mesh": "/workspace/php_parkour/outputs/research/motion-matching/scenarios/high_speed_jump_35/jump_35_terrain.obj",
+      "mesh_sha256": "1587a5105b09d7095c91d7f9e67c5198891c4ff390607943e1da305f08a8f248",
+      "command": 6,
+      "matching_released_training_bundle_available": false,
+      "quality_verified": false,
+      "obstacle_course_completion_verified": false,
+      "output": "/outputs/sim2sim/scene-matrix-final/high_speed_jump_35",
+      "launch": [
+        "/isaac-sim/kit/python/bin/python3",
+        "/workspace/php_parkour/scripts/research/sim2sim.py",
+        "--models",
+        "/data/assets/student",
+        "--terrain",
+        "custom",
+        "--mesh",
+        "/workspace/php_parkour/outputs/research/motion-matching/scenarios/high_speed_jump_35/jump_35_terrain.obj",
+        "--commands",
+        "6",
+        "--seconds-per-command",
+        "10.0",
+        "--seed",
+        "42",
+        "--gl",
+        "egl",
+        "--output",
+        "/outputs/sim2sim/scene-matrix-final/high_speed_jump_35"
+      ]
+    }
+  ],
+  "selection_rule": "First passing forward-named configuration by source index, else first passing configuration; random_locomotion first clutter (>8 vertices) configuration with only high-forward moving segments",
+  "estimated_egl_wall_minutes": [
+    8,
+    12
+  ],
+  "quality_verified": false,
+  "obstacle_course_completion_verified": false
+}

@@ -136,10 +136,10 @@ class FileKeyboardController:
 
                     if not gui_running:
                         self.running = False
-            except Exception:
-                # print(f"[DEBUG] File read error: {e}")
-                # If file read fails, use terminal input
-                self._handle_terminal_input()
+            except (OSError, ValueError):
+                # A GUI writer may be replacing the file. Keep the last valid
+                # state until the next tick; Docker stdin may not be a TTY.
+                pass
         else:
             # If file does not exist, use terminal input
             self._handle_terminal_input()
@@ -200,17 +200,22 @@ class GUIKeyboardController:
         self.speed_display_state = {key: "Low" for key in speed_modifier_keys}
         # Subprocess: receive the parent's state file path via env var; fallback to fresh mkstemp() if launched standalone.
         self.state_file = os.environ.get(KEYBOARD_STATE_ENV) or _create_state_file()
+        self._state_lock = threading.Lock()
 
     def start(self) -> None:
         """Start GUI"""
         self.root = tk.Tk()
         self.root.title("Motion Matching - Keyboard Controller")
-        self.root.geometry("700x600")
+        self.root.protocol("WM_DELETE_WINDOW", self._quit_program)
 
         # Set window always on top
         self.root.attributes("-topmost", True)
 
         self._setup_ui()
+        # Fit the complete skill list at the display's actual font scale. The
+        # fixed 700x600 size clipped status text and hid the Quit button.
+        self.root.update_idletasks()
+        self.root.minsize(self.root.winfo_reqwidth(), self.root.winfo_reqheight())
         self._bind_keys()
 
         # Start state save thread
@@ -310,26 +315,40 @@ class GUIKeyboardController:
     def _quit_program(self) -> None:
         """Quit program"""
         self.running = False
+        self._save_state()
         self.root.quit()
 
     def _save_state(self) -> None:
         """Save state to file"""
+        temporary = None
         try:
-            state_data = {"key_states": self.key_states, "running": self.running}
-            with open(self.state_file, "w") as f:
-                json.dump(state_data, f)
+            # GUI callbacks and the periodic writer share this path. Replace a
+            # complete file so the motion loop never observes truncated JSON.
+            with self._state_lock:
+                state_data = {"key_states": self.key_states.copy(), "running": self.running}
+                with tempfile.NamedTemporaryFile(
+                    mode="w", dir=os.path.dirname(self.state_file),
+                    prefix=".motion_matching_state_", delete=False,
+                ) as f:
+                    temporary = f.name
+                    json.dump(state_data, f)
+                os.replace(temporary, self.state_file)
+                temporary = None
             # print(f"[DEBUG] State saved: {self.key_states}")
         except Exception as e:
             print(f"Save state error: {e}")
+        finally:
+            if temporary is not None:
+                try:
+                    os.remove(temporary)
+                except OSError:
+                    pass
 
     def _save_state_loop(self) -> None:
         """Save state to file loop"""
         while self.running:
             try:
-                # Save state to JSON file
-                state_data = {"key_states": self.key_states, "running": self.running}
-                with open(self.state_file, "w") as f:
-                    json.dump(state_data, f)
+                self._save_state()
                 time.sleep(0.01)  # 10ms update once
             except Exception as e:
                 print(f"Save state error: {e}")

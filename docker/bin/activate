@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# Source this file to choose the Python executable without installing Conda.
+case "${1:-train}" in
+    train|sim) PHP_RUNTIME=train ;;
+    motion) PHP_RUNTIME=motion ;;
+    inference) PHP_RUNTIME=inference ;;
+    *) echo 'Usage: source /opt/php/bin/activate train|sim|motion|inference' >&2; return 2 ;;
+esac
+export PHP_RUNTIME PHP_DOCKER=1 HSSIM_PYTHON=/opt/php/bin/train-python
+export PATH="/opt/php/runtimes/$PHP_RUNTIME/bin:/opt/php/bin:$PATH"

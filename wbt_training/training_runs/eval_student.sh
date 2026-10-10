@@ -3,8 +3,7 @@
 # Required: CHECKPOINT=local.pt (or wandb://entity/project/run[/model_N.pt]),
 # REGISTRY=file:///absolute/bundle[,file:///another/bundle] in training order.
 # REGISTRY=auto recovers the ordered datasets from a W&B student run.
-# NUM_ENVS=1, MAX_EVAL_STEPS=1000, GPU_INDEX=0, LOGGER=wandb.
-# LOGGER=disabled keeps logging local.
+# NUM_ENVS=1, MAX_EVAL_STEPS=1000, GPU_INDEX=0, LOGGER=tensorboard.
 set -euo pipefail
 source "$(dirname "${BASH_SOURCE[0]}")/setup_env.sh"
 php_launcher_init

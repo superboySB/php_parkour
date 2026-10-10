@@ -1,0 +1,68 @@
+{
+  "label": "export-student-pure",
+  "profile": "smoke",
+  "started_utc": "2026-10-10T02:56:54.713761+00:00",
+  "command": [
+    "/isaac-sim/kit/python/bin/python3",
+    "-m",
+    "wbt_training.training_runs.export_distill_onnx",
+    "--training.checkpoint",
+    "/outputs/training-acceptance/smoke/student-pure/PHP-research/20261010_025541-student-pure-locomotion/model_00001.pt",
+    "--training.registry-name",
+    "file:///data/assets/motions-locomotion,file:///data/assets/motions-low-step,file:///data/assets/motions-high-step,file:///data/assets/motions-low-climb-76,file:///data/assets/motions-high-climb-76",
+    "--training.num-envs",
+    "1",
+    "logger:disabled",
+    "--logger.base-dir",
+    "/outputs/training-acceptance/smoke/export-student-pure"
+  ],
+  "environment": {
+    "LOGGER": "disabled",
+    "NGPUS": "1",
+    "CUDA_VISIBLE_DEVICES": "0",
+    "HSSIM_PYTHON": "/opt/php/bin/train-python"
+  },
+  "settings": {
+    "profile": "smoke",
+    "skills": [
+      "locomotion",
+      "low-step",
+      "high-step",
+      "low-climb-76",
+      "high-climb-76"
+    ],
+    "assets": "/data/assets",
+    "num_envs": null,
+    "iterations_target": null,
+    "registries": null,
+    "finetune": null,
+    "source_checkpoints": [
+      {
+        "path": "/outputs/training-acceptance/smoke/student-pure/PHP-research/20261010_025541-student-pure-locomotion/model_00001.pt",
+        "sha256": "8a36d94532f10df3a01548cc0c1ea59cba807207b4b51695aa5740b15c9f1d34"
+      }
+    ],
+    "eval_steps": null
+  },
+  "overrides": {
+    "num_envs": null,
+    "iterations_target": null
+  },
+  "quality_verified": false,
+  "scope": "execution smoke only",
+  "resume_checkpoint": "/outputs/training-acceptance/smoke/student-pure/PHP-research/20261010_025541-student-pure-locomotion/model_00001.pt",
+  "status": "passed",
+  "returncode": 0,
+  "finished_utc": "2026-10-10T02:57:16.534361+00:00",
+  "elapsed_seconds": 21.820651853457093,
+  "log": "/outputs/training-acceptance/smoke/export-student-pure-1791601014720556569.log",
+  "onnx_bundle_directories": [
+    "/outputs/training-acceptance/smoke/export-student-pure/PHP-research/20261010_025701-student-pure-export/model_00001"
+  ],
+  "onnx_validation_reports": [
+    {
+      "bundle": "/outputs/training-acceptance/smoke/export-student-pure/PHP-research/20261010_025701-student-pure-export/model_00001",
+      "report": "/outputs/training-acceptance/smoke/export-student-pure/onnx-validation-0.json"
+    }
+  ]
+}

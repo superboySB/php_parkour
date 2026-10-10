@@ -46,6 +46,7 @@ def fake_runtime(tmp_path):
     for key in ("RUN", "STEP", "BACKBONE", "STUDENT", "CONDA_ENV_NAME"):
         env.pop(key, None)
     env.update(
+        PHP_DOCKER="0",  # Exercise the supplied fake runtime, even inside Docker.
         HOLOSOMA_ROOT=str(holosoma),
         COMMAND_LOG=str(command_log),
         PATH=f"{fake_bin}:{env['PATH']}",
@@ -82,6 +83,7 @@ def test_sim_launcher_uses_pinned_holosoma_and_forwards_overrides(fake_runtime, 
         "--robot.asset.xml-file",
         "g1/g1_29dof_halfspherehand.xml",
         "--simulator.config.bridge.enabled=True",
+        "--simulator.config.sim.fps=500",
         "--simulator.config.no-render",
     ]
 

@@ -1,0 +1,67 @@
+{
+  "label": "teacher-high-step",
+  "profile": "smoke",
+  "started_utc": "2026-10-10T02:48:40.194447+00:00",
+  "command": [
+    "bash",
+    "/workspace/php_parkour/wbt_training/training_runs/run_terrain_teacher.sh",
+    "--training.headless",
+    "True",
+    "--training.num-envs",
+    "64",
+    "--training.name",
+    "teacher-high-step",
+    "--training.project",
+    "PHP-research",
+    "--logger.base-dir",
+    "/outputs/training-acceptance/smoke/teacher-high-step",
+    "--training.seed",
+    "42",
+    "--algo.config.num-learning-iterations",
+    "2",
+    "--algo.config.save-interval",
+    "1",
+    "--algo.config.num-mini-batches",
+    "4",
+    "--training.preprocess-hook-kwargs",
+    "{\"add_onpath_obstacle\": true, \"num_variants\": 1, \"obstacle_seed\": 42}"
+  ],
+  "environment": {
+    "LOGGER": "disabled",
+    "NGPUS": "1",
+    "CUDA_VISIBLE_DEVICES": "0",
+    "HSSIM_PYTHON": "/opt/php/bin/train-python",
+    "REGISTRY": "file:///data/assets/motions-high-step"
+  },
+  "settings": {
+    "profile": "smoke",
+    "skills": [
+      "locomotion",
+      "low-step",
+      "high-step",
+      "low-climb-76",
+      "high-climb-76"
+    ],
+    "assets": "/data/assets",
+    "num_envs": null,
+    "iterations_target": 2,
+    "registries": "file:///data/assets/motions-high-step",
+    "finetune": null,
+    "source_checkpoints": [],
+    "eval_steps": null
+  },
+  "overrides": {
+    "num_envs": null,
+    "iterations_target": null
+  },
+  "quality_verified": false,
+  "scope": "execution smoke only",
+  "status": "passed",
+  "returncode": 0,
+  "finished_utc": "2026-10-10T02:48:59.785049+00:00",
+  "elapsed_seconds": 19.590651005506516,
+  "log": "/outputs/training-acceptance/smoke/teacher-high-step-1791600520200719675.log",
+  "checkpoint": "/outputs/training-acceptance/smoke/teacher-high-step/PHP-research/20261010_024849-teacher-high-step-locomotion/model_00001.pt",
+  "checkpoint_iteration": 1,
+  "checkpoint_sha256": "0453e3c6c2166a4138be5ad71b7a44e5d321b7fcf959cf1c4b4197154a95f46e"
+}

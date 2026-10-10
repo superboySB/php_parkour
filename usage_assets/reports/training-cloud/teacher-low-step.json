@@ -1,0 +1,67 @@
+{
+  "label": "teacher-low-step",
+  "profile": "smoke",
+  "started_utc": "2026-10-10T02:48:20.237650+00:00",
+  "command": [
+    "bash",
+    "/workspace/php_parkour/wbt_training/training_runs/run_terrain_teacher.sh",
+    "--training.headless",
+    "True",
+    "--training.num-envs",
+    "64",
+    "--training.name",
+    "teacher-low-step",
+    "--training.project",
+    "PHP-research",
+    "--logger.base-dir",
+    "/outputs/training-acceptance/smoke/teacher-low-step",
+    "--training.seed",
+    "42",
+    "--algo.config.num-learning-iterations",
+    "2",
+    "--algo.config.save-interval",
+    "1",
+    "--algo.config.num-mini-batches",
+    "4",
+    "--training.preprocess-hook-kwargs",
+    "{\"add_onpath_obstacle\": true, \"num_variants\": 1, \"obstacle_seed\": 42}"
+  ],
+  "environment": {
+    "LOGGER": "disabled",
+    "NGPUS": "1",
+    "CUDA_VISIBLE_DEVICES": "0",
+    "HSSIM_PYTHON": "/opt/php/bin/train-python",
+    "REGISTRY": "file:///data/assets/motions-low-step"
+  },
+  "settings": {
+    "profile": "smoke",
+    "skills": [
+      "locomotion",
+      "low-step",
+      "high-step",
+      "low-climb-76",
+      "high-climb-76"
+    ],
+    "assets": "/data/assets",
+    "num_envs": null,
+    "iterations_target": 2,
+    "registries": "file:///data/assets/motions-low-step",
+    "finetune": null,
+    "source_checkpoints": [],
+    "eval_steps": null
+  },
+  "overrides": {
+    "num_envs": null,
+    "iterations_target": null
+  },
+  "quality_verified": false,
+  "scope": "execution smoke only",
+  "status": "passed",
+  "returncode": 0,
+  "finished_utc": "2026-10-10T02:48:40.129032+00:00",
+  "elapsed_seconds": 19.891420715488493,
+  "log": "/outputs/training-acceptance/smoke/teacher-low-step-1791600500245705253.log",
+  "checkpoint": "/outputs/training-acceptance/smoke/teacher-low-step/PHP-research/20261010_024829-teacher-low-step-locomotion/model_00001.pt",
+  "checkpoint_iteration": 1,
+  "checkpoint_sha256": "cec2080fbfeadeb922e537c535d1f13bb6f0107c02d996e4138d77e0ce5c0ea1"
+}

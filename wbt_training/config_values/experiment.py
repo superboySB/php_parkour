@@ -2,7 +2,7 @@
 
 The teacher derives from Holosoma's G1 whole-body-tracking experiment;
 terrain variants and students preserve their existing replace chains.
-W&B logging is enabled by default; use ``logger:disabled`` for local-only output.
+Local TensorBoard logging is enabled by default; no online account is required.
 """
 
 from __future__ import annotations
@@ -22,7 +22,7 @@ from holosoma.config_types.algo import (
 )
 from holosoma.config_types.experiment import ExperimentConfig
 from holosoma.config_values import simulator
-from holosoma.config_values.logger import wandb as wandb_logger
+from holosoma.config_values.logger import disabled as local_logger
 from holosoma.config_values.wbt.g1.experiment import g1_29dof_wbt
 
 from wbt_training.config_values.depth_distillation import (
@@ -56,7 +56,7 @@ g1_wbt_terrain_ref = replace(
         name="g1_29dof_wbt_terrain_manager",
         num_envs=4096,
         # Application-specific preprocess: resolves training.registry_name via
-        # wandb (or file://), samples per-env on-path obstacles, splices the
+        # local file:// registries, samples per-env on-path obstacles, splices the
         # combined terrain OBJ + motion NPZ into the config before env build.
         preprocess_hook="wbt_training.config_values.terrain:apply_terrain_preprocess",
         preprocess_hook_kwargs=json.dumps(
@@ -67,7 +67,7 @@ g1_wbt_terrain_ref = replace(
             }
         ),
     ),
-    logger=wandb_logger,
+    logger=local_logger,
     simulator=replace(
         simulator.isaacsim,
         config=replace(

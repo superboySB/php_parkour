@@ -1,7 +1,7 @@
 #!/bin/bash
 # Train the PHP height-scan teacher with unit action scales.
 # Required: REGISTRY=file:///absolute/bundle[,file:///another/bundle].
-# Defaults: LOGGER=wandb, NGPUS=1; LOGGER=disabled keeps logging local.
+# Defaults: LOGGER=tensorboard, NGPUS=1; local events need no account.
 # Optional: WANDB_PROJECT, WANDB_ENTITY, RUN_NAME.
 # Explicit W&B artifacts (entity/project/artifact:version) are also accepted.
 # Additional CLI arguments are passed through to wbt_training.train_agent.

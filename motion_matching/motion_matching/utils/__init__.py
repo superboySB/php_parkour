@@ -1,12 +1,15 @@
 """Packaged G1 assets and the user-configurable motion database cache."""
 
 import os
-from importlib.resources import files
 from pathlib import Path
 
 # Wheels installed by pip expose these resources as ordinary files. Both model
 # loaders need the complete relative mesh hierarchy alongside the model file.
-PKG_ROOT: Path = Path(str(files("motion_matching"))).resolve()
+# The checkout's outer motion_matching/ directory can become a namespace
+# package when `python -m ...` runs at the repository root. In Python 3.12,
+# resources.files then returns a MultiplexedPath whose string is not a path.
+# Resolve relative to this installed module, which always owns the resources.
+PKG_ROOT: Path = Path(__file__).resolve().parents[1]
 ASSETS_DIR: Path = PKG_ROOT / "assets"
 ROBOTS_DIR: Path = ASSETS_DIR / "robots"
 ROBOT_MOTIONS_DIR: Path = ASSETS_DIR / "robot_motions"

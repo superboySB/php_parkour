@@ -1,0 +1,84 @@
+{
+  "status": "passed",
+  "source": "/outputs/motion-pilot/scenarios/low_speed_step/forward_walk0.5s_step0s_motion.npz",
+  "converted": "/outputs/conversion/real-low-step/single/example_motion.npz",
+  "commands": [
+    {
+      "command": [
+        "/isaac-sim/kit/python/bin/python3",
+        "-m",
+        "wbt_training.training_runs.motion_convert",
+        "/outputs/motion-pilot/scenarios/low_speed_step/forward_walk0.5s_step0s_motion.npz",
+        "/outputs/conversion/real-low-step/single/example_motion.npz"
+      ],
+      "returncode": 0,
+      "log": "single.log"
+    },
+    {
+      "command": [
+        "/isaac-sim/kit/python/bin/python3",
+        "-m",
+        "wbt_training.training_runs.motion_convert",
+        "/outputs/conversion/real-low-step/directory-source",
+        "/outputs/conversion/real-low-step/directory-output"
+      ],
+      "returncode": 0,
+      "log": "directory.log"
+    },
+    {
+      "command": [
+        "/isaac-sim/kit/python/bin/python3",
+        "-m",
+        "wbt_training.training_runs.diagnose_motion",
+        "/outputs/conversion/real-low-step/single/example_motion.npz"
+      ],
+      "returncode": 0,
+      "log": "diagnose.log"
+    }
+  ],
+  "shapes": {
+    "fps": [
+      1
+    ],
+    "joint_pos": [
+      364,
+      36
+    ],
+    "joint_vel": [
+      364,
+      35
+    ],
+    "body_pos_w": [
+      364,
+      32,
+      3
+    ],
+    "body_quat_w": [
+      364,
+      32,
+      4
+    ],
+    "body_lin_vel_w": [
+      364,
+      32,
+      3
+    ],
+    "body_ang_vel_w": [
+      364,
+      32,
+      3
+    ],
+    "joint_names": [
+      29
+    ],
+    "body_names": [
+      32
+    ],
+    "vel_cmd": [
+      364,
+      15
+    ]
+  },
+  "checks": "File and directory CLI outputs are identical; all root, DOF, body and optional fields match the expected permutation; native registry validates; diagnose CLI ran",
+  "requires_isaac_or_gpu": false
+}

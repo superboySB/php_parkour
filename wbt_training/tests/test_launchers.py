@@ -174,12 +174,12 @@ def option(command, flag):
 
 
 @pytest.mark.parametrize("name", LAUNCHERS)
-@pytest.mark.parametrize("logger", [None, ""])
-def test_launch_defaults_to_wandb_without_inventing_metadata(launcher, name, logger):
+@pytest.mark.parametrize("logger", [None, "", "tensorboard"])
+def test_launch_defaults_to_local_tensorboard_without_online_metadata(launcher, name, logger):
     result, command = launcher(name, LOGGER=logger)
     assert result.returncode == 0, result.stderr
-    assert "logger:wandb" in command["args"]
-    assert "logger:disabled" not in command["args"]
+    assert "logger:disabled" in command["args"]
+    assert "logger:wandb" not in command["args"]
     assert "--logger.project" not in command["args"]
     assert "--logger.entity" not in command["args"]
     assert "--logger.name" not in command["args"]
@@ -210,7 +210,7 @@ def test_local_launch_is_offline_and_uses_disabled_logger(launcher, name):
 
 
 @pytest.mark.parametrize("name", LAUNCHERS)
-@pytest.mark.parametrize("logger", [None, "wandb"])
+@pytest.mark.parametrize("logger", ["wandb"])
 def test_wandb_logging_uses_only_supplied_metadata(launcher, name, logger):
     result, command = launcher(
         name,
@@ -529,16 +529,17 @@ def test_logger_arguments_match_core_config_union(launcher):
     from holosoma.config_types.experiment import ExperimentConfig
     from holosoma.utils.tyro_utils import TYRO_CONIFG
 
-    for mode in ("disabled", "wandb"):
+    for mode in ("disabled", "tensorboard", "wandb"):
         result, command = launcher(
             "eval_teacher.sh", LOGGER=mode, WANDB_PROJECT="example"
         )
         assert result.returncode == 0, result.stderr
         args = command["args"]
-        start = args.index(f"logger:{mode}")
+        core_mode = "disabled" if mode == "tensorboard" else mode
+        start = args.index(f"logger:{core_mode}")
         stop = args.index("--training.preprocess-hook-kwargs")
         config = tyro.cli(ExperimentConfig, args=args[start:stop], config=TYRO_CONIFG)
-        assert config.logger.type == mode
+        assert config.logger.type == core_mode
         assert config.logger.video.enabled
         if mode == "wandb":
             assert config.logger.project == "example"
@@ -553,7 +554,7 @@ def test_logger_arguments_match_core_config_union(launcher):
     ],
 )
 @pytest.mark.parametrize(
-    "logger,expected_logger", [(None, "wandb"), ("disabled", "disabled")]
+    "logger,expected_logger", [(None, "disabled"), ("tensorboard", "disabled"), ("disabled", "disabled"), ("wandb", "wandb")]
 )
 def test_complete_training_command_parses_against_php_presets(
     launcher, name, finetune, logger, expected_logger

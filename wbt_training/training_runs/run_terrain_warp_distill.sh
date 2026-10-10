@@ -4,7 +4,7 @@
 # REGISTRY defaults to auto and requires W&B teachers with usable data metadata.
 # Override REGISTRY with one file:// directory or W&B artifact per teacher.
 # FINETUNE=1: DAgger + PPO (default); FINETUNE=0: pure DAgger.
-# WARMUP_STEPS=0, NGPUS=2; LOGGER=wandb (LOGGER=disabled keeps logging local).
+# WARMUP_STEPS=0, NGPUS=2; LOGGER=tensorboard writes local events only.
 set -euo pipefail
 source "$(dirname "${BASH_SOURCE[0]}")/setup_env.sh"
 php_launcher_init

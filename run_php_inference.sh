@@ -48,7 +48,11 @@ for model in "$BACKBONE" "$STUDENT"; do
 done
 
 cd "$HOLOSOMA_ROOT"
-source "$HOLOSOMA_ROOT/scripts/source_inference_setup.sh"
+if [[ "${PHP_DOCKER:-0}" == 1 ]]; then
+    source /opt/php/bin/activate inference
+else
+    source "$HOLOSOMA_ROOT/scripts/source_inference_setup.sh"
+fi
 
 # Both paths belong in one Python-list CLI token; the config accepts one model
 # path or a list, and the depth student requires the backbone/student pair.

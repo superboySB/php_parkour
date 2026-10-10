@@ -38,7 +38,27 @@ assert len(OUT32_TO_BM30) == 32
 
 
 def convert(in_path: str, out_path: str) -> bool:
-    d = np.load(in_path, allow_pickle=True)
+    with np.load(in_path, allow_pickle=False) as archive:
+        d = {key: archive[key] for key in archive.files}
+
+    required = {"fps", "joint_pos", "joint_vel", "body_pos_w", "body_quat_w", "body_lin_vel_w", "body_ang_vel_w"}
+    if missing := required - d.keys():
+        raise ValueError(f"{in_path}: missing BeyondMimic fields {sorted(missing)}")
+    if d["joint_pos"].ndim != 2 or d["joint_pos"].shape[1] != 29:
+        raise ValueError(f"{in_path}: BeyondMimic joint_pos must be (T, 29), got {d['joint_pos'].shape}; native Holosoma files are already converted")
+    T = d["joint_pos"].shape[0]
+    for name, shape in {"joint_vel": (T, 29), "body_pos_w": (T, 30, 3), "body_quat_w": (T, 30, 4),
+                        "body_lin_vel_w": (T, 30, 3), "body_ang_vel_w": (T, 30, 3)}.items():
+        if d[name].shape != shape:
+            raise ValueError(f"{in_path}: {name} must be {shape}, got {d[name].shape}")
+    for name in required:
+        if d[name].dtype.kind not in "fiu" or not np.isfinite(d[name]).all():
+            raise ValueError(f"{in_path}: {name} must contain finite numeric values")
+    if d["fps"].size != 1 or float(d["fps"].reshape(-1)[0]) <= 0:
+        raise ValueError(f"{in_path}: fps must be one positive value")
+    for name in ("vel_cmd", "motion_ends", "motion_idxs"):
+        if name in d and (d[name].ndim < 1 or len(d[name]) != T):
+            raise ValueError(f"{in_path}: {name} must have {T} frames")
 
     fps_val = d["fps"]
     if fps_val.ndim > 0:
@@ -54,7 +74,6 @@ def convert(in_path: str, out_path: str) -> bool:
     joint_pos_isaac = d["joint_pos"].astype(np.float64)  # [T, 29]
     joint_vel_isaac = d["joint_vel"].astype(np.float64)
 
-    T = joint_pos_isaac.shape[0]
     if T < 2:
         return False
 
@@ -89,9 +108,10 @@ def convert(in_path: str, out_path: str) -> bool:
         "body_names": np.array(G1_BODY_NAMES),
     }
     for passthrough in ("vel_cmd", "motion_ends", "motion_idxs"):
-        if passthrough in d.files:
+        if passthrough in d:
             out[passthrough] = d[passthrough]
 
+    Path(out_path).parent.mkdir(parents=True, exist_ok=True)
     np.savez(out_path, **out)
     return True
 
@@ -113,8 +133,11 @@ def main():
             if convert(str(f), os.path.join(args.output, f.name)):
                 ok_count += 1
         print(f"Converted {ok_count}/{len(files)} files.")
+        if ok_count != len(files):
+            sys.exit(1)
     else:
-        convert(args.input, args.output)
+        if not convert(args.input, args.output):
+            p.error(f"{args.input} needs at least two frames; no converted file was written")
         print(f"Converted {args.input} -> {args.output}")
 
 

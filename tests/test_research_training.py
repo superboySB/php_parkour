@@ -1,0 +1,233 @@
+"""Protect long training jobs from unsafe resume/skip bookkeeping.
+
+No simulator starts: the fake process writes a real torch checkpoint in the
+same schema that Holosoma saves. Run with train-python in the research Docker.
+"""
+from __future__ import annotations
+
+import importlib.util
+import json
+import sys
+from types import SimpleNamespace
+from pathlib import Path
+
+import pytest
+
+torch = pytest.importorskip("torch")
+ROOT = Path(__file__).resolve().parents[1]
+
+
+def test_actual_rich_wrapped_training_log_timing():
+    spec = importlib.util.spec_from_file_location("research_timing", ROOT / "scripts/research/train_pipeline.py")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    real_log = (ROOT / "tests/fixtures/holosoma_rich_timing.log").read_text()
+    assert module.iteration_timings(real_log) == pytest.approx([1.384, 1.254])
+
+
+@pytest.fixture
+def pipeline(monkeypatch, tmp_path):
+    spec = importlib.util.spec_from_file_location("research_train_pipeline", ROOT / "scripts/research/train_pipeline.py")
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    commands = []
+
+    class FakeProcess:
+        def __init__(self, command, **kwargs):
+            commands.append(command)
+            output = Path(command[command.index("--logger.base-dir") + 1]) / "native-run"
+            output.mkdir(parents=True, exist_ok=True)
+            restored = 0
+            if "--training.checkpoint" in command:
+                restored = torch.load(command[command.index("--training.checkpoint") + 1], weights_only=False)["iter"]
+            iterations = int(command[command.index("--algo.config.num-learning-iterations") + 1]) if "--algo.config.num-learning-iterations" in command else 20000
+            last = restored + iterations - 1
+            checkpoint = {"iter": last, "actor_model_state_dict": {"weight": torch.zeros(1)}, "critic_model_state_dict": {"weight": torch.zeros(1)}}
+            torch.save(checkpoint, output / f"model_{last:05d}.pt")
+            if any("eval_quality.sh" in value for value in command):
+                (output / "evaluation.mp4").write_bytes(b"mock video checked by the stub probe")
+                launcher_index = next(i for i, value in enumerate(command) if Path(value).name == "eval_quality.sh")
+                report_path = Path(command[launcher_index + 2])
+                assert report_path.is_absolute() and report_path.name == "quality.json"
+                assert report_path.is_relative_to(tmp_path), "The mock must never write into the project root"
+                source = Path(kwargs["env"]["CHECKPOINT"])
+                import hashlib
+                report_path.write_text(json.dumps({"status": "completed", "control_steps": int(kwargs["env"]["MAX_EVAL_STEPS"]),
+                    "checkpoint_sha256": hashlib.sha256(source.read_bytes()).hexdigest(), "finite_actions": True, "finite_root_states": True,
+                    "videos": [{"path": str(output / "evaluation.mp4")}], "metrics": {str(i): {"finite": True} for i in range(4)}}))
+            self.stdout = iter(["Computation: 100 steps/s (Collection: 1.000s, Learning 0.500s)\n"])
+
+        def wait(self):
+            return 0
+
+    monkeypatch.setattr(module.subprocess, "Popen", FakeProcess)
+    monkeypatch.setattr(module.subprocess, "run", lambda *a, **kw: SimpleNamespace(returncode=0, stdout='{"format":{"duration":"1.0"}}'))
+    monkeypatch.setenv("PHP_DOCKER", "1")
+
+    def run(*extra, action="teachers"):
+        monkeypatch.setattr(sys, "argv", ["train_pipeline.py", action, "--profile", "official", "--skills", "locomotion", "--output", str(tmp_path), *extra])
+        module.main()
+        label = "teacher-locomotion" if action == "teachers" else "eval-student-finetune" if action == "eval-student" else "export-student-finetune"
+        return json.loads((tmp_path / "official/manifests" / f"{label}.json").read_text())
+
+    return run, commands, tmp_path
+
+
+def test_resume_starts_unstarted_stage_from_iteration_zero(pipeline):
+    run, commands, _ = pipeline
+    completed = run("--iterations", "20", "--resume")
+    assert completed["checkpoint_iteration"] == 19
+    assert "--training.checkpoint" not in commands[-1]
+
+
+def test_resume_continues_past_completed_teacher_to_unstarted_next_teacher(pipeline):
+    run, commands, directory = pipeline
+    run("--iterations", "20")
+    run("--iterations", "20", "--resume", "--skills", "locomotion", "low-step")
+    assert len(commands) == 2
+    assert "--training.checkpoint" not in commands[-1]
+    next_manifest = json.loads((directory / "official/manifests/teacher-low-step.json").read_text())
+    assert next_manifest["checkpoint_iteration"] == 19 and next_manifest["status"] == "passed"
+
+
+def test_resume_restarts_failed_stage_without_any_checkpoint(pipeline):
+    run, commands, directory = pipeline
+    manifests = directory / "official/manifests"
+    manifests.mkdir(parents=True)
+    (manifests / "teacher-locomotion.json").write_text(json.dumps({"profile": "official", "label": "teacher-locomotion", "status": "failed"}))
+    completed = run("--iterations", "2", "--resume")
+    assert completed["checkpoint_iteration"] == 1
+    assert "--training.checkpoint" not in commands[-1]
+
+
+def test_resume_targets_total_iterations_and_accepts_native_ppo_schema(pipeline):
+    run, commands, _ = pipeline
+    pilot = run("--iterations", "20")
+    assert pilot["checkpoint_iteration"] == 19
+    assert pilot["overrides"]["iterations_target"] == 20
+    assert "explicit overrides" in pilot["scope"]
+    finished = run("--resume")
+    command = commands[-1]
+    assert command[command.index("--algo.config.num-learning-iterations") + 1] == "19981"
+    assert finished["checkpoint_iteration"] == 19999
+    assert finished["status"] == "passed"
+    assert finished["quality_verified"] is False
+
+
+def test_skip_requires_success_matching_settings_and_unchanged_checkpoint(pipeline):
+    run, commands, _ = pipeline
+    result = run("--iterations", "20")
+    run("--iterations", "20", "--skip-completed")
+    assert len(commands) == 1
+    Path(result["checkpoint"]).write_bytes(b"interrupted checkpoint bytes")
+    with pytest.raises(Exception):
+        run("--iterations", "20", "--skip-completed")
+    assert len(commands) == 1
+
+
+def test_resume_does_not_repeat_training_when_target_is_already_met(pipeline):
+    run, commands, _ = pipeline
+    pilot = run("--iterations", "20")
+    finished = run("--iterations", "20", "--resume")
+    assert len(commands) == 1
+    assert finished["checkpoint_sha256"] == pilot["checkpoint_sha256"]
+    assert finished["checkpoint_iteration"] == 19
+
+
+@pytest.mark.parametrize("old_status", ["failed", "running"])
+def test_resume_retries_unfinished_stage_even_with_target_checkpoint(pipeline, old_status):
+    run, commands, directory = pipeline
+    result = run("--iterations", "20")
+    manifest = directory / "official/manifests/teacher-locomotion.json"
+    result["status"] = old_status
+    manifest.write_text(json.dumps(result))
+    completed = run("--iterations", "20", "--resume")
+    assert len(commands) == 2
+    assert completed["status"] == "passed"
+    assert completed["checkpoint_iteration"] == 19
+
+
+@pytest.mark.parametrize("bad_value", [float("nan"), float("inf"), float("-inf")])
+@pytest.mark.parametrize("schema", ["ppo", "student"])
+def test_nonfinite_native_policy_tensors_are_rejected(pipeline, bad_value, schema):
+    run, commands, _ = pipeline
+    result = run("--iterations", "2")
+    path = Path(result["checkpoint"])
+    data = torch.load(path, weights_only=False)
+    if schema == "ppo":
+        data["critic_model_state_dict"]["weight"][0] = bad_value
+    else:
+        data["model_state_dict"] = {"nested": {"weights": [torch.tensor([bad_value])]}}
+    torch.save(data, path)
+    with pytest.raises(ValueError, match="Non-finite policy tensor"):
+        run("--iterations", "2", "--skip-completed")
+    assert len(commands) == 1
+
+
+def test_nonempty_policy_dictionary_without_tensors_is_rejected(pipeline):
+    run, _, _ = pipeline
+    result = run("--iterations", "2")
+    path = Path(result["checkpoint"])
+    data = torch.load(path, weights_only=False)
+    data["actor_model_state_dict"] = {"metadata": "no parameters were saved"}
+    torch.save(data, path)
+    with pytest.raises(ValueError, match="No policy tensors"):
+        run("--iterations", "2", "--skip-completed")
+
+
+def test_evaluation_skip_is_bound_to_source_weights_and_duration(pipeline):
+    run, commands, directory = pipeline
+    teacher = run("--iterations", "2")
+    source = directory / "student.pt"
+    source.write_bytes(Path(teacher["checkpoint"]).read_bytes())
+    first = run("--checkpoint", str(source), "--eval-steps", "100", action="eval-student")
+    run("--checkpoint", str(source), "--eval-steps", "100", "--skip-completed", action="eval-student")
+    assert len(commands) == 2
+    longer = run("--checkpoint", str(source), "--eval-steps", "250", "--skip-completed", action="eval-student")
+    assert len(commands) == 3
+    checkpoint = torch.load(source, weights_only=False)
+    checkpoint["actor_model_state_dict"]["weight"] += 1
+    torch.save(checkpoint, source)
+    changed = run("--checkpoint", str(source), "--eval-steps", "250", "--skip-completed", action="eval-student")
+    assert len(commands) == 4
+    assert first["settings"]["eval_steps"] == 100
+    assert longer["settings"]["eval_steps"] == 250
+    assert changed["settings"]["source_checkpoints"] != longer["settings"]["source_checkpoints"]
+
+
+def test_successful_export_without_new_bundle_is_failed(pipeline):
+    run, _, directory = pipeline
+    teacher = run("--iterations", "2")
+    with pytest.raises(SystemExit) as stopped:
+        run("--checkpoint", teacher["checkpoint"], action="export")
+    assert stopped.value.code == 1
+    manifest = json.loads((directory / "official/manifests/export-student-finetune.json").read_text())
+    assert manifest["status"] == "failed"
+    assert "bundle" in manifest["error"]
+
+
+def test_successful_exit_without_target_checkpoint_is_not_success(pipeline, monkeypatch):
+    run, _, directory = pipeline
+    result = run("--iterations", "2")
+    checkpoint = Path(result["checkpoint"])
+    data = torch.load(checkpoint, weights_only=False)
+    data["iter"] = 0
+    torch.save(data, checkpoint)
+
+    class NoSaveProcess:
+        stdout = iter([])
+        def __init__(self, *args, **kwargs):
+            pass
+        def wait(self):
+            return 0
+
+    # Replace the module's shared subprocess factory used by the fixture.
+    import subprocess
+    monkeypatch.setattr(subprocess, "Popen", NoSaveProcess)
+    with pytest.raises(SystemExit) as stopped:
+        run("--iterations", "20")
+    assert stopped.value.code == 1
+    manifest = json.loads((directory / "official/manifests/teacher-locomotion.json").read_text())
+    assert manifest["status"] == "failed"
+    assert "target iteration" in manifest["error"]

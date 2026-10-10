@@ -15,7 +15,11 @@ fi
 HOLOSOMA_ROOT=$(cd -- "$HOLOSOMA_ROOT" && pwd)
 cd "$HOLOSOMA_ROOT"
 
-source "$HOLOSOMA_ROOT/scripts/source_mujoco_setup.sh"
+if [[ "${PHP_DOCKER:-0}" == 1 ]]; then
+    source /opt/php/bin/activate sim
+else
+    source "$HOLOSOMA_ROOT/scripts/source_mujoco_setup.sh"
+fi
 
 if [ -z "${DISPLAY:-}" ]; then
     echo "[run_php_sim] DISPLAY is unset — the MuJoCo window will not open and the" >&2

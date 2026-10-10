@@ -1,5 +1,9 @@
 # [RSS 2026] Perceptive Humanoid Parkour: Chaining Dynamic Human Skills via Motion Matching
 
+Research Docker workflow: [配置与运行手册](note.md) · [功能复现与图像/视频证据](usage.md).
+The `research` branch uses one image for local simulation and cloud training,
+local TensorBoard events and file registries; project packages are installed inside Docker.
+
 Zhen Wu\*, Xiaoyu Huang\*, Lujie Yang\*, Yuanhang Zhang, Xi Chen,
 Pieter Abbeel†, Rocky Duan†, Angjoo Kanazawa†, Carmelo Sferrazza†, Guanya Shi†, C. Karen Liu†
 

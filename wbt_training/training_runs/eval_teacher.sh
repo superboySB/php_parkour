@@ -4,7 +4,7 @@
 # REGISTRY=file:///absolute/bundle[,file:///another/bundle].
 # Explicit W&B artifacts and REGISTRY=auto with a W&B teacher are supported.
 # NUM_ENVS=1, MAX_EVAL_STEPS=10000, EXPORT_ONNX=False, GPU_INDEX=0.
-# LOGGER=wandb by default; LOGGER=disabled keeps logging local.
+# LOGGER=tensorboard by default; no online logging is required.
 # Extra CLI args override evaluation defaults.
 set -euo pipefail
 source "$(dirname "${BASH_SOURCE[0]}")/setup_env.sh"

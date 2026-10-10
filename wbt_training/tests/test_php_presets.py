@@ -10,7 +10,7 @@ import numpy as np
 import pytest
 import tyro
 from holosoma.config_types.experiment import ExperimentConfig
-from holosoma.config_values.logger import disabled, wandb
+from holosoma.config_values.logger import disabled
 from holosoma.config_values.robot import g1_29dof as core_g1_robot
 from holosoma.config_values.wbt.g1.experiment import g1_29dof_wbt
 from holosoma.managers.utils import resolve_callable
@@ -173,20 +173,20 @@ def test_registry_contains_only_the_eight_php_presets():
 
 
 @pytest.mark.parametrize("name", PHP_PRESETS)
-def test_cli_selects_presets_with_wandb_logging_by_default(name):
+def test_cli_selects_presets_with_local_tensorboard_by_default(name):
     cfg = tyro.cli(
         experiment.AnnotatedExperimentConfig,
         args=[f"exp:{name.replace('_', '-')}"],
         config=TYRO_CONIFG,
     )
     assert cfg == experiment.DEFAULTS[name]
-    assert cfg.logger == wandb
+    assert cfg.logger == disabled
     motion_config = cfg.command.setup_terms["motion_command"].params["motion_config"]
     assert motion_config.resample_on_motion_end is True
 
 
 @pytest.mark.parametrize("name", PHP_PRESETS)
-def test_wandb_logging_can_be_disabled_explicitly(name):
+def test_local_logging_can_be_selected_explicitly(name):
     cfg = tyro.cli(
         experiment.AnnotatedExperimentConfig,
         args=[f"exp:{name.replace('_', '-')}", "logger:disabled"],

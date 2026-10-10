@@ -1,0 +1,46 @@
+name: php-parkour-research
+services:
+  php:
+    image: php-parkour:research
+    container_name: php-parkour-research
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    working_dir: /workspace/php_parkour
+    command: ["sleep", "infinity"]
+    network_mode: host
+    ipc: private
+    shm_size: 8gb
+    init: true
+    stdin_open: true
+    tty: true
+    environment:
+      PHP_DOCKER: "1"
+      ACCEPT_EULA: "Y"
+      PRIVACY_CONSENT: "Y"
+      OMNI_KIT_ACCEPT_EULA: "YES"
+      OMNI_KIT_ALLOW_ROOT: "1"
+      NVIDIA_DRIVER_CAPABILITIES: compute,utility,graphics
+      LOGGER: tensorboard
+      WANDB_MODE: disabled
+      PHP_MOTION_DATABASE_DIR: /data/assets/databases
+    volumes:
+      - ..:/workspace/php_parkour
+      - ../outputs/research:/outputs
+      - ../outputs/research/assets:/data/assets
+      - ../outputs/research/cache:/data/cache
+      - isaac-kit-cache:/isaac-sim/kit/cache
+      - isaac-ov-cache:/root/.cache/ov
+      - isaac-gl-cache:/root/.cache/nvidia/GLCache
+      - isaac-compute-cache:/root/.nv/ComputeCache
+      - isaac-logs:/root/.nvidia-omniverse/logs
+      - isaac-data:/root/.local/share/ov/data
+    devices:
+      - nvidia.com/gpu=${PHP_GPU:-0}
+volumes:
+  isaac-kit-cache:
+  isaac-ov-cache:
+  isaac-gl-cache:
+  isaac-compute-cache:
+  isaac-logs:
+  isaac-data:

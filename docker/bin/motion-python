@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+set -e
+# Isaac's PYTHONPATH contains its NumPy 1 installation; isolate this venv.
+unset PYTHONPATH PYTHONHOME
+export PATH="/opt/php/runtimes/motion/bin:$PATH"
+export PHP_RUNTIME=motion
+exec /opt/php/envs/motion/bin/python "$@"

@@ -60,3 +60,12 @@ def test_database_cache_override_is_resolved_without_creating_it(tmp_path) -> No
 
 def test_db_path_is_under_database_dir() -> None:
     assert Path(paths.db_path("foo.bin")) == paths.DATABASE_DIR / "foo.bin"
+
+
+def test_installed_models_resolve_from_checkout_root() -> None:
+    checkout = paths.PKG_ROOT.parents[1]
+    env = {key: value for key, value in os.environ.items() if key != "PYTHONPATH"}
+    code = "from pathlib import Path; from motion_matching.utils import G1_URDF,G1_MJCF; assert Path(G1_URDF).is_file(),G1_URDF; assert Path(G1_MJCF).is_file(),G1_MJCF"
+    result = subprocess.run([sys.executable, "-c", code], env=env, cwd=checkout,
+                            capture_output=True, text=True, check=False)
+    assert result.returncode == 0, result.stderr

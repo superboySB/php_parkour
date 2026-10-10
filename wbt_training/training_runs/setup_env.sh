@@ -13,16 +13,18 @@ php_launcher_init() {
     PHP_REPO_ROOT="$(cd "$PHP_TRAINING_DIR/../.." && pwd)"
     CONDA_ROOT="${CONDA_ROOT:-$HOME/.holosoma_deps/miniconda3}"
     HSSIM_PYTHON="${HSSIM_PYTHON:-$CONDA_ROOT/envs/${ENV_NAME:-php}/bin/python}"
-    LOGGER="${LOGGER:-wandb}"
+    LOGGER="${LOGGER:-tensorboard}"
     case "$LOGGER" in
-        disabled) LOGGER_ARGS=(logger:disabled) ;;
+        # Holosoma always writes TensorBoard; its disabled logger disables only
+        # the optional online integration, not the local SummaryWriter.
+        tensorboard|disabled) LOGGER_ARGS=(logger:disabled) ;;
         wandb)
             LOGGER_ARGS=(logger:wandb)
             [[ -z "${WANDB_PROJECT:-}" ]] || LOGGER_ARGS+=(--logger.project "$WANDB_PROJECT")
             [[ -z "${WANDB_ENTITY:-}" ]] || LOGGER_ARGS+=(--logger.entity "$WANDB_ENTITY")
             [[ -z "${RUN_NAME:-}" ]] || LOGGER_ARGS+=(--logger.name "$RUN_NAME")
             ;;
-        *) php_error "LOGGER must be disabled or wandb (got '$LOGGER')"; return 1 ;;
+        *) php_error "LOGGER must be tensorboard, disabled or wandb (got '$LOGGER')"; return 1 ;;
     esac
 }
 
