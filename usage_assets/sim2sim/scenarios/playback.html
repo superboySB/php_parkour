@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>G1 · 17 场景 ONNX 物理闭环</title><style>
+:root{color-scheme:dark}*{box-sizing:border-box}body{background:#121b26;color:#edf2f8;font:16px/1.55 system-ui;margin:0;padding:30px}a{color:#8dc7ff}header,.toolbar,.counts{max-width:1500px;margin:0 auto 24px}h1{font-size:30px;margin:0 0 12px}p{color:#bfd0df;margin:10px 0}.counts{display:flex;gap:12px;flex-wrap:wrap}.counts span{background:#203043;border:1px solid #395169;border-radius:8px;padding:10px 15px}.toolbar{display:flex;gap:12px;flex-wrap:wrap}input,select{font:inherit;color:inherit;background:#203043;border:1px solid #526980;border-radius:6px;padding:9px 12px}input{flex:1;min-width:240px}main{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:24px;max-width:1500px;margin:auto}article{background:#203043;padding:18px;border-radius:12px;min-width:0}.card-head{display:flex;align-items:center;gap:8px;justify-content:space-between;flex-wrap:wrap}h2{font-size:21px;margin:0}.name{font-size:14px;color:#91a9bd;margin-top:3px}.config{min-height:52px;font-size:14px;overflow-wrap:anywhere}.badge{font-size:12px;border-radius:99px;padding:5px 10px;background:#35485b;white-space:nowrap}.threshold{background:#6b3929;color:#ffd5bc}.unflagged{background:#23553f;color:#c2f1d4}.execution_failed{background:#74313d;color:#ffd5dd}video{width:100%;display:block;border-radius:6px;background:#0b1119;aspect-ratio:16/9}.small{font-size:12px}dl{display:grid;grid-template-columns:1fr 1fr;gap:10px 16px;margin:14px 0}dl div{min-width:0}dt{font-size:12px;color:#9cb5c9}dd{margin:1px 0;font-variant-numeric:tabular-nums;font-size:14px}details{border-top:1px solid #40566b;padding-top:10px;font-size:13px}summary{cursor:pointer;color:#b8dcff}.hash{overflow-wrap:anywhere}.missing{padding:30px 10px;background:#172330}[hidden]{display:none!important}footer{max-width:1500px;margin:28px auto;color:#91a9bd;font-size:13px}code{font-size:12px}@media(max-width:600px){body{padding:18px}h1{font-size:25px}}
+</style></head><body><header><h1>G1 · 17 场景 ONNX 物理闭环</h1>
+<p>真实 MuJoCo 物理、原生 Unitree DDS 与深度共享内存、公开学生 ONNX 策略。每种场景只选一个完整生成配置的 OBJ，持续输入低速或高速前进，目标为 10 秒策略时间，seed 42。本页覆盖 17 个代表几何，不是 629 个策略试验，也不证明同名参考技能或整个障碍课程完成。</p>
+<p>高度/倾斜阈值：移除吊架后，骨盆高度 &lt; 0.4 m 或基座朝上余弦 &lt; 0.35。正常攀爬也可能触发倾斜阈值；未触发不等于课程成功。原片保留起始安置阶段，策略控制阶段吊架已移除。所有触发事件和执行失败均保留。</p>
+<p><a href="manifest.json">媒体与来源 SHA-256</a> · <a href="matrix.json">完整原始验收矩阵</a></p></header>
+<div class="counts"><span>代表场景 <b>17</b></span><span>执行完成 <b>17</b></span><span>未触发阈值 <b>3</b></span><span>阈值事件 <b>14</b></span><span>执行失败 <b>0</b></span></div>
+<div class="toolbar"><input id="search" type="search" placeholder="搜索场景或配置" aria-label="搜索场景或配置"><select id="state" aria-label="筛选结果"><option value="all">全部结果</option><option value="threshold">触发高度/倾斜阈值</option><option value="unflagged">未触发阈值</option><option value="execution_failed">执行失败</option></select><span id="visible"></span></div>
+<main><article id="random_locomotion" data-state="unflagged" data-search="random_locomotion cfg0035_stand_2.0s_run_forward_1.2s_stand_2.0s">
+<div class="card-head"><h2>自由移动与散落障碍</h2><span class="badge unflagged">本次未触发阈值</span></div>
+<p class="name">random_locomotion</p><p class="config">源索引 35（共 100 组）：<code>cfg0035_stand_2.0s_run_forward_1.2s_stand_2.0s</code></p>
+<video controls preload="metadata" poster="random_locomotion/rollout-01.png" src="random_locomotion/rollout-01.mp4"></video><p class="small">原片 14.08 秒，640 × 360，50/1 FPS · <a href="random_locomotion/rollout-01.mp4">下载 MP4</a></p>
+<dl><div><dt>持续输入</dt><dd>高速前进（6）</dd></div><div><dt>实际策略时间</dt><dd>10.014 s</dd></div>
+<div><dt>XY 净位移</dt><dd>(19.910, 3.037) m</dd></div><div><dt>XY 路径长度</dt><dd>20.481 m</dd></div>
+<div><dt>最低骨盆高度</dt><dd>0.620 m</dd></div><div><dt>最低朝上余弦</dt><dd>0.854</dd></div>
+<div><dt>倾斜阈值累计时间</dt><dd>0.000 s</dd></div><div><dt>同类发布训练数据</dt><dd>有</dd></div></dl>
+<details><summary>配置、输入与原始证据</summary><p>这是所选场景的地形几何。持续前进指令没有重放参考动作中的翻滚、跳跃或翻越序列。</p>
+<p class="hash">OBJ SHA-256：<code>354c04a1740902aa401aac2b8227b71a8c88afce5d3821ffb6c318de77d10ba7</code></p><p><a href="random_locomotion/result.json">result.json</a> · <a href="random_locomotion/trajectory.csv">trajectory.csv</a> · <a href="random_locomotion/execution.log">execution.log</a></p></details></article><article id="low_speed_step" data-state="threshold" data-search="low_speed_step forward_walk0.5s_step0s">
+<div class="card-head"><h2>低速台阶</h2><span class="badge threshold">触发高度/倾斜阈值</span></div>
+<p class="name">low_speed_step</p><p class="config">源索引 0（共 56 组）：<code>forward_walk0.5s_step0s</code></p>
+<video controls preload="metadata" poster="low_speed_step/rollout-01.png" src="low_speed_step/rollout-01.mp4"></video><p class="small">原片 14.00 秒，640 × 360，50/1 FPS · <a href="low_speed_step/rollout-01.mp4">下载 MP4</a></p>
+<dl><div><dt>持续输入</dt><dd>低速前进（1）</dd></div><div><dt>实际策略时间</dt><dd>10.018 s</dd></div>
+<div><dt>XY 净位移</dt><dd>(0.926, -0.187) m</dd></div><div><dt>XY 路径长度</dt><dd>3.561 m</dd></div>
+<div><dt>最低骨盆高度</dt><dd>0.421 m</dd></div><div><dt>最低朝上余弦</dt><dd>-0.271</dd></div>
+<div><dt>倾斜阈值累计时间</dt><dd>0.500 s</dd></div><div><dt>同类发布训练数据</dt><dd>有</dd></div></dl>
+<details><summary>配置、输入与原始证据</summary><p>这是所选场景的地形几何。持续前进指令没有重放参考动作中的翻滚、跳跃或翻越序列。</p>
+<p class="hash">OBJ SHA-256：<code>dce4eacd1b9df5b8614c2b37242f5c826a72872c10acc745b1e91935779d2a21</code></p><p><a href="low_speed_step/result.json">result.json</a> · <a href="low_speed_step/trajectory.csv">trajectory.csv</a> · <a href="low_speed_step/execution.log">execution.log</a></p></details></article><article id="high_speed_step" data-state="threshold" data-search="high_speed_step run_forward_0.6s_step0s">
+<div class="card-head"><h2>高速台阶</h2><span class="badge threshold">触发高度/倾斜阈值</span></div>
+<p class="name">high_speed_step</p><p class="config">源索引 0（共 60 组）：<code>run_forward_0.6s_step0s</code></p>
+<video controls preload="metadata" poster="high_speed_step/rollout-01.png" src="high_speed_step/rollout-01.mp4"></video><p class="small">原片 14.08 秒，640 × 360，50/1 FPS · <a href="high_speed_step/rollout-01.mp4">下载 MP4</a></p>
+<dl><div><dt>持续输入</dt><dd>高速前进（6）</dd></div><div><dt>实际策略时间</dt><dd>10.002 s</dd></div>
+<div><dt>XY 净位移</dt><dd>(18.966, 3.352) m</dd></div><div><dt>XY 路径长度</dt><dd>19.653 m</dd></div>
+<div><dt>最低骨盆高度</dt><dd>0.627 m</dd></div><div><dt>最低朝上余弦</dt><dd>0.245</dd></div>
+<div><dt>倾斜阈值累计时间</dt><dd>0.060 s</dd></div><div><dt>同类发布训练数据</dt><dd>有</dd></div></dl>
+<details><summary>配置、输入与原始证据</summary><p>这是所选场景的地形几何。持续前进指令没有重放参考动作中的翻滚、跳跃或翻越序列。</p>
+<p class="hash">OBJ SHA-256：<code>aa9b612e9a9e86a79d2d6a781f582660ee6a9aef450fb0d50d30388913e1ba94</code></p><p><a href="high_speed_step/result.json">result.json</a> · <a href="high_speed_step/trajectory.csv">trajectory.csv</a> · <a href="high_speed_step/execution.log">execution.log</a></p></details></article><article id="low_speed_climb_58" data-state="unflagged" data-search="low_speed_climb_58 forward_walk0.5s_plat0s">
+<div class="card-head"><h2>低速攀爬 58</h2><span class="badge unflagged">本次未触发阈值</span></div>
+<p class="name">low_speed_climb_58</p><p class="config">源索引 0（共 40 组）：<code>forward_walk0.5s_plat0s</code></p>
+<video controls preload="metadata" poster="low_speed_climb_58/rollout-01.png" src="low_speed_climb_58/rollout-01.mp4"></video><p class="small">原片 13.96 秒，640 × 360，50/1 FPS · <a href="low_speed_climb_58/rollout-01.mp4">下载 MP4</a></p>
+<dl><div><dt>持续输入</dt><dd>低速前进（1）</dd></div><div><dt>实际策略时间</dt><dd>10.014 s</dd></div>
+<div><dt>XY 净位移</dt><dd>(6.723, -1.816) m</dd></div><div><dt>XY 路径长度</dt><dd>7.510 m</dd></div>
+<div><dt>最低骨盆高度</dt><dd>0.712 m</dd></div><div><dt>最低朝上余弦</dt><dd>0.902</dd></div>
+<div><dt>倾斜阈值累计时间</dt><dd>0.000 s</dd></div><div><dt>同类发布训练数据</dt><dd>无</dd></div></dl>
+<details><summary>配置、输入与原始证据</summary><p>这是所选场景的地形几何。持续前进指令没有重放参考动作中的翻滚、跳跃或翻越序列。</p>
+<p class="hash">OBJ SHA-256：<code>36a9bf749b161e80fc98e4ba7988bc7cf44a0f290706bf481607629eb68c6518</code></p><p><a href="low_speed_climb_58/result.json">result.json</a> · <a href="low_speed_climb_58/trajectory.csv">trajectory.csv</a> · <a href="low_speed_climb_58/execution.log">execution.log</a></p></details></article><article id="high_speed_climb_58" data-state="threshold" data-search="high_speed_climb_58 run_forward_0.6s_step0.1s">
+<div class="card-head"><h2>高速攀爬 58</h2><span class="badge threshold">触发高度/倾斜阈值</span></div>
+<p class="name">high_speed_climb_58</p><p class="config">源索引 0（共 40 组）：<code>run_forward_0.6s_step0.1s</code></p>
+<video controls preload="metadata" poster="high_speed_climb_58/rollout-01.png" src="high_speed_climb_58/rollout-01.mp4"></video><p class="small">原片 14.00 秒，640 × 360，50/1 FPS · <a href="high_speed_climb_58/rollout-01.mp4">下载 MP4</a></p>
+<dl><div><dt>持续输入</dt><dd>高速前进（6）</dd></div><div><dt>实际策略时间</dt><dd>10.004 s</dd></div>
+<div><dt>XY 净位移</dt><dd>(9.109, 2.909) m</dd></div><div><dt>XY 路径长度</dt><dd>10.215 m</dd></div>
+<div><dt>最低骨盆高度</dt><dd>0.622 m</dd></div><div><dt>最低朝上余弦</dt><dd>0.076</dd></div>
+<div><dt>倾斜阈值累计时间</dt><dd>0.800 s</dd></div><div><dt>同类发布训练数据</dt><dd>无</dd></div></dl>
+<details><summary>配置、输入与原始证据</summary><p>这是所选场景的地形几何。持续前进指令没有重放参考动作中的翻滚、跳跃或翻越序列。</p>
+<p class="hash">OBJ SHA-256：<code>0f6d219f6886ae6683c4e6ee759ee49f6c05dfe2157795f7db15f7a7124688d1</code></p><p><a href="high_speed_climb_58/result.json">result.json</a> · <a href="high_speed_climb_58/trajectory.csv">trajectory.csv</a> · <a href="high_speed_climb_58/execution.log">execution.log</a></p></details></article><article id="low_speed_climb_76" data-state="threshold" data-search="low_speed_climb_76 forward_walk0.6s_step0.7s">
+<div class="card-head"><h2>低速攀爬 76</h2><span class="badge threshold">触发高度/倾斜阈值</span></div>
+<p class="name">low_speed_climb_76</p><p class="config">源索引 0（共 40 组）：<code>forward_walk0.6s_step0.7s</code></p>
+<video controls preload="metadata" poster="low_speed_climb_76/rollout-01.png" src="low_speed_climb_76/rollout-01.mp4"></video><p class="small">原片 13.94 秒，640 × 360，50/1 FPS · <a href="low_speed_climb_76/rollout-01.mp4">下载 MP4</a></p>
+<dl><div><dt>持续输入</dt><dd>低速前进（1）</dd></div><div><dt>实际策略时间</dt><dd>10.010 s</dd></div>
+<div><dt>XY 净位移</dt><dd>(2.908, 0.817) m</dd></div><div><dt>XY 路径长度</dt><dd>3.682 m</dd></div>
+<div><dt>最低骨盆高度</dt><dd>0.674 m</dd></div><div><dt>最低朝上余弦</dt><dd>-0.001</dd></div>
+<div><dt>倾斜阈值累计时间</dt><dd>1.600 s</dd></div><div><dt>同类发布训练数据</dt><dd>有</dd></div></dl>
+<details><summary>配置、输入与原始证据</summary><p>这是所选场景的地形几何。持续前进指令没有重放参考动作中的翻滚、跳跃或翻越序列。</p>
+<p class="hash">OBJ SHA-256：<code>caef86b7db9c4ac86430eba949985e030605a59118d6ec969103b1d7016cecae</code></p><p><a href="low_speed_climb_76/result.json">result.json</a> · <a href="low_speed_climb_76/trajectory.csv">trajectory.csv</a> · <a href="low_speed_climb_76/execution.log">execution.log</a></p></details></article><article id="high_speed_climb_76" data-state="threshold" data-search="high_speed_climb_76 run_forward_0.6s_step0s">
+<div class="card-head"><h2>高速攀爬 76</h2><span class="badge threshold">触发高度/倾斜阈值</span></div>
+<p class="name">high_speed_climb_76</p><p class="config">源索引 0（共 40 组）：<code>run_forward_0.6s_step0s</code></p>
+<video controls preload="metadata" poster="high_speed_climb_76/rollout-01.png" src="high_speed_climb_76/rollout-01.mp4"></video><p class="small">原片 14.14 秒，640 × 360，50/1 FPS · <a href="high_speed_climb_76/rollout-01.mp4">下载 MP4</a></p>
+<dl><div><dt>持续输入</dt><dd>高速前进（6）</dd></div><div><dt>实际策略时间</dt><dd>10.012 s</dd></div>
+<div><dt>XY 净位移</dt><dd>(8.658, 3.607) m</dd></div><div><dt>XY 路径长度</dt><dd>10.266 m</dd></div>
+<div><dt>最低骨盆高度</dt><dd>0.628 m</dd></div><div><dt>最低朝上余弦</dt><dd>0.159</dd></div>
+<div><dt>倾斜阈值累计时间</dt><dd>0.800 s</dd></div><div><dt>同类发布训练数据</dt><dd>有</dd></div></dl>
+<details><summary>配置、输入与原始证据</summary><p>这是所选场景的地形几何。持续前进指令没有重放参考动作中的翻滚、跳跃或翻越序列。</p>
+<p class="hash">OBJ SHA-256：<code>8ef153b4c79e73d3bd96228ea517cb3825d4652d231e8080ee1d4a98e6a2763e</code></p><p><a href="high_speed_climb_76/result.json">result.json</a> · <a href="high_speed_climb_76/trajectory.csv">trajectory.csv</a> · <a href="high_speed_climb_76/execution.log">execution.log</a></p></details></article><article id="low_speed_climb_94" data-state="threshold" data-search="low_speed_climb_94 forward_walk0.7s_step0.5s">
+<div class="card-head"><h2>低速攀爬 94</h2><span class="badge threshold">触发高度/倾斜阈值</span></div>
+<p class="name">low_speed_climb_94</p><p class="config">源索引 0（共 20 组）：<code>forward_walk0.7s_step0.5s</code></p>
+<video controls preload="metadata" poster="low_speed_climb_94/rollout-01.png" src="low_speed_climb_94/rollout-01.mp4"></video><p class="small">原片 14.02 秒，640 × 360，50/1 FPS · <a href="low_speed_climb_94/rollout-01.mp4">下载 MP4</a></p>
+<dl><div><dt>持续输入</dt><dd>低速前进（1）</dd></div><div><dt>实际策略时间</dt><dd>10.000 s</dd></div>
+<div><dt>XY 净位移</dt><dd>(2.500, -0.562) m</dd></div><div><dt>XY 路径长度</dt><dd>4.036 m</dd></div>
+<div><dt>最低骨盆高度</dt><dd>0.660 m</dd></div><div><dt>最低朝上余弦</dt><dd>0.233</dd></div>
+<div><dt>倾斜阈值累计时间</dt><dd>0.480 s</dd></div><div><dt>同类发布训练数据</dt><dd>无</dd></div></dl>
+<details><summary>配置、输入与原始证据</summary><p>这是所选场景的地形几何。持续前进指令没有重放参考动作中的翻滚、跳跃或翻越序列。</p>
+<p class="hash">OBJ SHA-256：<code>a42b90f17d6a334dfec36a7e2afe7190464a5bea8163c3bf5d4335827c0a8895</code></p><p><a href="low_speed_climb_94/result.json">result.json</a> · <a href="low_speed_climb_94/trajectory.csv">trajectory.csv</a> · <a href="low_speed_climb_94/execution.log">execution.log</a></p></details></article><article id="high_speed_climb_94" data-state="threshold" data-search="high_speed_climb_94 run_forward_0.6s_step0s">
+<div class="card-head"><h2>高速攀爬 94</h2><span class="badge threshold">触发高度/倾斜阈值</span></div>
+<p class="name">high_speed_climb_94</p><p class="config">源索引 0（共 15 组）：<code>run_forward_0.6s_step0s</code></p>
+<video controls preload="metadata" poster="high_speed_climb_94/rollout-01.png" src="high_speed_climb_94/rollout-01.mp4"></video><p class="small">原片 14.08 秒，640 × 360，50/1 FPS · <a href="high_speed_climb_94/rollout-01.mp4">下载 MP4</a></p>
+<dl><div><dt>持续输入</dt><dd>高速前进（6）</dd></div><div><dt>实际策略时间</dt><dd>10.012 s</dd></div>
+<div><dt>XY 净位移</dt><dd>(4.024, -2.190) m</dd></div><div><dt>XY 路径长度</dt><dd>7.561 m</dd></div>
+<div><dt>最低骨盆高度</dt><dd>0.063 m</dd></div><div><dt>最低朝上余弦</dt><dd>-0.735</dd></div>
+<div><dt>倾斜阈值累计时间</dt><dd>5.960 s</dd></div><div><dt>同类发布训练数据</dt><dd>无</dd></div></dl>
+<details><summary>配置、输入与原始证据</summary><p>这是所选场景的地形几何。持续前进指令没有重放参考动作中的翻滚、跳跃或翻越序列。</p>
+<p class="hash">OBJ SHA-256：<code>aad1ca0f4c6ed90b44b03508d38207c6881166fd130cc8258042d2ba1d339a91</code></p><p><a href="high_speed_climb_94/result.json">result.json</a> · <a href="high_speed_climb_94/trajectory.csv">trajectory.csv</a> · <a href="high_speed_climb_94/execution.log">execution.log</a></p></details></article><article id="low_speed_roll_78" data-state="threshold" data-search="low_speed_roll_78 roll_78">
+<div class="card-head"><h2>低速翻滚 78</h2><span class="badge threshold">触发高度/倾斜阈值</span></div>
+<p class="name">low_speed_roll_78</p><p class="config">源索引 0（共 1 组）：<code>roll_78</code></p>
+<video controls preload="metadata" poster="low_speed_roll_78/rollout-01.png" src="low_speed_roll_78/rollout-01.mp4"></video><p class="small">原片 13.98 秒，640 × 360，50/1 FPS · <a href="low_speed_roll_78/rollout-01.mp4">下载 MP4</a></p>
+<dl><div><dt>持续输入</dt><dd>低速前进（1）</dd></div><div><dt>实际策略时间</dt><dd>10.002 s</dd></div>
+<div><dt>XY 净位移</dt><dd>(3.158, 0.599) m</dd></div><div><dt>XY 路径长度</dt><dd>3.784 m</dd></div>
+<div><dt>最低骨盆高度</dt><dd>0.652 m</dd></div><div><dt>最低朝上余弦</dt><dd>0.020</dd></div>
+<div><dt>倾斜阈值累计时间</dt><dd>1.660 s</dd></div><div><dt>同类发布训练数据</dt><dd>无</dd></div></dl>
+<details><summary>配置、输入与原始证据</summary><p>这是所选场景的地形几何。持续前进指令没有重放参考动作中的翻滚、跳跃或翻越序列。</p>
+<p class="hash">OBJ SHA-256：<code>b00486a4cfe305677eec73e2969de27861d02b5e33f74d23b423a089499944af</code></p><p><a href="low_speed_roll_78/result.json">result.json</a> · <a href="low_speed_roll_78/trajectory.csv">trajectory.csv</a> · <a href="low_speed_roll_78/execution.log">execution.log</a></p></details></article><article id="low_speed_roll_90" data-state="threshold" data-search="low_speed_roll_90 roll_90_walk0.4s">
+<div class="card-head"><h2>低速翻滚 90</h2><span class="badge threshold">触发高度/倾斜阈值</span></div>
+<p class="name">low_speed_roll_90</p><p class="config">源索引 0（共 3 组）：<code>roll_90_walk0.4s</code></p>
+<video controls preload="metadata" poster="low_speed_roll_90/rollout-01.png" src="low_speed_roll_90/rollout-01.mp4"></video><p class="small">原片 14.06 秒，640 × 360，50/1 FPS · <a href="low_speed_roll_90/rollout-01.mp4">下载 MP4</a></p>
+<dl><div><dt>持续输入</dt><dd>低速前进（1）</dd></div><div><dt>实际策略时间</dt><dd>10.010 s</dd></div>
+<div><dt>XY 净位移</dt><dd>(0.740, -0.932) m</dd></div><div><dt>XY 路径长度</dt><dd>3.930 m</dd></div>
+<div><dt>最低骨盆高度</dt><dd>0.373 m</dd></div><div><dt>最低朝上余弦</dt><dd>-0.322</dd></div>
+<div><dt>倾斜阈值累计时间</dt><dd>2.120 s</dd></div><div><dt>同类发布训练数据</dt><dd>无</dd></div></dl>
+<details><summary>配置、输入与原始证据</summary><p>这是所选场景的地形几何。持续前进指令没有重放参考动作中的翻滚、跳跃或翻越序列。</p>
+<p class="hash">OBJ SHA-256：<code>084c54e11aabe8f5ff15ae4a7a9ece6981fa7d61ffc8ab58a2119c3032a2f419</code></p><p><a href="low_speed_roll_90/result.json">result.json</a> · <a href="low_speed_roll_90/trajectory.csv">trajectory.csv</a> · <a href="low_speed_roll_90/execution.log">execution.log</a></p></details></article><article id="high_speed_roll_134" data-state="threshold" data-search="high_speed_roll_134 run_forward_0.5s_step1.0s">
+<div class="card-head"><h2>高速翻滚 134</h2><span class="badge threshold">触发高度/倾斜阈值</span></div>
+<p class="name">high_speed_roll_134</p><p class="config">源索引 0（共 40 组）：<code>run_forward_0.5s_step1.0s</code></p>
+<video controls preload="metadata" poster="high_speed_roll_134/rollout-01.png" src="high_speed_roll_134/rollout-01.mp4"></video><p class="small">原片 14.20 秒，640 × 360，50/1 FPS · <a href="high_speed_roll_134/rollout-01.mp4">下载 MP4</a></p>
+<dl><div><dt>持续输入</dt><dd>高速前进（6）</dd></div><div><dt>实际策略时间</dt><dd>10.010 s</dd></div>
+<div><dt>XY 净位移</dt><dd>(2.121, 0.410) m</dd></div><div><dt>XY 路径长度</dt><dd>4.775 m</dd></div>
+<div><dt>最低骨盆高度</dt><dd>0.064 m</dd></div><div><dt>最低朝上余弦</dt><dd>-0.529</dd></div>
+<div><dt>倾斜阈值累计时间</dt><dd>7.200 s</dd></div><div><dt>同类发布训练数据</dt><dd>无</dd></div></dl>
+<details><summary>配置、输入与原始证据</summary><p>这是所选场景的地形几何。持续前进指令没有重放参考动作中的翻滚、跳跃或翻越序列。</p>
+<p class="hash">OBJ SHA-256：<code>0cb2e95f76afafd5796ab976e2999fe201ae9dfd4946772b8ed05a7b373989be</code></p><p><a href="high_speed_roll_134/result.json">result.json</a> · <a href="high_speed_roll_134/trajectory.csv">trajectory.csv</a> · <a href="high_speed_roll_134/execution.log">execution.log</a></p></details></article><article id="high_speed_hurdle" data-state="unflagged" data-search="high_speed_hurdle run_forward_0.3s">
+<div class="card-head"><h2>高速跨栏</h2><span class="badge unflagged">本次未触发阈值</span></div>
+<p class="name">high_speed_hurdle</p><p class="config">源索引 0（共 51 组）：<code>run_forward_0.3s</code></p>
+<video controls preload="metadata" poster="high_speed_hurdle/rollout-01.png" src="high_speed_hurdle/rollout-01.mp4"></video><p class="small">原片 14.14 秒，640 × 360，50/1 FPS · <a href="high_speed_hurdle/rollout-01.mp4">下载 MP4</a></p>
+<dl><div><dt>持续输入</dt><dd>高速前进（6）</dd></div><div><dt>实际策略时间</dt><dd>10.008 s</dd></div>
+<div><dt>XY 净位移</dt><dd>(19.794, 3.388) m</dd></div><div><dt>XY 路径长度</dt><dd>20.420 m</dd></div>
+<div><dt>最低骨盆高度</dt><dd>0.626 m</dd></div><div><dt>最低朝上余弦</dt><dd>0.880</dd></div>
+<div><dt>倾斜阈值累计时间</dt><dd>0.000 s</dd></div><div><dt>同类发布训练数据</dt><dd>无</dd></div></dl>
+<details><summary>配置、输入与原始证据</summary><p>这是所选场景的地形几何。持续前进指令没有重放参考动作中的翻滚、跳跃或翻越序列。</p>
+<p class="hash">OBJ SHA-256：<code>af8c92f7b9ccadb512ced0300325509e628cec4d86a1aca0604ca9f011846e8e</code></p><p><a href="high_speed_hurdle/result.json">result.json</a> · <a href="high_speed_hurdle/trajectory.csv">trajectory.csv</a> · <a href="high_speed_hurdle/execution.log">execution.log</a></p></details></article><article id="high_speed_dash_vault" data-state="threshold" data-search="high_speed_dash_vault run_forward_0.3s">
+<div class="card-head"><h2>高速 dash vault</h2><span class="badge threshold">触发高度/倾斜阈值</span></div>
+<p class="name">high_speed_dash_vault</p><p class="config">源索引 0（共 51 组）：<code>run_forward_0.3s</code></p>
+<video controls preload="metadata" poster="high_speed_dash_vault/rollout-01.png" src="high_speed_dash_vault/rollout-01.mp4"></video><p class="small">原片 14.00 秒，640 × 360，50/1 FPS · <a href="high_speed_dash_vault/rollout-01.mp4">下载 MP4</a></p>
+<dl><div><dt>持续输入</dt><dd>高速前进（6）</dd></div><div><dt>实际策略时间</dt><dd>10.014 s</dd></div>
+<div><dt>XY 净位移</dt><dd>(1.993, -2.253) m</dd></div><div><dt>XY 路径长度</dt><dd>7.881 m</dd></div>
+<div><dt>最低骨盆高度</dt><dd>0.066 m</dd></div><div><dt>最低朝上余弦</dt><dd>-0.643</dd></div>
+<div><dt>倾斜阈值累计时间</dt><dd>6.240 s</dd></div><div><dt>同类发布训练数据</dt><dd>无</dd></div></dl>
+<details><summary>配置、输入与原始证据</summary><p>这是所选场景的地形几何。持续前进指令没有重放参考动作中的翻滚、跳跃或翻越序列。</p>
+<p class="hash">OBJ SHA-256：<code>656464b90582b0d8a2043c4e8fe8535be04df8478c029272299a9ec2eda5e3bc</code></p><p><a href="high_speed_dash_vault/result.json">result.json</a> · <a href="high_speed_dash_vault/trajectory.csv">trajectory.csv</a> · <a href="high_speed_dash_vault/execution.log">execution.log</a></p></details></article><article id="high_speed_speed_vault" data-state="threshold" data-search="high_speed_speed_vault run_forward_0.3s">
+<div class="card-head"><h2>高速 speed vault</h2><span class="badge threshold">触发高度/倾斜阈值</span></div>
+<p class="name">high_speed_speed_vault</p><p class="config">源索引 0（共 20 组）：<code>run_forward_0.3s</code></p>
+<video controls preload="metadata" poster="high_speed_speed_vault/rollout-01.png" src="high_speed_speed_vault/rollout-01.mp4"></video><p class="small">原片 14.06 秒，640 × 360，50/1 FPS · <a href="high_speed_speed_vault/rollout-01.mp4">下载 MP4</a></p>
+<dl><div><dt>持续输入</dt><dd>高速前进（6）</dd></div><div><dt>实际策略时间</dt><dd>10.006 s</dd></div>
+<div><dt>XY 净位移</dt><dd>(13.092, -3.584) m</dd></div><div><dt>XY 路径长度</dt><dd>14.147 m</dd></div>
+<div><dt>最低骨盆高度</dt><dd>0.609 m</dd></div><div><dt>最低朝上余弦</dt><dd>0.091</dd></div>
+<div><dt>倾斜阈值累计时间</dt><dd>1.060 s</dd></div><div><dt>同类发布训练数据</dt><dd>无</dd></div></dl>
+<details><summary>配置、输入与原始证据</summary><p>这是所选场景的地形几何。持续前进指令没有重放参考动作中的翻滚、跳跃或翻越序列。</p>
+<p class="hash">OBJ SHA-256：<code>1829ea280616ae3cb09ea58909b8303f53eadc0213dfe7b63019a4bce750a77b</code></p><p><a href="high_speed_speed_vault/result.json">result.json</a> · <a href="high_speed_speed_vault/trajectory.csv">trajectory.csv</a> · <a href="high_speed_speed_vault/execution.log">execution.log</a></p></details></article><article id="high_speed_cat_vault" data-state="threshold" data-search="high_speed_cat_vault run_forward_0.3s">
+<div class="card-head"><h2>高速 cat vault</h2><span class="badge threshold">触发高度/倾斜阈值</span></div>
+<p class="name">high_speed_cat_vault</p><p class="config">源索引 0（共 51 组）：<code>run_forward_0.3s</code></p>
+<video controls preload="metadata" poster="high_speed_cat_vault/rollout-01.png" src="high_speed_cat_vault/rollout-01.mp4"></video><p class="small">原片 14.14 秒，640 × 360，50/1 FPS · <a href="high_speed_cat_vault/rollout-01.mp4">下载 MP4</a></p>
+<dl><div><dt>持续输入</dt><dd>高速前进（6）</dd></div><div><dt>实际策略时间</dt><dd>10.018 s</dd></div>
+<div><dt>XY 净位移</dt><dd>(3.481, 0.835) m</dd></div><div><dt>XY 路径长度</dt><dd>6.233 m</dd></div>
+<div><dt>最低骨盆高度</dt><dd>0.063 m</dd></div><div><dt>最低朝上余弦</dt><dd>-0.998</dd></div>
+<div><dt>倾斜阈值累计时间</dt><dd>4.840 s</dd></div><div><dt>同类发布训练数据</dt><dd>无</dd></div></dl>
+<details><summary>配置、输入与原始证据</summary><p>这是所选场景的地形几何。持续前进指令没有重放参考动作中的翻滚、跳跃或翻越序列。</p>
+<p class="hash">OBJ SHA-256：<code>d4e87ba27fcbab7d646aedee6db707a589318696e1fb9b69be95a0bfc9e03e91</code></p><p><a href="high_speed_cat_vault/result.json">result.json</a> · <a href="high_speed_cat_vault/trajectory.csv">trajectory.csv</a> · <a href="high_speed_cat_vault/execution.log">execution.log</a></p></details></article><article id="high_speed_jump_35" data-state="threshold" data-search="high_speed_jump_35 jump_35">
+<div class="card-head"><h2>跳跃 35</h2><span class="badge threshold">触发高度/倾斜阈值</span></div>
+<p class="name">high_speed_jump_35</p><p class="config">源索引 0（共 1 组）：<code>jump_35</code></p>
+<video controls preload="metadata" poster="high_speed_jump_35/rollout-01.png" src="high_speed_jump_35/rollout-01.mp4"></video><p class="small">原片 14.06 秒，640 × 360，50/1 FPS · <a href="high_speed_jump_35/rollout-01.mp4">下载 MP4</a></p>
+<dl><div><dt>持续输入</dt><dd>高速前进（6）</dd></div><div><dt>实际策略时间</dt><dd>10.012 s</dd></div>
+<div><dt>XY 净位移</dt><dd>(1.549, 0.288) m</dd></div><div><dt>XY 路径长度</dt><dd>2.070 m</dd></div>
+<div><dt>最低骨盆高度</dt><dd>0.548 m</dd></div><div><dt>最低朝上余弦</dt><dd>0.201</dd></div>
+<div><dt>倾斜阈值累计时间</dt><dd>8.000 s</dd></div><div><dt>同类发布训练数据</dt><dd>无</dd></div></dl>
+<details><summary>配置、输入与原始证据</summary><p>这是所选场景的地形几何。持续前进指令没有重放参考动作中的翻滚、跳跃或翻越序列。</p>
+<p class="hash">OBJ SHA-256：<code>1587a5105b09d7095c91d7f9e67c5198891c4ff390607943e1da305f08a8f248</code></p><p><a href="high_speed_jump_35/result.json">result.json</a> · <a href="high_speed_jump_35/trajectory.csv">trajectory.csv</a> · <a href="high_speed_jump_35/execution.log">execution.log</a></p></details></article></main><footer>同类发布训练数据仅表示该类 bundle 可下载，不认证本次策略掌握该技能。完整输入选择规则、模型、镜像与地形哈希见原始矩阵。所有媒体由原片逐字节复制，页面不生成或修改机器人轨迹。</footer>
+<script>const cards=[...document.querySelectorAll('article')],search=document.getElementById('search'),state=document.getElementById('state');function filter(){let count=0;for(const card of cards){card.hidden=!(card.dataset.search.toLowerCase().includes(search.value.toLowerCase())&&(state.value==='all'||card.dataset.state===state.value));if(!card.hidden)count++;}document.getElementById('visible').textContent=count+' / '+cards.length+' 场景';}search.addEventListener('input',filter);state.addEventListener('change',filter);filter();</script></body></html>

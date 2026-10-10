@@ -52,6 +52,25 @@ def fingerprint(path: Path) -> dict:
     return {"path": str(path.resolve()), "sha256": digest.hexdigest(), "bytes": path.stat().st_size}
 
 
+def resume_provenance(settings: dict, command: list[str]) -> dict:
+    """Compare the training inputs while allowing a larger iteration target.
+
+    Pre-existing manifests recorded the requested environment override (None
+    for defaults); the actual native command records its resolved value.
+    A teacher stage may be resumed while extending the multi-skill driver, so
+    only that stage's registry and ordered expert hashes belong in this key.
+    """
+    required = {"profile", "num_envs", "registries", "finetune", "source_checkpoints"}
+    if not isinstance(settings, dict) or not required <= settings.keys():
+        raise ValueError("Recorded training settings are insufficient to verify safe resume provenance")
+    if "--training.num-envs" not in command:
+        raise ValueError("Recorded training command has no resolved environment count")
+    return {"profile": settings["profile"],
+            "num_envs": int(command[command.index("--training.num-envs") + 1]),
+            "registries": settings["registries"], "finetune": settings["finetune"],
+            "teacher_checkpoint_sha256": [source["sha256"] for source in settings["source_checkpoints"]]}
+
+
 def load_quality_report(path: Path, source_sha: str, steps: int, num_envs: int) -> dict:
     quality = json.loads(path.read_text())
     if not isinstance(quality, dict) or not (quality.get("schema_version") == 1 and quality.get("status") == "completed"
@@ -220,10 +239,14 @@ def main() -> None:
         if args.plan:
             return
         target = (args.iterations or (2 if args.profile == "smoke" else (20000 if label.startswith("teacher-") else 10000 if label == "student-pure" else 30000))) if label.startswith(("teacher-", "student-")) else None
-        source_paths = [value.strip() for value in child_env.get("TEACHER_CHECKPOINT", "").split(",") if value.strip()]
-        if child_env.get("CHECKPOINT"):
+        # A student's own resume PT is state to restore, not another expert.
+        # CHECKPOINT is an eval-launcher input; an inherited value must not
+        # contaminate the ordered teacher provenance of a training stage.
+        source_paths = ([value.strip() for value in child_env.get("TEACHER_CHECKPOINT", "").split(",") if value.strip()]
+                        if label.startswith("student-") else [])
+        if label.startswith("eval-") and child_env.get("CHECKPOINT"):
             source_paths.append(child_env["CHECKPOINT"])
-        if target is None and "--training.checkpoint" in command:
+        if label.startswith("export-") and "--training.checkpoint" in command:
             source_paths.append(command[command.index("--training.checkpoint") + 1])
         sources = [{"path": value, "sha256": verify_checkpoint(Path(value))[2]} for value in source_paths]
         settings = {"profile": args.profile, "skills": args.skills, "assets": str(args.assets.resolve()),
@@ -234,7 +257,15 @@ def main() -> None:
         manifest = manifests / f"{label}.json"
         if args.resume and target is not None:
             restored = resume_point(label)
-            previously_passed = manifest.exists() and json.loads(manifest.read_text()).get("status") == "passed"
+            old = json.loads(manifest.read_text()) if manifest.exists() else {}
+            if restored is not None:
+                previous = resume_provenance(old.get("settings"), old.get("command", []))
+                requested = resume_provenance(settings, command)
+                differences = [key for key in requested if previous[key] != requested[key]]
+                if differences:
+                    raise ValueError(f"Resume provenance mismatch for {label}: {', '.join(differences)}. "
+                                     "Use a new output directory for different training inputs.")
+            previously_passed = old.get("status") == "passed"
             if previously_passed and restored is not None and restored[1] >= target - 1:
                 print(f"Verified checkpoint already reaches target {target}; no additional training for {label}", flush=True)
                 return

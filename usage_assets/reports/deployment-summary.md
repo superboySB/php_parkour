@@ -129,4 +129,20 @@ eval/export 从 native PT embedded config 恢复实际算法类型。pipeline �
 
 评估/导出 `--skip-completed` 现在还会复核产物的存在、SHA 和结构：eval 保存 quality JSON、其视频与 TensorBoard events 的 fingerprint，并复核实际原生指标名称、finite、steps×env 样本数及源模型；export 保存本次 fresh 的两个 ONNX 和真实 30-case 验收报告 fingerprint，模型 SHA 必须匹配验收报告。旧 manifest 缺字段或删除/篡改任何关键产物都会重跑。[加固后目标组 40/40 JUnit](research-pipeline-artifacts.xml)，包含14个新增产物损坏/删除/结构回归，与前述测试数重叠，不累加。实际 16env×100step 的质量报告也通过加强后的 validator。
 
-17 场景物理闭环已准备 [固定配置计划](sim2sim-scene-plan.json)，每场景只选 1 个已生成完整配置的实际 OBJ，默认 10 仿真秒，seed42，低/高速前进输入分别为1/6。`random_locomotion` 固定选含 clutter 的 cfg0035。计划输入的全部 OBJ 和 ONNX SHA 已核验，等待最终镜像重建后真实执行；**计划文件不是运行成功结果，也不是 629 配置的 policy 覆盖**。
+## 最终镜像的 17 场景真实物理闭环
+
+最终镜像 `sha256:88254ac0b90a3056375145601d741aa3e08726e18412d201a3c7e7915a23996f` 已实际运行全部 17 场景，每场景只选 1 个完整生成配置的实际 OBJ。选择规则在运行前固定：[配置计划](sim2sim-scene-plan.json)。`random_locomotion` 固定选含 clutter 的 cfg0035；低/高速前进输入分别为 1/6，seed42，每项独立进程和 fresh reset，gantry 释放后运行 500 次原生策略控制，实际 10.000–10.018 仿真秒。整批墙钟 348.98 秒，17/17 执行完成、0 执行错误，均有真实 MP4、截图、世界坐标轨迹和独立结果 JSON。
+
+[17 场景离线视频页](../sim2sim/scenarios/playback.html)、[完整矩阵 JSON](sim2sim-scene-matrix.json)、[逐场景结果表](sim2sim-scenes-summary.md)。14/17 场景在某时刻触发 pelvis<0.4 m 或 upright<0.35 阈值，仅 random_locomotion、low_speed_climb_58、high_speed_hurdle 没有触发；部分场景后来恢复直立，不能把 14 个阈值事件一律写成永久倒地。无阈值事件也不证明完成指定障碍。保留全部失败，所有结果仍明确 `quality_verified=false`、`obstacle_course_completion_verified=false`。
+
+本次是发布 ONNX 对 **17 场景各 1 个代表配置**的闭环实测，共 170 仿真秒目标时长；不是 629 配置的策略覆盖，不重放 motion-matching 参考片段的指令时序，也不证明策略已经学过全部 roll/vault 等技能。公开训练数据只包含 locomotion、低/高速 step、低/高速 climb76 五类 bundle，不能由场景可生成推断已发布策略掌握相应技能。
+
+```bash
+# 先完成全部 motion-matching 配置，输出为 /outputs/motion-matching/matrix.json。
+# 目录须为空；image-id 必须填 docker inspect 实际镜像 ID。
+bash scripts/research/docker.sh sim scripts/research/sim2sim_scene_matrix.py \
+  --matrix /outputs/motion-matching/matrix.json \
+  --models /data/assets/student --seconds 10 --seed 42 --gl egl \
+  --image-id sha256:88254ac0b90a3056375145601d741aa3e08726e18412d201a3c7e7915a23996f \
+  --output /outputs/sim2sim/scene-matrix-repeat
+```

@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "container": "php-parkour-research",
+  "groups": [
+    {
+      "name": "root-training",
+      "status": "passed",
+      "command": [
+        "docker",
+        "exec",
+        "-e",
+        "CUDA_VISIBLE_DEVICES=",
+        "-e",
+        "PHP_DOCKER=0",
+        "-w",
+        "/workspace/php_parkour",
+        "php-parkour-research",
+        "/opt/php/bin/train-python",
+        "-m",
+        "pytest",
+        "-q",
+        "tests",
+        "wbt_training/tests",
+        "--junitxml=/workspace/php_parkour/outputs/research/cpu-tests-64ebc5f-88254/root-training.xml"
+      ],
+      "exit_code": 0,
+      "tests": 289,
+      "errors": 0,
+      "failures": 0,
+      "skipped": 0,
+      "passed": 289,
+      "wall_seconds": 47.897,
+      "log": "/home/dzp/projects/php_parkour/outputs/research/cpu-tests-64ebc5f-88254/root-training.log",
+      "log_sha256": "776624516ffb2d9621eec2b14fd29250d720f68b635ce15d116b6d158f1d453c"
+    },
+    {
+      "name": "motion-matching",
+      "status": "failed",
+      "command": [
+        "docker",
+        "exec",
+        "-e",
+        "CUDA_VISIBLE_DEVICES=",
+        "-e",
+        "PHP_DOCKER=0",
+        "-w",
+        "/workspace/php_parkour/motion_matching",
+        "php-parkour-research",
+        "/opt/php/bin/motion-python",
+        "-m",
+        "pytest",
+        "-q",
+        "tests",
+        "--junitxml=/workspace/php_parkour/outputs/research/cpu-tests-64ebc5f-88254/motion-matching.xml"
+      ],
+      "exit_code": 1,
+      "tests": 225,
+      "errors": 0,
+      "failures": 12,
+      "skipped": 0,
+      "passed": 213,
+      "wall_seconds": 98.88,
+      "log": "/home/dzp/projects/php_parkour/outputs/research/cpu-tests-64ebc5f-88254/motion-matching.log",
+      "log_sha256": "e364772556c8963905c0b9d7e20cb489880c9e5d627d5ba6089efcadd2dfa3ee"
+    }
+  ],
+  "failed_groups": 1
+}

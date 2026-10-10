@@ -16,7 +16,7 @@ implements ``export()`` / ``actor_onnx_wrapper``.
 Usage::
 
     python -m wbt_training.training_runs.eval_teacher \\
-        --checkpoint wandb://<entity>/<project>/<run_id>[/model_NNNNN.pt]
+        --checkpoint /outputs/training/smoke/<run>/model_00001.pt
 
 Tips:
   --training.headless True               # required on remote boxes

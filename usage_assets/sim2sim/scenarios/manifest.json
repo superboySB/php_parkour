@@ -1,0 +1,1881 @@
+{
+  "schema_version": 1,
+  "scope": "17 scenarios, exactly one complete generated geometry per scenario; constant forward command; not 629 policy rollouts or reference-motion replay",
+  "source_matrix": "/home/dzp/projects/php_parkour/outputs/research/sim2sim/scene-matrix-final/matrix.json",
+  "source_matrix_sha256": "1ff2dd59a01cca2deb9ff9b226548eb7bd887e052b7fe02aa84a4c3fb818b39b",
+  "image_id": "sha256:88254ac0b90a3056375145601d741aa3e08726e18412d201a3c7e7915a23996f",
+  "seed": 42,
+  "model_sha256": {
+    "depth_backbone.onnx": "5b22466a218944e3b0ab0f4f82a910e3eec35375ee03e7fb94eb65fa88431b56",
+    "student.onnx": "e426c4206181d511b838c76efc48e43636299b76cb5a15183977011589931628"
+  },
+  "requested_policy_seconds": 10.0,
+  "selection_rule": "First passing forward-named configuration by source index, else first passing configuration; random_locomotion first clutter (>8 vertices) configuration with only high-forward moving segments",
+  "quality_verified": false,
+  "obstacle_course_completion_verified": false,
+  "publisher_sha256": "a90d6a20c13d10af73a9af83d65a37e0fe81d47e66400d365c13ccd7d3cbe93f",
+  "media_policy": "unaltered byte-for-byte copies of actual recordings and decoded thumbnails",
+  "scenarios": [
+    {
+      "scenario": "random_locomotion",
+      "configuration": "cfg0035_stand_2.0s_run_forward_1.2s_stand_2.0s",
+      "configuration_index": 35,
+      "available_configurations": 100,
+      "command": 6,
+      "mesh_sha256": "354c04a1740902aa401aac2b8227b71a8c88afce5d3821ffb6c318de77d10ba7",
+      "matching_released_training_bundle_available": true,
+      "status": "completed",
+      "videos": [
+        {
+          "path": "random_locomotion/rollout-01.mp4",
+          "thumbnail": "random_locomotion/rollout-01.png",
+          "duration_seconds": 14.08,
+          "width": 640,
+          "height": 360,
+          "fps": "50/1",
+          "frames": "704",
+          "codec": "h264"
+        }
+      ],
+      "artifacts": [
+        {
+          "path": "random_locomotion/result.json",
+          "kind": "result.json",
+          "source": "/home/dzp/projects/php_parkour/outputs/research/sim2sim/scene-matrix-final/random_locomotion/result.json",
+          "sha256": "ba0bc4c33923f960e6721f042c5897d94ad994edc47fd1692f4385d7066da240",
+          "size": 3090
+        },
+        {
+          "path": "random_locomotion/trajectory.csv",
+          "kind": "trajectory.csv",
+          "source": "/home/dzp/projects/php_parkour/outputs/research/sim2sim/scene-matrix-final/random_locomotion/trajectory.csv",
+          "sha256": "9fe9e8b4a88f8d793bd63b402727e3a1731b439e7956e3b37fb93e94a91afd4d",
+          "size": 75976
+        },
+        {
+          "path": "random_locomotion/execution.log",
+          "kind": "execution.log",
+          "source": "outputs/research/sim2sim/scene-matrix-final/random_locomotion.log",
+          "sha256": "ba0bc4c33923f960e6721f042c5897d94ad994edc47fd1692f4385d7066da240",
+          "size": 3090
+        },
+        {
+          "path": "random_locomotion/rollout-01.mp4",
+          "kind": "video",
+          "source": "/home/dzp/projects/php_parkour/outputs/research/sim2sim/scene-matrix-final/random_locomotion/video/episode_0_1791603449.mp4",
+          "sha256": "fb9a3166256773a118b8d32ceb65ab983b28d2d95b580227885e72f2e677a596",
+          "size": 405498
+        },
+        {
+          "path": "random_locomotion/rollout-01.png",
+          "kind": "thumbnail",
+          "source": "/home/dzp/projects/php_parkour/outputs/research/sim2sim/scene-matrix-final/random_locomotion/video/episode_0_1791603449.png",
+          "sha256": "634d1f0d092ce4f43121390d18c884428b7b94fa18088fda9da0fc72f8c412ab",
+          "size": 20990
+        }
+      ],
+      "fall_detected": false,
+      "heuristic_survival_passed": true,
+      "simulation": {
+        "status": "completed",
+        "physics_steps": 7031,
+        "active_samples": 501,
+        "policy_simulation_seconds": 10.014,
+        "simulation_seconds": 14.062000000000001,
+        "wall_seconds": 16.49652589892503,
+        "physics_fps_measured": 426.2109285133116,
+        "displacement_xy_m": [
+          19.910062819719315,
+          3.0371758016990498
+        ],
+        "path_length_xy_m": 20.48136982304009,
+        "heading_change_deg": 19.81424760965457,
+        "minimum_pelvis_height_m": 0.6204835176467896,
+        "minimum_base_up_z": 0.8535041511058807,
+        "final_position_xyz_m": [
+          19.715486526489258,
+          3.0388596057891846,
+          0.6994192004203796
+        ],
+        "final_base_up_z": 0.9843999845907092,
+        "low_pelvis_detected": false,
+        "tilt_threshold_sample_seconds": 0.0,
+        "fall_detected": false,
+        "fall_criterion": "pelvis height < 0.4 m OR base upright cosine < 0.35 after gantry release",
+        "fall_detection_is_heuristic": true,
+        "gantry_disabled_during_policy": true
+      },
+      "inference": {
+        "status": "completed",
+        "ticks": 500,
+        "commands": [
+          {
+            "seconds": 0.014,
+            "code": 6,
+            "name": "forward"
+          }
+        ],
+        "control_period_simulation_seconds": 0.02,
+        "onnxruntime_intra_op_threads": 1,
+        "lifecycle": {
+          "damping_mode_active": true,
+          "policy_action_disabled": true
+        },
+        "transport": "official Unitree SDK DDS on lo; official depth shared memory",
+        "input": "automated injected commands"
+      }
+    },
+    {
+      "scenario": "low_speed_step",
+      "configuration": "forward_walk0.5s_step0s",
+      "configuration_index": 0,
+      "available_configurations": 56,
+      "command": 1,
+      "mesh_sha256": "dce4eacd1b9df5b8614c2b37242f5c826a72872c10acc745b1e91935779d2a21",
+      "matching_released_training_bundle_available": true,
+      "status": "completed",
+      "videos": [
+        {
+          "path": "low_speed_step/rollout-01.mp4",
+          "thumbnail": "low_speed_step/rollout-01.png",
+          "duration_seconds": 14.0,
+          "width": 640,
+          "height": 360,
+          "fps": "50/1",
+          "frames": "700",
+          "codec": "h264"
+        }
+      ],
+      "artifacts": [
+        {
+          "path": "low_speed_step/result.json",
+          "kind": "result.json",
+          "source": "/home/dzp/projects/php_parkour/outputs/research/sim2sim/scene-matrix-final/low_speed_step/result.json",
+          "sha256": "ee462d92a71b6999f5a5bf4e138c00dc339f406e77f6b66517e37ec43ab69750",
+          "size": 3089
+        },
+        {
+          "path": "low_speed_step/trajectory.csv",
+          "kind": "trajectory.csv",
+          "source": "/home/dzp/projects/php_parkour/outputs/research/sim2sim/scene-matrix-final/low_speed_step/trajectory.csv",
+          "sha256": "b044b6c50c32e6982ea39e3a30c249fc5d8d7833c9120a08db5a2ffe9918dee2",
+          "size": 76170
+        },
+        {
+          "path": "low_speed_step/execution.log",
+          "kind": "execution.log",
+          "source": "outputs/research/sim2sim/scene-matrix-final/low_speed_step.log",
+          "sha256": "ee462d92a71b6999f5a5bf4e138c00dc339f406e77f6b66517e37ec43ab69750",
+          "size": 3089
+        },
+        {
+          "path": "low_speed_step/rollout-01.mp4",
+          "kind": "video",
+          "source": "/home/dzp/projects/php_parkour/outputs/research/sim2sim/scene-matrix-final/low_speed_step/video/episode_0_1791603469.mp4",
+          "sha256": "161b0905c43aad52f1b755e3ae08a2ae3799f76e10d6224071c7497ae20e9a0e",
+          "size": 392787
+        },
+        {
+          "path": "low_speed_step/rollout-01.png",
+          "kind": "thumbnail",
+          "source": "/home/dzp/projects/php_parkour/outputs/research/sim2sim/scene-matrix-final/low_speed_step/video/episode_0_1791603469.png",
+          "sha256": "6420c88fa8cb464bcf462c22743d44cab22c7f1584d53ba32782e6cd39aa2d96",
+          "size": 28815
+        }
+      ],
+      "fall_detected": true,
+      "heuristic_survival_passed": false,
+      "simulation": {
+        "status": "completed",
+        "physics_steps": 6991,
+        "active_samples": 501,
+        "policy_simulation_seconds": 10.018,
+        "simulation_seconds": 13.982000000000001,
+        "wall_seconds": 16.146493856911547,
+        "physics_fps_measured": 432.97323690355995,
+        "displacement_xy_m": [
+          0.9264655262231827,
+          -0.18710207569529302
+        ],
+        "path_length_xy_m": 3.5612837258720926,
+        "heading_change_deg": -103.9128245726626,
+        "minimum_pelvis_height_m": 0.4208328425884247,
+        "minimum_base_up_z": -0.27148687839508057,
+        "final_position_xyz_m": [
+          0.7797033190727234,
+          -0.18691343069076538,
+          0.5922976732254028
+        ],
+        "final_base_up_z": 0.3851088285446167,
+        "low_pelvis_detected": false,
+        "tilt_threshold_sample_seconds": 0.5,
+        "fall_detected": true,
+        "fall_criterion": "pelvis height < 0.4 m OR base upright cosine < 0.35 after gantry release",
+        "fall_detection_is_heuristic": true,
+        "gantry_disabled_during_policy": true
+      },
+      "inference": {
+        "status": "completed",
+        "ticks": 500,
+        "commands": [
+          {
+            "seconds": 0.018000000000000002,
+            "code": 1,
+            "name": "forward"
+          }
+        ],
+        "control_period_simulation_seconds": 0.02,
+        "onnxruntime_intra_op_threads": 1,
+        "lifecycle": {
+          "damping_mode_active": true,
+          "policy_action_disabled": true
+        },
+        "transport": "official Unitree SDK DDS on lo; official depth shared memory",
+        "input": "automated injected commands"
+      }
+    },
+    {
+      "scenario": "high_speed_step",
+      "configuration": "run_forward_0.6s_step0s",
+      "configuration_index": 0,
+      "available_configurations": 60,
+      "command": 6,
+      "mesh_sha256": "aa9b612e9a9e86a79d2d6a781f582660ee6a9aef450fb0d50d30388913e1ba94",
+      "matching_released_training_bundle_available": true,
+      "status": "completed",
+      "videos": [
+        {
+          "path": "high_speed_step/rollout-01.mp4",
+          "thumbnail": "high_speed_step/rollout-01.png",
+          "duration_seconds": 14.08,
+          "width": 640,
+          "height": 360,
+          "fps": "50/1",
+          "frames": "704",
+          "codec": "h264"
+        }
+      ],
+      "artifacts": [
+        {
+          "path": "high_speed_step/result.json",
+          "kind": "result.json",
+          "source": "/home/dzp/projects/php_parkour/outputs/research/sim2sim/scene-matrix-final/high_speed_step/result.json",
+          "sha256": "2242440de0d7f600b58b5b767432c09abf23e3f4260cfabdc784a5b27cf7485f",
+          "size": 3068
+        },
+        {
+          "path": "high_speed_step/trajectory.csv",
+          "kind": "trajectory.csv",
+          "source": "/home/dzp/projects/php_parkour/outputs/research/sim2sim/scene-matrix-final/high_speed_step/trajectory.csv",
+          "sha256": "17a95d8750b4a97acc9914a5ae8447b923b9dee44b027192d1a97ce6228268ce",
+          "size": 75747
+        },
+        {
+          "path": "high_speed_step/execution.log",
+          "kind": "execution.log",
+          "source": "outputs/research/sim2sim/scene-matrix-final/high_speed_step.log",
+          "sha256": "2242440de0d7f600b58b5b767432c09abf23e3f4260cfabdc784a5b27cf7485f",
+          "size": 3068
+        },
+        {
+          "path": "high_speed_step/rollout-01.mp4",
+          "kind": "video",
+          "source": "/home/dzp/projects/php_parkour/outputs/research/sim2sim/scene-matrix-final/high_speed_step/video/episode_0_1791603489.mp4",
+          "sha256": "f240614274a2f514e203503cfd3bf63df0520974911afc34e816b3545f420462",
+          "size": 386576
+        },
+        {
+          "path": "high_speed_step/rollout-01.png",
+          "kind": "thumbnail",
+          "source": "/home/dzp/projects/php_parkour/outputs/research/sim2sim/scene-matrix-final/high_speed_step/video/episode_0_1791603489.png",
+          "sha256": "533630497178f43ff831b7e5a06b7de1c244a7e6b43a0134d666039adb8f6ce7",
+          "size": 21026
+        }
+      ],
+      "fall_detected": true,
+      "heuristic_survival_passed": false,
+      "simulation": {
+        "status": "completed",
+        "physics_steps": 7031,
+        "active_samples": 501,
+        "policy_simulation_seconds": 10.002,
+        "simulation_seconds": 14.062000000000001,
+        "wall_seconds": 16.038887472939678,
+        "physics_fps_measured": 438.37200279342596,
+        "displacement_xy_m": [
+          18.966320022940636,
+          3.351911306148395
+        ],
+        "path_length_xy_m": 19.65297102104158,
+        "heading_change_deg": 20.620563990510796,
+        "minimum_pelvis_height_m": 0.6268856525421143,
+        "minimum_base_up_z": 0.24512773752212524,
+        "final_position_xyz_m": [
+          18.76656150817871,
+          3.355172634124756,
+          0.7005659937858582
+        ],
+        "final_base_up_z": 0.9781425390392542,
+        "low_pelvis_detected": false,
+        "tilt_threshold_sample_seconds": 0.06,
+        "fall_detected": true,
+        "fall_criterion": "pelvis height < 0.4 m OR base upright cosine < 0.35 after gantry release",
+        "fall_detection_is_heuristic": true,
+        "gantry_disabled_during_policy": true
+      },
+      "inference": {
+        "status": "completed",
+        "ticks": 500,
+        "commands": [
+          {
+            "seconds": 0.002,
+            "code": 6,
+            "name": "forward"
+          }
+        ],
+        "control_period_simulation_seconds": 0.02,
+        "onnxruntime_intra_op_threads": 1,
+        "lifecycle": {
+          "damping_mode_active": true,
+          "policy_action_disabled": true
+        },
+        "transport": "official Unitree SDK DDS on lo; official depth shared memory",
+        "input": "automated injected commands"
+      }
+    },
+    {
+      "scenario": "low_speed_climb_58",
+      "configuration": "forward_walk0.5s_plat0s",
+      "configuration_index": 0,
+      "available_configurations": 40,
+      "command": 1,
+      "mesh_sha256": "36a9bf749b161e80fc98e4ba7988bc7cf44a0f290706bf481607629eb68c6518",
+      "matching_released_training_bundle_available": false,
+      "status": "completed",
+      "videos": [
+        {
+          "path": "low_speed_climb_58/rollout-01.mp4",
+          "thumbnail": "low_speed_climb_58/rollout-01.png",
+          "duration_seconds": 13.96,
+          "width": 640,
+          "height": 360,
+          "fps": "50/1",
+          "frames": "698",
+          "codec": "h264"
+        }
+      ],
+      "artifacts": [
+        {
+          "path": "low_speed_climb_58/result.json",
+          "kind": "result.json",
+          "source": "/home/dzp/projects/php_parkour/outputs/research/sim2sim/scene-matrix-final/low_speed_climb_58/result.json",
+          "sha256": "6bf752bdd2478ed48c15998742cf78a7df1c9fa8374fac3ec6aa93d4d778ca94",
+          "size": 3058
+        },
+        {
+          "path": "low_speed_climb_58/trajectory.csv",
+          "kind": "trajectory.csv",
+          "source": "/home/dzp/projects/php_parkour/outputs/research/sim2sim/scene-matrix-final/low_speed_climb_58/trajectory.csv",
+          "sha256": "b9497209f5c8d25c348427409c707e5777a4c167335393c88efdff05516344e9",
+          "size": 76078
+        },
+        {
+          "path": "low_speed_climb_58/execution.log",
+          "kind": "execution.log",
+          "source": "outputs/research/sim2sim/scene-matrix-final/low_speed_climb_58.log",
+          "sha256": "6bf752bdd2478ed48c15998742cf78a7df1c9fa8374fac3ec6aa93d4d778ca94",
+          "size": 3058
+        },
+        {
+          "path": "low_speed_climb_58/rollout-01.mp4",
+          "kind": "video",
+          "source": "/home/dzp/projects/php_parkour/outputs/research/sim2sim/scene-matrix-final/low_speed_climb_58/video/episode_0_1791603509.mp4",
+          "sha256": "a31022295cd60cc10644d344550ce40467aaf677c09d35258ba7a0d536a6cccb",
+          "size": 366880
+        },
+        {
+          "path": "low_speed_climb_58/rollout-01.png",
+          "kind": "thumbnail",
+          "source": "/home/dzp/projects/php_parkour/outputs/research/sim2sim/scene-matrix-final/low_speed_climb_58/video/episode_0_1791603509.png",
+          "sha256": "789b76c19cce09b0be524dabf9c6fa535f148ae786ac9e8c8d0f5057bd1855b0",
+          "size": 24749
+        }
+      ],
+      "fall_detected": false,
+      "heuristic_survival_passed": true,
+      "simulation": {
+        "status": "completed",
+        "physics_steps": 6971,
+        "active_samples": 501,
+        "policy_simulation_seconds": 10.014,
+        "simulation_seconds": 13.942,
+        "wall_seconds": 15.915511500905268,
+        "physics_fps_measured": 438.0003473959945,
+        "displacement_xy_m": [
+          6.722671821713448,
+          -1.816017614910379
+        ],
+        "path_length_xy_m": 7.509557259082415,
+        "heading_change_deg": -12.84468498676605,
+        "minimum_pelvis_height_m": 0.7121999859809875,
+        "minimum_base_up_z": 0.9018939360976219,
+        "final_position_xyz_m": [
+          6.591179370880127,
+          -1.8164088726043701,
+          0.7530437111854553
+        ],
+        "final_base_up_z": 0.9964915548916906,
+        "low_pelvis_detected": false,
+        "tilt_threshold_sample_seconds": 0.0,
+        "fall_detected": false,
+        "fall_criterion": "pelvis height < 0.4 m OR base upright cosine < 0.35 after gantry release",
+        "fall_detection_is_heuristic": true,
+        "gantry_disabled_during_policy": true
+      },
+      "inference": {
+        "status": "completed",
+        "ticks": 500,
+        "commands": [
+          {
+            "seconds": 0.014,
+            "code": 1,
+            "name": "forward"
+          }
+        ],
+        "control_period_simulation_seconds": 0.02,
+        "onnxruntime_intra_op_threads": 1,
+        "lifecycle": {
+          "damping_mode_active": true,
+          "policy_action_disabled": true
+        },
+        "transport": "official Unitree SDK DDS on lo; official depth shared memory",
+        "input": "automated injected commands"
+      }
+    },
+    {
+      "scenario": "high_speed_climb_58",
+      "configuration": "run_forward_0.6s_step0.1s",
+      "configuration_index": 0,
+      "available_configurations": 40,
+      "command": 6,
+      "mesh_sha256": "0f6d219f6886ae6683c4e6ee759ee49f6c05dfe2157795f7db15f7a7124688d1",
+      "matching_released_training_bundle_available": false,
+      "status": "completed",
+      "videos": [
+        {
+          "path": "high_speed_climb_58/rollout-01.mp4",
+          "thumbnail": "high_speed_climb_58/rollout-01.png",
+          "duration_seconds": 14.0,
+          "width": 640,
+          "height": 360,
+          "fps": "50/1",
+          "frames": "700",
+          "codec": "h264"
+        }
+      ],
+      "artifacts": [
+        {
+          "path": "high_speed_climb_58/result.json",
+          "kind": "result.json",
+          "source": "/home/dzp/projects/php_parkour/outputs/research/sim2sim/scene-matrix-final/high_speed_climb_58/result.json",
+          "sha256": "2781e5fd3a2f86a68b5a3a075ccbfca31cb29f71625a5919318fddb8adc362aa",
+          "size": 3072
+        },
+        {
+          "path": "high_speed_climb_58/trajectory.csv",
+          "kind": "trajectory.csv",
+          "source": "/home/dzp/projects/php_parkour/outputs/research/sim2sim/scene-matrix-final/high_speed_climb_58/trajectory.csv",
+          "sha256": "33e8e41a52fc8ff71b5ae4e7a252ed8c5b3a57fd75ed32b1cb1f8eace3fdfb24",
+          "size": 75200
+        },
+        {
+          "path": "high_speed_climb_58/execution.log",
+          "kind": "execution.log",
+          "source": "outputs/research/sim2sim/scene-matrix-final/high_speed_climb_58.log",
+          "sha256": "2781e5fd3a2f86a68b5a3a075ccbfca31cb29f71625a5919318fddb8adc362aa",
+          "size": 3072
+        },
+        {
+          "path": "high_speed_climb_58/rollout-01.mp4",
+          "kind": "video",
+          "source": "/home/dzp/projects/php_parkour/outputs/research/sim2sim/scene-matrix-final/high_speed_climb_58/video/episode_0_1791603529.mp4",
+          "sha256": "2b21fd560219513f442c4a965b6882e75c359c52777e07649bf996ba9d53ca61",
+          "size": 386451
+        },
+        {
+          "path": "high_speed_climb_58/rollout-01.png",
+          "kind": "thumbnail",
+          "source": "/home/dzp/projects/php_parkour/outputs/research/sim2sim/scene-matrix-final/high_speed_climb_58/video/episode_0_1791603529.png",
+          "sha256": "2a9f1f9abe182e2ad4193c46a26fc2c614a1609d5650fc7da1cc02de198de0ee",
+          "size": 22647
+        }
+      ],
+      "fall_detected": true,
+      "heuristic_survival_passed": false,
+      "simulation": {
+        "status": "completed",
+        "physics_steps": 6991,
+        "active_samples": 501,
+        "policy_simulation_seconds": 10.004,
+        "simulation_seconds": 13.982000000000001,
+        "wall_seconds": 16.080485492013395,
+        "physics_fps_measured": 434.75053546947265,
+        "displacement_xy_m": [
+          9.108501762151718,
+          2.909152969587012
+        ],
+        "path_length_xy_m": 10.214770145347305,
+        "heading_change_deg": 33.343092132623006,
+        "minimum_pelvis_height_m": 0.6215994954109192,
+        "minimum_base_up_z": 0.07590997219085693,
+        "final_position_xyz_m": [
+          8.955972671508789,
+          2.90901517868042,
+          0.7074621915817261
+        ],
+        "final_base_up_z": 0.9863954475149512,
+        "low_pelvis_detected": false,
+        "tilt_threshold_sample_seconds": 0.8,
+        "fall_detected": true,
+        "fall_criterion": "pelvis height < 0.4 m OR base upright cosine < 0.35 after gantry release",
+        "fall_detection_is_heuristic": true,
+        "gantry_disabled_during_policy": true
+      },
+      "inference": {
+        "status": "completed",
+        "ticks": 500,
+        "commands": [
+          {
+            "seconds": 0.004,
+            "code": 6,
+            "name": "forward"
+          }
+        ],
+        "control_period_simulation_seconds": 0.02,
+        "onnxruntime_intra_op_threads": 1,
+        "lifecycle": {
+          "damping_mode_active": true,
+          "policy_action_disabled": true
+        },
+        "transport": "official Unitree SDK DDS on lo; official depth shared memory",
+        "input": "automated injected commands"
+      }
+    },
+    {
+      "scenario": "low_speed_climb_76",
+      "configuration": "forward_walk0.6s_step0.7s",
+      "configuration_index": 0,
+      "available_configurations": 40,
+      "command": 1,
+      "mesh_sha256": "caef86b7db9c4ac86430eba949985e030605a59118d6ec969103b1d7016cecae",
+      "matching_released_training_bundle_available": true,
+      "status": "completed",
+      "videos": [
+        {
+          "path": "low_speed_climb_76/rollout-01.mp4",
+          "thumbnail": "low_speed_climb_76/rollout-01.png",
+          "duration_seconds": 13.94,
+          "width": 640,
+          "height": 360,
+          "fps": "50/1",
+          "frames": "697",
+          "codec": "h264"
+        }
+      ],
+      "artifacts": [
+        {
+          "path": "low_speed_climb_76/result.json",
+          "kind": "result.json",
+          "source": "/home/dzp/projects/php_parkour/outputs/research/sim2sim/scene-matrix-final/low_speed_climb_76/result.json",
+          "sha256": "040e968e57bda7abfd57fdd8fe78f0fca98770ac164388e407b1b13df98daa95",
+          "size": 3063
+        },
+        {
+          "path": "low_speed_climb_76/trajectory.csv",
+          "kind": "trajectory.csv",
+          "source": "/home/dzp/projects/php_parkour/outputs/research/sim2sim/scene-matrix-final/low_speed_climb_76/trajectory.csv",
+          "sha256": "c43684f1566c79e37265a2ac4bc88571263457f96046169e32e44d36d8e8d813",
+          "size": 75381
+        },
+        {
+          "path": "low_speed_climb_76/execution.log",
+          "kind": "execution.log",
+          "source": "outputs/research/sim2sim/scene-matrix-final/low_speed_climb_76.log",
+          "sha256": "040e968e57bda7abfd57fdd8fe78f0fca98770ac164388e407b1b13df98daa95",
+          "size": 3063
+        },
+        {
+          "path": "low_speed_climb_76/rollout-01.mp4",
+          "kind": "video",
+          "source": "/home/dzp/projects/php_parkour/outputs/research/sim2sim/scene-matrix-final/low_speed_climb_76/video/episode_0_1791603549.mp4",
+          "sha256": "e8b38d8c8e292ae34625b9b7cf210c55ddfcfb4e27380b683feada57782cc5d4",
+          "size": 366299
+        },
+        {
+          "path": "low_speed_climb_76/rollout-01.png",
+          "kind": "thumbnail",
+          "source": "/home/dzp/projects/php_parkour/outputs/research/sim2sim/scene-matrix-final/low_speed_climb_76/video/episode_0_1791603549.png",
+          "sha256": "294ccc7b79dd605dd4769c4b88cbbd39d96cdc3e345b9bed48a1679ecd938276",
+          "size": 25098
+        }
+      ],
+      "fall_detected": true,
+      "heuristic_survival_passed": false,
+      "simulation": {
+        "status": "completed",
+        "physics_steps": 6961,
+        "active_samples": 501,
+        "policy_simulation_seconds": 10.01,
+        "simulation_seconds": 13.922,
+        "wall_seconds": 16.005655966931954,
+        "physics_fps_measured": 434.90873972699785,
+        "displacement_xy_m": [
+          2.907897025346756,
+          0.8170400744857034
+        ],
+        "path_length_xy_m": 3.6824480232622534,
+        "heading_change_deg": 8.277324541540835,
+        "minimum_pelvis_height_m": 0.6742492914199829,
+        "minimum_base_up_z": -0.0006929636001586914,
+        "final_position_xyz_m": [
+          2.7812530994415283,
+          0.8172249794006348,
+          0.7622228860855103
+        ],
+        "final_base_up_z": 0.9824501164257526,
+        "low_pelvis_detected": false,
+        "tilt_threshold_sample_seconds": 1.6,
+        "fall_detected": true,
+        "fall_criterion": "pelvis height < 0.4 m OR base upright cosine < 0.35 after gantry release",
+        "fall_detection_is_heuristic": true,
+        "gantry_disabled_during_policy": true
+      },
+      "inference": {
+        "status": "completed",
+        "ticks": 500,
+        "commands": [
+          {
+            "seconds": 0.01,
+            "code": 1,
+            "name": "forward"
+          }
+        ],
+        "control_period_simulation_seconds": 0.02,
+        "onnxruntime_intra_op_threads": 1,
+        "lifecycle": {
+          "damping_mode_active": true,
+          "policy_action_disabled": true
+        },
+        "transport": "official Unitree SDK DDS on lo; official depth shared memory",
+        "input": "automated injected commands"
+      }
+    },
+    {
+      "scenario": "high_speed_climb_76",
+      "configuration": "run_forward_0.6s_step0s",
+      "configuration_index": 0,
+      "available_configurations": 40,
+      "command": 6,
+      "mesh_sha256": "8ef153b4c79e73d3bd96228ea517cb3825d4652d231e8080ee1d4a98e6a2763e",
+      "matching_released_training_bundle_available": true,
+      "status": "completed",
+      "videos": [
+        {
+          "path": "high_speed_climb_76/rollout-01.mp4",
+          "thumbnail": "high_speed_climb_76/rollout-01.png",
+          "duration_seconds": 14.14,
+          "width": 640,
+          "height": 360,
+          "fps": "50/1",
+          "frames": "707",
+          "codec": "h264"
+        }
+      ],
+      "artifacts": [
+        {
+          "path": "high_speed_climb_76/result.json",
+          "kind": "result.json",
+          "source": "/home/dzp/projects/php_parkour/outputs/research/sim2sim/scene-matrix-final/high_speed_climb_76/result.json",
+          "sha256": "5ccd099a7d20d53bed868478d92181bbcc91ad6dbf431413f98b85a825415dc6",
+          "size": 3058
+        },
+        {
+          "path": "high_speed_climb_76/trajectory.csv",
+          "kind": "trajectory.csv",
+          "source": "/home/dzp/projects/php_parkour/outputs/research/sim2sim/scene-matrix-final/high_speed_climb_76/trajectory.csv",
+          "sha256": "21c8dd24fa5f3f6c7320a71712af0d79f255f210808f0900b250ea058438d1ce",
+          "size": 75814
+        },
+        {
+          "path": "high_speed_climb_76/execution.log",
+          "kind": "execution.log",
+          "source": "outputs/research/sim2sim/scene-matrix-final/high_speed_climb_76.log",
+          "sha256": "5ccd099a7d20d53bed868478d92181bbcc91ad6dbf431413f98b85a825415dc6",
+          "size": 3058
+        },
+        {
+          "path": "high_speed_climb_76/rollout-01.mp4",
+          "kind": "video",
+          "source": "/home/dzp/projects/php_parkour/outputs/research/sim2sim/scene-matrix-final/high_speed_climb_76/video/episode_0_1791603570.mp4",
+          "sha256": "eaeb1395865c2f6c63811c1b03464f23a44d056beab364e131a5bd8efae2c418",
+          "size": 389787
+        },
+        {
+          "path": "high_speed_climb_76/rollout-01.png",
+          "kind": "thumbnail",
+          "source": "/home/dzp/projects/php_parkour/outputs/research/sim2sim/scene-matrix-final/high_speed_climb_76/video/episode_0_1791603570.png",
+          "sha256": "c9eb6a711c48111db261b19a4b2e9ae24b438c43a81035d41ac6e174d7635d95",
+          "size": 21877
+        }
+      ],
+      "fall_detected": true,
+      "heuristic_survival_passed": false,
+      "simulation": {
+        "status": "completed",
+        "physics_steps": 7061,
+        "active_samples": 501,
+        "policy_simulation_seconds": 10.012,
+        "simulation_seconds": 14.122,
+        "wall_seconds": 16.493224223027937,
+        "physics_fps_measured": 428.1151725020074,
+        "displacement_xy_m": [
+          8.657846510410309,
+          3.607415306614712
+        ],
+        "path_length_xy_m": 10.265629446321014,
+        "heading_change_deg": 44.07961935578517,
+        "minimum_pelvis_height_m": 0.6277492642402649,
+        "minimum_base_up_z": 0.15945589542388916,
+        "final_position_xyz_m": [
+          8.447714805603027,
+          3.6107125282287598,
+          0.7538285851478577
+        ],
+        "final_base_up_z": 0.9846017677336931,
+        "low_pelvis_detected": false,
+        "tilt_threshold_sample_seconds": 0.8,
+        "fall_detected": true,
+        "fall_criterion": "pelvis height < 0.4 m OR base upright cosine < 0.35 after gantry release",
+        "fall_detection_is_heuristic": true,
+        "gantry_disabled_during_policy": true
+      },
+      "inference": {
+        "status": "completed",
+        "ticks": 500,
+        "commands": [
+          {
+            "seconds": 0.012,
+            "code": 6,
+            "name": "forward"
+          }
+        ],
+        "control_period_simulation_seconds": 0.02,
+        "onnxruntime_intra_op_threads": 1,
+        "lifecycle": {
+          "damping_mode_active": true,
+          "policy_action_disabled": true
+        },
+        "transport": "official Unitree SDK DDS on lo; official depth shared memory",
+        "input": "automated injected commands"
+      }
+    },
+    {
+      "scenario": "low_speed_climb_94",
+      "configuration": "forward_walk0.7s_step0.5s",
+      "configuration_index": 0,
+      "available_configurations": 20,
+      "command": 1,
+      "mesh_sha256": "a42b90f17d6a334dfec36a7e2afe7190464a5bea8163c3bf5d4335827c0a8895",
+      "matching_released_training_bundle_available": false,
+      "status": "completed",
+      "videos": [
+        {
+          "path": "low_speed_climb_94/rollout-01.mp4",
+          "thumbnail": "low_speed_climb_94/rollout-01.png",
+          "duration_seconds": 14.02,
+          "width": 640,
+          "height": 360,
+          "fps": "50/1",
+          "frames": "701",
+          "codec": "h264"
+        }
+      ],
+      "artifacts": [
+        {
+          "path": "low_speed_climb_94/result.json",
+          "kind": "result.json",
+          "source": "/home/dzp/projects/php_parkour/outputs/research/sim2sim/scene-matrix-final/low_speed_climb_94/result.json",
+          "sha256": "97514229c00d68ecb9f94daf0240cde6afb0ab7b78f7d31c0c484cdbec43668c",
+          "size": 3057
+        },
+        {
+          "path": "low_speed_climb_94/trajectory.csv",
+          "kind": "trajectory.csv",
+          "source": "/home/dzp/projects/php_parkour/outputs/research/sim2sim/scene-matrix-final/low_speed_climb_94/trajectory.csv",
+          "sha256": "8233f54f5f75d4275d7dfcd407ddb3145019986a434aa4931350c0ed2ef99efa",
+          "size": 75384
+        },
+        {
+          "path": "low_speed_climb_94/execution.log",
+          "kind": "execution.log",
+          "source": "outputs/research/sim2sim/scene-matrix-final/low_speed_climb_94.log",
+          "sha256": "97514229c00d68ecb9f94daf0240cde6afb0ab7b78f7d31c0c484cdbec43668c",
+          "size": 3057
+        },
+        {
+          "path": "low_speed_climb_94/rollout-01.mp4",
+          "kind": "video",
+          "source": "/home/dzp/projects/php_parkour/outputs/research/sim2sim/scene-matrix-final/low_speed_climb_94/video/episode_0_1791603591.mp4",
+          "sha256": "4c45e81e56763bc16428ae6f2bb26b7166f1ee23123029b8714887414120decf",
+          "size": 392764
+        },
+        {
+          "path": "low_speed_climb_94/rollout-01.png",
+          "kind": "thumbnail",
+          "source": "/home/dzp/projects/php_parkour/outputs/research/sim2sim/scene-matrix-final/low_speed_climb_94/video/episode_0_1791603591.png",
+          "sha256": "9f3b939c0b0ae7d2b095952b9a7054299abdf7e4b6a56ca301417d3eaa6a9c52",
+          "size": 24153
+        }
+      ],
+      "fall_detected": true,
+      "heuristic_survival_passed": false,
+      "simulation": {
+        "status": "completed",
+        "physics_steps": 7001,
+        "active_samples": 501,
+        "policy_simulation_seconds": 10.0,
+        "simulation_seconds": 14.002,
+        "wall_seconds": 16.90941738395486,
+        "physics_fps_measured": 414.0296127985863,
+        "displacement_xy_m": [
+          2.499533787369728,
+          -0.5620609331526794
+        ],
+        "path_length_xy_m": 4.03560766025144,
+        "heading_change_deg": 118.04858259934515,
+        "minimum_pelvis_height_m": 0.6600782871246338,
+        "minimum_base_up_z": 0.23261529207229614,
+        "final_position_xyz_m": [
+          2.3341948986053467,
+          -0.5615136027336121,
+          1.0982780456542969
+        ],
+        "final_base_up_z": 0.5773354172706604,
+        "low_pelvis_detected": false,
+        "tilt_threshold_sample_seconds": 0.48,
+        "fall_detected": true,
+        "fall_criterion": "pelvis height < 0.4 m OR base upright cosine < 0.35 after gantry release",
+        "fall_detection_is_heuristic": true,
+        "gantry_disabled_during_policy": true
+      },
+      "inference": {
+        "status": "completed",
+        "ticks": 500,
+        "commands": [
+          {
+            "seconds": 0.0,
+            "code": 1,
+            "name": "forward"
+          }
+        ],
+        "control_period_simulation_seconds": 0.02,
+        "onnxruntime_intra_op_threads": 1,
+        "lifecycle": {
+          "damping_mode_active": true,
+          "policy_action_disabled": true
+        },
+        "transport": "official Unitree SDK DDS on lo; official depth shared memory",
+        "input": "automated injected commands"
+      }
+    },
+    {
+      "scenario": "high_speed_climb_94",
+      "configuration": "run_forward_0.6s_step0s",
+      "configuration_index": 0,
+      "available_configurations": 15,
+      "command": 6,
+      "mesh_sha256": "aad1ca0f4c6ed90b44b03508d38207c6881166fd130cc8258042d2ba1d339a91",
+      "matching_released_training_bundle_available": false,
+      "status": "completed",
+      "videos": [
+        {
+          "path": "high_speed_climb_94/rollout-01.mp4",
+          "thumbnail": "high_speed_climb_94/rollout-01.png",
+          "duration_seconds": 14.08,
+          "width": 640,
+          "height": 360,
+          "fps": "50/1",
+          "frames": "704",
+          "codec": "h264"
+        }
+      ],
+      "artifacts": [
+        {
+          "path": "high_speed_climb_94/result.json",
+          "kind": "result.json",
+          "source": "/home/dzp/projects/php_parkour/outputs/research/sim2sim/scene-matrix-final/high_speed_climb_94/result.json",
+          "sha256": "48e78169e52d854b87c17a28f79f845be736e5781a383dae517fe48c3fa815d4",
+          "size": 3076
+        },
+        {
+          "path": "high_speed_climb_94/trajectory.csv",
+          "kind": "trajectory.csv",
+          "source": "/home/dzp/projects/php_parkour/outputs/research/sim2sim/scene-matrix-final/high_speed_climb_94/trajectory.csv",
+          "sha256": "f7fc099285a2691b78d2ef9909f2084c5008e093cf719b56d0c3f127293c6fb5",
+          "size": 76501
+        },
+        {
+          "path": "high_speed_climb_94/execution.log",
+          "kind": "execution.log",
+          "source": "outputs/research/sim2sim/scene-matrix-final/high_speed_climb_94.log",
+          "sha256": "48e78169e52d854b87c17a28f79f845be736e5781a383dae517fe48c3fa815d4",
+          "size": 3076
+        },
+        {
+          "path": "high_speed_climb_94/rollout-01.mp4",
+          "kind": "video",
+          "source": "/home/dzp/projects/php_parkour/outputs/research/sim2sim/scene-matrix-final/high_speed_climb_94/video/episode_0_1791603612.mp4",
+          "sha256": "b0e2f9c45ee3700e3bf504d6b4af9daba6210c57c81e08887d767b4e2e7b1fd7",
+          "size": 420940
+        },
+        {
+          "path": "high_speed_climb_94/rollout-01.png",
+          "kind": "thumbnail",
+          "source": "/home/dzp/projects/php_parkour/outputs/research/sim2sim/scene-matrix-final/high_speed_climb_94/video/episode_0_1791603612.png",
+          "sha256": "e2be9d841d89862f47c74252c6634c480f94c28233cb24d784c9eefa0c5a4a4f",
+          "size": 26335
+        }
+      ],
+      "fall_detected": true,
+      "heuristic_survival_passed": false,
+      "simulation": {
+        "status": "completed",
+        "physics_steps": 7031,
+        "active_samples": 501,
+        "policy_simulation_seconds": 10.012,
+        "simulation_seconds": 14.062000000000001,
+        "wall_seconds": 16.744218578911386,
+        "physics_fps_measured": 419.9061082924354,
+        "displacement_xy_m": [
+          4.024129942059517,
+          -2.1898981807753444
+        ],
+        "path_length_xy_m": 7.561447190556429,
+        "heading_change_deg": -116.30805552197425,
+        "minimum_pelvis_height_m": 0.0628933236002922,
+        "minimum_base_up_z": -0.7348132133483887,
+        "final_position_xyz_m": [
+          3.82778263092041,
+          -2.1871612071990967,
+          0.06603725254535675
+        ],
+        "final_base_up_z": -0.04869794845581055,
+        "low_pelvis_detected": true,
+        "tilt_threshold_sample_seconds": 5.96,
+        "fall_detected": true,
+        "fall_criterion": "pelvis height < 0.4 m OR base upright cosine < 0.35 after gantry release",
+        "fall_detection_is_heuristic": true,
+        "gantry_disabled_during_policy": true
+      },
+      "inference": {
+        "status": "completed",
+        "ticks": 500,
+        "commands": [
+          {
+            "seconds": 0.012,
+            "code": 6,
+            "name": "forward"
+          }
+        ],
+        "control_period_simulation_seconds": 0.02,
+        "onnxruntime_intra_op_threads": 1,
+        "lifecycle": {
+          "damping_mode_active": true,
+          "policy_action_disabled": true
+        },
+        "transport": "official Unitree SDK DDS on lo; official depth shared memory",
+        "input": "automated injected commands"
+      }
+    },
+    {
+      "scenario": "low_speed_roll_78",
+      "configuration": "roll_78",
+      "configuration_index": 0,
+      "available_configurations": 1,
+      "command": 1,
+      "mesh_sha256": "b00486a4cfe305677eec73e2969de27861d02b5e33f74d23b423a089499944af",
+      "matching_released_training_bundle_available": false,
+      "status": "completed",
+      "videos": [
+        {
+          "path": "low_speed_roll_78/rollout-01.mp4",
+          "thumbnail": "low_speed_roll_78/rollout-01.png",
+          "duration_seconds": 13.98,
+          "width": 640,
+          "height": 360,
+          "fps": "50/1",
+          "frames": "699",
+          "codec": "h264"
+        }
+      ],
+      "artifacts": [
+        {
+          "path": "low_speed_roll_78/result.json",
+          "kind": "result.json",
+          "source": "/home/dzp/projects/php_parkour/outputs/research/sim2sim/scene-matrix-final/low_speed_roll_78/result.json",
+          "sha256": "ec2f8d64a00be59235505bfb987ca5e89d0a3a9c699153564707c2d535d28cdf",
+          "size": 3055
+        },
+        {
+          "path": "low_speed_roll_78/trajectory.csv",
+          "kind": "trajectory.csv",
+          "source": "/home/dzp/projects/php_parkour/outputs/research/sim2sim/scene-matrix-final/low_speed_roll_78/trajectory.csv",
+          "sha256": "6064d5d12dd3574daab09403f974a47cd7cdc98c831b7d22d6519cf791d3d6a3",
+          "size": 76047
+        },
+        {
+          "path": "low_speed_roll_78/execution.log",
+          "kind": "execution.log",
+          "source": "outputs/research/sim2sim/scene-matrix-final/low_speed_roll_78.log",
+          "sha256": "ec2f8d64a00be59235505bfb987ca5e89d0a3a9c699153564707c2d535d28cdf",
+          "size": 3055
+        },
+        {
+          "path": "low_speed_roll_78/rollout-01.mp4",
+          "kind": "video",
+          "source": "/home/dzp/projects/php_parkour/outputs/research/sim2sim/scene-matrix-final/low_speed_roll_78/video/episode_0_1791603632.mp4",
+          "sha256": "88e8478ed3a9dea667dde111ea0a9f2924f6f8271dce38de8774176fe984a3ba",
+          "size": 376297
+        },
+        {
+          "path": "low_speed_roll_78/rollout-01.png",
+          "kind": "thumbnail",
+          "source": "/home/dzp/projects/php_parkour/outputs/research/sim2sim/scene-matrix-final/low_speed_roll_78/video/episode_0_1791603632.png",
+          "sha256": "6d75277190f32f5ff39c485cf00821f9f09fe2f0250e0d9d6bace6b7f7b04fad",
+          "size": 25232
+        }
+      ],
+      "fall_detected": true,
+      "heuristic_survival_passed": false,
+      "simulation": {
+        "status": "completed",
+        "physics_steps": 6981,
+        "active_samples": 501,
+        "policy_simulation_seconds": 10.002,
+        "simulation_seconds": 13.962,
+        "wall_seconds": 16.441755086067133,
+        "physics_fps_measured": 424.5896907290376,
+        "displacement_xy_m": [
+          3.158346563577652,
+          0.5987220718757271
+        ],
+        "path_length_xy_m": 3.7843065494306036,
+        "heading_change_deg": 18.44067551598263,
+        "minimum_pelvis_height_m": 0.6522259712219238,
+        "minimum_base_up_z": 0.02035808563232422,
+        "final_position_xyz_m": [
+          3.014641523361206,
+          0.5987154841423035,
+          0.7572309970855713
+        ],
+        "final_base_up_z": 0.992345530539751,
+        "low_pelvis_detected": false,
+        "tilt_threshold_sample_seconds": 1.6600000000000001,
+        "fall_detected": true,
+        "fall_criterion": "pelvis height < 0.4 m OR base upright cosine < 0.35 after gantry release",
+        "fall_detection_is_heuristic": true,
+        "gantry_disabled_during_policy": true
+      },
+      "inference": {
+        "status": "completed",
+        "ticks": 500,
+        "commands": [
+          {
+            "seconds": 0.002,
+            "code": 1,
+            "name": "forward"
+          }
+        ],
+        "control_period_simulation_seconds": 0.02,
+        "onnxruntime_intra_op_threads": 1,
+        "lifecycle": {
+          "damping_mode_active": true,
+          "policy_action_disabled": true
+        },
+        "transport": "official Unitree SDK DDS on lo; official depth shared memory",
+        "input": "automated injected commands"
+      }
+    },
+    {
+      "scenario": "low_speed_roll_90",
+      "configuration": "roll_90_walk0.4s",
+      "configuration_index": 0,
+      "available_configurations": 3,
+      "command": 1,
+      "mesh_sha256": "084c54e11aabe8f5ff15ae4a7a9ece6981fa7d61ffc8ab58a2119c3032a2f419",
+      "matching_released_training_bundle_available": false,
+      "status": "completed",
+      "videos": [
+        {
+          "path": "low_speed_roll_90/rollout-01.mp4",
+          "thumbnail": "low_speed_roll_90/rollout-01.png",
+          "duration_seconds": 14.06,
+          "width": 640,
+          "height": 360,
+          "fps": "50/1",
+          "frames": "703",
+          "codec": "h264"
+        }
+      ],
+      "artifacts": [
+        {
+          "path": "low_speed_roll_90/result.json",
+          "kind": "result.json",
+          "source": "/home/dzp/projects/php_parkour/outputs/research/sim2sim/scene-matrix-final/low_speed_roll_90/result.json",
+          "sha256": "1453594ad5c0aa0655cd265ec11708ef42688bb77f94682883e2a4a22e868003",
+          "size": 3054
+        },
+        {
+          "path": "low_speed_roll_90/trajectory.csv",
+          "kind": "trajectory.csv",
+          "source": "/home/dzp/projects/php_parkour/outputs/research/sim2sim/scene-matrix-final/low_speed_roll_90/trajectory.csv",
+          "sha256": "577a48187df5593c2e238cf14d15cfaf76942b44fee47b362a23b189cdda9f88",
+          "size": 76744
+        },
+        {
+          "path": "low_speed_roll_90/execution.log",
+          "kind": "execution.log",
+          "source": "outputs/research/sim2sim/scene-matrix-final/low_speed_roll_90.log",
+          "sha256": "1453594ad5c0aa0655cd265ec11708ef42688bb77f94682883e2a4a22e868003",
+          "size": 3054
+        },
+        {
+          "path": "low_speed_roll_90/rollout-01.mp4",
+          "kind": "video",
+          "source": "/home/dzp/projects/php_parkour/outputs/research/sim2sim/scene-matrix-final/low_speed_roll_90/video/episode_0_1791603653.mp4",
+          "sha256": "a21bf941cd29458afc6176c0d2a820484d4d02e89dd8bde179dc5dadd7203930",
+          "size": 420999
+        },
+        {
+          "path": "low_speed_roll_90/rollout-01.png",
+          "kind": "thumbnail",
+          "source": "/home/dzp/projects/php_parkour/outputs/research/sim2sim/scene-matrix-final/low_speed_roll_90/video/episode_0_1791603653.png",
+          "sha256": "7f77bbc30501d14496e9624d17da49f709cd09b1a35cbc6c9b70938ffac2c1a3",
+          "size": 24614
+        }
+      ],
+      "fall_detected": true,
+      "heuristic_survival_passed": false,
+      "simulation": {
+        "status": "completed",
+        "physics_steps": 7021,
+        "active_samples": 501,
+        "policy_simulation_seconds": 10.01,
+        "simulation_seconds": 14.042,
+        "wall_seconds": 16.343079786049202,
+        "physics_fps_measured": 429.6007700220054,
+        "displacement_xy_m": [
+          0.7401885986328125,
+          -0.9322690122644417
+        ],
+        "path_length_xy_m": 3.9304214722900097,
+        "heading_change_deg": 198.27775965938335,
+        "minimum_pelvis_height_m": 0.3731756806373596,
+        "minimum_base_up_z": -0.3224978446960449,
+        "final_position_xyz_m": [
+          0.5539025664329529,
+          -0.9313747882843018,
+          0.3832814693450928
+        ],
+        "final_base_up_z": -0.27476704120635986,
+        "low_pelvis_detected": true,
+        "tilt_threshold_sample_seconds": 2.12,
+        "fall_detected": true,
+        "fall_criterion": "pelvis height < 0.4 m OR base upright cosine < 0.35 after gantry release",
+        "fall_detection_is_heuristic": true,
+        "gantry_disabled_during_policy": true
+      },
+      "inference": {
+        "status": "completed",
+        "ticks": 500,
+        "commands": [
+          {
+            "seconds": 0.01,
+            "code": 1,
+            "name": "forward"
+          }
+        ],
+        "control_period_simulation_seconds": 0.02,
+        "onnxruntime_intra_op_threads": 1,
+        "lifecycle": {
+          "damping_mode_active": true,
+          "policy_action_disabled": true
+        },
+        "transport": "official Unitree SDK DDS on lo; official depth shared memory",
+        "input": "automated injected commands"
+      }
+    },
+    {
+      "scenario": "high_speed_roll_134",
+      "configuration": "run_forward_0.5s_step1.0s",
+      "configuration_index": 0,
+      "available_configurations": 40,
+      "command": 6,
+      "mesh_sha256": "0cb2e95f76afafd5796ab976e2999fe201ae9dfd4946772b8ed05a7b373989be",
+      "matching_released_training_bundle_available": false,
+      "status": "completed",
+      "videos": [
+        {
+          "path": "high_speed_roll_134/rollout-01.mp4",
+          "thumbnail": "high_speed_roll_134/rollout-01.png",
+          "duration_seconds": 14.2,
+          "width": 640,
+          "height": 360,
+          "fps": "50/1",
+          "frames": "710",
+          "codec": "h264"
+        }
+      ],
+      "artifacts": [
+        {
+          "path": "high_speed_roll_134/result.json",
+          "kind": "result.json",
+          "source": "/home/dzp/projects/php_parkour/outputs/research/sim2sim/scene-matrix-final/high_speed_roll_134/result.json",
+          "sha256": "5a45f517641fe5c2551707e94f56afc7d3475a4fd9a32ecf4f3eb73963ac0d1a",
+          "size": 3078
+        },
+        {
+          "path": "high_speed_roll_134/trajectory.csv",
+          "kind": "trajectory.csv",
+          "source": "/home/dzp/projects/php_parkour/outputs/research/sim2sim/scene-matrix-final/high_speed_roll_134/trajectory.csv",
+          "sha256": "580f492233989198f2461e33dee50b2824ec47aad66d6adf1c6f0d9896c07107",
+          "size": 77144
+        },
+        {
+          "path": "high_speed_roll_134/execution.log",
+          "kind": "execution.log",
+          "source": "outputs/research/sim2sim/scene-matrix-final/high_speed_roll_134.log",
+          "sha256": "5a45f517641fe5c2551707e94f56afc7d3475a4fd9a32ecf4f3eb73963ac0d1a",
+          "size": 3078
+        },
+        {
+          "path": "high_speed_roll_134/rollout-01.mp4",
+          "kind": "video",
+          "source": "/home/dzp/projects/php_parkour/outputs/research/sim2sim/scene-matrix-final/high_speed_roll_134/video/episode_0_1791603673.mp4",
+          "sha256": "bb3906bf5e3f47a120d69c461aac7866b92c8f5270c026938b66983a83a211df",
+          "size": 402133
+        },
+        {
+          "path": "high_speed_roll_134/rollout-01.png",
+          "kind": "thumbnail",
+          "source": "/home/dzp/projects/php_parkour/outputs/research/sim2sim/scene-matrix-final/high_speed_roll_134/video/episode_0_1791603673.png",
+          "sha256": "bcc5be643d91d4d0a6841a8a9a8032691dfc84ee22a509f0d508e77e2bdd6075",
+          "size": 26475
+        }
+      ],
+      "fall_detected": true,
+      "heuristic_survival_passed": false,
+      "simulation": {
+        "status": "completed",
+        "physics_steps": 7091,
+        "active_samples": 501,
+        "policy_simulation_seconds": 10.01,
+        "simulation_seconds": 14.182,
+        "wall_seconds": 16.385388156049885,
+        "physics_fps_measured": 432.7635982389815,
+        "displacement_xy_m": [
+          2.1212812811136246,
+          0.4095427277497947
+        ],
+        "path_length_xy_m": 4.774888444712605,
+        "heading_change_deg": -124.42130860026899,
+        "minimum_pelvis_height_m": 0.06435883045196533,
+        "minimum_base_up_z": -0.5293289422988892,
+        "final_position_xyz_m": [
+          1.9102671146392822,
+          0.4103928804397583,
+          0.0686187744140625
+        ],
+        "final_base_up_z": -0.016698241233825684,
+        "low_pelvis_detected": true,
+        "tilt_threshold_sample_seconds": 7.199999999999999,
+        "fall_detected": true,
+        "fall_criterion": "pelvis height < 0.4 m OR base upright cosine < 0.35 after gantry release",
+        "fall_detection_is_heuristic": true,
+        "gantry_disabled_during_policy": true
+      },
+      "inference": {
+        "status": "completed",
+        "ticks": 500,
+        "commands": [
+          {
+            "seconds": 0.01,
+            "code": 6,
+            "name": "forward"
+          }
+        ],
+        "control_period_simulation_seconds": 0.02,
+        "onnxruntime_intra_op_threads": 1,
+        "lifecycle": {
+          "damping_mode_active": true,
+          "policy_action_disabled": true
+        },
+        "transport": "official Unitree SDK DDS on lo; official depth shared memory",
+        "input": "automated injected commands"
+      }
+    },
+    {
+      "scenario": "high_speed_hurdle",
+      "configuration": "run_forward_0.3s",
+      "configuration_index": 0,
+      "available_configurations": 51,
+      "command": 6,
+      "mesh_sha256": "af8c92f7b9ccadb512ced0300325509e628cec4d86a1aca0604ca9f011846e8e",
+      "matching_released_training_bundle_available": false,
+      "status": "completed",
+      "videos": [
+        {
+          "path": "high_speed_hurdle/rollout-01.mp4",
+          "thumbnail": "high_speed_hurdle/rollout-01.png",
+          "duration_seconds": 14.14,
+          "width": 640,
+          "height": 360,
+          "fps": "50/1",
+          "frames": "707",
+          "codec": "h264"
+        }
+      ],
+      "artifacts": [
+        {
+          "path": "high_speed_hurdle/result.json",
+          "kind": "result.json",
+          "source": "/home/dzp/projects/php_parkour/outputs/research/sim2sim/scene-matrix-final/high_speed_hurdle/result.json",
+          "sha256": "f1b277db4759b2490535fe3905bc712eac6007d6d27ad3202c1ad06afeff44e8",
+          "size": 3061
+        },
+        {
+          "path": "high_speed_hurdle/trajectory.csv",
+          "kind": "trajectory.csv",
+          "source": "/home/dzp/projects/php_parkour/outputs/research/sim2sim/scene-matrix-final/high_speed_hurdle/trajectory.csv",
+          "sha256": "79a836286927f8e6e8c1b77d922e4293eff7a3af9d1e04e0380317c112c0246c",
+          "size": 76101
+        },
+        {
+          "path": "high_speed_hurdle/execution.log",
+          "kind": "execution.log",
+          "source": "outputs/research/sim2sim/scene-matrix-final/high_speed_hurdle.log",
+          "sha256": "f1b277db4759b2490535fe3905bc712eac6007d6d27ad3202c1ad06afeff44e8",
+          "size": 3061
+        },
+        {
+          "path": "high_speed_hurdle/rollout-01.mp4",
+          "kind": "video",
+          "source": "/home/dzp/projects/php_parkour/outputs/research/sim2sim/scene-matrix-final/high_speed_hurdle/video/episode_0_1791603694.mp4",
+          "sha256": "c08c69823a65f919b1bf7eabce6fd72d9af142049735ae62e0b4ee854479dabd",
+          "size": 368491
+        },
+        {
+          "path": "high_speed_hurdle/rollout-01.png",
+          "kind": "thumbnail",
+          "source": "/home/dzp/projects/php_parkour/outputs/research/sim2sim/scene-matrix-final/high_speed_hurdle/video/episode_0_1791603694.png",
+          "sha256": "43e4fc6afbdbc40ab28dbfdb9f9ae7f13f4ac76288274325526e91dae93ac4aa",
+          "size": 21126
+        }
+      ],
+      "fall_detected": false,
+      "heuristic_survival_passed": true,
+      "simulation": {
+        "status": "completed",
+        "physics_steps": 7061,
+        "active_samples": 501,
+        "policy_simulation_seconds": 10.008000000000001,
+        "simulation_seconds": 14.122,
+        "wall_seconds": 16.632099770009518,
+        "physics_fps_measured": 424.5404849934565,
+        "displacement_xy_m": [
+          19.793852001428604,
+          3.3875943936873227
+        ],
+        "path_length_xy_m": 20.41967405165481,
+        "heading_change_deg": 24.082460329056488,
+        "minimum_pelvis_height_m": 0.6264596581459045,
+        "minimum_base_up_z": 0.8797148838639259,
+        "final_position_xyz_m": [
+          19.5847225189209,
+          3.3902995586395264,
+          0.7261443138122559
+        ],
+        "final_base_up_z": 0.9858405832201242,
+        "low_pelvis_detected": false,
+        "tilt_threshold_sample_seconds": 0.0,
+        "fall_detected": false,
+        "fall_criterion": "pelvis height < 0.4 m OR base upright cosine < 0.35 after gantry release",
+        "fall_detection_is_heuristic": true,
+        "gantry_disabled_during_policy": true
+      },
+      "inference": {
+        "status": "completed",
+        "ticks": 500,
+        "commands": [
+          {
+            "seconds": 0.008,
+            "code": 6,
+            "name": "forward"
+          }
+        ],
+        "control_period_simulation_seconds": 0.02,
+        "onnxruntime_intra_op_threads": 1,
+        "lifecycle": {
+          "damping_mode_active": true,
+          "policy_action_disabled": true
+        },
+        "transport": "official Unitree SDK DDS on lo; official depth shared memory",
+        "input": "automated injected commands"
+      }
+    },
+    {
+      "scenario": "high_speed_dash_vault",
+      "configuration": "run_forward_0.3s",
+      "configuration_index": 0,
+      "available_configurations": 51,
+      "command": 6,
+      "mesh_sha256": "656464b90582b0d8a2043c4e8fe8535be04df8478c029272299a9ec2eda5e3bc",
+      "matching_released_training_bundle_available": false,
+      "status": "completed",
+      "videos": [
+        {
+          "path": "high_speed_dash_vault/rollout-01.mp4",
+          "thumbnail": "high_speed_dash_vault/rollout-01.png",
+          "duration_seconds": 14.0,
+          "width": 640,
+          "height": 360,
+          "fps": "50/1",
+          "frames": "700",
+          "codec": "h264"
+        }
+      ],
+      "artifacts": [
+        {
+          "path": "high_speed_dash_vault/result.json",
+          "kind": "result.json",
+          "source": "/home/dzp/projects/php_parkour/outputs/research/sim2sim/scene-matrix-final/high_speed_dash_vault/result.json",
+          "sha256": "4d5b57162d62c93cd3a658acfc173394de652b5e5e692ca270627fb3dcc49bc1",
+          "size": 3070
+        },
+        {
+          "path": "high_speed_dash_vault/trajectory.csv",
+          "kind": "trajectory.csv",
+          "source": "/home/dzp/projects/php_parkour/outputs/research/sim2sim/scene-matrix-final/high_speed_dash_vault/trajectory.csv",
+          "sha256": "a663bc80e149dddb3e80ea045c50d04ee814a9a36ea1deb333f518a3e962d8cb",
+          "size": 76290
+        },
+        {
+          "path": "high_speed_dash_vault/execution.log",
+          "kind": "execution.log",
+          "source": "outputs/research/sim2sim/scene-matrix-final/high_speed_dash_vault.log",
+          "sha256": "4d5b57162d62c93cd3a658acfc173394de652b5e5e692ca270627fb3dcc49bc1",
+          "size": 3070
+        },
+        {
+          "path": "high_speed_dash_vault/rollout-01.mp4",
+          "kind": "video",
+          "source": "/home/dzp/projects/php_parkour/outputs/research/sim2sim/scene-matrix-final/high_speed_dash_vault/video/episode_0_1791603714.mp4",
+          "sha256": "1086a83d9aa5950c66198329a4f5809f14f9d0391ad250fa8b4d92a231c99683",
+          "size": 425708
+        },
+        {
+          "path": "high_speed_dash_vault/rollout-01.png",
+          "kind": "thumbnail",
+          "source": "/home/dzp/projects/php_parkour/outputs/research/sim2sim/scene-matrix-final/high_speed_dash_vault/video/episode_0_1791603714.png",
+          "sha256": "74600bf6cf55eb558d6214a4c756c3eed90b6319756bd0a77eaf445b29f096b9",
+          "size": 23978
+        }
+      ],
+      "fall_detected": true,
+      "heuristic_survival_passed": false,
+      "simulation": {
+        "status": "completed",
+        "physics_steps": 6991,
+        "active_samples": 501,
+        "policy_simulation_seconds": 10.014,
+        "simulation_seconds": 13.982000000000001,
+        "wall_seconds": 16.806273789028637,
+        "physics_fps_measured": 415.9755860189363,
+        "displacement_xy_m": [
+          1.993055522441864,
+          -2.253151731856633
+        ],
+        "path_length_xy_m": 7.881105245391375,
+        "heading_change_deg": 50.19543470852897,
+        "minimum_pelvis_height_m": 0.06595980376005173,
+        "minimum_base_up_z": -0.6430381536483765,
+        "final_position_xyz_m": [
+          1.844797968864441,
+          -2.2529194355010986,
+          0.07150935381650925
+        ],
+        "final_base_up_z": 0.020125985145568848,
+        "low_pelvis_detected": true,
+        "tilt_threshold_sample_seconds": 6.24,
+        "fall_detected": true,
+        "fall_criterion": "pelvis height < 0.4 m OR base upright cosine < 0.35 after gantry release",
+        "fall_detection_is_heuristic": true,
+        "gantry_disabled_during_policy": true
+      },
+      "inference": {
+        "status": "completed",
+        "ticks": 500,
+        "commands": [
+          {
+            "seconds": 0.014,
+            "code": 6,
+            "name": "forward"
+          }
+        ],
+        "control_period_simulation_seconds": 0.02,
+        "onnxruntime_intra_op_threads": 1,
+        "lifecycle": {
+          "damping_mode_active": true,
+          "policy_action_disabled": true
+        },
+        "transport": "official Unitree SDK DDS on lo; official depth shared memory",
+        "input": "automated injected commands"
+      }
+    },
+    {
+      "scenario": "high_speed_speed_vault",
+      "configuration": "run_forward_0.3s",
+      "configuration_index": 0,
+      "available_configurations": 20,
+      "command": 6,
+      "mesh_sha256": "1829ea280616ae3cb09ea58909b8303f53eadc0213dfe7b63019a4bce750a77b",
+      "matching_released_training_bundle_available": false,
+      "status": "completed",
+      "videos": [
+        {
+          "path": "high_speed_speed_vault/rollout-01.mp4",
+          "thumbnail": "high_speed_speed_vault/rollout-01.png",
+          "duration_seconds": 14.06,
+          "width": 640,
+          "height": 360,
+          "fps": "50/1",
+          "frames": "703",
+          "codec": "h264"
+        }
+      ],
+      "artifacts": [
+        {
+          "path": "high_speed_speed_vault/result.json",
+          "kind": "result.json",
+          "source": "/home/dzp/projects/php_parkour/outputs/research/sim2sim/scene-matrix-final/high_speed_speed_vault/result.json",
+          "sha256": "76906cd0c5824ce0ae1dec9a77131cd22e9787e8dcd1f307f079929baa8d38b7",
+          "size": 3061
+        },
+        {
+          "path": "high_speed_speed_vault/trajectory.csv",
+          "kind": "trajectory.csv",
+          "source": "/home/dzp/projects/php_parkour/outputs/research/sim2sim/scene-matrix-final/high_speed_speed_vault/trajectory.csv",
+          "sha256": "2b82bbcbe97094251b53a7bb26bc444785483e5cdf8a438ed11a56cb9e7d9864",
+          "size": 76083
+        },
+        {
+          "path": "high_speed_speed_vault/execution.log",
+          "kind": "execution.log",
+          "source": "outputs/research/sim2sim/scene-matrix-final/high_speed_speed_vault.log",
+          "sha256": "76906cd0c5824ce0ae1dec9a77131cd22e9787e8dcd1f307f079929baa8d38b7",
+          "size": 3061
+        },
+        {
+          "path": "high_speed_speed_vault/rollout-01.mp4",
+          "kind": "video",
+          "source": "/home/dzp/projects/php_parkour/outputs/research/sim2sim/scene-matrix-final/high_speed_speed_vault/video/episode_0_1791603736.mp4",
+          "sha256": "c3428f67666c2b7ac1d411e8fbb91b9702dfa647ae9630eea05dc31dc648d539",
+          "size": 392187
+        },
+        {
+          "path": "high_speed_speed_vault/rollout-01.png",
+          "kind": "thumbnail",
+          "source": "/home/dzp/projects/php_parkour/outputs/research/sim2sim/scene-matrix-final/high_speed_speed_vault/video/episode_0_1791603736.png",
+          "sha256": "b495875daf3be8dde76a619454b0845224e4322d4352074f1a2d832cd70a56e4",
+          "size": 21230
+        }
+      ],
+      "fall_detected": true,
+      "heuristic_survival_passed": false,
+      "simulation": {
+        "status": "completed",
+        "physics_steps": 7021,
+        "active_samples": 501,
+        "policy_simulation_seconds": 10.006,
+        "simulation_seconds": 14.042,
+        "wall_seconds": 16.702144861919805,
+        "physics_fps_measured": 420.36515275889496,
+        "displacement_xy_m": [
+          13.091600254178047,
+          -3.5839983204496093
+        ],
+        "path_length_xy_m": 14.147405331703723,
+        "heading_change_deg": -10.445289325221555,
+        "minimum_pelvis_height_m": 0.6089743375778198,
+        "minimum_base_up_z": 0.09094208478927612,
+        "final_position_xyz_m": [
+          12.903322219848633,
+          -3.583111047744751,
+          0.7179882526397705
+        ],
+        "final_base_up_z": 0.983349310234189,
+        "low_pelvis_detected": false,
+        "tilt_threshold_sample_seconds": 1.06,
+        "fall_detected": true,
+        "fall_criterion": "pelvis height < 0.4 m OR base upright cosine < 0.35 after gantry release",
+        "fall_detection_is_heuristic": true,
+        "gantry_disabled_during_policy": true
+      },
+      "inference": {
+        "status": "completed",
+        "ticks": 500,
+        "commands": [
+          {
+            "seconds": 0.006,
+            "code": 6,
+            "name": "forward"
+          }
+        ],
+        "control_period_simulation_seconds": 0.02,
+        "onnxruntime_intra_op_threads": 1,
+        "lifecycle": {
+          "damping_mode_active": true,
+          "policy_action_disabled": true
+        },
+        "transport": "official Unitree SDK DDS on lo; official depth shared memory",
+        "input": "automated injected commands"
+      }
+    },
+    {
+      "scenario": "high_speed_cat_vault",
+      "configuration": "run_forward_0.3s",
+      "configuration_index": 0,
+      "available_configurations": 51,
+      "command": 6,
+      "mesh_sha256": "d4e87ba27fcbab7d646aedee6db707a589318696e1fb9b69be95a0bfc9e03e91",
+      "matching_released_training_bundle_available": false,
+      "status": "completed",
+      "videos": [
+        {
+          "path": "high_speed_cat_vault/rollout-01.mp4",
+          "thumbnail": "high_speed_cat_vault/rollout-01.png",
+          "duration_seconds": 14.14,
+          "width": 640,
+          "height": 360,
+          "fps": "50/1",
+          "frames": "707",
+          "codec": "h264"
+        }
+      ],
+      "artifacts": [
+        {
+          "path": "high_speed_cat_vault/result.json",
+          "kind": "result.json",
+          "source": "/home/dzp/projects/php_parkour/outputs/research/sim2sim/scene-matrix-final/high_speed_cat_vault/result.json",
+          "sha256": "9f1a0cc50c478b7dcb0314b375c2adf22b2386bb676177bfe8aa254b50f6ff76",
+          "size": 3070
+        },
+        {
+          "path": "high_speed_cat_vault/trajectory.csv",
+          "kind": "trajectory.csv",
+          "source": "/home/dzp/projects/php_parkour/outputs/research/sim2sim/scene-matrix-final/high_speed_cat_vault/trajectory.csv",
+          "sha256": "6e9d425f49d652c1a23a47e56713dc59a860261760a961828cfe3f694660974b",
+          "size": 76693
+        },
+        {
+          "path": "high_speed_cat_vault/execution.log",
+          "kind": "execution.log",
+          "source": "outputs/research/sim2sim/scene-matrix-final/high_speed_cat_vault.log",
+          "sha256": "9f1a0cc50c478b7dcb0314b375c2adf22b2386bb676177bfe8aa254b50f6ff76",
+          "size": 3070
+        },
+        {
+          "path": "high_speed_cat_vault/rollout-01.mp4",
+          "kind": "video",
+          "source": "/home/dzp/projects/php_parkour/outputs/research/sim2sim/scene-matrix-final/high_speed_cat_vault/video/episode_0_1791603756.mp4",
+          "sha256": "8309d1e10078b841422adcba7f34f80e7124f38244ce1eec806e30bcd62e3d74",
+          "size": 390366
+        },
+        {
+          "path": "high_speed_cat_vault/rollout-01.png",
+          "kind": "thumbnail",
+          "source": "/home/dzp/projects/php_parkour/outputs/research/sim2sim/scene-matrix-final/high_speed_cat_vault/video/episode_0_1791603756.png",
+          "sha256": "8fc4c36b96378c26da621aca076bd53232cf5aba76c79a4c077fa02d70064582",
+          "size": 25663
+        }
+      ],
+      "fall_detected": true,
+      "heuristic_survival_passed": false,
+      "simulation": {
+        "status": "completed",
+        "physics_steps": 7061,
+        "active_samples": 501,
+        "policy_simulation_seconds": 10.018,
+        "simulation_seconds": 14.122,
+        "wall_seconds": 16.64541122596711,
+        "physics_fps_measured": 424.20097104656617,
+        "displacement_xy_m": [
+          3.481419786810875,
+          0.8346077322494239
+        ],
+        "path_length_xy_m": 6.23311441741464,
+        "heading_change_deg": -109.4423166529284,
+        "minimum_pelvis_height_m": 0.06256864219903946,
+        "minimum_base_up_z": -0.9979032278060913,
+        "final_position_xyz_m": [
+          3.27374529838562,
+          0.8373243808746338,
+          0.06852017343044281
+        ],
+        "final_base_up_z": -0.017800450325012207,
+        "low_pelvis_detected": true,
+        "tilt_threshold_sample_seconds": 4.84,
+        "fall_detected": true,
+        "fall_criterion": "pelvis height < 0.4 m OR base upright cosine < 0.35 after gantry release",
+        "fall_detection_is_heuristic": true,
+        "gantry_disabled_during_policy": true
+      },
+      "inference": {
+        "status": "completed",
+        "ticks": 500,
+        "commands": [
+          {
+            "seconds": 0.018000000000000002,
+            "code": 6,
+            "name": "forward"
+          }
+        ],
+        "control_period_simulation_seconds": 0.02,
+        "onnxruntime_intra_op_threads": 1,
+        "lifecycle": {
+          "damping_mode_active": true,
+          "policy_action_disabled": true
+        },
+        "transport": "official Unitree SDK DDS on lo; official depth shared memory",
+        "input": "automated injected commands"
+      }
+    },
+    {
+      "scenario": "high_speed_jump_35",
+      "configuration": "jump_35",
+      "configuration_index": 0,
+      "available_configurations": 1,
+      "command": 6,
+      "mesh_sha256": "1587a5105b09d7095c91d7f9e67c5198891c4ff390607943e1da305f08a8f248",
+      "matching_released_training_bundle_available": false,
+      "status": "completed",
+      "videos": [
+        {
+          "path": "high_speed_jump_35/rollout-01.mp4",
+          "thumbnail": "high_speed_jump_35/rollout-01.png",
+          "duration_seconds": 14.06,
+          "width": 640,
+          "height": 360,
+          "fps": "50/1",
+          "frames": "703",
+          "codec": "h264"
+        }
+      ],
+      "artifacts": [
+        {
+          "path": "high_speed_jump_35/result.json",
+          "kind": "result.json",
+          "source": "/home/dzp/projects/php_parkour/outputs/research/sim2sim/scene-matrix-final/high_speed_jump_35/result.json",
+          "sha256": "122f9413700cd2c5ef84da82f9b62c7dc09a019a5d3146f1aba612db6e4c2f9c",
+          "size": 3046
+        },
+        {
+          "path": "high_speed_jump_35/trajectory.csv",
+          "kind": "trajectory.csv",
+          "source": "/home/dzp/projects/php_parkour/outputs/research/sim2sim/scene-matrix-final/high_speed_jump_35/trajectory.csv",
+          "sha256": "bf29428736980a15ec55679858b258e0557c9e465c322f615d0752040e85915e",
+          "size": 76132
+        },
+        {
+          "path": "high_speed_jump_35/execution.log",
+          "kind": "execution.log",
+          "source": "outputs/research/sim2sim/scene-matrix-final/high_speed_jump_35.log",
+          "sha256": "122f9413700cd2c5ef84da82f9b62c7dc09a019a5d3146f1aba612db6e4c2f9c",
+          "size": 3046
+        },
+        {
+          "path": "high_speed_jump_35/rollout-01.mp4",
+          "kind": "video",
+          "source": "/home/dzp/projects/php_parkour/outputs/research/sim2sim/scene-matrix-final/high_speed_jump_35/video/episode_0_1791603777.mp4",
+          "sha256": "1bf9f51cbc84a5d751f2c962eda143d761377f8d232ff0a3fe0b5e3428a4532e",
+          "size": 324737
+        },
+        {
+          "path": "high_speed_jump_35/rollout-01.png",
+          "kind": "thumbnail",
+          "source": "/home/dzp/projects/php_parkour/outputs/research/sim2sim/scene-matrix-final/high_speed_jump_35/video/episode_0_1791603777.png",
+          "sha256": "cabbd5363e5738b8ee51861e21afa04889d324f7d6c509ee7b070d95ff75f8db",
+          "size": 24417
+        }
+      ],
+      "fall_detected": true,
+      "heuristic_survival_passed": false,
+      "simulation": {
+        "status": "completed",
+        "physics_steps": 7021,
+        "active_samples": 501,
+        "policy_simulation_seconds": 10.012,
+        "simulation_seconds": 14.042,
+        "wall_seconds": 16.321571219945326,
+        "physics_fps_measured": 430.1668989298966,
+        "displacement_xy_m": [
+          1.5492164343595505,
+          0.2882971439976245
+        ],
+        "path_length_xy_m": 2.0699632488511495,
+        "heading_change_deg": -124.35496081151005,
+        "minimum_pelvis_height_m": 0.5479113459587097,
+        "minimum_base_up_z": 0.2014981508255005,
+        "final_position_xyz_m": [
+          1.3637819290161133,
+          0.2895665764808655,
+          0.5914304852485657
+        ],
+        "final_base_up_z": 0.22274410724639893,
+        "low_pelvis_detected": false,
+        "tilt_threshold_sample_seconds": 8.0,
+        "fall_detected": true,
+        "fall_criterion": "pelvis height < 0.4 m OR base upright cosine < 0.35 after gantry release",
+        "fall_detection_is_heuristic": true,
+        "gantry_disabled_during_policy": true
+      },
+      "inference": {
+        "status": "completed",
+        "ticks": 500,
+        "commands": [
+          {
+            "seconds": 0.012,
+            "code": 6,
+            "name": "forward"
+          }
+        ],
+        "control_period_simulation_seconds": 0.02,
+        "onnxruntime_intra_op_threads": 1,
+        "lifecycle": {
+          "damping_mode_active": true,
+          "policy_action_disabled": true
+        },
+        "transport": "official Unitree SDK DDS on lo; official depth shared memory",
+        "input": "automated injected commands"
+      }
+    }
+  ],
+  "counts": {
+    "planned": 17,
+    "completed": 17,
+    "threshold_triggered": 14,
+    "unflagged": 3,
+    "execution_failed": 0,
+    "videos": 17
+  }
+}

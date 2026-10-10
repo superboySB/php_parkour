@@ -14,7 +14,7 @@ Mirrors holosoma's ``eval_agent.py`` but tailored for distill checkpoints:
 Usage::
 
     python -m wbt_training.training_runs.eval_student \\
-        --checkpoint wandb://<entity>/<project>/<run_id>[/model_NNNNN.pt]
+        --checkpoint /outputs/training/smoke/<run>/model_00001.pt
 """
 
 from __future__ import annotations

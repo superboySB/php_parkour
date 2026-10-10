@@ -1,0 +1,1461 @@
+{
+  "status": "passed",
+  "scope": "ONNX structure, metadata and synthetic inference; not locomotion quality",
+  "seed": 2026,
+  "python": "3.12.3",
+  "numpy": "2.3.5",
+  "onnx": "1.23.2",
+  "onnxruntime": "1.31.0",
+  "models": [
+    {
+      "path": "/outputs/student-capacity-pilot/pure/PHP-research-capacity/20261010_034926-capacity-pilot-pure-locomotion/model_00019/depth_backbone.onnx",
+      "bytes": 105254,
+      "sha256": "857895cfda0286d0eb7112864534a0fef1e55461d0a129a925beb60d68163923",
+      "inputs": [
+        {
+          "name": "depth_image",
+          "shape": [
+            1,
+            58,
+            87
+          ],
+          "dtype": "tensor(float)"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "depth_latent",
+          "shape": [
+            1,
+            32
+          ],
+          "dtype": "tensor(float)"
+        }
+      ],
+      "metadata": {
+        "run_path": ""
+      }
+    },
+    {
+      "path": "/outputs/student-capacity-pilot/pure/PHP-research-capacity/20261010_034926-capacity-pilot-pure-locomotion/model_00019/student.onnx",
+      "bytes": 2710180,
+      "sha256": "d4613144b48c6b618d5f4476e56578b785b2661a776357f568ba17f14bb75de4",
+      "inputs": [
+        {
+          "name": "obs",
+          "shape": [
+            1,
+            140
+          ],
+          "dtype": "tensor(float)"
+        },
+        {
+          "name": "time_step",
+          "shape": [
+            1,
+            1
+          ],
+          "dtype": "tensor(float)"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "actions",
+          "shape": [
+            1,
+            29
+          ],
+          "dtype": "tensor(float)"
+        },
+        {
+          "name": "joint_pos",
+          "shape": [
+            1,
+            29
+          ],
+          "dtype": "tensor(float)"
+        },
+        {
+          "name": "joint_vel",
+          "shape": [
+            1,
+            29
+          ],
+          "dtype": "tensor(float)"
+        },
+        {
+          "name": "body_pos_w",
+          "shape": [
+            1,
+            32,
+            3
+          ],
+          "dtype": "tensor(float)"
+        },
+        {
+          "name": "body_quat_w",
+          "shape": [
+            1,
+            32,
+            4
+          ],
+          "dtype": "tensor(float)"
+        },
+        {
+          "name": "body_lin_vel_w",
+          "shape": [
+            1,
+            32,
+            3
+          ],
+          "dtype": "tensor(float)"
+        },
+        {
+          "name": "body_ang_vel_w",
+          "shape": [
+            1,
+            32,
+            3
+          ],
+          "dtype": "tensor(float)"
+        }
+      ],
+      "metadata": {
+        "run_path": "",
+        "joint_names": "left_hip_pitch_joint,left_hip_roll_joint,left_hip_yaw_joint,left_knee_joint,left_ankle_pitch_joint,left_ankle_roll_joint,right_hip_pitch_joint,right_hip_roll_joint,right_hip_yaw_joint,right_knee_joint,right_ankle_pitch_joint,right_ankle_roll_joint,waist_yaw_joint,waist_roll_joint,waist_pitch_joint,left_shoulder_pitch_joint,left_shoulder_roll_joint,left_shoulder_yaw_joint,left_elbow_joint,left_wrist_roll_joint,left_wrist_pitch_joint,left_wrist_yaw_joint,right_shoulder_pitch_joint,right_shoulder_roll_joint,right_shoulder_yaw_joint,right_elbow_joint,right_wrist_roll_joint,right_wrist_pitch_joint,right_wrist_yaw_joint",
+        "action_scale": "1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000",
+        "default_joint_pos": "-0.312,0.000,0.000,0.669,-0.363,0.000,-0.312,0.000,0.000,0.669,-0.363,0.000,0.000,0.000,0.000,0.200,0.200,0.000,0.600,0.000,0.000,0.000,0.200,-0.200,0.000,0.600,0.000,0.000,0.000",
+        "joint_stiffness": "40.179,99.098,40.179,99.098,28.501,28.501,40.179,99.098,40.179,99.098,28.501,28.501,40.179,28.501,28.501,14.251,14.251,14.251,14.251,14.251,16.778,16.778,14.251,14.251,14.251,14.251,14.251,16.778,16.778",
+        "joint_damping": "2.558,6.309,2.558,6.309,1.814,1.814,2.558,6.309,2.558,6.309,1.814,1.814,2.558,1.814,1.814,0.907,0.907,0.907,0.907,0.907,1.068,1.068,0.907,0.907,0.907,0.907,0.907,1.068,1.068",
+        "kp": "40.179,99.098,40.179,99.098,28.501,28.501,40.179,99.098,40.179,99.098,28.501,28.501,40.179,28.501,28.501,14.251,14.251,14.251,14.251,14.251,16.778,16.778,14.251,14.251,14.251,14.251,14.251,16.778,16.778",
+        "kd": "2.558,6.309,2.558,6.309,1.814,1.814,2.558,6.309,2.558,6.309,1.814,1.814,2.558,1.814,1.814,0.907,0.907,0.907,0.907,0.907,1.068,1.068,0.907,0.907,0.907,0.907,0.907,1.068,1.068",
+        "command_names": "motion_command",
+        "observation_names": "actions,base_ang_vel,dof_pos,dof_vel,robot_anchor_projected_gravity,velocity_command,placeholder",
+        "anchor_body_name": "torso_link",
+        "body_names": "pelvis,left_hip_roll_link,left_knee_link,left_ankle_roll_link,right_hip_roll_link,right_knee_link,right_ankle_roll_link,torso_link,left_shoulder_roll_link,left_elbow_link,left_wrist_yaw_link,right_shoulder_roll_link,right_elbow_link,right_wrist_yaw_link"
+      }
+    }
+  ],
+  "cases": [
+    {
+      "depth_case": "zero_depth",
+      "command_index": 0,
+      "command": "stand",
+      "deployed_command": true,
+      "seconds": 6.0092657804489136e-05,
+      "action_min": -0.18832843005657196,
+      "action_max": 0.05747045576572418,
+      "action_l2": 0.33537575602531433,
+      "output_shapes": [
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          4
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          3
+        ]
+      ]
+    },
+    {
+      "depth_case": "zero_depth",
+      "command_index": 1,
+      "command": "low_forward",
+      "deployed_command": true,
+      "seconds": 3.819912672042847e-05,
+      "action_min": -0.19143901765346527,
+      "action_max": 0.08837255835533142,
+      "action_l2": 0.3764791190624237,
+      "output_shapes": [
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          4
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          3
+        ]
+      ]
+    },
+    {
+      "depth_case": "zero_depth",
+      "command_index": 2,
+      "command": "low_left_45",
+      "deployed_command": true,
+      "seconds": 3.081653267145157e-05,
+      "action_min": -0.13790565729141235,
+      "action_max": 0.061521150171756744,
+      "action_l2": 0.2931159436702728,
+      "output_shapes": [
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          4
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          3
+        ]
+      ]
+    },
+    {
+      "depth_case": "zero_depth",
+      "command_index": 3,
+      "command": "low_left_90",
+      "deployed_command": true,
+      "seconds": 2.9025599360466003e-05,
+      "action_min": -0.1513107270002365,
+      "action_max": 0.08169160038232803,
+      "action_l2": 0.3185012638568878,
+      "output_shapes": [
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          4
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          3
+        ]
+      ]
+    },
+    {
+      "depth_case": "zero_depth",
+      "command_index": 4,
+      "command": "low_right_45",
+      "deployed_command": true,
+      "seconds": 2.8854236006736755e-05,
+      "action_min": -0.15684129297733307,
+      "action_max": 0.07363495975732803,
+      "action_l2": 0.30850690603256226,
+      "output_shapes": [
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          4
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          3
+        ]
+      ]
+    },
+    {
+      "depth_case": "zero_depth",
+      "command_index": 5,
+      "command": "low_right_90",
+      "deployed_command": true,
+      "seconds": 2.8553418815135956e-05,
+      "action_min": -0.159311443567276,
+      "action_max": 0.06622300297021866,
+      "action_l2": 0.30926692485809326,
+      "output_shapes": [
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          4
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          3
+        ]
+      ]
+    },
+    {
+      "depth_case": "zero_depth",
+      "command_index": 6,
+      "command": "high_forward",
+      "deployed_command": true,
+      "seconds": 2.789311110973358e-05,
+      "action_min": -0.14086343348026276,
+      "action_max": 0.07694990932941437,
+      "action_l2": 0.2939974367618561,
+      "output_shapes": [
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          4
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          3
+        ]
+      ]
+    },
+    {
+      "depth_case": "zero_depth",
+      "command_index": 7,
+      "command": "high_left_45",
+      "deployed_command": true,
+      "seconds": 2.737250179052353e-05,
+      "action_min": -0.11903776228427887,
+      "action_max": 0.08202242106199265,
+      "action_l2": 0.28384771943092346,
+      "output_shapes": [
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          4
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          3
+        ]
+      ]
+    },
+    {
+      "depth_case": "zero_depth",
+      "command_index": 8,
+      "command": "high_left_90",
+      "deployed_command": true,
+      "seconds": 2.9375776648521423e-05,
+      "action_min": -0.11882135272026062,
+      "action_max": 0.07249462604522705,
+      "action_l2": 0.28026074171066284,
+      "output_shapes": [
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          4
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          3
+        ]
+      ]
+    },
+    {
+      "depth_case": "zero_depth",
+      "command_index": 9,
+      "command": "high_right_45",
+      "deployed_command": true,
+      "seconds": 2.9826536774635315e-05,
+      "action_min": -0.12201718240976334,
+      "action_max": 0.08184543251991272,
+      "action_l2": 0.28119558095932007,
+      "output_shapes": [
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          4
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          3
+        ]
+      ]
+    },
+    {
+      "depth_case": "zero_depth",
+      "command_index": 10,
+      "command": "high_right_90",
+      "deployed_command": true,
+      "seconds": 2.7472153306007385e-05,
+      "action_min": -0.11584299802780151,
+      "action_max": 0.06704416871070862,
+      "action_l2": 0.26341646909713745,
+      "output_shapes": [
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          4
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          3
+        ]
+      ]
+    },
+    {
+      "depth_case": "zero_depth",
+      "command_index": 11,
+      "command": "back",
+      "deployed_command": true,
+      "seconds": 2.7101486921310425e-05,
+      "action_min": -0.17487694323062897,
+      "action_max": 0.044053249061107635,
+      "action_l2": 0.31350159645080566,
+      "output_shapes": [
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          4
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          3
+        ]
+      ]
+    },
+    {
+      "depth_case": "zero_depth",
+      "command_index": 12,
+      "command": "reserved_12",
+      "deployed_command": false,
+      "seconds": 2.78521329164505e-05,
+      "action_min": -0.15817484259605408,
+      "action_max": 0.05783741548657417,
+      "action_l2": 0.30410587787628174,
+      "output_shapes": [
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          4
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          3
+        ]
+      ]
+    },
+    {
+      "depth_case": "zero_depth",
+      "command_index": 13,
+      "command": "reserved_13",
+      "deployed_command": false,
+      "seconds": 2.940557897090912e-05,
+      "action_min": -0.16677138209342957,
+      "action_max": 0.05139785259962082,
+      "action_l2": 0.3190799951553345,
+      "output_shapes": [
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          4
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          3
+        ]
+      ]
+    },
+    {
+      "depth_case": "zero_depth",
+      "command_index": 14,
+      "command": "reserved_14",
+      "deployed_command": false,
+      "seconds": 2.822279930114746e-05,
+      "action_min": -0.1649862825870514,
+      "action_max": 0.0496455542743206,
+      "action_l2": 0.31271302700042725,
+      "output_shapes": [
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          4
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          3
+        ]
+      ]
+    },
+    {
+      "depth_case": "random_normalized_depth",
+      "command_index": 0,
+      "command": "stand",
+      "deployed_command": true,
+      "seconds": 2.9704533517360687e-05,
+      "action_min": -0.158237487077713,
+      "action_max": 0.0609075129032135,
+      "action_l2": 0.2921464145183563,
+      "output_shapes": [
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          4
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          3
+        ]
+      ]
+    },
+    {
+      "depth_case": "random_normalized_depth",
+      "command_index": 1,
+      "command": "low_forward",
+      "deployed_command": true,
+      "seconds": 2.8522685170173645e-05,
+      "action_min": -0.16823527216911316,
+      "action_max": 0.08336877822875977,
+      "action_l2": 0.34573736786842346,
+      "output_shapes": [
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          4
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          3
+        ]
+      ]
+    },
+    {
+      "depth_case": "random_normalized_depth",
+      "command_index": 2,
+      "command": "low_left_45",
+      "deployed_command": true,
+      "seconds": 2.735201269388199e-05,
+      "action_min": -0.11584998667240143,
+      "action_max": 0.06202398240566254,
+      "action_l2": 0.2631479501724243,
+      "output_shapes": [
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          4
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          3
+        ]
+      ]
+    },
+    {
+      "depth_case": "random_normalized_depth",
+      "command_index": 3,
+      "command": "low_left_90",
+      "deployed_command": true,
+      "seconds": 3.163795918226242e-05,
+      "action_min": -0.1289798617362976,
+      "action_max": 0.08237337321043015,
+      "action_l2": 0.28586316108703613,
+      "output_shapes": [
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          4
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          3
+        ]
+      ]
+    },
+    {
+      "depth_case": "random_normalized_depth",
+      "command_index": 4,
+      "command": "low_right_45",
+      "deployed_command": true,
+      "seconds": 2.7152709662914276e-05,
+      "action_min": -0.134470596909523,
+      "action_max": 0.07420922070741653,
+      "action_l2": 0.27463844418525696,
+      "output_shapes": [
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          4
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          3
+        ]
+      ]
+    },
+    {
+      "depth_case": "random_normalized_depth",
+      "command_index": 5,
+      "command": "low_right_90",
+      "deployed_command": true,
+      "seconds": 2.7651898562908173e-05,
+      "action_min": -0.1362934410572052,
+      "action_max": 0.06626591831445694,
+      "action_l2": 0.27534034848213196,
+      "output_shapes": [
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          4
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          3
+        ]
+      ]
+    },
+    {
+      "depth_case": "random_normalized_depth",
+      "command_index": 6,
+      "command": "high_forward",
+      "deployed_command": true,
+      "seconds": 2.712104469537735e-05,
+      "action_min": -0.11753489822149277,
+      "action_max": 0.0706978291273117,
+      "action_l2": 0.2628016471862793,
+      "output_shapes": [
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          4
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          3
+        ]
+      ]
+    },
+    {
+      "depth_case": "random_normalized_depth",
+      "command_index": 7,
+      "command": "high_left_45",
+      "deployed_command": true,
+      "seconds": 2.7381815016269684e-05,
+      "action_min": -0.10140743851661682,
+      "action_max": 0.08251366019248962,
+      "action_l2": 0.25268036127090454,
+      "output_shapes": [
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          4
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          3
+        ]
+      ]
+    },
+    {
+      "depth_case": "random_normalized_depth",
+      "command_index": 8,
+      "command": "high_left_90",
+      "deployed_command": true,
+      "seconds": 2.920534461736679e-05,
+      "action_min": -0.09882241487503052,
+      "action_max": 0.0729048103094101,
+      "action_l2": 0.24692294001579285,
+      "output_shapes": [
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          4
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          3
+        ]
+      ]
+    },
+    {
+      "depth_case": "random_normalized_depth",
+      "command_index": 9,
+      "command": "high_right_45",
+      "deployed_command": true,
+      "seconds": 3.1006522476673126e-05,
+      "action_min": -0.09824854135513306,
+      "action_max": 0.08248264342546463,
+      "action_l2": 0.24842695891857147,
+      "output_shapes": [
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          4
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          3
+        ]
+      ]
+    },
+    {
+      "depth_case": "random_normalized_depth",
+      "command_index": 10,
+      "command": "high_right_90",
+      "deployed_command": true,
+      "seconds": 2.713128924369812e-05,
+      "action_min": -0.09212753176689148,
+      "action_max": 0.06793470680713654,
+      "action_l2": 0.23116660118103027,
+      "output_shapes": [
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          4
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          3
+        ]
+      ]
+    },
+    {
+      "depth_case": "random_normalized_depth",
+      "command_index": 11,
+      "command": "back",
+      "deployed_command": true,
+      "seconds": 2.715177834033966e-05,
+      "action_min": -0.14977684617042542,
+      "action_max": 0.04431763291358948,
+      "action_l2": 0.27321919798851013,
+      "output_shapes": [
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          4
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          3
+        ]
+      ]
+    },
+    {
+      "depth_case": "random_normalized_depth",
+      "command_index": 12,
+      "command": "reserved_12",
+      "deployed_command": false,
+      "seconds": 2.8213486075401306e-05,
+      "action_min": -0.13303124904632568,
+      "action_max": 0.06062870845198631,
+      "action_l2": 0.2663225829601288,
+      "output_shapes": [
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          4
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          3
+        ]
+      ]
+    },
+    {
+      "depth_case": "random_normalized_depth",
+      "command_index": 13,
+      "command": "reserved_13",
+      "deployed_command": false,
+      "seconds": 2.9173679649829865e-05,
+      "action_min": -0.1418667435646057,
+      "action_max": 0.05379880964756012,
+      "action_l2": 0.2821187973022461,
+      "output_shapes": [
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          4
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          3
+        ]
+      ]
+    },
+    {
+      "depth_case": "random_normalized_depth",
+      "command_index": 14,
+      "command": "reserved_14",
+      "deployed_command": false,
+      "seconds": 2.784375101327896e-05,
+      "action_min": -0.1406359225511551,
+      "action_max": 0.05081244558095932,
+      "action_l2": 0.27655401825904846,
+      "output_shapes": [
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          29
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          4
+        ],
+        [
+          1,
+          32,
+          3
+        ],
+        [
+          1,
+          32,
+          3
+        ]
+      ]
+    }
+  ]
+}

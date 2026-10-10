@@ -84,7 +84,9 @@ def pipeline(monkeypatch, tmp_path):
     def run(*extra, action="teachers"):
         monkeypatch.setattr(sys, "argv", ["train_pipeline.py", action, "--profile", "official", "--skills", "locomotion", "--output", str(tmp_path), *extra])
         module.main()
-        label = "teacher-locomotion" if action == "teachers" else "eval-student-finetune" if action == "eval-student" else "export-student-finetune"
+        label = ("teacher-locomotion" if action == "teachers" else
+                 f"student-{action.removeprefix('distill-')}" if action.startswith("distill-") else
+                 "eval-student-finetune" if action == "eval-student" else "export-student-finetune")
         return json.loads((tmp_path / "official/manifests" / f"{label}.json").read_text())
 
     return run, commands, tmp_path
@@ -149,6 +151,104 @@ def test_resume_does_not_repeat_training_when_target_is_already_met(pipeline):
     assert len(commands) == 1
     assert finished["checkpoint_sha256"] == pilot["checkpoint_sha256"]
     assert finished["checkpoint_iteration"] == 19
+
+
+@pytest.mark.parametrize("target", ["20", "20000"])
+def test_resume_rejects_changed_environment_count_even_when_target_is_met(pipeline, target):
+    run, commands, _ = pipeline
+    run("--iterations", "20", "--num-envs", "64")
+    with pytest.raises(ValueError, match="Resume provenance mismatch.*num_envs"):
+        run("--iterations", target, "--resume")
+    assert len(commands) == 1
+
+
+def test_resume_accepts_explicit_default_environment_count(pipeline):
+    run, commands, _ = pipeline
+    run("--iterations", "20")
+    result = run("--iterations", "20", "--num-envs", "4096", "--resume")
+    assert result["checkpoint_iteration"] == 19 and len(commands) == 1
+
+
+def test_resume_rejects_changed_registry_before_reusing_completed_weights(pipeline):
+    run, commands, directory = pipeline
+    run("--iterations", "20")
+    with pytest.raises(ValueError, match="Resume provenance mismatch.*registries"):
+        run("--iterations", "20", "--assets", str(directory / "different-assets"), "--resume")
+    assert len(commands) == 1
+
+
+def test_resume_rejects_changed_finetune_mode(pipeline):
+    run, commands, directory = pipeline
+    run("--iterations", "20000")
+    result = run("--iterations", "2", action="distill-finetune")
+    result["settings"]["finetune"] = "0"
+    manifest = directory / "official/manifests/student-finetune.json"
+    manifest.write_text(json.dumps(result))
+    with pytest.raises(ValueError, match="Resume provenance mismatch.*finetune"):
+        run("--iterations", "2", "--resume", action="distill-finetune")
+    assert len(commands) == 2
+
+
+def test_resume_rejects_changed_ordered_teacher_weights(pipeline):
+    run, commands, directory = pipeline
+    teacher = run("--iterations", "20000")
+    run("--iterations", "2", action="distill-pure")
+    checkpoint = Path(teacher["checkpoint"])
+    state = torch.load(checkpoint, weights_only=False)
+    state["actor_model_state_dict"]["weight"] += 1
+    torch.save(state, checkpoint)
+    # Simulate a new successful teacher revision with valid native tensors and
+    # updated provenance. The old student must not silently keep its experts.
+    teacher["checkpoint_sha256"] = hashlib.sha256(checkpoint.read_bytes()).hexdigest()
+    (directory / "official/manifests/teacher-locomotion.json").write_text(json.dumps(teacher))
+    with pytest.raises(ValueError, match="Resume provenance mismatch.*teacher_checkpoint_sha256"):
+        run("--iterations", "2", "--resume", action="distill-pure")
+    assert len(commands) == 2
+
+
+def test_student_resume_rejects_reordered_teacher_registry_pairs(pipeline):
+    run, commands, directory = pipeline
+    run("--iterations", "20000", "--skills", "locomotion", "low-step")
+    # Give the second valid expert different weights so source order has an
+    # observable identity, rather than comparing two identical fake policies.
+    manifest_path = directory / "official/manifests/teacher-low-step.json"
+    teacher = json.loads(manifest_path.read_text())
+    checkpoint = Path(teacher["checkpoint"])
+    state = torch.load(checkpoint, weights_only=False)
+    state["actor_model_state_dict"]["weight"] += 1
+    torch.save(state, checkpoint)
+    teacher["checkpoint_sha256"] = hashlib.sha256(checkpoint.read_bytes()).hexdigest()
+    manifest_path.write_text(json.dumps(teacher))
+    run("--iterations", "2", "--skills", "locomotion", "low-step", action="distill-pure")
+    with pytest.raises(ValueError, match="Resume provenance mismatch.*registries.*teacher_checkpoint_sha256"):
+        run("--iterations", "2", "--skills", "low-step", "locomotion", "--resume", action="distill-pure")
+    assert len(commands) == 3
+
+
+@pytest.mark.parametrize("kind", ["pure", "finetune"])
+def test_student_resume_extends_target_without_treating_own_checkpoint_as_expert(pipeline, monkeypatch, kind):
+    run, commands, _ = pipeline
+    teacher = run("--iterations", "20000")
+    pilot = run("--iterations", "2", action=f"distill-{kind}")
+    # CHECKPOINT belongs to eval launchers. Even if a caller leaves its own
+    # student PT in the environment, only TEACHER_CHECKPOINT supplies experts.
+    monkeypatch.setenv("CHECKPOINT", pilot["checkpoint"])
+    result = run("--iterations", "4", "--resume", action=f"distill-{kind}")
+    assert len(commands) == 3 and result["checkpoint_iteration"] == 3
+    command = commands[-1]
+    assert command[command.index("--training.checkpoint") + 1] == pilot["checkpoint"]
+    assert command[command.index("--algo.config.num-learning-iterations") + 1] == "3"
+    assert result["settings"]["source_checkpoints"] == [{"path": teacher["checkpoint"], "sha256": teacher["checkpoint_sha256"]}]
+
+
+def test_resume_rejects_checkpoint_with_unverifiable_legacy_training_settings(pipeline):
+    run, commands, directory = pipeline
+    result = run("--iterations", "20")
+    del result["settings"]
+    (directory / "official/manifests/teacher-locomotion.json").write_text(json.dumps(result))
+    with pytest.raises(ValueError, match="insufficient to verify safe resume provenance"):
+        run("--iterations", "20", "--resume")
+    assert len(commands) == 1
 
 
 @pytest.mark.parametrize("old_status", ["failed", "running"])

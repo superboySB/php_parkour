@@ -1,0 +1,155 @@
+{
+  "image": "sha256:707065aebca88043d1ca4742d3112e7f3cdcf5148b09eff4333f58e0d1e967b0",
+  "image_ref": "sha256:707065aebca88043d1ca4742d3112e7f3cdcf5148b09eff4333f58e0d1e967b0",
+  "source_tree_sha256": "cbdb6ef45a8b19a46ee968d1c6f57d7952de983b1980829ef6847b290a3ac6d9",
+  "container": "php-parkour-cloud-research",
+  "physical_gpu_index": 1,
+  "gpu_uuid": "GPU-27eb1141-ab74-ebdd-42c2-6549fb7253e5",
+  "gpu_idle_before_launch": {
+    "memory_used_mib": 2,
+    "utilization_percent": 0,
+    "processes": 0
+  },
+  "defaults": {
+    "pure": {
+      "num_envs": 2048,
+      "seed": 42,
+      "preprocess_hook": "wbt_training.config_values.terrain:apply_terrain_preprocess",
+      "preprocess_hook_kwargs": {
+        "add_onpath_obstacle": true,
+        "num_variants": 3
+      },
+      "algo_target": "wbt_training.utils.student_teacher.PhpDistillation",
+      "algo_defaults": {
+        "module": {
+          "student_hidden_dims": [
+            512,
+            256,
+            128
+          ],
+          "teacher_hidden_dims": [
+            512,
+            256,
+            128
+          ],
+          "critic_hidden_dims": [
+            512,
+            256,
+            128
+          ],
+          "activation": "ELU",
+          "depth_backbone": "holosoma.agents.modules.depth_backbone.DepthOnlyFCBackbone58x87Small",
+          "depth_output_dim": 32
+        },
+        "num_learning_epochs": 2,
+        "num_mini_batches": 96,
+        "learning_rate": 0.0003,
+        "max_grad_norm": 1.0,
+        "num_steps_per_env": 24,
+        "save_interval": 500,
+        "init_noise_std": 0.001,
+        "num_learning_iterations": 10000,
+        "empirical_normalization": false,
+        "distill_loss_type": "mse",
+        "distillation_warmup_steps": 0,
+        "eval_callbacks": null
+      }
+    },
+    "finetune": {
+      "num_envs": 2048,
+      "seed": 42,
+      "preprocess_hook": "wbt_training.config_values.terrain:apply_terrain_preprocess",
+      "preprocess_hook_kwargs": {
+        "add_onpath_obstacle": true,
+        "num_variants": 3
+      },
+      "algo_target": "wbt_training.utils.student_teacher.PhpDistillationPPO",
+      "algo_defaults": {
+        "module": {
+          "student_hidden_dims": [
+            2048,
+            1024,
+            512,
+            256,
+            128
+          ],
+          "teacher_hidden_dims": [
+            512,
+            256,
+            128
+          ],
+          "critic_hidden_dims": [
+            512,
+            256,
+            128
+          ],
+          "activation": "ELU",
+          "depth_backbone": "holosoma.agents.modules.depth_backbone.DepthOnlyFCBackbone58x87Small",
+          "depth_output_dim": 32
+        },
+        "num_learning_epochs": 2,
+        "num_mini_batches": 96,
+        "clip_param": 0.2,
+        "gamma": 0.99,
+        "lam": 0.95,
+        "value_loss_coef": 1.0,
+        "entropy_coef": 0.001,
+        "learning_rate": 0.0003,
+        "max_grad_norm": 1.0,
+        "schedule": "adaptive",
+        "desired_kl": 0.01,
+        "num_steps_per_env": 24,
+        "save_interval": 500,
+        "init_noise_std": 0.01,
+        "num_learning_iterations": 30000,
+        "empirical_normalization": false,
+        "ppo_start_epoch": 0,
+        "dagger_end_epoch": 10000,
+        "distill_loss_type": "mse",
+        "dagger_loss_coef": 10.0,
+        "distillation_warmup_steps": 0,
+        "weight_decay": 0.0,
+        "depth_weight_decay": 0.01,
+        "eval_callbacks": null
+      }
+    },
+    "source_experiment_sha256": "eb8cf1b1c0f59d95322154b176df51301466ad599cdb68f20fae2c0d6975c92e"
+  },
+  "teacher_proofs": [
+    {
+      "skill": "locomotion",
+      "checkpoint": "/outputs/training-acceptance/smoke/teacher-locomotion/PHP-research/20261010_024801-teacher-locomotion-locomotion/model_00001.pt",
+      "iteration": 1,
+      "sha256": "388f3794bdea07da1371b5350b72520a1c33529982c0c1b7a41af51cf25638ec",
+      "manifest": "/outputs/training-acceptance/smoke/manifests/teacher-locomotion.json"
+    },
+    {
+      "skill": "low-step",
+      "checkpoint": "/outputs/training-acceptance/smoke/teacher-low-step/PHP-research/20261010_024829-teacher-low-step-locomotion/model_00001.pt",
+      "iteration": 1,
+      "sha256": "cec2080fbfeadeb922e537c535d1f13bb6f0107c02d996e4138d77e0ce5c0ea1",
+      "manifest": "/outputs/training-acceptance/smoke/manifests/teacher-low-step.json"
+    },
+    {
+      "skill": "high-step",
+      "checkpoint": "/outputs/training-acceptance/smoke/teacher-high-step/PHP-research/20261010_024849-teacher-high-step-locomotion/model_00001.pt",
+      "iteration": 1,
+      "sha256": "0453e3c6c2166a4138be5ad71b7a44e5d321b7fcf959cf1c4b4197154a95f46e",
+      "manifest": "/outputs/training-acceptance/smoke/manifests/teacher-high-step.json"
+    },
+    {
+      "skill": "low-climb-76",
+      "checkpoint": "/outputs/training-acceptance/smoke/teacher-low-climb-76/PHP-research/20261010_024908-teacher-low-climb-76-locomotion/model_00001.pt",
+      "iteration": 1,
+      "sha256": "c89f781be30f535c121f44bfb684f7e1a3623bf5d0f3cf5ac8d52e00c7913642",
+      "manifest": "/outputs/training-acceptance/smoke/manifests/teacher-low-climb-76.json"
+    },
+    {
+      "skill": "high-climb-76",
+      "checkpoint": "/outputs/training-acceptance/smoke/teacher-high-climb-76/PHP-research/20261010_024928-teacher-high-climb-76-locomotion/model_00001.pt",
+      "iteration": 1,
+      "sha256": "62346650ef164a70b01837c81462cf1510a55aca9a3f4d0f94790cbaaf261430",
+      "manifest": "/outputs/training-acceptance/smoke/manifests/teacher-high-climb-76.json"
+    }
+  ]
+}

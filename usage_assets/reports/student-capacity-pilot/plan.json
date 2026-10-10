@@ -1,0 +1,263 @@
+{
+  "status": "authorized_for_capacity_pilot",
+  "scope": "Capacity/performance diagnostic with five untrained two-iteration experts and 20-iteration override. Not the published complete training schedule, final image validation or skill/convergence evidence.",
+  "image": "sha256:707065aebca88043d1ca4742d3112e7f3cdcf5148b09eff4333f58e0d1e967b0",
+  "source_tree_sha256": "cbdb6ef45a8b19a46ee968d1c6f57d7952de983b1980829ef6847b290a3ac6d9",
+  "container": "php-parkour-cloud-research",
+  "gpu_uuid": "GPU-27eb1141-ab74-ebdd-42c2-6549fb7253e5",
+  "physical_gpu_index": 1,
+  "output": "/outputs/student-capacity-pilot",
+  "teacher_registry_order": [
+    {
+      "skill": "locomotion",
+      "checkpoint": "/outputs/training-acceptance/smoke/teacher-locomotion/PHP-research/20261010_024801-teacher-locomotion-locomotion/model_00001.pt",
+      "iteration": 1,
+      "sha256": "388f3794bdea07da1371b5350b72520a1c33529982c0c1b7a41af51cf25638ec",
+      "manifest": "/outputs/training-acceptance/smoke/manifests/teacher-locomotion.json",
+      "registry": "file:///data/assets/motions-locomotion"
+    },
+    {
+      "skill": "low-step",
+      "checkpoint": "/outputs/training-acceptance/smoke/teacher-low-step/PHP-research/20261010_024829-teacher-low-step-locomotion/model_00001.pt",
+      "iteration": 1,
+      "sha256": "cec2080fbfeadeb922e537c535d1f13bb6f0107c02d996e4138d77e0ce5c0ea1",
+      "manifest": "/outputs/training-acceptance/smoke/manifests/teacher-low-step.json",
+      "registry": "file:///data/assets/motions-low-step"
+    },
+    {
+      "skill": "high-step",
+      "checkpoint": "/outputs/training-acceptance/smoke/teacher-high-step/PHP-research/20261010_024849-teacher-high-step-locomotion/model_00001.pt",
+      "iteration": 1,
+      "sha256": "0453e3c6c2166a4138be5ad71b7a44e5d321b7fcf959cf1c4b4197154a95f46e",
+      "manifest": "/outputs/training-acceptance/smoke/manifests/teacher-high-step.json",
+      "registry": "file:///data/assets/motions-high-step"
+    },
+    {
+      "skill": "low-climb-76",
+      "checkpoint": "/outputs/training-acceptance/smoke/teacher-low-climb-76/PHP-research/20261010_024908-teacher-low-climb-76-locomotion/model_00001.pt",
+      "iteration": 1,
+      "sha256": "c89f781be30f535c121f44bfb684f7e1a3623bf5d0f3cf5ac8d52e00c7913642",
+      "manifest": "/outputs/training-acceptance/smoke/manifests/teacher-low-climb-76.json",
+      "registry": "file:///data/assets/motions-low-climb-76"
+    },
+    {
+      "skill": "high-climb-76",
+      "checkpoint": "/outputs/training-acceptance/smoke/teacher-high-climb-76/PHP-research/20261010_024928-teacher-high-climb-76-locomotion/model_00001.pt",
+      "iteration": 1,
+      "sha256": "62346650ef164a70b01837c81462cf1510a55aca9a3f4d0f94790cbaaf261430",
+      "manifest": "/outputs/training-acceptance/smoke/manifests/teacher-high-climb-76.json",
+      "registry": "file:///data/assets/motions-high-climb-76"
+    }
+  ],
+  "initial_preflight": {
+    "memory_used_mib": 2,
+    "utilization_percent": 0,
+    "processes": 0
+  },
+  "official_student_preprocess_variants": 3,
+  "variants_correction": "Teachers default to 64 variants; both native student presets intentionally default to 3. This pilot retains 3.",
+  "runtime_execution_overrides": {
+    "NGPUS": "1 (native launcher defaults 2; use the single selected cloud GPU)",
+    "headless": true,
+    "logger": "disabled (TensorBoard still active)",
+    "output_project_and_name": "diagnostic bookkeeping only"
+  },
+  "algorithm_override": {
+    "num_learning_iterations": 20
+  },
+  "stages": [
+    {
+      "kind": "pure",
+      "command": [
+        "bash",
+        "wbt_training/training_runs/run_terrain_warp_distill.sh",
+        "--training.headless",
+        "True",
+        "--training.name",
+        "capacity-pilot-pure",
+        "--training.project",
+        "PHP-research-capacity",
+        "--logger.base-dir",
+        "/outputs/student-capacity-pilot/pure",
+        "--algo.config.num-learning-iterations",
+        "20"
+      ],
+      "environment": {
+        "PHP_DOCKER": "1",
+        "HSSIM_PYTHON": "/opt/php/bin/train-python",
+        "NGPUS": "1",
+        "CUDA_VISIBLE_DEVICES": "0",
+        "LOGGER": "disabled",
+        "WANDB_MODE": "disabled",
+        "HF_HUB_OFFLINE": "1",
+        "HF_DATASETS_OFFLINE": "1",
+        "TRANSFORMERS_OFFLINE": "1",
+        "FINETUNE": "0",
+        "WARMUP_STEPS": "0",
+        "REGISTRY": "file:///data/assets/motions-locomotion,file:///data/assets/motions-low-step,file:///data/assets/motions-high-step,file:///data/assets/motions-low-climb-76,file:///data/assets/motions-high-climb-76",
+        "TEACHER_CHECKPOINT": "/outputs/training-acceptance/smoke/teacher-locomotion/PHP-research/20261010_024801-teacher-locomotion-locomotion/model_00001.pt,/outputs/training-acceptance/smoke/teacher-low-step/PHP-research/20261010_024829-teacher-low-step-locomotion/model_00001.pt,/outputs/training-acceptance/smoke/teacher-high-step/PHP-research/20261010_024849-teacher-high-step-locomotion/model_00001.pt,/outputs/training-acceptance/smoke/teacher-low-climb-76/PHP-research/20261010_024908-teacher-low-climb-76-locomotion/model_00001.pt,/outputs/training-acceptance/smoke/teacher-high-climb-76/PHP-research/20261010_024928-teacher-high-climb-76-locomotion/model_00001.pt"
+      },
+      "official_default_comparison": {
+        "num_envs": 2048,
+        "num_variants": 3,
+        "num_mini_batches": 96,
+        "num_learning_epochs": 2,
+        "num_steps_per_env": 24,
+        "save_interval": 500,
+        "default_iterations": 10000
+      },
+      "algo_target": "wbt_training.utils.student_teacher.PhpDistillation",
+      "full_native_algorithm_defaults": {
+        "module": {
+          "student_hidden_dims": [
+            512,
+            256,
+            128
+          ],
+          "teacher_hidden_dims": [
+            512,
+            256,
+            128
+          ],
+          "critic_hidden_dims": [
+            512,
+            256,
+            128
+          ],
+          "activation": "ELU",
+          "depth_backbone": "holosoma.agents.modules.depth_backbone.DepthOnlyFCBackbone58x87Small",
+          "depth_output_dim": 32
+        },
+        "num_learning_epochs": 2,
+        "num_mini_batches": 96,
+        "learning_rate": 0.0003,
+        "max_grad_norm": 1.0,
+        "num_steps_per_env": 24,
+        "save_interval": 500,
+        "init_noise_std": 0.001,
+        "num_learning_iterations": 10000,
+        "empirical_normalization": false,
+        "distill_loss_type": "mse",
+        "distillation_warmup_steps": 0,
+        "eval_callbacks": null
+      },
+      "preprocess_defaults": {
+        "add_onpath_obstacle": true,
+        "num_variants": 3
+      },
+      "expected_iterations": 20,
+      "expected_final_checkpoint_iteration": 19,
+      "expected_timesteps": 983040,
+      "checkpoint_interval_overridden": false,
+      "minibatches_overridden": false,
+      "preprocess_overridden": false
+    },
+    {
+      "kind": "finetune",
+      "command": [
+        "bash",
+        "wbt_training/training_runs/run_terrain_warp_distill.sh",
+        "--training.headless",
+        "True",
+        "--training.name",
+        "capacity-pilot-finetune",
+        "--training.project",
+        "PHP-research-capacity",
+        "--logger.base-dir",
+        "/outputs/student-capacity-pilot/finetune",
+        "--algo.config.num-learning-iterations",
+        "20"
+      ],
+      "environment": {
+        "PHP_DOCKER": "1",
+        "HSSIM_PYTHON": "/opt/php/bin/train-python",
+        "NGPUS": "1",
+        "CUDA_VISIBLE_DEVICES": "0",
+        "LOGGER": "disabled",
+        "WANDB_MODE": "disabled",
+        "HF_HUB_OFFLINE": "1",
+        "HF_DATASETS_OFFLINE": "1",
+        "TRANSFORMERS_OFFLINE": "1",
+        "FINETUNE": "1",
+        "WARMUP_STEPS": "0",
+        "REGISTRY": "file:///data/assets/motions-locomotion,file:///data/assets/motions-low-step,file:///data/assets/motions-high-step,file:///data/assets/motions-low-climb-76,file:///data/assets/motions-high-climb-76",
+        "TEACHER_CHECKPOINT": "/outputs/training-acceptance/smoke/teacher-locomotion/PHP-research/20261010_024801-teacher-locomotion-locomotion/model_00001.pt,/outputs/training-acceptance/smoke/teacher-low-step/PHP-research/20261010_024829-teacher-low-step-locomotion/model_00001.pt,/outputs/training-acceptance/smoke/teacher-high-step/PHP-research/20261010_024849-teacher-high-step-locomotion/model_00001.pt,/outputs/training-acceptance/smoke/teacher-low-climb-76/PHP-research/20261010_024908-teacher-low-climb-76-locomotion/model_00001.pt,/outputs/training-acceptance/smoke/teacher-high-climb-76/PHP-research/20261010_024928-teacher-high-climb-76-locomotion/model_00001.pt"
+      },
+      "official_default_comparison": {
+        "num_envs": 2048,
+        "num_variants": 3,
+        "num_mini_batches": 96,
+        "num_learning_epochs": 2,
+        "num_steps_per_env": 24,
+        "save_interval": 500,
+        "default_iterations": 30000
+      },
+      "algo_target": "wbt_training.utils.student_teacher.PhpDistillationPPO",
+      "full_native_algorithm_defaults": {
+        "module": {
+          "student_hidden_dims": [
+            2048,
+            1024,
+            512,
+            256,
+            128
+          ],
+          "teacher_hidden_dims": [
+            512,
+            256,
+            128
+          ],
+          "critic_hidden_dims": [
+            512,
+            256,
+            128
+          ],
+          "activation": "ELU",
+          "depth_backbone": "holosoma.agents.modules.depth_backbone.DepthOnlyFCBackbone58x87Small",
+          "depth_output_dim": 32
+        },
+        "num_learning_epochs": 2,
+        "num_mini_batches": 96,
+        "clip_param": 0.2,
+        "gamma": 0.99,
+        "lam": 0.95,
+        "value_loss_coef": 1.0,
+        "entropy_coef": 0.001,
+        "learning_rate": 0.0003,
+        "max_grad_norm": 1.0,
+        "schedule": "adaptive",
+        "desired_kl": 0.01,
+        "num_steps_per_env": 24,
+        "save_interval": 500,
+        "init_noise_std": 0.01,
+        "num_learning_iterations": 30000,
+        "empirical_normalization": false,
+        "ppo_start_epoch": 0,
+        "dagger_end_epoch": 10000,
+        "distill_loss_type": "mse",
+        "dagger_loss_coef": 10.0,
+        "distillation_warmup_steps": 0,
+        "weight_decay": 0.0,
+        "depth_weight_decay": 0.01,
+        "eval_callbacks": null
+      },
+      "preprocess_defaults": {
+        "add_onpath_obstacle": true,
+        "num_variants": 3
+      },
+      "expected_iterations": 20,
+      "expected_final_checkpoint_iteration": 19,
+      "expected_timesteps": 983040,
+      "checkpoint_interval_overridden": false,
+      "minibatches_overridden": false,
+      "preprocess_overridden": false
+    }
+  ],
+  "weight_verifier": {
+    "source": "scripts/research/verify_weight_update.py",
+    "sha256": "b7a38cabda4e1e674947933fedf45bf04fe266fe6654d4cfde7e6a93f6ed4a94",
+    "remote_host_path": "/diff/dzp_is_sb/php-parkour-research/outputs/tools/verify_weight_update-b7a38cabda4e1e674947933fedf45bf04fe266fe6654d4cfde7e6a93f6ed4a94.py",
+    "container_path": "/outputs/tools/verify_weight_update-b7a38cabda4e1e674947933fedf45bf04fe266fe6654d4cfde7e6a93f6ed4a94.py",
+    "source_snapshot_modified": false
+  }
+}

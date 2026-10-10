@@ -30,13 +30,14 @@ The framework has three steps:
 
 ## Get started
 
-For sim2sim with an existing ONNX pair, use the PHP launchers and pinned
-[Holosoma setup](wbt_training/DEPLOY.md#get-holosoma-and-install-the-runtimes).
+Start with [note.md](note.md) to build the unified Docker image, verify assets,
+and configure local simulation or offline cloud training. Actual results and
+known failures are recorded in [usage.md](usage.md).
 
 For motion matching and training, clone PHP with its pinned Holosoma submodule:
 
 ```bash
-git clone --recurse-submodules https://github.com/amazon-far/php_parkour.git
+git clone --branch research --recurse-submodules https://github.com/superboySB/php_parkour.git
 cd php_parkour
 ```
 
@@ -46,9 +47,9 @@ with motion matching. If you already have an exported ONNX pair, go directly to 
 
 | Guide | Workflow | Requirements |
 |---|---|---|
-| [Motion matching](motion_matching/README.md) | Generate and inspect motion/terrain datasets; upload them for training or add new skills | Conda; no IsaacSim |
-| [Training and evaluation](wbt_training/README.md) | Train teachers, distill a student, evaluate checkpoints, and export ONNX | Linux/NVIDIA with IsaacSim |
-| [Sim2sim](wbt_training/DEPLOY.md) | Run the exported depth policy in MuJoCo | Holosoma's MuJoCo and inference environments |
+| [Motion matching](motion_matching/README.md) | Generate and inspect motion/terrain datasets; prepare local bundles or add skills | Unified Docker, `motion-python` |
+| [Training and evaluation](wbt_training/README.md) | Train teachers, distill students, evaluate checkpoints, and export ONNX | Unified Docker, `train-python`; offline TensorBoard |
+| [Sim2sim](wbt_training/DEPLOY.md) | Run the exported depth policy in MuJoCo | Same Docker image, native DDS and depth shared memory |
 
 ## 🏃 Try the demo
 
@@ -61,13 +62,13 @@ from the [student release](https://github.com/amazon-far/php_parkour/releases/ta
 Run from the PHP checkout root:
 
 ```bash
-python scripts/download_assets.py student
+python3 scripts/research/verify_assets.py
 ```
 
 The release contains sanitized `depth_backbone.onnx` and `student.onnx` files,
-without raw `.pt` or teacher checkpoints. Files default to
-`~/.cache/php-parkour/student`; pass `--destination DIR` to choose another
-directory. The downloader verifies the archive and both model files against
+without raw `.pt` or teacher checkpoints. The research verifier stores all seven asset groups in
+`outputs/research/assets/`; the student pair is mounted as `/data/assets/student`
+in Docker. It verifies each archive and extracted file against
 [release-assets.json](release-assets.json).
 
 Follow the [sim2sim guide](wbt_training/DEPLOY.md) to run the policy. You can

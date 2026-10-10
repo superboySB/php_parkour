@@ -77,9 +77,9 @@ def make_page(manifest: dict) -> str:
         if row["status"] != "completed":
             state, badge = "execution_failed", "执行失败 · 保留结果"
         elif row["fall_detected"]:
-            state, badge = "threshold", "触发跌倒判据"
+            state, badge = "threshold", "触发高度/倾斜阈值"
         else:
-            state, badge = "unflagged", "本次未触发判据"
+            state, badge = "unflagged", "本次未触发阈值"
         videos = []
         for video in row["videos"]:
             poster = f' poster="{escape(video["thumbnail"], quote=True)}"' if video.get("thumbnail") else ""
@@ -111,10 +111,10 @@ def make_page(manifest: dict) -> str:
 :root{{color-scheme:dark}}*{{box-sizing:border-box}}body{{background:#121b26;color:#edf2f8;font:16px/1.55 system-ui;margin:0;padding:30px}}a{{color:#8dc7ff}}header,.toolbar,.counts{{max-width:1500px;margin:0 auto 24px}}h1{{font-size:30px;margin:0 0 12px}}p{{color:#bfd0df;margin:10px 0}}.counts{{display:flex;gap:12px;flex-wrap:wrap}}.counts span{{background:#203043;border:1px solid #395169;border-radius:8px;padding:10px 15px}}.toolbar{{display:flex;gap:12px;flex-wrap:wrap}}input,select{{font:inherit;color:inherit;background:#203043;border:1px solid #526980;border-radius:6px;padding:9px 12px}}input{{flex:1;min-width:240px}}main{{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:24px;max-width:1500px;margin:auto}}article{{background:#203043;padding:18px;border-radius:12px;min-width:0}}.card-head{{display:flex;align-items:center;gap:8px;justify-content:space-between;flex-wrap:wrap}}h2{{font-size:21px;margin:0}}.name{{font-size:14px;color:#91a9bd;margin-top:3px}}.config{{min-height:52px;font-size:14px;overflow-wrap:anywhere}}.badge{{font-size:12px;border-radius:99px;padding:5px 10px;background:#35485b;white-space:nowrap}}.threshold{{background:#6b3929;color:#ffd5bc}}.unflagged{{background:#23553f;color:#c2f1d4}}.execution_failed{{background:#74313d;color:#ffd5dd}}video{{width:100%;display:block;border-radius:6px;background:#0b1119;aspect-ratio:16/9}}.small{{font-size:12px}}dl{{display:grid;grid-template-columns:1fr 1fr;gap:10px 16px;margin:14px 0}}dl div{{min-width:0}}dt{{font-size:12px;color:#9cb5c9}}dd{{margin:1px 0;font-variant-numeric:tabular-nums;font-size:14px}}details{{border-top:1px solid #40566b;padding-top:10px;font-size:13px}}summary{{cursor:pointer;color:#b8dcff}}.hash{{overflow-wrap:anywhere}}.missing{{padding:30px 10px;background:#172330}}[hidden]{{display:none!important}}footer{{max-width:1500px;margin:28px auto;color:#91a9bd;font-size:13px}}code{{font-size:12px}}@media(max-width:600px){{body{{padding:18px}}h1{{font-size:25px}}}}
 </style></head><body><header><h1>G1 · 17 场景 ONNX 物理闭环</h1>
 <p>真实 MuJoCo 物理、原生 Unitree DDS 与深度共享内存、公开学生 ONNX 策略。每种场景只选一个完整生成配置的 OBJ，持续输入低速或高速前进，目标为 {seconds} 秒策略时间，seed {manifest['seed']}。本页覆盖 17 个代表几何，不是 629 个策略试验，也不证明同名参考技能或整个障碍课程完成。</p>
-<p>跌倒判据：移除吊架后，骨盆高度 &lt; 0.4 m 或基座朝上余弦 &lt; 0.35。该判据也会记录攀爬时的倾斜；未触发不等于课程成功。原片保留起始安置阶段，策略控制阶段吊架已移除。所有触发事件和执行失败均保留。</p>
+<p>高度/倾斜阈值：移除吊架后，骨盆高度 &lt; 0.4 m 或基座朝上余弦 &lt; 0.35。正常攀爬也可能触发倾斜阈值；未触发不等于课程成功。原片保留起始安置阶段，策略控制阶段吊架已移除。所有触发事件和执行失败均保留。</p>
 <p><a href="manifest.json">媒体与来源 SHA-256</a> · <a href="matrix.json">完整原始验收矩阵</a></p></header>
-<div class="counts"><span>代表场景 <b>{counts['planned']}</b></span><span>执行完成 <b>{counts['completed']}</b></span><span>未触发判据 <b>{counts['unflagged']}</b></span><span>触发判据 <b>{counts['threshold_triggered']}</b></span><span>执行失败 <b>{counts['execution_failed']}</b></span></div>
-<div class="toolbar"><input id="search" type="search" placeholder="搜索场景或配置" aria-label="搜索场景或配置"><select id="state" aria-label="筛选结果"><option value="all">全部结果</option><option value="threshold">触发跌倒判据</option><option value="unflagged">未触发判据</option><option value="execution_failed">执行失败</option></select><span id="visible"></span></div>
+<div class="counts"><span>代表场景 <b>{counts['planned']}</b></span><span>执行完成 <b>{counts['completed']}</b></span><span>未触发阈值 <b>{counts['unflagged']}</b></span><span>阈值事件 <b>{counts['threshold_triggered']}</b></span><span>执行失败 <b>{counts['execution_failed']}</b></span></div>
+<div class="toolbar"><input id="search" type="search" placeholder="搜索场景或配置" aria-label="搜索场景或配置"><select id="state" aria-label="筛选结果"><option value="all">全部结果</option><option value="threshold">触发高度/倾斜阈值</option><option value="unflagged">未触发阈值</option><option value="execution_failed">执行失败</option></select><span id="visible"></span></div>
 <main>{''.join(cards)}</main><footer>同类发布训练数据仅表示该类 bundle 可下载，不认证本次策略掌握该技能。完整输入选择规则、模型、镜像与地形哈希见原始矩阵。所有媒体由原片逐字节复制，页面不生成或修改机器人轨迹。</footer>
 <script>const cards=[...document.querySelectorAll('article')],search=document.getElementById('search'),state=document.getElementById('state');function filter(){{let count=0;for(const card of cards){{card.hidden=!(card.dataset.search.toLowerCase().includes(search.value.toLowerCase())&&(state.value==='all'||card.dataset.state===state.value));if(!card.hidden)count++;}}document.getElementById('visible').textContent=count+' / '+cards.length+' 场景';}}search.addEventListener('input',filter);state.addEventListener('change',filter);filter();</script></body></html>'''
 

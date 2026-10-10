@@ -1,126 +1,193 @@
 # PHP sim2sim with the RealSense D435i student
 
-[Project overview](../README.md)
+[Project overview](../README.md) · [Docker setup](../note.md) · [Actual results and videos](../usage.md)
 
-Run the exported PHP depth policy in MuJoCo with the PHP-owned
-[run_php_sim.sh](../run_php_sim.sh) and
-[run_php_inference.sh](../run_php_inference.sh) launchers. They select the
-RealSense D435i simulation and inference presets from this checkout's pinned
-[Holosoma submodule](../README.md#get-started).
-A student consists of two local files, `depth_backbone.onnx` and `student.onnx`.
-The depth backbone encodes the camera image; the student combines that latent
-with proprioception and a direction command to produce joint targets.
+Run the depth policy on the half-sphere-hand Unitree G1 with 29 actuated joints.
+A student consists of two matching local files, `depth_backbone.onnx` and
+`student.onnx`: the backbone encodes D435i depth, and the student combines its
+latent with proprioception and a direction command to produce joint targets.
 
-For policy downloads, see [Example results](../README.md#example-results).
+The `research` branch runs simulation, inference, training and export inside
+one Docker image. Follow [note.md](../note.md) to clone this branch, build the
+image and download/check all assets. Project Python dependencies are installed
+in the image. Cloud execution uses the same image, local files and TensorBoard.
 
 ## Get Holosoma and install the runtimes
 
-The wrappers activate `hsmujoco` for simulation and `hsinference` for inference,
-under `~/.holosoma_deps/miniconda3` by default. Initialize the pinned submodule;
-skip the two setup commands if these environments are already installed:
+The pinned [Holosoma submodule](../thirdparty/holosoma) and its runtimes are
+included by the [Docker build](../docker/Dockerfile). After initial setup, run
+these checks **on the host, from the PHP repository root**:
 
 ```bash
 git submodule update --init --recursive thirdparty/holosoma
-bash thirdparty/holosoma/scripts/setup_mujoco.sh
-bash thirdparty/holosoma/scripts/setup_inference.sh
+python3 scripts/research/verify_assets.py --verify-only
+test -n "$DISPLAY" && test -f "$XAUTHORITY"
+bash scripts/research/docker.sh gui
+bash scripts/research/docker.sh doctor --require-gpu
 ```
 
-If reusing environments installed from another checkout, install these packages
-into them so imports resolve here. This replaces their existing editable installs:
+Select GUI mode before starting jobs: `docker.sh gui` recreates this project's
+container. It uses the existing X11 session and Xauthority cookie. See
+[note.md](../note.md) for first downloads, headless startup and troubleshooting.
 
-```bash
-"$HOME/.holosoma_deps/miniconda3/envs/hsmujoco/bin/python" \
-    -m pip install --no-deps -e ./thirdparty/holosoma/src/holosoma
-"$HOME/.holosoma_deps/miniconda3/envs/hsinference/bin/python" \
-    -m pip install --no-deps -e ./thirdparty/holosoma/src/holosoma_inference
-```
+The container is `php-parkour-research`, with repository `/workspace/php_parkour`,
+results `/outputs` and assets `/data/assets`. Both launchers must run in this
+same container. Simulation uses `train-python`; inference uses the isolated
+`inference-python` environment. `PHP_DOCKER=1` selects these image runtimes.
 
-See the [Holosoma inference guide](https://github.com/amazon-far/holosoma/blob/jinkunc/php-release-port/src/holosoma_inference/README.md)
-for supported systems and runtime dependencies. This standalone route uses
-Holosoma's local simulator bridge and depth shared memory; it does not require
-FAR-pi.
+The native Unitree SDK DDS bridge uses interface `lo`. The simulator publishes
+D435i depth to `depth_img_shm`, with shape `(1, 1, 58, 87)`. Both processes share
+the container's private `/dev/shm`; keep the provided Compose IPC configuration.
+These native transports and policy implementations are used by the tests below.
 
 ## Start simulation and inference
 
-Run both launchers from the PHP checkout on the same machine. They use
-`thirdparty/holosoma` by default; set `HOLOSOMA_ROOT=/path/to/holosoma` to test
-against another compatible checkout. Use a graphical desktop, or set `DISPLAY`
-in both terminals to that desktop's X server when connecting over SSH. Without
-a display, the simulator's gantry keys are unavailable and policy direction
-keys cannot detect releases.
-
-Stop any previous PHP simulator and inference processes before restarting:
-the simulator wrapper recreates `depth_img_shm`.
-
-Start the simulator first:
+Use two host terminals. End any previous simulation and inference first,
+because the simulator launcher recreates `depth_img_shm`.
 
 ```bash
-# Terminal 1
-bash ./run_php_sim.sh
+# Host terminal 1
+docker exec -it -w /workspace/php_parkour php-parkour-research bash ./run_php_sim.sh
 ```
 
-The wrapper selects the RealSense D435i camera and depth publisher, the
-half-sphere-hand G1 model, and the local simulator bridge. Wait for:
+The launcher selects the half-sphere-hand G1, D435i camera, local DDS bridge,
+500 Hz physics and Holosoma's bundled stepped course. Wait for:
 
 ```text
 [DepthShmPlugin] created 'depth_img_shm' (20184 bytes) shape=(1, 1, 58, 87)
 ```
 
-The default stepped course is bundled with Holosoma. Append
-`terrain:terrain-locomotion-plane` for flat ground, or
-`--terrain.terrain-term.obj-file-path /absolute/path/to/course.obj` for a custom
-mesh. Other CLI overrides are also forwarded by the wrapper.
-
-Then start inference with a matching ONNX pair:
+Then start inference with the validated public pair:
 
 ```bash
-# Terminal 2
-PHP_STUDENT_DIR="$HOME/.cache/php-parkour/student"
-BACKBONE="$PHP_STUDENT_DIR/depth_backbone.onnx" \
-STUDENT="$PHP_STUDENT_DIR/student.onnx" \
-bash ./run_php_inference.sh
+# Host terminal 2
+docker exec -it -w /workspace/php_parkour \
+  -e BACKBONE=/data/assets/student/depth_backbone.onnx \
+  -e STUDENT=/data/assets/student/student.onnx \
+  php-parkour-research bash ./run_php_inference.sh
 ```
 
-Change `PHP_STUDENT_DIR` to use the pair from your own training run. The wrapper
-passes the backbone and student together, in that order, and selects the local
-interface `lo`. Local ONNX files require no W&B access or training registry.
-Always supply both paths or your own `RUN` and `STEP` rather than relying on
-the script's built-in model defaults.
-
-Alternatively, load an already-exported pair from W&B:
-
-```bash
-RUN='wandb://your-team/php-experiments/STUDENT_RUN_ID' \
-STEP=model_20000 \
-bash ./run_php_inference.sh
-```
-
-Set `STEP` to an ONNX folder in the run's files. This published wrapper
-does not resolve `STEP=latest` or convert `.pt` checkpoints automatically;
-use the [export instructions](README.md#export-to-onnx) if needed.
-
-Before starting the policy, confirm that inference reports:
+Wait for the policy's attachment message:
 
 ```text
 [DepthShmSensor] attached to 'depth_img_shm' shape=(1, 1, 58, 87)
 ```
 
+Both models must belong to the same checkpoint/export. For your own pair, set
+`BACKBONE` and `STUDENT` to their actual mounted paths. Host `outputs/research/`
+is visible as `/outputs/`; validated assets are visible as `/data/assets/`.
+
+To change terrain, append `terrain:terrain-locomotion-plane` to the simulation
+command for a plane, or
+`--terrain.terrain-term.obj-file-path /outputs/path/to/course.obj` for your OBJ.
+Replace that example path with an existing mesh. Native CLI overrides are
+forwarded by the launcher. Loading a mesh does not verify policy traversal.
 
 ## Control the robot
 
 Lower the gantry with `8` in the MuJoCo window until the feet reach the ground,
 then remove it with `9`. Press `]` in the policy terminal to start the policy.
-`o` enters damping mode; `i` returns to the stiff startup pose. These are the
-native inference controls.
-Press `Backspace` in the MuJoCo window to reset the environment.
+`o` enters damping mode; `i` returns to the stiff startup pose. Press
+`Backspace` in the MuJoCo window to reset the environment.
 
-| Direction command | Policy-terminal keys |
-|---|---|
+| Direction or action | Policy-terminal key |
+| --- | --- |
 | Forward / backward | `w` / `s` |
 | 45° left / right | `a` / `d` |
 | 90° left / right | `q` / `e` |
-| Toggle speed mode | `=` |
+| Stand | `z` |
+| Toggle low/high speed | `=` |
+| Start/stop recording | `c` |
 
-The [Sim-to-Sim Depth Locomotion workflow](https://github.com/amazon-far/holosoma/blob/jinkunc/php-release-port/src/holosoma_inference/docs/workflows/sim-to-sim-depth-locomotion.md)
-shows the underlying Holosoma commands, depth image configuration, and
-keyboard controls.
+Key-release detection requires the display session passed into the GUI
+container. The bounded harness supplies commands without manual keyboard
+input. Stop both processes before restarting either one.
+
+Native recordings contain `[root_quat_wxyz, zero_xyz, dof29]` and commands:
+the SDK supplies zero root-position placeholders. They are not world
+trajectories or native training bundles. Use the harness's `trajectory.csv`
+for actual simulated world positions. The
+[motion conversion guide](../note.md#4-动作匹配可视化与自定义数据) covers the separate
+tracking-to-native training conversion.
+
+## Bounded headless checks
+
+Run these on the host from the repository root, with the unified container
+running and interactive simulation/inference stopped. Choose fresh empty
+output directories. EGL was used for the recorded physical checks;
+`--gl osmesa` selects CPU rendering.
+
+```bash
+bash scripts/research/docker.sh inference scripts/research/validate_onnx.py \
+  --models /data/assets/student --output /outputs/onnx/deploy-new.json
+bash scripts/research/docker.sh sim scripts/research/sim2sim.py \
+  --models /data/assets/student --terrain plane --commands all --isolate-commands \
+  --seed 42 --seconds-per-command 8 --gl egl --output /outputs/sim2sim/deploy-plane-new
+bash scripts/research/docker.sh sim scripts/research/sim2sim.py \
+  --models /data/assets/student --terrain step --commands 6 \
+  --seed 42 --seconds-per-command 20 --gl egl --output /outputs/sim2sim/deploy-step-new
+```
+
+The harness runs the native DDS/depth path and ONNX policy at 50 Hz, releases
+the gantry, and records physics steps, policy ticks, world trajectories, logs,
+MP4 and decoded PNG frames. Each isolated plane command gets a fresh simulation.
+`--record-policy` also checks native recording, automatic save on STOP and damping.
+
+Deployed indices are 0–11; slots 12–14 are reserved and only checked as model
+inputs. The ONNX validator ran 30 CPU inference cases (15 slots × two synthetic
+depth inputs); this does not measure skill success. All 12 plane commands ran
+eight simulation seconds without the height/tilt event threshold. Command 11
+ended with positive X displacement, so backward tracking was not verified.
+
+The public policy also ran on one representative OBJ from every generated
+scene: 17/17 executions completed, with 14 height/tilt threshold events and
+three unflagged cases. Each used seed 42 and 500 policy ticks over about ten
+simulation seconds. The threshold is pelvis height below 0.4 m or base-up cosine
+below 0.35 after gantry release; climbing tilt can trigger it and the robot can
+recover. These are neither 14 permanent falls nor course-completion results,
+and they do not cover policy behavior on all 629 configurations. Narrow-step
+falls, partial climbs and assisted-input failures are retained in
+[usage.md](../usage.md#7-mujoco-场景与物理闭环), the
+[deployment report](../usage_assets/reports/deployment-summary.md) and the
+[17-scene offline video page](../usage_assets/sim2sim/scenarios/playback.html).
+
+## Export a local native checkpoint
+
+The public release provides an ONNX pair, without native teacher/student `.pt`
+checkpoints. Export your own student from a real local native `.pt` and the
+same five ordered local motion registries used for training. The
+[training/export guide](README.md#export-to-onnx) gives the direct command and
+checkpoint lookup with explicit `file://` registries.
+
+For an already completed local pipeline student, the independent export is:
+
+```bash
+docker exec -w /workspace/php_parkour php-parkour-research \
+  bash scripts/research/train_pipeline.sh export --profile official --student-kind finetune
+```
+
+This requires its completed stage manifest under
+`/outputs/training/official/manifests/`; select the actual profile/student kind
+and output directory used by your training. The pipeline supplies ordered
+local registries, exports both models and verifies them with ONNX Runtime. It
+reports the export directory; use that pair as `BACKBONE`/`STUDENT`. After pulling
+cloud results, adjust paths to local mounted files as described in
+[note.md](../note.md).
+
+## View offline TensorBoard curves
+
+Training and evaluation write local TensorBoard events. On the host, start
+the viewer in Docker:
+
+```bash
+docker exec php-parkour-research train-python -m tensorboard.main \
+  --logdir /outputs/training --host 127.0.0.1 --port 6006 --load_fast false
+```
+
+Open `http://127.0.0.1:6006/`. Use the actual output root if training was written
+elsewhere. To inspect the published raw events, use
+`--logdir /workspace/php_parkour/usage_assets/tensorboard`. Keep one viewer per
+port; cloud viewing uses the SSH port forward in [note.md](../note.md).
+The recorded student runs are two-iteration smoke checks and the larger
+4096-environment teacher pilot ran 20 iterations. They validate execution and
+finite updates, without a convergence or full official-training claim.

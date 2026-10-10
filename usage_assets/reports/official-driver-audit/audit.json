@@ -1,0 +1,162 @@
+{
+  "schema_version": 1,
+  "status": "completed_with_documented_limitations",
+  "audited_utc": "2026-10-10T03:58:41.742127+00:00",
+  "image_id": "sha256:88254ac0b90a3056375145601d741aa3e08726e18412d201a3c7e7915a23996f",
+  "image_source_commit": "64ebc5f125958ac1a9ab4891858b80a2ece5dd57",
+  "mounted_pipeline_sha256": "5f85596f40b796b8626e05058d54824d93ba97e3788129e1763ba5c461284adb",
+  "scope": "Static source audit, CPU typed-default inspection, eight read-only plans and 45 CPU regression cases; no GPU training/evaluation launched by this audit.",
+  "official_output": "/outputs/official-full",
+  "default_schedule": {
+    "teacher_skills": [
+      "locomotion",
+      "low-step",
+      "high-step",
+      "low-climb-76",
+      "high-climb-76"
+    ],
+    "teachers_each": {
+      "num_envs": 4096,
+      "iterations": 20000,
+      "num_variants": 64,
+      "num_mini_batches": 4,
+      "num_learning_epochs": 5,
+      "num_steps_per_env": 24,
+      "save_interval": 500
+    },
+    "student_pure": {
+      "algorithm": "wbt_training.utils.student_teacher.PhpDistillation",
+      "num_envs": 2048,
+      "num_learning_iterations": 10000,
+      "save_interval": 500,
+      "num_mini_batches": 96,
+      "num_learning_epochs": 2,
+      "num_steps_per_env": 24,
+      "preprocess_hook": "wbt_training.config_values.terrain:apply_terrain_preprocess",
+      "preprocess_hook_kwargs": {
+        "add_onpath_obstacle": true,
+        "num_variants": 3
+      },
+      "action_scale": 1.0,
+      "action_scales_by_effort_limit_over_p_gain": false,
+      "logger": "disabled",
+      "ppo_start_epoch": null,
+      "dagger_end_epoch": null,
+      "teacher_hidden_dims": [
+        512,
+        256,
+        128
+      ],
+      "student_hidden_dims": [
+        512,
+        256,
+        128
+      ],
+      "depth_output_dim": 32
+    },
+    "student_finetune": {
+      "algorithm": "wbt_training.utils.student_teacher.PhpDistillationPPO",
+      "num_envs": 2048,
+      "num_learning_iterations": 30000,
+      "save_interval": 500,
+      "num_mini_batches": 96,
+      "num_learning_epochs": 2,
+      "num_steps_per_env": 24,
+      "preprocess_hook": "wbt_training.config_values.terrain:apply_terrain_preprocess",
+      "preprocess_hook_kwargs": {
+        "add_onpath_obstacle": true,
+        "num_variants": 3
+      },
+      "action_scale": 1.0,
+      "action_scales_by_effort_limit_over_p_gain": false,
+      "logger": "disabled",
+      "ppo_start_epoch": 0,
+      "dagger_end_epoch": 10000,
+      "teacher_hidden_dims": [
+        512,
+        256,
+        128
+      ],
+      "student_hidden_dims": [
+        2048,
+        1024,
+        512,
+        256,
+        128
+      ],
+      "depth_output_dim": 32
+    },
+    "evaluation": {
+      "num_envs": 64,
+      "control_steps": 3000,
+      "teacher_variants": 1,
+      "student_variants": 3
+    }
+  },
+  "regressions": {
+    "tests": 45,
+    "failures": 0,
+    "errors": 0,
+    "seconds": 2.5,
+    "junit": "resume-provenance.xml",
+    "scope": "Bookkeeping tests use real torch checkpoint files and fake processes; actual Isaac/ONNX physical evidence is separately reported."
+  },
+  "plan_actions": 8,
+  "planned_pipeline_stages": 16,
+  "findings": [
+    {
+      "id": "resume-provenance",
+      "severity": "high",
+      "state": "fixed_in_mounted_source",
+      "detail": "Image source 64ebc5f can return early for a passed target without checking input settings. Mounted patch compares resolved environment count, stage registry order, FINETUNE and ordered teacher SHA before reusing any checkpoint; target extension is allowed. Missing legacy provenance with an existing PT fails closed.",
+      "evidence": "resume-provenance.xml"
+    },
+    {
+      "id": "teacher-graph-recovery",
+      "severity": "limitation",
+      "state": "accepted_fail_closed",
+      "detail": "Final teacher graph missing, changed, invalid or mismatched iteration/registry stops official driver. A passed teacher PT is not retrained merely to recreate a deleted graph. Native training save/export errors mark failed and can resume. Do not replace a 64-variant training graph with a 1-variant evaluation export."
+    },
+    {
+      "id": "native-resume-state",
+      "severity": "limitation",
+      "state": "documented",
+      "detail": "Native checkpoints restore model/optimizer/iteration. WBT inherits empty BaseTask environment checkpoint state; motion sampling history, WBT curriculum and RNG/simulator state are not persisted. Resume is not bitwise continuation and repeats the saved zero-based iteration."
+    },
+    {
+      "id": "quality-gate",
+      "severity": "limitation",
+      "state": "documented",
+      "detail": "Evaluation verifies finite actions/root states, exact steps*env tracking samples, source PT SHA, fresh readable videos and TensorBoard. It records failure/timeout counts and tracking errors but does not impose learned-skill/convergence thresholds; poor policies can pass execution acceptance."
+    },
+    {
+      "id": "evaluation-coverage",
+      "severity": "limitation",
+      "state": "documented",
+      "detail": "Official evaluation uses 64 environments x 3000 steps (60 simulated seconds/env at dt0.02), teacher1variant and student3variants. Clip/expert IDs are reported; exhaustive coverage of each motion or 64 training layouts is not guaranteed."
+    },
+    {
+      "id": "onnx-contract",
+      "severity": "limitation",
+      "state": "documented",
+      "detail": "Teacher validation checks full graph, 29-joint metadata, embedded references, iteration and registry, with 12 real CPU cases. Student export recovers exact saved pure/finetune config and teacher-slot count, loads full checkpoint, then checks two fresh graphs with 30 real CPU cases and deployment metadata. This is not PT/ONNX numerical parity or policy quality."
+    },
+    {
+      "id": "registry-immutability",
+      "severity": "limitation",
+      "state": "documented",
+      "detail": "Training resume/skip binds registry URI, not every in-place data byte. Keep the separately checksum-verified asset bundles immutable; changing content under the same file:// URI requires a fresh output directory."
+    },
+    {
+      "id": "official-skill-scope",
+      "severity": "information",
+      "state": "verified",
+      "detail": "The complete official driver uses all five ordered skills and requires each teacher iter>=19999 before student training. The generic pipeline --skills option permits an explicitly requested subset; that is not the full five-expert recipe."
+    }
+  ],
+  "evidence": {
+    "defaults": "defaults.json",
+    "plans": "plan.json",
+    "source_fingerprints": "source-fingerprints.json"
+  }
+}

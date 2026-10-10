@@ -2,7 +2,13 @@
 
 配置和首次启动见 [note.md](note.md)。本项目使用 Unitree G1 29 DOF，功能覆盖以 [验收定义](scripts/research/acceptance_matrix.json) 和代码注册表为准。本文件随真实运行结果更新；没有对应日志、JSON 和源文件校验记录的项目不记为通过。
 
-先看真实结果：[17 场景参考动作播放页](usage_assets/motion_matching/playback.html)、[12 指令物理闭环视频](usage_assets/sim2sim/directions.mp4)、[逐项原始报告](usage_assets/reports/)。参考动作来自生成数组，闭环录像来自公开 ONNX 策略驱动的 MuJoCo，训练录像来自实际 Isaac checkpoint。
+先看真实结果：[17 场景物理闭环视频](usage_assets/sim2sim/scenarios/playback.html)、[17 场景参考动作播放页](usage_assets/motion_matching/playback.html)、[12 指令物理闭环视频](usage_assets/sim2sim/directions.mp4)、[逐项原始报告](usage_assets/reports/)。参考动作来自生成数组，闭环录像来自公开 ONNX 策略驱动的 MuJoCo，训练录像来自实际 Isaac checkpoint。
+
+在本地仓库运行下面的标准库服务后，可打开 `http://127.0.0.1:8088/sim2sim/scenarios/playback.html` 或 `http://127.0.0.1:8088/motion_matching/playback.html` 交互查看；不需要安装包。
+
+```bash
+python3 -m http.server 8088 --bind 127.0.0.1 --directory usage_assets
+```
 
 [![17场景参考动作离线播放页，点击打开](usage_assets/motion-gallery.png)](usage_assets/motion_matching/playback.html)
 
@@ -199,6 +205,19 @@ bash scripts/research/docker.sh sim scripts/research/sim2sim.py \
 
 [详细数值、引导算法与逐条复跑命令](usage_assets/reports/deployment-summary.md)。所有这些试验都未声明完整课程成功率，单次没有阈值事件也不能推广为任意地形泛化。
 
+最终镜像还逐项运行了全部 **17 个生成场景的代表几何**：每场景独立 seed 42、500 次策略控制、约 10 仿真秒，17/17 执行完成、0 执行错误。其中 14 场景触发高度或倾斜阈值，3 场景未触发；部分倾斜后能恢复，不能把阈值事件都称为永久跌倒，也不能据此认定越障成功。每种场景只选一个配置，未声称覆盖全部 629 配置的策略表现。[逐场景数值与限制](usage_assets/reports/sim2sim-scenes-summary.md)、[包含模型/OBJ SHA 的完整矩阵](usage_assets/reports/sim2sim-scene-matrix.json)。
+
+[![17场景真实物理闭环播放页](usage_assets/scene-gallery.png)](usage_assets/sim2sim/scenarios/playback.html)
+
+[离线视频页](usage_assets/sim2sim/scenarios/playback.html)提供全部 17 个原片、截图、世界轨迹和阈值记录。已有 Chrome 逐一加载并 seek 解码全部视频，另检查实际播放、搜索与筛选，[浏览器验收](usage_assets/reports/scene-gallery.json)。视频包含起始安置阶段，视频时长不等于正式策略控制时长。
+
+```bash
+bash scripts/research/docker.sh sim scripts/research/sim2sim_scene_matrix.py \
+  --matrix /outputs/motion-matching/matrix.json \
+  --models /data/assets/student --seed 42 --seconds 10 --gl egl \
+  --output /outputs/sim2sim/scene-matrix-new
+```
+
 `--record-policy` 已真实验证录制开关、STOP 自动保存和阻尼发送，Kp=0、Kd≥3。原生 Unitree 状态把 root xyz 填为零，所以录制 NPZ 只包含 SDK wxyz 四元数、零 xyz 占位、29 关节和指令；不能直接当作世界轨迹或训练 bundle。真实机器人位移记录在 simulator 的 `trajectory.csv`。
 
 ## 8. 全量测试、同步与结果来源
@@ -212,10 +231,18 @@ python3 scripts/research/cloud.py pull
 
 CPU 测试统一在 Docker 中运行，分别保留根目录/训练和 motion matching 的 JUnit、日志、计数及日志 SHA-256。`PHP_DOCKER=0` 只用于隔离原生安装路径的 subprocess double 测试，解释器仍在容器内；真实容器路径由 doctor、训练和闭环运行验证。
 
+最终镜像 `88254ac0…`、源码 `64ebc5f` 上完整复跑：根目录及训练 **289 passed、0 failed、0 skipped**；动作匹配 **213 passed、12 failed、0 skipped**。[本次汇总](usage_assets/reports/cpu-tests-final.json)与[原始 JUnit/日志](usage_assets/reports/cpu-final/)包含全部结果。
+
+此后恢复逻辑又补充了参数与教师来源检查：环境数、注册表、FINETUNE 或有序教师 SHA 不符时拒绝恢复，允许合法延长总迭代数。相关 **45/45 回归通过**，两种学生自身恢复也已覆盖。[官方驱动与默认参数审计](usage_assets/reports/official-driver-audit/audit.md)保留当前脚本 SHA、实际配置计划和 JUnit；这批检查独立于上述 `64ebc5f` 全量测试记录。
+
 动作测试目前 **213 passed、12 failed、0 skipped**。12 项均为修改前已有的历史字节 hash：未修改基线`554edcc`与research的36组数组逐字节一致，9项独立功能不变量通过，URDF零位FK的独立误差最大2.30e-16；另外用Python3.10复查6个characterization/FK hash测试，仍出现相同失败。历史`mm_hs`原始数组/环境不可得，[本机限定路径与文件名检查](usage_assets/reports/legacy-local-reference-search.json)也未找到；不能从SHA反推差异，也没有刷新golden或跳过失败。[12项原始详情](usage_assets/reports/legacy-goldens.json)、[原版数值对照](usage_assets/reports/motion-baseline-parity.json)。因此完整CPU命令保留退出码1，不能称为全绿。
 
 还在本机检查了官方仓库全部 5 个 advertised refs、16 个可达 commit：未发现测试提到的 `0424c06c`、`mm_hs` 完整环境锁或 golden 输出数组，GitHub commit 查询也返回该 SHA 不存在。[官方历史调查](usage_assets/reports/legacy-upstream-audit.json)。
 
 云端镜像核对压缩包 SHA-256、镜像配置和层内容，源码快照逐文件复核 SHA-256。选卡检查包含图形与计算进程，Docker 根据 GPU UUID 映射，保存物理 nvidia-smi 编号。远端容器不在本体安装任何项目包。当前运行中的结果均写入 `outputs/research/` 或远端项目持久目录，未完成项目不会在此文件中记作通过。
 
-首次完整镜像归档 **12,014,827,234 字节**，包 SHA-256 `332e292e5b0f542c2dfec6bf1b4c007d623f6acef313c3b37b03ba1d2eaccb83`，两端 Config/RootFS 指纹相同。部署时物理 GPU 1 没有任何进程、显存 1 MiB、利用率 0%，对应 UUID `GPU-27eb1141-ab74-ebdd-42c2-6549fb7253e5`；容器内只见这张卡。[传输记录](usage_assets/reports/cloud-image-transfer.json)、[部署记录](usage_assets/reports/cloud-deployment.json)、[仅公钥登录验证](usage_assets/reports/cloud-ssh-key-check.json)。最终重建的镜像将另行记录，不与首次镜像混记。
+首次完整镜像归档 **12,014,827,234 字节**，包 SHA-256 `332e292e5b0f542c2dfec6bf1b4c007d623f6acef313c3b37b03ba1d2eaccb83`，两端 Config/RootFS 指纹相同。部署时物理 GPU 1 没有任何进程、显存 1 MiB、利用率 0%，对应 UUID `GPU-27eb1141-ab74-ebdd-42c2-6549fb7253e5`；容器内只见这张卡。[传输记录](usage_assets/reports/cloud-image-transfer.json)、[部署记录](usage_assets/reports/cloud-deployment.json)、[仅公钥登录验证](usage_assets/reports/cloud-ssh-key-check.json)。最终重建的镜像另行记录如下。
+
+最终镜像为 `sha256:88254ac0b90a3056375145601d741aa3e08726e18412d201a3c7e7915a23996f`，对应干净源码提交 `64ebc5f`，镜像内记录大小为 22,704,771,469 字节。独立容器只挂只读资产、输出和空缓存，`--network none`、私有 IPC，**没有宿主源码挂载**：三环境 doctor、全部 265 项锁定版本、真实 16 环境两轮 Isaac 训练、有限权重更新、教师 ONNX 12 组真实 CPU 推理和离线 TensorBoard 均通过。[完整离线证明](usage_assets/reports/runtime-final-offline-summary.json)及[原始记录](usage_assets/reports/runtime-final-offline/)记录源码边界、模型与镜像 SHA；motion/inference 的 `pip check` 通过，train 仍保留前述三项上游元数据冲突。
+
+最终归档 **10,858,424,068 字节**、SHA-256 `e6c0483f15242e9da95aaa136e21eb10b746a2e423a5e206f03e174b76d5e4c3` 已完整传输并在云端加载，两端 Config/RootFS 指纹为 `2a43037e2397fac3e343e8d621dd42c41ea7c27da82602789d575fddda112482`。[最终镜像传输核验](usage_assets/reports/cloud-final-image-transfer.json)保留本地/远端镜像 ID；Docker 存储实现导致两端 manifest ID 不同，层内容与配置已独立核对。

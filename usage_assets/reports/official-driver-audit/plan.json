@@ -1,0 +1,552 @@
+{
+  "scope": "Read-only --plan. Checkpoint angle-bracket placeholders are not executable files; no simulator or GPU job started. Fresh official driver adds --resume and the equivalent explicit remaining target.",
+  "records": [
+    {
+      "action": "teachers",
+      "student_kind": null,
+      "returncode": 0,
+      "invocation": [
+        "/isaac-sim/kit/python/bin/python3",
+        "/workspace/php_parkour/scripts/research/train_pipeline.py",
+        "teachers",
+        "--profile",
+        "official",
+        "--output",
+        "/outputs/official-full",
+        "--plan"
+      ],
+      "stages": [
+        {
+          "label": "teacher-locomotion",
+          "command": [
+            "bash",
+            "/workspace/php_parkour/wbt_training/training_runs/run_terrain_teacher.sh",
+            "--training.headless",
+            "True",
+            "--training.num-envs",
+            "4096",
+            "--training.name",
+            "teacher-locomotion",
+            "--training.project",
+            "PHP-research",
+            "--logger.base-dir",
+            "/outputs/official-full/official/teacher-locomotion",
+            "--training.seed",
+            "42"
+          ],
+          "environment": {
+            "LOGGER": "tensorboard",
+            "NGPUS": "1",
+            "CUDA_VISIBLE_DEVICES": "",
+            "REGISTRY": "file:///data/assets/motions-locomotion"
+          }
+        },
+        {
+          "label": "teacher-low-step",
+          "command": [
+            "bash",
+            "/workspace/php_parkour/wbt_training/training_runs/run_terrain_teacher.sh",
+            "--training.headless",
+            "True",
+            "--training.num-envs",
+            "4096",
+            "--training.name",
+            "teacher-low-step",
+            "--training.project",
+            "PHP-research",
+            "--logger.base-dir",
+            "/outputs/official-full/official/teacher-low-step",
+            "--training.seed",
+            "42"
+          ],
+          "environment": {
+            "LOGGER": "tensorboard",
+            "NGPUS": "1",
+            "CUDA_VISIBLE_DEVICES": "",
+            "REGISTRY": "file:///data/assets/motions-low-step"
+          }
+        },
+        {
+          "label": "teacher-high-step",
+          "command": [
+            "bash",
+            "/workspace/php_parkour/wbt_training/training_runs/run_terrain_teacher.sh",
+            "--training.headless",
+            "True",
+            "--training.num-envs",
+            "4096",
+            "--training.name",
+            "teacher-high-step",
+            "--training.project",
+            "PHP-research",
+            "--logger.base-dir",
+            "/outputs/official-full/official/teacher-high-step",
+            "--training.seed",
+            "42"
+          ],
+          "environment": {
+            "LOGGER": "tensorboard",
+            "NGPUS": "1",
+            "CUDA_VISIBLE_DEVICES": "",
+            "REGISTRY": "file:///data/assets/motions-high-step"
+          }
+        },
+        {
+          "label": "teacher-low-climb-76",
+          "command": [
+            "bash",
+            "/workspace/php_parkour/wbt_training/training_runs/run_terrain_teacher.sh",
+            "--training.headless",
+            "True",
+            "--training.num-envs",
+            "4096",
+            "--training.name",
+            "teacher-low-climb-76",
+            "--training.project",
+            "PHP-research",
+            "--logger.base-dir",
+            "/outputs/official-full/official/teacher-low-climb-76",
+            "--training.seed",
+            "42"
+          ],
+          "environment": {
+            "LOGGER": "tensorboard",
+            "NGPUS": "1",
+            "CUDA_VISIBLE_DEVICES": "",
+            "REGISTRY": "file:///data/assets/motions-low-climb-76"
+          }
+        },
+        {
+          "label": "teacher-high-climb-76",
+          "command": [
+            "bash",
+            "/workspace/php_parkour/wbt_training/training_runs/run_terrain_teacher.sh",
+            "--training.headless",
+            "True",
+            "--training.num-envs",
+            "4096",
+            "--training.name",
+            "teacher-high-climb-76",
+            "--training.project",
+            "PHP-research",
+            "--logger.base-dir",
+            "/outputs/official-full/official/teacher-high-climb-76",
+            "--training.seed",
+            "42"
+          ],
+          "environment": {
+            "LOGGER": "tensorboard",
+            "NGPUS": "1",
+            "CUDA_VISIBLE_DEVICES": "",
+            "REGISTRY": "file:///data/assets/motions-high-climb-76"
+          }
+        }
+      ]
+    },
+    {
+      "action": "distill-pure",
+      "student_kind": null,
+      "returncode": 0,
+      "invocation": [
+        "/isaac-sim/kit/python/bin/python3",
+        "/workspace/php_parkour/scripts/research/train_pipeline.py",
+        "distill-pure",
+        "--profile",
+        "official",
+        "--output",
+        "/outputs/official-full",
+        "--plan"
+      ],
+      "stages": [
+        {
+          "label": "student-pure",
+          "command": [
+            "bash",
+            "/workspace/php_parkour/wbt_training/training_runs/run_terrain_warp_distill.sh",
+            "--training.headless",
+            "True",
+            "--training.num-envs",
+            "2048",
+            "--training.name",
+            "student-pure",
+            "--training.project",
+            "PHP-research",
+            "--logger.base-dir",
+            "/outputs/official-full/official/student-pure",
+            "--training.seed",
+            "42"
+          ],
+          "environment": {
+            "LOGGER": "tensorboard",
+            "NGPUS": "1",
+            "CUDA_VISIBLE_DEVICES": "",
+            "REGISTRY": "file:///data/assets/motions-locomotion,file:///data/assets/motions-low-step,file:///data/assets/motions-high-step,file:///data/assets/motions-low-climb-76,file:///data/assets/motions-high-climb-76",
+            "TEACHER_CHECKPOINT": "<teacher-locomotion-checkpoint>,<teacher-low-step-checkpoint>,<teacher-high-step-checkpoint>,<teacher-low-climb-76-checkpoint>,<teacher-high-climb-76-checkpoint>",
+            "FINETUNE": "0"
+          }
+        }
+      ]
+    },
+    {
+      "action": "distill-finetune",
+      "student_kind": null,
+      "returncode": 0,
+      "invocation": [
+        "/isaac-sim/kit/python/bin/python3",
+        "/workspace/php_parkour/scripts/research/train_pipeline.py",
+        "distill-finetune",
+        "--profile",
+        "official",
+        "--output",
+        "/outputs/official-full",
+        "--plan"
+      ],
+      "stages": [
+        {
+          "label": "student-finetune",
+          "command": [
+            "bash",
+            "/workspace/php_parkour/wbt_training/training_runs/run_terrain_warp_distill.sh",
+            "--training.headless",
+            "True",
+            "--training.num-envs",
+            "2048",
+            "--training.name",
+            "student-finetune",
+            "--training.project",
+            "PHP-research",
+            "--logger.base-dir",
+            "/outputs/official-full/official/student-finetune",
+            "--training.seed",
+            "42"
+          ],
+          "environment": {
+            "LOGGER": "tensorboard",
+            "NGPUS": "1",
+            "CUDA_VISIBLE_DEVICES": "",
+            "REGISTRY": "file:///data/assets/motions-locomotion,file:///data/assets/motions-low-step,file:///data/assets/motions-high-step,file:///data/assets/motions-low-climb-76,file:///data/assets/motions-high-climb-76",
+            "TEACHER_CHECKPOINT": "<teacher-locomotion-checkpoint>,<teacher-low-step-checkpoint>,<teacher-high-step-checkpoint>,<teacher-low-climb-76-checkpoint>,<teacher-high-climb-76-checkpoint>",
+            "FINETUNE": "1"
+          }
+        }
+      ]
+    },
+    {
+      "action": "eval-teachers",
+      "student_kind": null,
+      "returncode": 0,
+      "invocation": [
+        "/isaac-sim/kit/python/bin/python3",
+        "/workspace/php_parkour/scripts/research/train_pipeline.py",
+        "eval-teachers",
+        "--profile",
+        "official",
+        "--output",
+        "/outputs/official-full",
+        "--plan",
+        "--num-envs",
+        "64",
+        "--eval-steps",
+        "3000"
+      ],
+      "stages": [
+        {
+          "label": "eval-teacher-locomotion",
+          "command": [
+            "bash",
+            "/workspace/php_parkour/scripts/research/eval_quality.sh",
+            "teacher",
+            "/outputs/official-full/official/eval-teacher-locomotion/quality.json",
+            "--training.headless",
+            "True",
+            "--logger.base-dir",
+            "/outputs/official-full/official/eval-teacher-locomotion",
+            "--logger.video.interval",
+            "1",
+            "--logger.video.upload-to-wandb",
+            "False"
+          ],
+          "environment": {
+            "LOGGER": "tensorboard",
+            "NGPUS": "1",
+            "CUDA_VISIBLE_DEVICES": "",
+            "REGISTRY": "file:///data/assets/motions-locomotion",
+            "CHECKPOINT": "<teacher-locomotion-checkpoint>"
+          }
+        },
+        {
+          "label": "eval-teacher-low-step",
+          "command": [
+            "bash",
+            "/workspace/php_parkour/scripts/research/eval_quality.sh",
+            "teacher",
+            "/outputs/official-full/official/eval-teacher-low-step/quality.json",
+            "--training.headless",
+            "True",
+            "--logger.base-dir",
+            "/outputs/official-full/official/eval-teacher-low-step",
+            "--logger.video.interval",
+            "1",
+            "--logger.video.upload-to-wandb",
+            "False"
+          ],
+          "environment": {
+            "LOGGER": "tensorboard",
+            "NGPUS": "1",
+            "CUDA_VISIBLE_DEVICES": "",
+            "REGISTRY": "file:///data/assets/motions-low-step",
+            "CHECKPOINT": "<teacher-low-step-checkpoint>"
+          }
+        },
+        {
+          "label": "eval-teacher-high-step",
+          "command": [
+            "bash",
+            "/workspace/php_parkour/scripts/research/eval_quality.sh",
+            "teacher",
+            "/outputs/official-full/official/eval-teacher-high-step/quality.json",
+            "--training.headless",
+            "True",
+            "--logger.base-dir",
+            "/outputs/official-full/official/eval-teacher-high-step",
+            "--logger.video.interval",
+            "1",
+            "--logger.video.upload-to-wandb",
+            "False"
+          ],
+          "environment": {
+            "LOGGER": "tensorboard",
+            "NGPUS": "1",
+            "CUDA_VISIBLE_DEVICES": "",
+            "REGISTRY": "file:///data/assets/motions-high-step",
+            "CHECKPOINT": "<teacher-high-step-checkpoint>"
+          }
+        },
+        {
+          "label": "eval-teacher-low-climb-76",
+          "command": [
+            "bash",
+            "/workspace/php_parkour/scripts/research/eval_quality.sh",
+            "teacher",
+            "/outputs/official-full/official/eval-teacher-low-climb-76/quality.json",
+            "--training.headless",
+            "True",
+            "--logger.base-dir",
+            "/outputs/official-full/official/eval-teacher-low-climb-76",
+            "--logger.video.interval",
+            "1",
+            "--logger.video.upload-to-wandb",
+            "False"
+          ],
+          "environment": {
+            "LOGGER": "tensorboard",
+            "NGPUS": "1",
+            "CUDA_VISIBLE_DEVICES": "",
+            "REGISTRY": "file:///data/assets/motions-low-climb-76",
+            "CHECKPOINT": "<teacher-low-climb-76-checkpoint>"
+          }
+        },
+        {
+          "label": "eval-teacher-high-climb-76",
+          "command": [
+            "bash",
+            "/workspace/php_parkour/scripts/research/eval_quality.sh",
+            "teacher",
+            "/outputs/official-full/official/eval-teacher-high-climb-76/quality.json",
+            "--training.headless",
+            "True",
+            "--logger.base-dir",
+            "/outputs/official-full/official/eval-teacher-high-climb-76",
+            "--logger.video.interval",
+            "1",
+            "--logger.video.upload-to-wandb",
+            "False"
+          ],
+          "environment": {
+            "LOGGER": "tensorboard",
+            "NGPUS": "1",
+            "CUDA_VISIBLE_DEVICES": "",
+            "REGISTRY": "file:///data/assets/motions-high-climb-76",
+            "CHECKPOINT": "<teacher-high-climb-76-checkpoint>"
+          }
+        }
+      ]
+    },
+    {
+      "action": "eval-student",
+      "student_kind": "pure",
+      "returncode": 0,
+      "invocation": [
+        "/isaac-sim/kit/python/bin/python3",
+        "/workspace/php_parkour/scripts/research/train_pipeline.py",
+        "eval-student",
+        "--profile",
+        "official",
+        "--output",
+        "/outputs/official-full",
+        "--plan",
+        "--num-envs",
+        "64",
+        "--eval-steps",
+        "3000",
+        "--student-kind",
+        "pure"
+      ],
+      "stages": [
+        {
+          "label": "eval-student-pure",
+          "command": [
+            "bash",
+            "/workspace/php_parkour/scripts/research/eval_quality.sh",
+            "student",
+            "/outputs/official-full/official/eval-student-pure/quality.json",
+            "--training.headless",
+            "True",
+            "--logger.base-dir",
+            "/outputs/official-full/official/eval-student-pure",
+            "--logger.video.interval",
+            "1",
+            "--logger.video.upload-to-wandb",
+            "False"
+          ],
+          "environment": {
+            "LOGGER": "tensorboard",
+            "NGPUS": "1",
+            "CUDA_VISIBLE_DEVICES": "",
+            "REGISTRY": "file:///data/assets/motions-locomotion,file:///data/assets/motions-low-step,file:///data/assets/motions-high-step,file:///data/assets/motions-low-climb-76,file:///data/assets/motions-high-climb-76",
+            "CHECKPOINT": "<student-pure-checkpoint>"
+          }
+        }
+      ]
+    },
+    {
+      "action": "eval-student",
+      "student_kind": "finetune",
+      "returncode": 0,
+      "invocation": [
+        "/isaac-sim/kit/python/bin/python3",
+        "/workspace/php_parkour/scripts/research/train_pipeline.py",
+        "eval-student",
+        "--profile",
+        "official",
+        "--output",
+        "/outputs/official-full",
+        "--plan",
+        "--num-envs",
+        "64",
+        "--eval-steps",
+        "3000",
+        "--student-kind",
+        "finetune"
+      ],
+      "stages": [
+        {
+          "label": "eval-student-finetune",
+          "command": [
+            "bash",
+            "/workspace/php_parkour/scripts/research/eval_quality.sh",
+            "student",
+            "/outputs/official-full/official/eval-student-finetune/quality.json",
+            "--training.headless",
+            "True",
+            "--logger.base-dir",
+            "/outputs/official-full/official/eval-student-finetune",
+            "--logger.video.interval",
+            "1",
+            "--logger.video.upload-to-wandb",
+            "False"
+          ],
+          "environment": {
+            "LOGGER": "tensorboard",
+            "NGPUS": "1",
+            "CUDA_VISIBLE_DEVICES": "",
+            "REGISTRY": "file:///data/assets/motions-locomotion,file:///data/assets/motions-low-step,file:///data/assets/motions-high-step,file:///data/assets/motions-low-climb-76,file:///data/assets/motions-high-climb-76",
+            "CHECKPOINT": "<student-finetune-checkpoint>"
+          }
+        }
+      ]
+    },
+    {
+      "action": "export",
+      "student_kind": "pure",
+      "returncode": 0,
+      "invocation": [
+        "/isaac-sim/kit/python/bin/python3",
+        "/workspace/php_parkour/scripts/research/train_pipeline.py",
+        "export",
+        "--profile",
+        "official",
+        "--output",
+        "/outputs/official-full",
+        "--plan",
+        "--student-kind",
+        "pure"
+      ],
+      "stages": [
+        {
+          "label": "export-student-pure",
+          "command": [
+            "/isaac-sim/kit/python/bin/python3",
+            "-m",
+            "wbt_training.training_runs.export_distill_onnx",
+            "--training.checkpoint",
+            "<student-pure-checkpoint>",
+            "--training.registry-name",
+            "file:///data/assets/motions-locomotion,file:///data/assets/motions-low-step,file:///data/assets/motions-high-step,file:///data/assets/motions-low-climb-76,file:///data/assets/motions-high-climb-76",
+            "--training.num-envs",
+            "1",
+            "logger:disabled",
+            "--logger.base-dir",
+            "/outputs/official-full/official/export-student-pure"
+          ],
+          "environment": {
+            "LOGGER": "tensorboard",
+            "NGPUS": "1",
+            "CUDA_VISIBLE_DEVICES": ""
+          }
+        }
+      ]
+    },
+    {
+      "action": "export",
+      "student_kind": "finetune",
+      "returncode": 0,
+      "invocation": [
+        "/isaac-sim/kit/python/bin/python3",
+        "/workspace/php_parkour/scripts/research/train_pipeline.py",
+        "export",
+        "--profile",
+        "official",
+        "--output",
+        "/outputs/official-full",
+        "--plan",
+        "--student-kind",
+        "finetune"
+      ],
+      "stages": [
+        {
+          "label": "export-student-finetune",
+          "command": [
+            "/isaac-sim/kit/python/bin/python3",
+            "-m",
+            "wbt_training.training_runs.export_distill_onnx",
+            "--training.checkpoint",
+            "<student-finetune-checkpoint>",
+            "--training.registry-name",
+            "file:///data/assets/motions-locomotion,file:///data/assets/motions-low-step,file:///data/assets/motions-high-step,file:///data/assets/motions-low-climb-76,file:///data/assets/motions-high-climb-76",
+            "--training.num-envs",
+            "1",
+            "logger:disabled",
+            "--logger.base-dir",
+            "/outputs/official-full/official/export-student-finetune"
+          ],
+          "environment": {
+            "LOGGER": "tensorboard",
+            "NGPUS": "1",
+            "CUDA_VISIBLE_DEVICES": ""
+          }
+        }
+      ]
+    }
+  ]
+}

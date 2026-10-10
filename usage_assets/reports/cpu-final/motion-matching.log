@@ -1,0 +1,247 @@
+FF.......FF.................FFFFFF...................................... [ 32%]
+........................................................................ [ 64%]
+........................................................................ [ 96%]
+.......FF                                                                [100%]
+=================================== FAILURES ===================================
+___________________ TestDataUtilsResample.test_resample_data ___________________
+
+self = <tests.test_characterization.TestDataUtilsResample object at 0x78fa7ab3f9b0>
+
+    def test_resample_data(self) -> None:
+>       assert hash_array(D.resample_data(_qpos_like(40, 1), 50, 60)) == (
+            "0be401a93cd93c3f7855664d038517efec5a212925f5523a0061e5e51e780b04"
+        )
+E       AssertionError: assert '4f0b24f4cdd0...fe4b5824f26cf' == '0be401a93cd9...1e5e51e780b04'
+E         
+E         - 0be401a93cd93c3f7855664d038517efec5a212925f5523a0061e5e51e780b04
+E         + 4f0b24f4cdd0bc9977e9063f2e1028f6bbe8fffae68ddcb9099fe4b5824f26cf
+
+tests/test_characterization.py:51: AssertionError
+_________________ TestDataUtilsResample.test_adjust_data_speed _________________
+
+self = <tests.test_characterization.TestDataUtilsResample object at 0x78fa7abe8380>
+
+    def test_adjust_data_speed(self) -> None:
+>       assert hash_array(D.adjust_data_speed(_qpos_like(40, 1), 1.3)) == (
+            "9a54bb95b0a6b1869cae1128b82a3414967eafac4241f9c769a50aaab1d5b538"
+        )
+E       AssertionError: assert '166bbe945846...06c4751dad28c' == '9a54bb95b0a6...50aaab1d5b538'
+E         
+E         - 9a54bb95b0a6b1869cae1128b82a3414967eafac4241f9c769a50aaab1d5b538
+E         + 166bbe945846a2e982d56a1fec1e6c5278b08981f9525b8795406c4751dad28c
+
+tests/test_characterization.py:56: AssertionError
+________________ TestQposToTracking.test_outputs_byte_identical ________________
+
+self = <tests.test_characterization.TestQposToTracking object at 0x78fa7abebe30>
+
+    def test_outputs_byte_identical(self) -> None:
+        qp = _qpos_like(12, 5).astype(np.float32)
+        tracking = qpos_to_tracking(qp, 50)
+        assert set(tracking) == set(self.GOLDENS), "output keys changed"
+        for key, golden in self.GOLDENS.items():
+>           assert hash_array(tracking[key]) == golden, key
+E           AssertionError: body_ang_vel_w
+E           assert 'f9464975b446...ff02323bc328c' == 'c4c65ec5d49a...a5197b96f3f49'
+E             
+E             - c4c65ec5d49aba47ada54c5445c6190fa02232dbe2c457bda45a5197b96f3f49
+E             + f9464975b446f290d7589e74ab7ccbbc6b776d3e400210e2468ff02323bc328c
+
+tests/test_characterization.py:152: AssertionError
+____________ TestRandomizeBox.test_seeded_output_is_byte_identical _____________
+
+self = <tests.test_characterization.TestRandomizeBox object at 0x78fa7ac18110>
+
+    def test_seeded_output_is_byte_identical(self) -> None:
+        params = {"pos": [1.0, 2.0, 0.5], "quat": [1.0, 0.0, 0.0, 0.0], "size": [0.4, 0.6, 0.3]}
+        out = D.randomize_box_x_numpy(params, num_variants=10, rng=np.random.default_rng(0))
+>       assert hash_array(out) == ("e87ff7c5365a8a3a2ec550ed333bcefd7b147aa1c760d3d8c3e0a719a7c7701b")
+E       AssertionError: assert 'b95c7fb00b1c...835352ca5de1d' == 'e87ff7c5365a...0a719a7c7701b'
+E         
+E         - e87ff7c5365a8a3a2ec550ed333bcefd7b147aa1c760d3d8c3e0a719a7c7701b
+E         + b95c7fb00b1ce9bcf8c77b64adbccef75f57b5a3956fd4326fc835352ca5de1d
+
+tests/test_characterization.py:162: AssertionError
+__________________ test_motion_npz_is_byte_identical[roll_78] __________________
+
+generated = {'climb_76_first_config': {'npy': '/tmp/pytest-of-root/pytest-1/climb_76_first_config0/forward_walk0.6s_step0.7s_terra...est-of-root/pytest-1/roll_780/roll_78_motion.npz', 'obj': '/tmp/pytest-of-root/pytest-1/roll_780/roll_78_terrain.obj'}}
+key = 'roll_78'
+
+    @pytest.mark.parametrize("key", list(_SCENARIOS))
+    def test_motion_npz_is_byte_identical(generated, key) -> None:
+>       assert hash_npz(generated[key]["npz"]) == _SCENARIOS[key][2]
+E       AssertionError: assert '54af46a87219...349377807f2ad' == '09eee5f1b873...51a3a4a426db3'
+E         
+E         - 09eee5f1b873a81370a53adbebf803737e95b67ca93f252e84f51a3a4a426db3
+E         + 54af46a8721940af504bb32adea3a0cd599a47f6060b13a58b3349377807f2ad
+
+tests/test_golden_generation.py:119: AssertionError
+---------------------------- Captured stdout setup -----------------------------
+Loading database from: /data/assets/databases/database_g1_locomotion.bin
+Building motion matching features...
+  Computing left foot position features...
+  Computing right foot position features...
+  Computing left foot velocity features...
+  Computing right foot velocity features...
+  Computing hip velocity features...
+  Computing trajectory position features...
+  Computing trajectory direction features...
+  Normalizing features...
+✅ Features built successfully!
+   Shape: (59456, 27)
+   Feature names: ['LeftFootPos_X', 'LeftFootPos_Y', 'LeftFootPos_Z', 'RightFootPos_X', 'RightFootPos_Y', 'RightFootPos_Z', 'LeftFootVel_X', 'LeftFootVel_Y', 'LeftFootVel_Z', 'RightFootVel_X', 'RightFootVel_Y', 'RightFootVel_Z', 'HipVel_X', 'HipVel_Y', 'HipVel_Z', 'TrajPos_t0_A', 'TrajPos_t0_B', 'TrajPos_t1_A', 'TrajPos_t1_B', 'TrajPos_t2_A', 'TrajPos_t2_B', 'TrajDir_t0_A', 'TrajDir_t0_B', 'TrajDir_t1_A', 'TrajDir_t1_B', 'TrajDir_t2_A', 'TrajDir_t2_B']
+Loading database from: /data/assets/databases/database_g1_climb_76.bin
+Building motion matching features...
+  Computing left foot position features...
+  Computing right foot position features...
+  Computing left foot velocity features...
+  Computing right foot velocity features...
+  Computing hip velocity features...
+  Computing trajectory position features...
+  Computing trajectory direction features...
+  Normalizing features...
+✅ Features built successfully!
+   Shape: (1348, 27)
+   Feature names: ['LeftFootPos_X', 'LeftFootPos_Y', 'LeftFootPos_Z', 'RightFootPos_X', 'RightFootPos_Y', 'RightFootPos_Z', 'LeftFootVel_X', 'LeftFootVel_Y', 'LeftFootVel_Z', 'RightFootVel_X', 'RightFootVel_Y', 'RightFootVel_Z', 'HipVel_X', 'HipVel_Y', 'HipVel_Z', 'TrajPos_t0_A', 'TrajPos_t0_B', 'TrajPos_t1_A', 'TrajPos_t1_B', 'TrajPos_t2_A', 'TrajPos_t2_B', 'TrajDir_t0_A', 'TrajDir_t0_B', 'TrajDir_t1_A', 'TrajDir_t1_B', 'TrajDir_t2_A', 'TrajDir_t2_B']
+Loading database from: /data/assets/databases/database_g1_roll_78.bin
+Building motion matching features...
+  Computing left foot position features...
+  Computing right foot position features...
+  Computing left foot velocity features...
+  Computing right foot velocity features...
+  Computing hip velocity features...
+  Computing trajectory position features...
+  Computing trajectory direction features...
+  Normalizing features...
+✅ Features built successfully!
+   Shape: (432, 27)
+   Feature names: ['LeftFootPos_X', 'LeftFootPos_Y', 'LeftFootPos_Z', 'RightFootPos_X', 'RightFootPos_Y', 'RightFootPos_Z', 'LeftFootVel_X', 'LeftFootVel_Y', 'LeftFootVel_Z', 'RightFootVel_X', 'RightFootVel_Y', 'RightFootVel_Z', 'HipVel_X', 'HipVel_Y', 'HipVel_Z', 'TrajPos_t0_A', 'TrajPos_t0_B', 'TrajPos_t1_A', 'TrajPos_t1_B', 'TrajPos_t2_A', 'TrajPos_t2_B', 'TrajDir_t0_A', 'TrajDir_t0_B', 'TrajDir_t1_A', 'TrajDir_t1_B', 'TrajDir_t2_A', 'TrajDir_t2_B']
+Generating roll_78...
+Saved to /tmp/pytest-of-root/pytest-1/roll_780/roll_78_motion.npz
+Loading database from: /data/assets/databases/database_g1_locomotion.bin
+Loading database from: /data/assets/databases/database_g1_climb_76.bin
+Loading database from: /data/assets/databases/database_g1_climb_76.bin
+Generating forward_walk0.6s_step0.7s...
+Saved to /tmp/pytest-of-root/pytest-1/climb_76_first_config0/forward_walk0.6s_step0.7s_motion.npz
+___________ test_motion_npz_is_byte_identical[climb_76_first_config] ___________
+
+generated = {'climb_76_first_config': {'npy': '/tmp/pytest-of-root/pytest-1/climb_76_first_config0/forward_walk0.6s_step0.7s_terra...est-of-root/pytest-1/roll_780/roll_78_motion.npz', 'obj': '/tmp/pytest-of-root/pytest-1/roll_780/roll_78_terrain.obj'}}
+key = 'climb_76_first_config'
+
+    @pytest.mark.parametrize("key", list(_SCENARIOS))
+    def test_motion_npz_is_byte_identical(generated, key) -> None:
+>       assert hash_npz(generated[key]["npz"]) == _SCENARIOS[key][2]
+E       AssertionError: assert 'd3ec2e36949e...afec475699ac8' == '21106f348a77...7b9822b8c6e08'
+E         
+E         - 21106f348a772b5c487fc55a68c4b8b973b99b27ef091d18e6d7b9822b8c6e08
+E         + d3ec2e36949e7f4419cac9356e2143322e6ed3082758bab87f1afec475699ac8
+
+tests/test_golden_generation.py:119: AssertionError
+_________________ test_terrain_obj_is_byte_identical[roll_78] __________________
+
+generated = {'climb_76_first_config': {'npy': '/tmp/pytest-of-root/pytest-1/climb_76_first_config0/forward_walk0.6s_step0.7s_terra...est-of-root/pytest-1/roll_780/roll_78_motion.npz', 'obj': '/tmp/pytest-of-root/pytest-1/roll_780/roll_78_terrain.obj'}}
+key = 'roll_78'
+
+    @pytest.mark.parametrize("key", list(_SCENARIOS))
+    def test_terrain_obj_is_byte_identical(generated, key) -> None:
+>       assert hash_obj(generated[key]["obj"]) == _SCENARIOS[key][3]
+E       AssertionError: assert '3ed303c28c51...8b9c7776b490f' == 'f6fde926bd54...4cfd9b0c84223'
+E         
+E         - f6fde926bd54f8662bc177d22903c2f326147a8d7ee251df0014cfd9b0c84223
+E         + 3ed303c28c51d8f258af6d59f307cc1f7bb3b210ed4b1605ca48b9c7776b490f
+
+tests/test_golden_generation.py:124: AssertionError
+__________ test_terrain_obj_is_byte_identical[climb_76_first_config] ___________
+
+generated = {'climb_76_first_config': {'npy': '/tmp/pytest-of-root/pytest-1/climb_76_first_config0/forward_walk0.6s_step0.7s_terra...est-of-root/pytest-1/roll_780/roll_78_motion.npz', 'obj': '/tmp/pytest-of-root/pytest-1/roll_780/roll_78_terrain.obj'}}
+key = 'climb_76_first_config'
+
+    @pytest.mark.parametrize("key", list(_SCENARIOS))
+    def test_terrain_obj_is_byte_identical(generated, key) -> None:
+>       assert hash_obj(generated[key]["obj"]) == _SCENARIOS[key][3]
+E       AssertionError: assert 'b2ff8475146a...4b390c2fefc57' == 'e7aa7720b0b6...f8789a4b446ff'
+E         
+E         - e7aa7720b0b607e0f42d8a9db2a1e6934944c44b0fc9a5ee7b4f8789a4b446ff
+E         + b2ff8475146a5495e8f522456ea85e39a7f31cb551c348f25d44b390c2fefc57
+
+tests/test_golden_generation.py:124: AssertionError
+___________ test_terrain_npy_is_byte_identical_when_seeded[roll_78] ____________
+
+generated = {'climb_76_first_config': {'npy': '/tmp/pytest-of-root/pytest-1/climb_76_first_config0/forward_walk0.6s_step0.7s_terra...est-of-root/pytest-1/roll_780/roll_78_motion.npz', 'obj': '/tmp/pytest-of-root/pytest-1/roll_780/roll_78_terrain.obj'}}
+key = 'roll_78'
+
+    @pytest.mark.parametrize("key", list(_SCENARIOS))
+    def test_terrain_npy_is_byte_identical_when_seeded(generated, key) -> None:
+        # Locked only because the module-scoped fixture seeds default_rng(0).
+>       assert hash_npy(generated[key]["npy"]) == _SCENARIOS[key][4]
+E       AssertionError: assert '9e7acc9507eb...fedf52be13891' == '3a7d16b2b0fc...b381b40cb515a'
+E         
+E         - 3a7d16b2b0fc57d15f239e32599bf37f703430eae32219608cab381b40cb515a
+E         + 9e7acc9507eb281e6bd974faa301ab44f2ba3421ea812b40705fedf52be13891
+
+tests/test_golden_generation.py:130: AssertionError
+____ test_terrain_npy_is_byte_identical_when_seeded[climb_76_first_config] _____
+
+generated = {'climb_76_first_config': {'npy': '/tmp/pytest-of-root/pytest-1/climb_76_first_config0/forward_walk0.6s_step0.7s_terra...est-of-root/pytest-1/roll_780/roll_78_motion.npz', 'obj': '/tmp/pytest-of-root/pytest-1/roll_780/roll_78_terrain.obj'}}
+key = 'climb_76_first_config'
+
+    @pytest.mark.parametrize("key", list(_SCENARIOS))
+    def test_terrain_npy_is_byte_identical_when_seeded(generated, key) -> None:
+        # Locked only because the module-scoped fixture seeds default_rng(0).
+>       assert hash_npy(generated[key]["npy"]) == _SCENARIOS[key][4]
+E       AssertionError: assert '4613748fe53a...57c7b48070dd7' == 'fa89823c0cf4...3e050ebfb9f42'
+E         
+E         - fa89823c0cf43b246cf5253a651be68c514f82ea2bc2a74d5ea3e050ebfb9f42
+E         + 4613748fe53a292567410ab0157523aa57ca4a542ad363a191b57c7b48070dd7
+
+tests/test_golden_generation.py:130: AssertionError
+___________________ test_compute_global_poses_byte_identical ___________________
+
+kin = <motion_matching.kinematics.urdf_kinematics.URDFKinematics object at 0x78fa7165ffb0>
+
+    def test_compute_global_poses_byte_identical(kin) -> None:
+        pos, orient = kin.compute_global_poses(
+            root_position=_ROOT_POS, root_orientation=_ROOT_ORI, joint_angles=np.zeros(kin.num_joints)
+        )
+>       assert hash_array(np.asarray(pos)) == ("96313fde3781acceddb17c5c5ad751f1d2b676f2499689afb874f61477487fce")
+E       AssertionError: assert '490f8f58ad38...5729ba45e1c93' == '96313fde3781...4f61477487fce'
+E         
+E         - 96313fde3781acceddb17c5c5ad751f1d2b676f2499689afb874f61477487fce
+E         + 490f8f58ad38d5d29ac32aa844ae4a94cedb173d87777103b635729ba45e1c93
+
+tests/test_urdf_kinematics_char.py:41: AssertionError
+___________________ test_compute_joint_poses_byte_identical ____________________
+
+kin = <motion_matching.kinematics.urdf_kinematics.URDFKinematics object at 0x78fa7165ffb0>
+
+    def test_compute_joint_poses_byte_identical(kin) -> None:
+        pos, orient = kin.compute_joint_poses(
+            root_position=_ROOT_POS, root_orientation=_ROOT_ORI, joint_angles=np.zeros(kin.num_joints)
+        )
+>       assert hash_array(np.asarray(pos)) == ("62d1cc032ca9b4361dc6da6f7c8f16ec41388ea76fdf5a82e210e04f82622859")
+E       AssertionError: assert '772209812159...30f4bbe2babbb' == '62d1cc032ca9...0e04f82622859'
+E         
+E         - 62d1cc032ca9b4361dc6da6f7c8f16ec41388ea76fdf5a82e210e04f82622859
+E         + 772209812159ca31303aad57131dd16052f24f3ad830dcdd13b30f4bbe2babbb
+
+tests/test_urdf_kinematics_char.py:49: AssertionError
+=============================== warnings summary ===============================
+tests/test_paths.py: 17 warnings
+  /opt/php/envs/motion/lib/python3.12/site-packages/yourdfpy/urdf.py:1315: DeprecationWarning: `Scene.dump(concatenate=True)` DEPRECATED FOR REMOVAL APRIL 2025: replace with `Scene.to_geometry()`
+    geometry=tmp_scene.dump(concatenate=True),
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_characterization.py::TestDataUtilsResample::test_resample_data
+FAILED tests/test_characterization.py::TestDataUtilsResample::test_adjust_data_speed
+FAILED tests/test_characterization.py::TestQposToTracking::test_outputs_byte_identical
+FAILED tests/test_characterization.py::TestRandomizeBox::test_seeded_output_is_byte_identical
+FAILED tests/test_golden_generation.py::test_motion_npz_is_byte_identical[roll_78]
+FAILED tests/test_golden_generation.py::test_motion_npz_is_byte_identical[climb_76_first_config]
+FAILED tests/test_golden_generation.py::test_terrain_obj_is_byte_identical[roll_78]
+FAILED tests/test_golden_generation.py::test_terrain_obj_is_byte_identical[climb_76_first_config]
+FAILED tests/test_golden_generation.py::test_terrain_npy_is_byte_identical_when_seeded[roll_78]
+FAILED tests/test_golden_generation.py::test_terrain_npy_is_byte_identical_when_seeded[climb_76_first_config]
+FAILED tests/test_urdf_kinematics_char.py::test_compute_global_poses_byte_identical
+FAILED tests/test_urdf_kinematics_char.py::test_compute_joint_poses_byte_identical
+12 failed, 213 passed, 17 warnings in 98.11s (0:01:38)

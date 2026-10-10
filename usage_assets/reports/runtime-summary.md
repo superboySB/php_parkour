@@ -1,6 +1,16 @@
 # 统一容器环境验收记录
 
-本记录对应首次完成实际功能验收的镜像 `sha256:4a0aa12db11137e88db530fe871229d5bfe146e14db254f326f64c69b947cab2`，大小 23,871,450,353 字节。之后增加的完整依赖约束已通过 resolver 验证，尚待最终统一重建；不能把本记录中的 image ID 当成最终重建的 ID。基础镜像固定为 NVIDIA Isaac Lab 2.3.0 的 amd64 digest，见 [镜像记录](runtime-image-initial.json)。
+首次完成完整功能验收的镜像为 `sha256:4a0aa12db11137e88db530fe871229d5bfe146e14db254f326f64c69b947cab2`，大小 23,871,450,353 字节。最终锁定版本已完成统一重建与独立离线验收，见下节；首次与最终 image ID 分开记录。基础镜像固定为 NVIDIA Isaac Lab 2.3.0 的 amd64 digest，见 [镜像记录](runtime-image-initial.json)。
+
+## 最终镜像独立离线验收
+
+最终镜像为 `sha256:88254ac0b90a3056375145601d741aa3e08726e18412d201a3c7e7915a23996f`，22,704,771,469 字节，Config/RootFS 内容指纹为 `2a43037e2397fac3e343e8d621dd42c41ea7c27da82602789d575fddda112482`。镜像标签对应 clean source commit `64ebc5f125958ac1a9ab4891858b80a2ece5dd57`。
+
+固定该 ID 启动独立容器，使用 `--network none`、私有 IPC 和 8 GiB shm，只挂只读 `/data/assets`、独立 `/outputs` 和初始空 `/data/cache`，没有挂载源码。七个关键文件的镜像内 SHA 与该 clean commit 一致；启动训练前的镜像源码边界检查无 Git、密钥、环境文件及烘入的 outputs。三 runtime doctor 全部通过，motion 82 项、inference 66 项、train 新增 117 项与约束逐一匹配。两个 venv 的 pip check 通过，train 仍仅有下述三条已知上游 metadata 冲突，没有新增。
+
+该完全断网、无源码挂载的容器实际完成了 locomotion 教师 16 environments、2 iterations、768 timesteps，耗时 25.524 秒；最终 PT iteration 1，SHA-256 `55dd15bab28c0139d22b54908b6d30d1bf14a4a2bddca9c5b221bcf0b45f80ad`。原生 actor/critic 张量均有限且权重发生非零变化。最终教师 ONNX 又通过 12 组真实 CPU/checker/参考动作查表验收；TensorBoard 的 52 个 scalar tag 全部有限，loss/reward 保留 step 0、1。日志仍含官方 URDF 转换的非致命视觉 reference 警告，训练和导出正常完成。这些是执行证据，不代表策略质量。
+
+[离线验收汇总](runtime-final-offline-summary.json) 和 [全部精选原始记录](runtime-final-offline/) 保存镜像、隔离配置、baked 源码 SHA、doctor、版本约束、pip check、训练 manifest、完整 stdout、权重更新与 ONNX/TensorBoard 检查；相应原始 events 位于 [最终离线 run](../tensorboard/final-offline/teacher-locomotion/)。GPU 在训练结束后已释放。
 
 ## 实际版本与路径
 
@@ -23,7 +33,7 @@ Isaac Lab 产品 release 是 2.3.0，而 `isaaclab` Python distribution metadata
 | 初始已有 Dockerfile 专用 ignore，但根目录没有 `.dockerignore`；两种构建入口的排除规则需要统一 | 补充根 ignore，与专用 ignore 保持一致，并扩展凭据/密钥过滤；重启构建使用独立日志 | 专用 ignore 原本已经排除 Git 元数据和产物；最终无挂载镜像源码边界检查通过，见 [独立检查](runtime-image-boundary.json) |
 | 中止的后台构建仍向共用日志追加退出栈 | 每次构建使用 UTC 时间/PID 独立日志，`build.log` 仅作为最新尝试的软链接 | 首次成功日志为 `build-20261010T021735Z-3994990.log` |
 | motion 子进程调用裸 `python` 时可能继承 train 的 PATH | 运行 wrapper 将对应 runtime 的 bin 置于 PATH 首位 | 原生 setup/launch wrapper 测试 11 项通过 |
-| `XDG_CACHE_HOME=/data/cache` 导致 pip 绕过 BuildKit 的缓存挂载 | Dockerfile 显式指定 `PIP_CACHE_DIR=/root/.cache/pip` | 修复已写入待重建配置；首次镜像的 pip check 日志仍含旧缓存权限警告 |
+| `XDG_CACHE_HOME=/data/cache` 导致 pip 绕过 BuildKit 的缓存挂载 | Dockerfile 显式指定 `PIP_CACHE_DIR=/root/.cache/pip` | 最终镜像重建通过，pip check 无缓存权限警告；首次镜像日志仍保留旧警告 |
 | inference 的 ONNXRuntime 等传递依赖未锁定，未来重建可能漂移 | 从已验收镜像 freeze 锁定 motion/inference 全量，训练仅锁相对固定 base 的新增/变更，同时固定构建后端 | motion 82 项、inference 66 项从空环境解析后与约束逐项相等；训练 117 项增量 dry-run 无运行依赖变更 |
 
 依赖约束为 [Docker 目录](../../docker/) 中的 `constraints.motion.txt`、`constraints.inference.txt`、`constraints.train-added.txt` 和 `constraints.build.txt`。验证结果见 [锁定报告](runtime-lock-validation.json)；完整原始 freeze 见 [train](runtime-freeze-train.txt)、[motion](runtime-freeze-motion.txt)、[inference](runtime-freeze-inference.txt)。固定基础镜像负责训练底座，增量约束不试图替换整个 NVIDIA Python 栈。
@@ -57,6 +67,6 @@ docker exec php-parkour-research bash scripts/research/train_pipeline.sh \
 
 独立 cloud review 测试覆盖远端归档损坏、错误加载层、已有容器保留、传输后重新选择 GPU UUID、私有 IPC、敏感文件过滤，以及 IMAGE tag 在 inspect 后被并发构建替换的情况。export 使用初始不可变 ID 对应的 transfer tag，远端只给内容验证通过的加载 ID 重 tag；部署也使用经验证的 remote ID。[原生 wrapper 与 cloud 测试](runtime-tests.txt) 分别为 11 和 9 项通过。
 
-最终重建后需要重新生成镜像 ID/内容指纹、doctor、pip check 和源码边界报告，并确认两端加载同一新镜像。现有功能测试使用本记录开头明确标识的首次镜像及挂载源码，依赖锁的 resolver 验证不能替代最终新镜像构建验证。
+最终镜像 ID/内容指纹、doctor、pip check、约束逐项核对和源码边界报告均已重新生成，并完成上述独立离线训练。首次完整功能验收仍对应开头明确标识的首次镜像；后续最终镜像功能矩阵及云端传输单独保留其证据，避免混淆两次运行。
 
 后续同一镜像在云端完成的 22 项 smoke、4096 环境的 20 轮性能 pilot，以及离线 TensorBoard 原始曲线，另见 [云端训练验收记录](training-cloud-summary.md)。
