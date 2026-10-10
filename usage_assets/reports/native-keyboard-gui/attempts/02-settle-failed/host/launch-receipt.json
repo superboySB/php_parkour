@@ -1,0 +1,243 @@
+{
+  "schema_version": 1,
+  "status": "failed",
+  "plan_sha256": "33bc6b9fca939987e8ee2a3d5faa8a7cdc8040407823893ecc2de4a47f727638",
+  "started_unix": 1791625236.0721345,
+  "native_started": true,
+  "scope": "One native MuJoCo plane GUI and real terminal keyboard workflow. No obstacle or robot-hardware success claim.",
+  "cleanup": [
+    {
+      "unix": 1791625264.5654585,
+      "pid": 733349,
+      "requested_signal": 15
+    }
+  ],
+  "errors": [],
+  "gpu_idle": {
+    "selected_gpu_uuid": "GPU-1803972d-e774-ee96-e6f6-1ee1ce47bb25",
+    "matching_compute_processes": []
+  },
+  "xephyr": {
+    "argv": [
+      "Xephyr",
+      ":91",
+      "-screen",
+      "1920x1200",
+      "-noreset",
+      "-nolisten",
+      "tcp",
+      "-auth",
+      "/home/dzp/projects/php_parkour/outputs/research/native-keyboard-gui-prepared-auth-final/host/private.xauth"
+    ],
+    "group": {
+      "process_group_id": 733349,
+      "session_id": 733349,
+      "leader_identity": {
+        "pid": 733349,
+        "start_time_clock_ticks": 105323054
+      },
+      "known_members": [
+        {
+          "pid": 733349,
+          "start_time_clock_ticks": 105323054
+        }
+      ],
+      "retired": true,
+      "ownership_lost": false,
+      "ownership_state": "retired_empty",
+      "ownership_reason": null
+    }
+  },
+  "create_argv": [
+    "docker",
+    "create",
+    "--name",
+    "php-native-gui-aeef5c6536e5a76ffdd787a54ea21b86",
+    "--hostname",
+    "php-gui-aeef5c6536e5a76ffdd787a54ea21b86",
+    "--label",
+    "php.gui.audit.token=aeef5c6536e5a76ffdd787a54ea21b86",
+    "--network",
+    "none",
+    "--ipc",
+    "private",
+    "--init",
+    "--shm-size",
+    "8g",
+    "--gpus",
+    "device=GPU-1803972d-e774-ee96-e6f6-1ee1ce47bb25",
+    "--workdir",
+    "/workspace/php_parkour",
+    "--entrypoint",
+    "/bin/bash",
+    "--env",
+    "PHP_DOCKER=1",
+    "--env",
+    "PHP_GUI_TOKEN=aeef5c6536e5a76ffdd787a54ea21b86",
+    "--env",
+    "DISPLAY=:91",
+    "--env",
+    "XAUTHORITY=/run/php-gui.xauth",
+    "--env",
+    "WANDB_MODE=disabled",
+    "--env",
+    "WANDB_DISABLED=true",
+    "--env",
+    "HF_HUB_OFFLINE=1",
+    "--env",
+    "HF_DATASETS_OFFLINE=1",
+    "--env",
+    "TRANSFORMERS_OFFLINE=1",
+    "--env",
+    "NVIDIA_DRIVER_CAPABILITIES=compute,utility,graphics",
+    "--env",
+    "PYTHONDONTWRITEBYTECODE=1",
+    "--env",
+    "MUJOCO_GL=glfw",
+    "--env",
+    "MUJOCO_EGL_DEVICE_ID=0",
+    "--env",
+    "OMP_NUM_THREADS=1",
+    "--env",
+    "OPENBLAS_NUM_THREADS=1",
+    "--env",
+    "MKL_NUM_THREADS=1",
+    "--env",
+    "PYTHONFAULTHANDLER=1",
+    "--mount",
+    "type=bind,src=/home/dzp/projects/php_parkour/outputs/research/native-keyboard-gui-prepared-auth-final/cohort,dst=/data/cohort,readonly",
+    "--mount",
+    "type=bind,src=/home/dzp/projects/php_parkour/outputs/research/native-keyboard-gui-prepared-auth-final/cohort/source,dst=/workspace/php_parkour,readonly",
+    "--mount",
+    "type=bind,src=/home/dzp/projects/php_parkour/outputs/research/native-keyboard-gui-prepared-auth-final/cohort/assets/student,dst=/data/assets/student,readonly",
+    "--mount",
+    "type=bind,src=/home/dzp/projects/php_parkour/outputs/research/native-keyboard-gui-prepared-auth-final/outputs,dst=/outputs",
+    "--mount",
+    "type=bind,src=/home/dzp/projects/php_parkour/outputs/research/native-keyboard-gui-prepared-auth-final/cache,dst=/data/cache",
+    "--mount",
+    "type=bind,src=/home/dzp/projects/php_parkour/outputs/research/native-keyboard-gui-prepared-auth-final/host/private.xauth,dst=/run/php-gui.xauth,readonly",
+    "--mount",
+    "type=bind,src=/tmp/.X11-unix/X91,dst=/tmp/.X11-unix/X91,readonly",
+    "sha256:2be18521015b2a84ef7a4442af9a94ef041a19feb9ce385ae15424b1dc158d8f",
+    "-lc",
+    "exec sleep infinity"
+  ],
+  "container_id": "fc735a685c4702c1e08cc16cf120a5598062a462c050b7d04c77ca7c4169cfc6",
+  "container_host_init_identity": {
+    "pid": 733426,
+    "pid_namespace": "current container",
+    "observed_unix": 1791625236.4092982,
+    "proc_status": {
+      "Name": "docker-init",
+      "Tgid": "733426",
+      "Pid": "733426",
+      "PPid": "733403",
+      "NSpid": "733426\t1",
+      "Threads": "1"
+    },
+    "state": "S",
+    "process_group_id": 733426,
+    "session_id": 733426,
+    "start_time_clock_ticks": 105323072,
+    "cmdline": "/sbin/docker-init -- /bin/bash -lc exec sleep infinity "
+  },
+  "private_x11_probe_stdout": "{\"schema_version\": 1, \"status\": \"passed\", \"display\": \":91\", \"hostname\": \"php-gui-aeef5c6536e5a76ffdd787a54ea21b86\", \"pid\": 10, \"root_xid\": 544, \"child_window_count\": 0, \"xauthority_path\": \"/run/php-gui.xauth\", \"root_token_matched\": true, \"xtest_extension\": true, \"record_extension\": true, \"key_events_sent\": 0, \"native_objects_constructed\": false, \"gpu_compute_invoked\": false, \"scope\": \"Real private python-xlib authentication and query_tree only; not GUI-policy acceptance\"}\n",
+  "gpu_before_native": {
+    "selected_gpu_uuid": "GPU-1803972d-e774-ee96-e6f6-1ee1ce47bb25",
+    "matching_compute_processes": []
+  },
+  "native_driver_started": true,
+  "gui_driver_start_unix": 1791625242.7498834,
+  "native_argv": [
+    "docker",
+    "exec",
+    "fc735a685c4702c1e08cc16cf120a5598062a462c050b7d04c77ca7c4169cfc6",
+    "/opt/php/bin/inference-python",
+    "/workspace/php_parkour/scripts/research/gui_audit/container_runner.py",
+    "--plan",
+    "/data/cohort/plan.json"
+  ],
+  "docker_exec_identity": {
+    "pid": 734144,
+    "pid_namespace": "current container",
+    "observed_unix": 1791625242.7504892,
+    "proc_status": {
+      "Name": "docker",
+      "Tgid": "734144",
+      "Pid": "734144",
+      "PPid": "733310",
+      "NSpid": "734144",
+      "Threads": "1"
+    },
+    "state": "R",
+    "process_group_id": 734144,
+    "session_id": 734144,
+    "start_time_clock_ticks": 105323720,
+    "cmdline": "docker exec fc735a685c4702c1e08cc16cf120a5598062a462c050b7d04c77ca7c4169cfc6 /opt/php/bin/inference-python /workspace/php_parkour/scripts/research/gui_audit/container_runner.py --plan /data/cohort/plan.json "
+  },
+  "docker_exec_returncode": 1,
+  "error": "Actual GUI execution returned nonzero; retained raw receipt",
+  "traceback": "Traceback (most recent call last):\n  File \"/home/dzp/projects/php_parkour/outputs/research/native-keyboard-gui-runner-auth-v2/host_runner.py\", line 343, in run\n    raise RuntimeError('Actual GUI execution returned nonzero; retained raw receipt')\nRuntimeError: Actual GUI execution returned nonzero; retained raw receipt\n",
+  "observer_returncode": 0,
+  "container_before_stop": {
+    "state": {
+      "Status": "running",
+      "Running": true,
+      "Paused": false,
+      "Restarting": false,
+      "OOMKilled": false,
+      "Dead": false,
+      "Pid": 733426,
+      "ExitCode": 0,
+      "Error": "",
+      "StartedAt": "2026-10-10T09:40:36.248527878Z",
+      "FinishedAt": "0001-01-01T00:00:00Z"
+    },
+    "host_identity": {
+      "pid": 733426,
+      "pid_namespace": "current container",
+      "observed_unix": 1791625264.3892038,
+      "proc_status": {
+        "Name": "docker-init",
+        "Tgid": "733426",
+        "Pid": "733426",
+        "PPid": "733403",
+        "NSpid": "733426\t1",
+        "Threads": "1"
+      },
+      "state": "S",
+      "process_group_id": 733426,
+      "session_id": 733426,
+      "start_time_clock_ticks": 105323072,
+      "cmdline": "/sbin/docker-init -- /bin/bash -lc exec sleep infinity "
+    }
+  },
+  "container_stopped": true,
+  "docker_exec_final_returncode": 1,
+  "xephyr_final_group": {
+    "process_group_id": 733349,
+    "session_id": 733349,
+    "leader_identity": {
+      "pid": 733349,
+      "start_time_clock_ticks": 105323054
+    },
+    "known_members": [
+      {
+        "pid": 733349,
+        "start_time_clock_ticks": 105323054
+      }
+    ],
+    "retired": true,
+    "ownership_lost": false,
+    "ownership_state": "retired_empty",
+    "ownership_reason": null,
+    "live_members": [],
+    "ownership_verified": true
+  },
+  "xephyr_returncode": 0,
+  "native_worker_entries_present": [
+    "simulator",
+    "inference"
+  ],
+  "finished_unix": 1791625264.5872128
+}

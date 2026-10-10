@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="5" skipped="0" tests="25" time="0.114" timestamp="2026-10-10T10:06:39.725806+00:00" hostname="dzp-MS-7E30"><testcase classname="outputs.research.source-coverage-host.test_upgrade_waiting_watch" name="test_foreign_reused_or_dead_old_process_is_rejected[pid-1]" time="0.002" /><testcase classname="outputs.research.source-coverage-host.test_upgrade_waiting_watch" name="test_foreign_reused_or_dead_old_process_is_rejected[start_ticks-42]" time="0.000" /><testcase classname="outputs.research.source-coverage-host.test_upgrade_waiting_watch" name="test_foreign_reused_or_dead_old_process_is_rejected[pgid-1]" time="0.000" /><testcase classname="outputs.research.source-coverage-host.test_upgrade_waiting_watch" name="test_foreign_reused_or_dead_old_process_is_rejected[sid-1]" time="0.000" /><testcase classname="outputs.research.source-coverage-host.test_upgrade_waiting_watch" name="test_foreign_reused_or_dead_old_process_is_rejected[cmdline-value4]" time="0.000" /><testcase classname="outputs.research.source-coverage-host.test_upgrade_waiting_watch" name="test_foreign_reused_or_dead_old_process_is_rejected[state-Z]" time="0.000" /><testcase classname="outputs.research.source-coverage-host.test_upgrade_waiting_watch" name="test_foreign_reused_or_dead_old_process_is_rejected[state-X]" time="0.000" /><testcase classname="outputs.research.source-coverage-host.test_upgrade_waiting_watch" name="test_foreign_reused_or_dead_old_process_is_rejected[boot_id-87654321-1234-1234-1234-123456789abc]" time="0.000" /><testcase classname="outputs.research.source-coverage-host.test_upgrade_waiting_watch" name="test_process_fields_bind_first_birth_before_cmdline_read" time="0.002" /><testcase classname="outputs.research.source-coverage-host.test_upgrade_waiting_watch" name="test_pidfd_rechecks_birth_after_open_before_the_only_signal" time="0.000"><failure message="AttributeError: &lt;module 'os' (frozen)&gt; has no attribute 'pidfd_open'">remote = &lt;module 'upgrade_waiting_watch_remote' from '/workspace/php_parkour/outputs/research/source-coverage-host/upgrade_waiting_watch_remote.py'&gt;
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x70816c299050&gt;
+
+    def test_pidfd_rechecks_birth_after_open_before_the_only_signal(remote, monkeypatch):
+        opened, signals, closed = [], [], []
+        values = [record(remote), {**record(remote), 'start_ticks': 999}]
+        monkeypatch.setattr(remote, 'process', lambda *_: values.pop(0))
+&gt;       monkeypatch.setattr(remote.os, 'pidfd_open', lambda pid, flags: opened.append((pid, flags)) or 87)
+E       AttributeError: &lt;module 'os' (frozen)&gt; has no attribute 'pidfd_open'
+
+outputs/research/source-coverage-host/test_upgrade_waiting_watch.py:72: AttributeError</failure></testcase><testcase classname="outputs.research.source-coverage-host.test_upgrade_waiting_watch" name="test_exact_old_signal_uses_pidfd_sigterm_once_without_group_or_escalation" time="0.000"><failure message="AttributeError: &lt;module 'os' (frozen)&gt; has no attribute 'pidfd_open'">remote = &lt;module 'upgrade_waiting_watch_remote' from '/workspace/php_parkour/outputs/research/source-coverage-host/upgrade_waiting_watch_remote.py'&gt;
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x70816c379c50&gt;
+
+    def test_exact_old_signal_uses_pidfd_sigterm_once_without_group_or_escalation(remote, monkeypatch):
+        signals, polls, closed = [], [], []
+        calls = iter([record(remote), record(remote), FileNotFoundError()])
+        def process(*_):
+            result = next(calls)
+            if isinstance(result, Exception):
+                raise result
+            return result
+        monkeypatch.setattr(remote, 'process', process)
+&gt;       monkeypatch.setattr(remote.os, 'pidfd_open', lambda pid, flags: 90 if pid == remote.OLD_PID else pytest.fail('Foreign PID'))
+E       AttributeError: &lt;module 'os' (frozen)&gt; has no attribute 'pidfd_open'
+
+outputs/research/source-coverage-host/test_upgrade_waiting_watch.py:89: AttributeError</failure></testcase><testcase classname="outputs.research.source-coverage-host.test_upgrade_waiting_watch" name="test_pidfd_timeout_does_not_send_kill_or_another_signal" time="0.000"><failure message="AttributeError: &lt;module 'os' (frozen)&gt; has no attribute 'pidfd_open'">remote = &lt;module 'upgrade_waiting_watch_remote' from '/workspace/php_parkour/outputs/research/source-coverage-host/upgrade_waiting_watch_remote.py'&gt;
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x70816c27c8d0&gt;
+
+    def test_pidfd_timeout_does_not_send_kill_or_another_signal(remote, monkeypatch):
+        signals = []
+        monkeypatch.setattr(remote, 'process', lambda *_: record(remote))
+&gt;       monkeypatch.setattr(remote.os, 'pidfd_open', lambda *_: 90)
+E       AttributeError: &lt;module 'os' (frozen)&gt; has no attribute 'pidfd_open'
+
+outputs/research/source-coverage-host/test_upgrade_waiting_watch.py:103: AttributeError</failure></testcase><testcase classname="outputs.research.source-coverage-host.test_upgrade_waiting_watch" name="test_no_pidfd_means_no_pid_only_fallback" time="0.000"><failure message="AttributeError: pidfd_open">remote = &lt;module 'upgrade_waiting_watch_remote' from '/workspace/php_parkour/outputs/research/source-coverage-host/upgrade_waiting_watch_remote.py'&gt;
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x70816c3aa790&gt;
+
+    def test_no_pidfd_means_no_pid_only_fallback(remote, monkeypatch):
+&gt;       monkeypatch.delattr(remote.os, 'pidfd_open')
+E       AttributeError: pidfd_open
+
+outputs/research/source-coverage-host/test_upgrade_waiting_watch.py:113: AttributeError</failure></testcase><testcase classname="outputs.research.source-coverage-host.test_upgrade_waiting_watch" name="test_status_must_be_fresh_waiting_without_gpu[running]" time="0.001" /><testcase classname="outputs.research.source-coverage-host.test_upgrade_waiting_watch" name="test_status_must_be_fresh_waiting_without_gpu[gpu_started]" time="0.001" /><testcase classname="outputs.research.source-coverage-host.test_upgrade_waiting_watch" name="test_status_must_be_fresh_waiting_without_gpu[stale]" time="0.001" /><testcase classname="outputs.research.source-coverage-host.test_upgrade_waiting_watch" name="test_archive_keeps_exact_raw_and_rejects_links" time="0.001" /><testcase classname="outputs.research.source-coverage-host.test_upgrade_waiting_watch" name="test_global_lock_must_really_be_released" time="0.000" /><testcase classname="outputs.research.source-coverage-host.test_upgrade_waiting_watch" name="test_audit_writes_only_new_receipts_without_signal_or_new_watch" time="0.002" /><testcase classname="outputs.research.source-coverage-host.test_upgrade_waiting_watch" name="test_upgrade_rejects_changed_official_fingerprint_before_any_signal[docker_ids]" time="0.001" /><testcase classname="outputs.research.source-coverage-host.test_upgrade_waiting_watch" name="test_upgrade_rejects_changed_official_fingerprint_before_any_signal[official]" time="0.001" /><testcase classname="outputs.research.source-coverage-host.test_upgrade_waiting_watch" name="test_upgrade_rejects_changed_official_fingerprint_before_any_signal[native_training]" time="0.001" /><testcase classname="outputs.research.source-coverage-host.test_upgrade_waiting_watch" name="test_upgrade_starts_only_fresh_watch_after_old_exit_and_actual_lock_release" time="0.001"><failure message="ValueError: New watcher status predates its own launch">operation = (&lt;module 'upgrade_waiting_watch_remote' from '/workspace/php_parkour/outputs/research/source-coverage-host/upgrade_wai...age': 'sha256:631d9e53768a3cc65372b394d0aa266a34ee92004141a9817824001ade30e3bd', 'Mounts': ['frozen'], 'Pid': 5, ...}})
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x70816c23c710&gt;
+
+    def test_upgrade_starts_only_fresh_watch_after_old_exit_and_actual_lock_release(operation, monkeypatch):
+        remote, root, system = operation
+        remote.run(remote.APPROVED_TREE, 'audit', 'fixture-upgrade-ok', 'a' * 64)
+        events = []
+        monkeypatch.setattr(remote, 'terminate_exact_old', lambda _: events.append('old-exit') or {'exit_observed': True})
+        monkeypatch.setattr(remote, 'global_lock_free', lambda: events.append('lock-free') or {'available': True})
+        def start(argv, **kwargs):
+            assert events == ['old-exit', 'lock-free']
+            events.append('new-watch')
+            assert argv == remote.command(remote.APPROVED_TREE, 'watch') and kwargs['start_new_session']
+            remote.write(remote.NEW_COVERAGE / 'monitor-status.json', {'status': 'waiting', 'gpu_started': False, 'observed_utc': remote.now()})
+            (remote.NEW_COVERAGE / 'monitor.lock').touch()
+            return SimpleNamespace(pid=77, poll=lambda: None)
+        monkeypatch.setattr(remote.subprocess, 'Popen', start)
+        monkeypatch.setattr(remote.time, 'sleep', lambda _: None)
+        monkeypatch.setattr(remote, 'process', lambda _: {'pid': 77, 'start_ticks': 88, 'pgid': 77, 'sid': 77,
+            'state': 'S', 'boot_id': record(remote)['boot_id'], 'cmdline': remote.command(remote.APPROVED_TREE, 'watch')})
+&gt;       result = remote.run(remote.APPROVED_TREE, 'upgrade', 'fixture-upgrade-ok', 'a' * 64)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+outputs/research/source-coverage-host/test_upgrade_waiting_watch.py:217: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+outputs/research/source-coverage-host/upgrade_waiting_watch_remote.py:276: in run
+    require(report['new_watch']['waiting']['observed_utc'] &gt;= report['new_watch']['launched_utc'],
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+condition = False, message = 'New watcher status predates its own launch'
+
+    def require(condition, message):
+        if not condition:
+&gt;           raise ValueError(message)
+E           ValueError: New watcher status predates its own launch
+
+outputs/research/source-coverage-host/upgrade_waiting_watch_remote.py:40: ValueError</failure></testcase><testcase classname="outputs.research.source-coverage-host.test_upgrade_waiting_watch" name="test_default_host_preview_never_connects_or_writes" time="0.001" /><testcase classname="outputs.research.source-coverage-host.test_upgrade_waiting_watch" name="test_helper_source_has_no_docker_mutation_or_group_signal" time="0.000" /></testsuite></testsuites>

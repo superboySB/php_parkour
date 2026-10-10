@@ -1,0 +1,110 @@
+{
+  "schema_version": 1,
+  "status": "native_execution_completed_pending_independent_evidence_validation",
+  "started_utc": "2026-10-10T09:58:13.154327+00:00",
+  "image_id": "sha256:2be18521015b2a84ef7a4442af9a94ef041a19feb9ce385ae15424b1dc158d8f",
+  "gpu_uuid": "GPU-1803972d-e774-ee96-e6f6-1ee1ce47bb25",
+  "readiness_sha256": "2710ce2a2443cfa32819dccf6a843588ec48a5b73c96ae45e5189a391b40fe0f",
+  "scope": "One exact source, original iter500 teacher,1env/1variant/seed42/fullsource cap. Skill quality remains false.",
+  "quality_verified": false,
+  "commands": [
+    {
+      "argv": [
+        "docker",
+        "exec",
+        "-w",
+        "/workspace/php_parkour",
+        "8114edab64443cf1c9b74ef42534b1dffb47c682137e4221edfb6b00f60b0def",
+        "/opt/php/bin/train-python",
+        "scripts/research/eval_source_coverage.py",
+        "run",
+        "--plan",
+        "/outputs/teacher/plan.json"
+      ],
+      "started_utc": "2026-10-10T09:58:14.036398+00:00",
+      "returncode": 0,
+      "log_sha256": "cd513832cbe531814bdcaae6e12dc220a16c9a03b2501fa3ee34519bf15841fb"
+    }
+  ],
+  "create_argv": [
+    "docker",
+    "create",
+    "--name",
+    "php-source-coverage-ro-assets-pilot-01",
+    "--gpus",
+    "device=GPU-1803972d-e774-ee96-e6f6-1ee1ce47bb25",
+    "--network",
+    "none",
+    "--ipc",
+    "private",
+    "--init",
+    "--shm-size",
+    "8g",
+    "-e",
+    "PYTHONDONTWRITEBYTECODE=1",
+    "-e",
+    "HF_HUB_OFFLINE=1",
+    "-e",
+    "WANDB_MODE=disabled",
+    "-e",
+    "LOGGER=tensorboard",
+    "-e",
+    "OMP_NUM_THREADS=4",
+    "-e",
+    "PYTHONUNBUFFERED=1",
+    "--mount",
+    "type=bind,src=/home/dzp/projects/php_parkour/outputs/research/source-coverage-ro-assets-pilot-preparation-01/source,dst=/workspace/php_parkour,readonly",
+    "--mount",
+    "type=bind,src=/home/dzp/projects/php_parkour/outputs/research/assets,dst=/data/assets,readonly",
+    "--mount",
+    "type=bind,src=/home/dzp/projects/php_parkour/outputs/research/cloud/results/official-full/official/teacher-locomotion/PHP-research/20261010_042104-teacher-locomotion-locomotion,dst=/data/pilot-checkpoint,readonly",
+    "--mount",
+    "type=bind,src=/home/dzp/projects/php_parkour/outputs/research/source-coverage-ro-assets-pilot-preparation-01/run-output,dst=/outputs",
+    "--mount",
+    "type=bind,src=/home/dzp/projects/php_parkour/outputs/research/source-coverage-ro-assets-pilot-preparation-01/cache,dst=/data/cache",
+    "-w",
+    "/workspace/php_parkour",
+    "--entrypoint",
+    "/bin/bash",
+    "sha256:2be18521015b2a84ef7a4442af9a94ef041a19feb9ce385ae15424b1dc158d8f",
+    "-lc",
+    "exec sleep infinity"
+  ],
+  "container_id": "8114edab64443cf1c9b74ef42534b1dffb47c682137e4221edfb6b00f60b0def",
+  "actual_gpu_uuids": [
+    "GPU-1803972d-e774-ee96-e6f6-1ee1ce47bb25"
+  ],
+  "same_container_cpu_gate": "Actual CPU plan/report/source/asset contract verified; no native object instantiated\n",
+  "native_summary_sha256": "34340b0b65e633a68d03e14adf255e10828cf566e896cdba09c4cf1b1dde265b",
+  "native_case": {
+    "case_id": "teacher-e0-000-fef9f7ce29d0",
+    "source_clip_id": "motions-locomotion/cfg0000_stand_2.0s_left_45_1.4s_forward_2.3s_right_90_0.9s_right_45_0.6s_right_45_2.0s_left_90_0.6s_left_45_2.6s_run_right_45_1.2s_left_45_1.3s_run_right_90_1.6s_stand_2.0s_motion.npz",
+    "command": [
+      "/isaac-sim/kit/python/bin/python3",
+      "/workspace/php_parkour/scripts/research/source_coverage_probe.py",
+      "--case",
+      "/outputs/teacher/cases/teacher-e0-000-fef9f7ce29d0/case.json"
+    ],
+    "return_code": 0,
+    "wall_seconds": 105.38816211791709,
+    "log": {
+      "path": "/outputs/teacher/cases/teacher-e0-000-fef9f7ce29d0/native-first-attempt.log",
+      "sha256": "23bc86bb561667c474a84eac750623d2b784e1fef9731a65294c4d5d8a91d599",
+      "bytes": 84751
+    },
+    "status": "execution_passed",
+    "quality_verified": false,
+    "report": {
+      "path": "/outputs/teacher/cases/teacher-e0-000-fef9f7ce29d0/quality.json",
+      "sha256": "3a55dac1ae38b895c33ec60334d0c000f0277dcfb3946e5ec12390224f63bb97",
+      "bytes": 58560
+    },
+    "stop_reason": "failed",
+    "reference_boundary_reached": false,
+    "policy_steps": 158
+  },
+  "source_and_input_bytes_unchanged": true,
+  "owned_container_stop": "Flag --time has been deprecated, use --timeout instead\n8114edab64443cf1c9b74ef42534b1dffb47c682137e4221edfb6b00f60b0def",
+  "owned_container_running_after_stop": false,
+  "finished_utc": "2026-10-10T10:00:00.420652+00:00"
+}

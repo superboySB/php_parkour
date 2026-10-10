@@ -1,0 +1,433 @@
+{
+  "schema_version": 1,
+  "status": "completed",
+  "plan_sha256": "95498d688d2fc84d3c0fc7da8d66e63a04ebb59907e3116c0a9ca8f6a1a94aca",
+  "started_unix": 1791626485.3781464,
+  "native_started": true,
+  "scope": "One native MuJoCo plane GUI and real terminal keyboard workflow. No obstacle or robot-hardware success claim.",
+  "cleanup": [
+    {
+      "unix": 1791626515.986741,
+      "pid": 781798,
+      "requested_signal": 15
+    }
+  ],
+  "errors": [],
+  "gpu_idle": {
+    "selected_gpu_uuid": "GPU-1803972d-e774-ee96-e6f6-1ee1ce47bb25",
+    "matching_compute_processes": []
+  },
+  "xephyr": {
+    "argv": [
+      "Xephyr",
+      ":91",
+      "-screen",
+      "1920x1200",
+      "-noreset",
+      "-nolisten",
+      "tcp",
+      "-auth",
+      "/home/dzp/projects/php_parkour/outputs/research/native-keyboard-gui-prepared-egl-final/host/private.xauth"
+    ],
+    "group": {
+      "process_group_id": 781798,
+      "session_id": 781798,
+      "leader_identity": {
+        "pid": 781798,
+        "start_time_clock_ticks": 105447985
+      },
+      "known_members": [
+        {
+          "pid": 781798,
+          "start_time_clock_ticks": 105447985
+        }
+      ],
+      "retired": true,
+      "ownership_lost": false,
+      "ownership_state": "retired_empty",
+      "ownership_reason": null
+    }
+  },
+  "create_argv": [
+    "docker",
+    "create",
+    "--name",
+    "php-native-gui-090ec9fbc69055aa48531868da0d2904",
+    "--hostname",
+    "php-gui-090ec9fbc69055aa48531868da0d2904",
+    "--label",
+    "php.gui.audit.token=090ec9fbc69055aa48531868da0d2904",
+    "--network",
+    "none",
+    "--ipc",
+    "private",
+    "--init",
+    "--shm-size",
+    "8g",
+    "--gpus",
+    "device=GPU-1803972d-e774-ee96-e6f6-1ee1ce47bb25",
+    "--workdir",
+    "/workspace/php_parkour",
+    "--entrypoint",
+    "/bin/bash",
+    "--env",
+    "PHP_DOCKER=1",
+    "--env",
+    "PHP_GUI_TOKEN=090ec9fbc69055aa48531868da0d2904",
+    "--env",
+    "DISPLAY=:91",
+    "--env",
+    "XAUTHORITY=/run/php-gui.xauth",
+    "--env",
+    "WANDB_MODE=disabled",
+    "--env",
+    "WANDB_DISABLED=true",
+    "--env",
+    "HF_HUB_OFFLINE=1",
+    "--env",
+    "HF_DATASETS_OFFLINE=1",
+    "--env",
+    "TRANSFORMERS_OFFLINE=1",
+    "--env",
+    "NVIDIA_DRIVER_CAPABILITIES=compute,utility,graphics",
+    "--env",
+    "PYTHONDONTWRITEBYTECODE=1",
+    "--env",
+    "MUJOCO_GL=egl",
+    "--env",
+    "MUJOCO_EGL_DEVICE_ID=0",
+    "--env",
+    "OMP_NUM_THREADS=1",
+    "--env",
+    "OPENBLAS_NUM_THREADS=1",
+    "--env",
+    "MKL_NUM_THREADS=1",
+    "--env",
+    "PYTHONFAULTHANDLER=1",
+    "--mount",
+    "type=bind,src=/home/dzp/projects/php_parkour/outputs/research/native-keyboard-gui-prepared-egl-final/cohort,dst=/data/cohort,readonly",
+    "--mount",
+    "type=bind,src=/home/dzp/projects/php_parkour/outputs/research/native-keyboard-gui-prepared-egl-final/cohort/source,dst=/workspace/php_parkour,readonly",
+    "--mount",
+    "type=bind,src=/home/dzp/projects/php_parkour/outputs/research/native-keyboard-gui-prepared-egl-final/cohort/assets/student,dst=/data/assets/student,readonly",
+    "--mount",
+    "type=bind,src=/home/dzp/projects/php_parkour/outputs/research/native-keyboard-gui-prepared-egl-final/outputs,dst=/outputs",
+    "--mount",
+    "type=bind,src=/home/dzp/projects/php_parkour/outputs/research/native-keyboard-gui-prepared-egl-final/cache,dst=/data/cache",
+    "--mount",
+    "type=bind,src=/home/dzp/projects/php_parkour/outputs/research/native-keyboard-gui-prepared-egl-final/host/private.xauth,dst=/run/php-gui.xauth,readonly",
+    "--mount",
+    "type=bind,src=/tmp/.X11-unix/X91,dst=/tmp/.X11-unix/X91,readonly",
+    "sha256:2be18521015b2a84ef7a4442af9a94ef041a19feb9ce385ae15424b1dc158d8f",
+    "-lc",
+    "exec sleep infinity"
+  ],
+  "container_id": "9e042bfb39d2918af1150bddc60e626e43de6d1568667ad05ec327e7384d0002",
+  "container_host_init_identity": {
+    "pid": 781879,
+    "pid_namespace": "current container",
+    "observed_unix": 1791626485.753101,
+    "proc_status": {
+      "Name": "docker-init",
+      "Tgid": "781879",
+      "Pid": "781879",
+      "PPid": "781856",
+      "NSpid": "781879\t1",
+      "Threads": "1"
+    },
+    "state": "S",
+    "process_group_id": 781879,
+    "session_id": 781879,
+    "start_time_clock_ticks": 105448005,
+    "cmdline": "/sbin/docker-init -- /bin/bash -lc exec sleep infinity "
+  },
+  "private_x11_probe_stdout": "{\"schema_version\": 1, \"status\": \"passed\", \"display\": \":91\", \"hostname\": \"php-gui-090ec9fbc69055aa48531868da0d2904\", \"pid\": 10, \"root_xid\": 544, \"child_window_count\": 0, \"xauthority_path\": \"/run/php-gui.xauth\", \"root_token_matched\": true, \"xtest_extension\": true, \"record_extension\": true, \"key_events_sent\": 0, \"native_objects_constructed\": false, \"gpu_compute_invoked\": false, \"scope\": \"Real private python-xlib authentication and query_tree only; not GUI-policy acceptance\"}\n",
+  "gpu_before_native": {
+    "selected_gpu_uuid": "GPU-1803972d-e774-ee96-e6f6-1ee1ce47bb25",
+    "matching_compute_processes": []
+  },
+  "native_driver_started": true,
+  "gui_driver_start_unix": 1791626492.4390223,
+  "native_argv": [
+    "docker",
+    "exec",
+    "9e042bfb39d2918af1150bddc60e626e43de6d1568667ad05ec327e7384d0002",
+    "/opt/php/bin/inference-python",
+    "/workspace/php_parkour/scripts/research/gui_audit/container_runner.py",
+    "--plan",
+    "/data/cohort/plan.json"
+  ],
+  "docker_exec_identity": {
+    "pid": 782276,
+    "pid_namespace": "current container",
+    "observed_unix": 1791626492.439643,
+    "proc_status": {
+      "Name": "docker",
+      "Tgid": "782276",
+      "Pid": "782276",
+      "PPid": "781759",
+      "NSpid": "782276",
+      "Threads": "1"
+    },
+    "state": "R",
+    "process_group_id": 782276,
+    "session_id": 782276,
+    "start_time_clock_ticks": 105448689,
+    "cmdline": "docker exec 9e042bfb39d2918af1150bddc60e626e43de6d1568667ad05ec327e7384d0002 /opt/php/bin/inference-python /workspace/php_parkour/scripts/research/gui_audit/container_runner.py --plan /data/cohort/plan.json "
+  },
+  "docker_exec_returncode": 0,
+  "observer_returncode": 0,
+  "native_host_pid_mappings": {
+    "simulator": {
+      "samples": 69,
+      "first": {
+        "unix": 1791626499.1848078,
+        "host_pid": 782388,
+        "container_pid": 57,
+        "start_time_clock_ticks": 105448748,
+        "nspid": [
+          782388,
+          57
+        ],
+        "command_writer_threads": [
+          {
+            "host_tid": 783396,
+            "host_tgid": 782388,
+            "container_tid": 83,
+            "container_tgid": 57,
+            "nspid": [
+              783396,
+              83
+            ],
+            "owner_start_time_clock_ticks": 105448748,
+            "nstgid": [
+              782388,
+              57
+            ],
+            "status": {
+              "Name": "command_writer",
+              "State": "S (sleeping)",
+              "Tgid": "782388",
+              "Pid": "783396",
+              "PPid": "782383",
+              "NStgid": [
+                782388,
+                57
+              ],
+              "NSpid": [
+                783396,
+                83
+              ],
+              "Threads": "18"
+            },
+            "start_time_clock_ticks": 105449357
+          }
+        ]
+      },
+      "last": {
+        "unix": 1791626515.35645,
+        "host_pid": 782388,
+        "container_pid": 57,
+        "start_time_clock_ticks": 105448748,
+        "nspid": [
+          782388,
+          57
+        ],
+        "command_writer_threads": [
+          {
+            "host_tid": 783396,
+            "host_tgid": 782388,
+            "container_tid": 83,
+            "container_tgid": 57,
+            "nspid": [
+              783396,
+              83
+            ],
+            "owner_start_time_clock_ticks": 105448748,
+            "nstgid": [
+              782388,
+              57
+            ],
+            "status": {
+              "Name": "command_writer",
+              "State": "S (sleeping)",
+              "Tgid": "782388",
+              "Pid": "783396",
+              "PPid": "782383",
+              "NStgid": [
+                782388,
+                57
+              ],
+              "NSpid": [
+                783396,
+                83
+              ],
+              "Threads": "31"
+            },
+            "start_time_clock_ticks": 105449357
+          }
+        ]
+      },
+      "raw_entry": {
+        "sha256": "86e2e7e4adfc99d06f525b0e7f45b5b6fa0aafab75e69d6b0f0f661f38502784",
+        "bytes": 2546
+      }
+    },
+    "inference": {
+      "samples": 47,
+      "first": {
+        "unix": 1791626501.2021508,
+        "host_pid": 783568,
+        "container_pid": 131,
+        "start_time_clock_ticks": 105449434,
+        "nspid": [
+          783568,
+          131
+        ],
+        "command_writer_threads": [
+          {
+            "host_tid": 783776,
+            "host_tgid": 783568,
+            "container_tid": 143,
+            "container_tgid": 131,
+            "nspid": [
+              783776,
+              143
+            ],
+            "owner_start_time_clock_ticks": 105449434,
+            "nstgid": [
+              783568,
+              131
+            ],
+            "status": {
+              "Name": "command_writer",
+              "State": "S (sleeping)",
+              "Tgid": "783568",
+              "Pid": "783776",
+              "PPid": "783562",
+              "NStgid": [
+                783568,
+                131
+              ],
+              "NSpid": [
+                783776,
+                143
+              ],
+              "Threads": "47"
+            },
+            "start_time_clock_ticks": 105449545
+          }
+        ]
+      },
+      "last": {
+        "unix": 1791626512.3982427,
+        "host_pid": 783568,
+        "container_pid": 131,
+        "start_time_clock_ticks": 105449434,
+        "nspid": [
+          783568,
+          131
+        ],
+        "command_writer_threads": [
+          {
+            "host_tid": 783776,
+            "host_tgid": 783568,
+            "container_tid": 143,
+            "container_tgid": 131,
+            "nspid": [
+              783776,
+              143
+            ],
+            "owner_start_time_clock_ticks": 105449434,
+            "nstgid": [
+              783568,
+              131
+            ],
+            "status": {
+              "Name": "command_writer",
+              "State": "S (sleeping)",
+              "Tgid": "783568",
+              "Pid": "783776",
+              "PPid": "783562",
+              "NStgid": [
+                783568,
+                131
+              ],
+              "NSpid": [
+                783776,
+                143
+              ],
+              "Threads": "46"
+            },
+            "start_time_clock_ticks": 105449545
+          }
+        ]
+      },
+      "raw_entry": {
+        "sha256": "dea891bc7e5c6fe526eb1676e6bc579030cd868d0706b115ccfb8df40a06f503",
+        "bytes": 1948
+      }
+    }
+  },
+  "container_before_stop": {
+    "state": {
+      "Status": "running",
+      "Running": true,
+      "Paused": false,
+      "Restarting": false,
+      "OOMKilled": false,
+      "Dead": false,
+      "Pid": 781879,
+      "ExitCode": 0,
+      "Error": "",
+      "StartedAt": "2026-10-10T10:01:25.573962665Z",
+      "FinishedAt": "0001-01-01T00:00:00Z"
+    },
+    "host_identity": {
+      "pid": 781879,
+      "pid_namespace": "current container",
+      "observed_unix": 1791626515.816733,
+      "proc_status": {
+        "Name": "docker-init",
+        "Tgid": "781879",
+        "Pid": "781879",
+        "PPid": "781856",
+        "NSpid": "781879\t1",
+        "Threads": "1"
+      },
+      "state": "S",
+      "process_group_id": 781879,
+      "session_id": 781879,
+      "start_time_clock_ticks": 105448005,
+      "cmdline": "/sbin/docker-init -- /bin/bash -lc exec sleep infinity "
+    }
+  },
+  "container_stopped": true,
+  "docker_exec_final_returncode": 0,
+  "xephyr_final_group": {
+    "process_group_id": 781798,
+    "session_id": 781798,
+    "leader_identity": {
+      "pid": 781798,
+      "start_time_clock_ticks": 105447985
+    },
+    "known_members": [
+      {
+        "pid": 781798,
+        "start_time_clock_ticks": 105447985
+      }
+    ],
+    "retired": true,
+    "ownership_lost": false,
+    "ownership_state": "retired_empty",
+    "ownership_reason": null,
+    "live_members": [],
+    "ownership_verified": true
+  },
+  "xephyr_returncode": 0,
+  "native_worker_entries_present": [
+    "simulator",
+    "inference"
+  ],
+  "finished_unix": 1791626516.0082726
+}

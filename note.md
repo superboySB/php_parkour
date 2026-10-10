@@ -62,6 +62,8 @@ bash scripts/research/docker.sh shell
 
 需要 Tk 键盘交互或 MuJoCo 窗口时，先确认本地 X11 的变量，**在启动训练/评估前**选择 GUI 模式：
 
+GUI compose现在令`MUJOCO_GL=egl`用于离屏depth/video渲染；可见MuJoCo passive viewer本身仍使用GLFW。真实平地验收已走通窗口8/9、终端策略/录制/速度/停止/保持按键及两份NPZ保存，双方正常退出。此前glfw离屏配置的一次析构abort原样保留；单次EGL对照通过不表示所有内存竞态均已排除。[完整交互、四次失败与最终通过证据](usage_assets/reports/native-keyboard-gui/summary.md)。
+
 ```bash
 test -n "$DISPLAY" && test -f "$XAUTHORITY"
 bash scripts/research/docker.sh gui
@@ -320,22 +322,24 @@ python3 scripts/research/cloud.py --detach exec bash -c \
 : "${PHP_COVERAGE_SOURCE_TREE:?请设为新的源码快照SHA}"
 PHP_COVERAGE_ROOT=/diff/dzp_is_sb/php-parkour-research
 python3 "$PHP_COVERAGE_ROOT/source/$PHP_COVERAGE_SOURCE_TREE/scripts/research/posttrain_coverage.py" \
-  dry-run --source-tree "$PHP_COVERAGE_SOURCE_TREE"
+  dry-run --source-tree "$PHP_COVERAGE_SOURCE_TREE" \
+  --coverage-output "$PHP_COVERAGE_ROOT/outputs/coverage-official-final-ro-assets-v2"
 # 核对dry-run，再以前台watch或已有进程管理方式持续运行：
 python3 "$PHP_COVERAGE_ROOT/source/$PHP_COVERAGE_SOURCE_TREE/scripts/research/posttrain_coverage.py" \
-  watch --source-tree "$PHP_COVERAGE_SOURCE_TREE" --poll-seconds 60
+  watch --source-tree "$PHP_COVERAGE_SOURCE_TREE" \
+  --coverage-output "$PHP_COVERAGE_ROOT/outputs/coverage-official-final-ro-assets-v2" --poll-seconds 60
 ```
 
-`dry-run`只读状态。`watch`等待全部16阶段manifest、driver最终标记、所有训练/评估子进程退出和官方锁释放；随后用相同镜像启动无GPU、无网络的Docker，核对七个最终PT的真实配置、有限权重及学生内嵌五专家与教师逐tensor一致，再执行三套296源CPU预检。只有固定物理GPU 1的UUID确实空闲时，才启动无网络GPU Docker执行888个首次尝试；不改原训练容器或源码。每个失败、未完成和已完成记录均保留；中断后只有显式`--resume-interrupted`才续跑未尝试项，不重试已失败的技能。状态保存在服务器`outputs/coverage-official-final/monitor-status.json`，逐源输出与官方训练目录分开；启动watch不等于完成这些测试。
+`dry-run`只读状态。`watch`等待全部16阶段manifest、driver最终标记、所有训练/评估子进程退出和官方锁释放；随后用相同镜像启动无GPU、无网络的Docker，核对七个最终PT的真实配置、有限权重及学生内嵌五专家与教师逐tensor一致，再执行三套296源CPU预检。只有固定物理GPU 1的UUID确实空闲时，才启动无网络GPU Docker执行888个首次尝试；不改原训练容器或源码。每个失败、未完成和已完成记录均保留；中断后只有显式`--resume-interrupted`才续跑未尝试项，不重试已失败的技能。状态保存在服务器`outputs/coverage-official-final-ro-assets-v2/monitor-status.json`，逐源输出与官方训练目录分开；启动watch不等于完成这些测试。
 
-本次watch已经在北京时间2026-10-10 14:39部署，使用独立的`8d9ee8a4…`源码快照；官方训练仍用原`0093aa40…`挂载。当前只需读状态，勿重复启动；同服务器全局锁会拒绝同时运行第二个watch。
+本次watch于北京时间2026-10-10 18:09升级到独立的`02bc1100…`源码快照，PID4074213，使用新的RO资产合同；原14:39部署的`8d9ee8a4…`watch与日志已按原字节归档。只向身份核验过的旧waiting进程发出一次pidfd SIGTERM，再启动新watch；正式训练的`0093aa40…`挂载、镜像和进程身份均未改变。当前只需读状态，勿重复启动；同服务器全局锁会拒绝第二个watch。
 
 ```bash
 ssh -p 22 -o BatchMode=yes -o PasswordAuthentication=no tencent-231 \
-  cat /diff/dzp_is_sb/php-parkour-research/outputs/coverage-official-final/monitor-status.json
+  cat /diff/dzp_is_sb/php-parkour-research/outputs/coverage-official-final-ro-assets-v2/monitor-status.json
 ```
 
-精确源码/镜像校验、只读dry-run、真实PID和持续轮询回执见[部署证据](usage_assets/reports/posttrain-monitor-deployment/summary.md)。当前等待正式训练完成，没有启动额外GPU作业。
+新源码/镜像校验、只读dry-run、旧进程出生身份、实际pidfd退出与新watch轮询回执见[本次升级证据](usage_assets/reports/posttrain-monitor-ro-assets-v2/summary.md)；[最初部署证据](usage_assets/reports/posttrain-monitor-deployment/summary.md)保留历史范围。当前等待正式训练完成，watch没有启动额外GPU作业。
 
 本次正式 driver 已于北京时间 2026-10-10 12:20 用上述 `/outputs/official-full` 目录启动，当前无需重复启动。云端 TensorBoard 已以该目录为 `--logdir` 运行，本机 6007 转发也已实测 HTTP 200；打开 `http://127.0.0.1:6007/` 查看实时训练。上述 `/outputs/training` 示例适用于默认输出目录；已有服务时复用同一端口。可随时只读检查进度：
 
@@ -454,3 +458,5 @@ Isaac评估将URDF转换缓存写在`robot.asset.asset_root`下。源码只读�
 `eval_source_coverage.py plan`会从原始G1 URDF解析35个依赖文件，复制到本次输出的`runtime-robot-assets/robots`，并通过公开参数`--robot.asset.asset-root`传给原生Isaac。三策略正式逐源执行器共享本次coverage输出内的一份副本，使用已有RW输出挂载，不开放Python源码写入。新selection/plan/case使用schema2；旧schema1计划需保留并重新准备，不能混入新结果。每次执行会校验原文件/副本SHA、解析后的asset_root/urdf_file及完整harness，已有不完整或改变的副本会拒绝，不自动覆盖。
 
 [116项目标Docker CPU测试和初轮失败原记录](usage_assets/reports/runtime-robot-assets/summary.md)已保存；真实RO源码的Isaac初始化另有独立验收，不能从CPU测试推断仿真或技能成功。
+
+真实只读源码单源验收已完成：原iter500教师初始化并执行158策略步后首次跟踪失败；完整920帧输入和cap920保留，35原资产及3356封存输入SHA不变。独立CPU后验、实际保存配置与三段视频全片解码通过。[真实RO源码/RW资产运行证据](usage_assets/reports/source-coverage-ro-assets-pilot/summary.md)。这证明初始化与评估流程可运行，技能质量仍为false。

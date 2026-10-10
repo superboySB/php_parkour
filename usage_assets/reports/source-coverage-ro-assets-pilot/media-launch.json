@@ -1,0 +1,58 @@
+{
+  "status": "passed",
+  "utc": "2026-10-10T10:02:25.449191+00:00",
+  "argv": [
+    "docker",
+    "create",
+    "--name",
+    "php-source-coverage-ro-assets-pilot-media-cpu-01",
+    "--runtime",
+    "runc",
+    "--network",
+    "none",
+    "-e",
+    "NVIDIA_VISIBLE_DEVICES=void",
+    "-e",
+    "CUDA_VISIBLE_DEVICES=",
+    "--mount",
+    "type=bind,src=/home/dzp/projects/php_parkour/outputs/research/source-coverage-ro-assets-pilot-preparation-01/run-output,dst=/outputs,readonly",
+    "--mount",
+    "type=bind,src=/home/dzp/projects/php_parkour/outputs/research/source-coverage-ro-assets-pilot-independent-review-01,dst=/audit",
+    "--entrypoint",
+    "ffmpeg",
+    "sha256:2be18521015b2a84ef7a4442af9a94ef041a19feb9ce385ae15424b1dc158d8f",
+    "-nostdin",
+    "-v",
+    "error",
+    "-i",
+    "/outputs/teacher/cases/teacher-e0-000-fef9f7ce29d0/native/PHP-research/20261010_095942-teacher-locomotion-wholebodytrackingmanager/renderings_training/episode_4_1791626398.mp4",
+    "-ss",
+    "1.59",
+    "-frames:v",
+    "1",
+    "/audit/teacher-iter500-source000.png"
+  ],
+  "container_id": "960406cfd6378b3293e574052ebfb15e695d40cf1a293828454408bdba0b3077",
+  "returncode": 0,
+  "scope": "CPU ffmpeg decode/screenshot; no native simulation or GPU",
+  "selected_original_video": {
+    "path": "/outputs/teacher/cases/teacher-e0-000-fef9f7ce29d0/native/PHP-research/20261010_095942-teacher-locomotion-wholebodytrackingmanager/renderings_training/episode_4_1791626398.mp4",
+    "sha256": "6e7cd334aa7dde4545f250882d94a9f3de71bae6d989bf3eb6862cb32bf107dd",
+    "bytes": 133692,
+    "duration_seconds": 3.18,
+    "streams": [
+      {
+        "width": 640,
+        "height": 360,
+        "nb_frames": "159"
+      }
+    ],
+    "full_decode_returncode": 0,
+    "quality_linked": true
+  },
+  "screenshot": {
+    "path": "/home/dzp/projects/php_parkour/outputs/research/source-coverage-ro-assets-pilot-independent-review-01/teacher-iter500-source000.png",
+    "sha256": "5533f5e8261a656d89aece1898cd12bab037470fbee41909fe95e2a2016877d7"
+  },
+  "frame_time_seconds": 1.59
+}

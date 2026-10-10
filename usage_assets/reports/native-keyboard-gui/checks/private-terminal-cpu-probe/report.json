@@ -1,0 +1,319 @@
+{
+  "schema_version": 1,
+  "status": "passed",
+  "plan_sha256": "cfb84df12e2cc285f450ee1d8c2b307fe1912e93dfb1174f58c7256e2aa93b0f",
+  "started_unix": 1791625893.9881933,
+  "scope": "Actual private Xephyr + runc/noGPU Tk/XTEST/ordinary CPU PTY input",
+  "native_objects_constructed": false,
+  "key_events_sent": "private ordinary CPU terminal only",
+  "gpu_requested": false,
+  "errors": [],
+  "cleanup": [
+    {
+      "unix": 1791625896.4612927,
+      "pid": 758462,
+      "requested_signal": 15
+    }
+  ],
+  "gpu_idle_readonly": {
+    "selected_gpu_uuid": "GPU-1803972d-e774-ee96-e6f6-1ee1ce47bb25",
+    "matching_compute_processes": []
+  },
+  "xephyr": {
+    "argv": [
+      "Xephyr",
+      ":91",
+      "-screen",
+      "1920x1200",
+      "-noreset",
+      "-nolisten",
+      "tcp",
+      "-auth",
+      "/home/dzp/projects/php_parkour/outputs/research/native-keyboard-gui-runner-terminal-v4/private-terminal-cpu-probe/private.xauth"
+    ],
+    "group": {
+      "process_group_id": 758462,
+      "session_id": 758462,
+      "leader_identity": {
+        "pid": 758462,
+        "start_time_clock_ticks": 105388848
+      },
+      "known_members": [
+        {
+          "pid": 758462,
+          "start_time_clock_ticks": 105388848
+        }
+      ],
+      "retired": true,
+      "ownership_lost": false,
+      "ownership_state": "retired_empty",
+      "ownership_reason": null
+    }
+  },
+  "create_argv": [
+    "docker",
+    "create",
+    "--mount",
+    "type=bind,src=/home/dzp/projects/php_parkour/outputs/research/native-keyboard-gui-runner-terminal-v4,dst=/probe,readonly",
+    "--runtime",
+    "runc",
+    "--env",
+    "NVIDIA_VISIBLE_DEVICES=void",
+    "--env",
+    "CUDA_VISIBLE_DEVICES=",
+    "--name",
+    "php-gui-terminal-cpu-1ba294c9803da84cf10e9c2f03c82ac7",
+    "--hostname",
+    "php-gui-1ba294c9803da84cf10e9c2f03c82ac7",
+    "--label",
+    "php.gui.audit.token=1ba294c9803da84cf10e9c2f03c82ac7",
+    "--network",
+    "none",
+    "--ipc",
+    "private",
+    "--init",
+    "--shm-size",
+    "8g",
+    "--workdir",
+    "/workspace/php_parkour",
+    "--entrypoint",
+    "/bin/bash",
+    "--env",
+    "PHP_DOCKER=1",
+    "--env",
+    "PHP_GUI_TOKEN=1ba294c9803da84cf10e9c2f03c82ac7",
+    "--env",
+    "DISPLAY=:91",
+    "--env",
+    "XAUTHORITY=/run/php-gui.xauth",
+    "--env",
+    "WANDB_MODE=disabled",
+    "--env",
+    "WANDB_DISABLED=true",
+    "--env",
+    "HF_HUB_OFFLINE=1",
+    "--env",
+    "HF_DATASETS_OFFLINE=1",
+    "--env",
+    "TRANSFORMERS_OFFLINE=1",
+    "--env",
+    "NVIDIA_DRIVER_CAPABILITIES=compute,utility,graphics",
+    "--env",
+    "PYTHONDONTWRITEBYTECODE=1",
+    "--env",
+    "MUJOCO_GL=glfw",
+    "--env",
+    "MUJOCO_EGL_DEVICE_ID=0",
+    "--env",
+    "OMP_NUM_THREADS=1",
+    "--env",
+    "OPENBLAS_NUM_THREADS=1",
+    "--env",
+    "MKL_NUM_THREADS=1",
+    "--env",
+    "PYTHONFAULTHANDLER=1",
+    "--mount",
+    "type=bind,src=/home/dzp/projects/php_parkour/outputs/research/native-keyboard-gui-prepared-terminal-final/cohort,dst=/data/cohort,readonly",
+    "--mount",
+    "type=bind,src=/home/dzp/projects/php_parkour/outputs/research/native-keyboard-gui-prepared-terminal-final/cohort/source,dst=/workspace/php_parkour,readonly",
+    "--mount",
+    "type=bind,src=/home/dzp/projects/php_parkour/outputs/research/native-keyboard-gui-prepared-terminal-final/cohort/assets/student,dst=/data/assets/student,readonly",
+    "--mount",
+    "type=bind,src=/home/dzp/projects/php_parkour/outputs/research/native-keyboard-gui-runner-terminal-v4/private-terminal-cpu-probe/outputs,dst=/outputs",
+    "--mount",
+    "type=bind,src=/home/dzp/projects/php_parkour/outputs/research/native-keyboard-gui-runner-terminal-v4/private-terminal-cpu-probe/cache,dst=/data/cache",
+    "--mount",
+    "type=bind,src=/home/dzp/projects/php_parkour/outputs/research/native-keyboard-gui-runner-terminal-v4/private-terminal-cpu-probe/private.xauth,dst=/run/php-gui.xauth,readonly",
+    "--mount",
+    "type=bind,src=/tmp/.X11-unix/X91,dst=/tmp/.X11-unix/X91,readonly",
+    "sha256:2be18521015b2a84ef7a4442af9a94ef041a19feb9ce385ae15424b1dc158d8f",
+    "-lc",
+    "exec sleep infinity"
+  ],
+  "container_id": "3d5c126ab2936a3a018377d3bb1d4ab66e4ace7e3e0fa99094bc765bb5b55cbb",
+  "probe_argv": [
+    "docker",
+    "exec",
+    "3d5c126ab2936a3a018377d3bb1d4ab66e4ace7e3e0fa99094bc765bb5b55cbb",
+    "/opt/php/bin/inference-python",
+    "/probe/private_terminal_probe.py"
+  ],
+  "probe_returncode": 0,
+  "actual_probe": {
+    "schema_version": 1,
+    "status": "passed",
+    "scope": "Real isolated Xephyr/Tk/XTEST and ordinary stdlib CPU PTY, not native GUI acceptance",
+    "plan_sha256": "cfb84df12e2cc285f450ee1d8c2b307fe1912e93dfb1174f58c7256e2aa93b0f",
+    "native_objects_constructed": false,
+    "gpu_compute_invoked": false,
+    "phases": [
+      {
+        "name": "original",
+        "native_objects_constructed": false,
+        "ordinary_cpu_entry": {
+          "ready": true,
+          "pid": 18,
+          "isatty": true,
+          "pgid": 18,
+          "sid": 18,
+          "foreground_pgid": 18
+        },
+        "tk_focus_before": "None",
+        "tk_focus_after": "None",
+        "xtest_keys": [
+          "bracketright"
+        ],
+        "actual_tk_pty_events": [],
+        "raw_pty_utf8": "{\"ready\": true, \"pid\": 18, \"isatty\": true, \"pgid\": 18, \"sid\": 18, \"foreground_pgid\": 18}\r\n",
+        "received_hex": [],
+        "expected_delivery": false,
+        "raw_pty_final_utf8": "{\"ready\": true, \"pid\": 18, \"isatty\": true, \"pgid\": 18, \"sid\": 18, \"foreground_pgid\": 18}\r\nORIGINAL_CPU_MAIN_RETURNED\n",
+        "ordinary_cpu_returncode": 0,
+        "status": "passed",
+        "final_group": {
+          "process_group_id": 18,
+          "session_id": 18,
+          "leader_identity": {
+            "pid": 18,
+            "start_time_clock_ticks": 105388884
+          },
+          "known_members": [
+            {
+              "pid": 18,
+              "start_time_clock_ticks": 105388884
+            }
+          ],
+          "retired": true,
+          "ownership_lost": false,
+          "ownership_state": "retired_empty",
+          "ownership_reason": null,
+          "live_members": [],
+          "ownership_verified": true
+        }
+      },
+      {
+        "name": "fixed",
+        "native_objects_constructed": false,
+        "ordinary_cpu_entry": {
+          "ready": true,
+          "pid": 19,
+          "isatty": true,
+          "pgid": 19,
+          "sid": 19,
+          "foreground_pgid": 19
+        },
+        "tk_focus_before": "None",
+        "tk_focus_after": ".!text",
+        "xtest_keys": [
+          "bracketright",
+          "c",
+          "equal",
+          "o",
+          "i"
+        ],
+        "actual_tk_pty_events": [
+          {
+            "kind": "real_terminal_key_to_pty",
+            "unix": 1791625895.0134044,
+            "monotonic": 1053889.469580845,
+            "keysym": "bracketright",
+            "bytes_hex": "5d",
+            "tty": "/dev/pts/ptmx",
+            "terminal_xid": 2097183
+          },
+          {
+            "kind": "real_terminal_key_to_pty",
+            "unix": 1791625895.2159624,
+            "monotonic": 1053889.672138536,
+            "keysym": "c",
+            "bytes_hex": "63",
+            "tty": "/dev/pts/ptmx",
+            "terminal_xid": 2097183
+          },
+          {
+            "kind": "real_terminal_key_to_pty",
+            "unix": 1791625895.4183624,
+            "monotonic": 1053889.874538565,
+            "keysym": "equal",
+            "bytes_hex": "3d",
+            "tty": "/dev/pts/ptmx",
+            "terminal_xid": 2097183
+          },
+          {
+            "kind": "real_terminal_key_to_pty",
+            "unix": 1791625895.6220515,
+            "monotonic": 1053890.078227885,
+            "keysym": "o",
+            "bytes_hex": "6f",
+            "tty": "/dev/pts/ptmx",
+            "terminal_xid": 2097183
+          },
+          {
+            "kind": "real_terminal_key_to_pty",
+            "unix": 1791625895.8250127,
+            "monotonic": 1053890.281188973,
+            "keysym": "i",
+            "bytes_hex": "69",
+            "tty": "/dev/pts/ptmx",
+            "terminal_xid": 2097183
+          }
+        ],
+        "raw_pty_utf8": "{\"ready\": true, \"pid\": 19, \"isatty\": true, \"pgid\": 19, \"sid\": 19, \"foreground_pgid\": 19}\r\n{\"received_hex\": \"5d\"}\n{\"received_hex\": \"63\"}\n{\"received_hex\": \"3d\"}\n{\"received_hex\": \"6f\"}\n{\"received_hex\": \"69\"}\n",
+        "received_hex": [
+          "5d",
+          "63",
+          "3d",
+          "6f",
+          "69"
+        ],
+        "expected_delivery": true,
+        "raw_pty_final_utf8": "{\"ready\": true, \"pid\": 19, \"isatty\": true, \"pgid\": 19, \"sid\": 19, \"foreground_pgid\": 19}\r\n{\"received_hex\": \"5d\"}\n{\"received_hex\": \"63\"}\n{\"received_hex\": \"3d\"}\n{\"received_hex\": \"6f\"}\n{\"received_hex\": \"69\"}\nORIGINAL_CPU_MAIN_RETURNED\n",
+        "ordinary_cpu_returncode": 0,
+        "status": "passed",
+        "final_group": {
+          "process_group_id": 19,
+          "session_id": 19,
+          "leader_identity": {
+            "pid": 19,
+            "start_time_clock_ticks": 105388939
+          },
+          "known_members": [
+            {
+              "pid": 19,
+              "start_time_clock_ticks": 105388939
+            }
+          ],
+          "retired": true,
+          "ownership_lost": false,
+          "ownership_state": "retired_empty",
+          "ownership_reason": null,
+          "live_members": [],
+          "ownership_verified": true
+        }
+      }
+    ]
+  },
+  "own_container_stopped": true,
+  "xephyr_final_group": {
+    "process_group_id": 758462,
+    "session_id": 758462,
+    "leader_identity": {
+      "pid": 758462,
+      "start_time_clock_ticks": 105388848
+    },
+    "known_members": [
+      {
+        "pid": 758462,
+        "start_time_clock_ticks": 105388848
+      }
+    ],
+    "retired": true,
+    "ownership_lost": false,
+    "ownership_state": "retired_empty",
+    "ownership_reason": null,
+    "live_members": [],
+    "ownership_verified": true
+  },
+  "xephyr_returncode": 0,
+  "finished_unix": 1791625896.483483
+}

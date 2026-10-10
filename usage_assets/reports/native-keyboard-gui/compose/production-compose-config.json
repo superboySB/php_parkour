@@ -1,0 +1,142 @@
+{
+  "name": "php-parkour-research",
+  "services": {
+    "php": {
+      "build": {
+        "context": "/home/dzp/projects/php_parkour",
+        "dockerfile": "docker/Dockerfile"
+      },
+      "command": [
+        "sleep",
+        "infinity"
+      ],
+      "container_name": "php-parkour-research",
+      "devices": [
+        {
+          "source": "nvidia.com/gpu=0",
+          "target": "nvidia.com/gpu=0",
+          "permissions": "rwm"
+        }
+      ],
+      "entrypoint": null,
+      "environment": {
+        "ACCEPT_EULA": "Y",
+        "DISPLAY": ":0",
+        "LOGGER": "tensorboard",
+        "MUJOCO_GL": "egl",
+        "NVIDIA_DRIVER_CAPABILITIES": "compute,utility,graphics",
+        "OMNI_KIT_ACCEPT_EULA": "YES",
+        "OMNI_KIT_ALLOW_ROOT": "1",
+        "PHP_DOCKER": "1",
+        "PHP_MOTION_DATABASE_DIR": "/data/assets/databases",
+        "PRIVACY_CONSENT": "Y",
+        "WANDB_MODE": "disabled",
+        "XAUTHORITY": "/tmp/php.xauthority"
+      },
+      "image": "php-parkour:research",
+      "init": true,
+      "ipc": "private",
+      "network_mode": "host",
+      "shm_size": "8589934592",
+      "stdin_open": true,
+      "tty": true,
+      "volumes": [
+        {
+          "type": "bind",
+          "source": "/home/dzp/projects/php_parkour",
+          "target": "/workspace/php_parkour",
+          "bind": {}
+        },
+        {
+          "type": "bind",
+          "source": "/home/dzp/projects/php_parkour/outputs/research",
+          "target": "/outputs",
+          "bind": {}
+        },
+        {
+          "type": "bind",
+          "source": "/home/dzp/projects/php_parkour/outputs/research/assets",
+          "target": "/data/assets",
+          "bind": {}
+        },
+        {
+          "type": "bind",
+          "source": "/home/dzp/projects/php_parkour/outputs/research/cache",
+          "target": "/data/cache",
+          "bind": {}
+        },
+        {
+          "type": "volume",
+          "source": "isaac-kit-cache",
+          "target": "/isaac-sim/kit/cache",
+          "volume": {}
+        },
+        {
+          "type": "volume",
+          "source": "isaac-ov-cache",
+          "target": "/root/.cache/ov",
+          "volume": {}
+        },
+        {
+          "type": "volume",
+          "source": "isaac-gl-cache",
+          "target": "/root/.cache/nvidia/GLCache",
+          "volume": {}
+        },
+        {
+          "type": "volume",
+          "source": "isaac-compute-cache",
+          "target": "/root/.nv/ComputeCache",
+          "volume": {}
+        },
+        {
+          "type": "volume",
+          "source": "isaac-logs",
+          "target": "/root/.nvidia-omniverse/logs",
+          "volume": {}
+        },
+        {
+          "type": "volume",
+          "source": "isaac-data",
+          "target": "/root/.local/share/ov/data",
+          "volume": {}
+        },
+        {
+          "type": "bind",
+          "source": "/tmp/.X11-unix",
+          "target": "/tmp/.X11-unix",
+          "read_only": true,
+          "bind": {}
+        },
+        {
+          "type": "bind",
+          "source": "/run/user/1000/gdm/Xauthority",
+          "target": "/tmp/php.xauthority",
+          "read_only": true,
+          "bind": {}
+        }
+      ],
+      "working_dir": "/workspace/php_parkour"
+    }
+  },
+  "volumes": {
+    "isaac-compute-cache": {
+      "name": "php-parkour-research_isaac-compute-cache"
+    },
+    "isaac-data": {
+      "name": "php-parkour-research_isaac-data"
+    },
+    "isaac-gl-cache": {
+      "name": "php-parkour-research_isaac-gl-cache"
+    },
+    "isaac-kit-cache": {
+      "name": "php-parkour-research_isaac-kit-cache"
+    },
+    "isaac-logs": {
+      "name": "php-parkour-research_isaac-logs"
+    },
+    "isaac-ov-cache": {
+      "name": "php-parkour-research_isaac-ov-cache"
+    }
+  }
+}

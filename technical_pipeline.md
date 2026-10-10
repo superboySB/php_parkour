@@ -547,9 +547,10 @@ startup default pose bias同时修改qtarget中心与观测`q−default`基准�
 | 原生训练接口 | 最终冻结源码下 22/22 个有界训练、评估、导出阶段；13 次真实权重更新检查 | 通路通过，smoke 不代表官方日程或收敛完成 |
 | 正式训练 | 五教师各 20000 轮、纯学生 10000、混合学生 30000 的顺序 driver 已启动 | 截至本文快照，仍在第一教师；不能确认全部完成 |
 | 云端 PT 回传本地 | iteration 19 pilot 与正式 iteration 500 都真实加载，在 16GiB 卡运行 64env×250step | 模型传输与 Isaac 推理通路通过；两次均 `quality_verified=false` |
-| 逐原始源片段验收 | 296 对输入逐项校验、48 项 CPU 回归、3 次真实独立 Isaac 片段尝试 | teacher500为158策略步，两种student smoke各21步后失败；0片段完成，尚未跑完296源×三策略 |
-| 发布学生的物理 sim2sim | 原生 ONNX、DDS、深度 SHM、PD；平地 12 个有效 command 与 17 场景各一个 OBJ | 新SDK12command已复测24worker正常退出/12视频全解码；旧17代表场景有真实轨迹但未证明所有worker正常终态，fresh629仍待执行 |
-| 全部生成几何的物理扫描 | 旧629计划已于15:48停止；原状态279 reported completed、5执行失败、1中断、344未运行 | 已发现10份reported completed日志带SIGSEGV；旧状态不能用于完整验收，修复后须fresh计划重跑 |
+| 逐原始源片段验收 | 296 对输入逐项校验、后续116项目标CPU回归；原3次Isaac尝试加新RO资产合同1次实测 | teacher500为158策略步，两种student smoke各21步后失败；0片段完成，尚未跑完296源×三策略 |
+| 发布学生的物理 sim2sim | 原生 ONNX、DDS、深度 SHM、PD；平地 12 个有效 command 与 17 场景各一个 OBJ | 新SDK12command已复测24worker正常退出/12视频全解码；旧17代表场景有真实轨迹但未证明所有worker正常终态，fresh629已用独立冻结计划启动，完整终态仍待验收 |
+| 全部生成几何的物理扫描 | 旧629计划已于15:48停止；原状态279 reported completed、5执行失败、1中断、344未运行 | 已发现10份reported completed日志带SIGSEGV；旧状态不能用于完整验收，新SDK0.1.8/fresh计划已启动；629完整终态仍待验收 |
+| 原生键盘与可见GUI | 平地窗口8/9、终端 ]/c/=/o/i、按住/松开w与低/高速录制 | 第五次真实通过，两NPZ169/196帧、两worker实际0且组空；四次原失败保留，不证明障碍技能 |
 | 实体 G1 | 审计 SDK、映射与相机接口，没有本次真实机器人运行 | 未验证；论文作者的实机成绩不能记成本次结果 |
 
 正式 iteration 500 的同设置短评估记录 **75 次失败重置**，iteration 19 pilot 为 **3971 次**；这是 64 个环境反复终止的累计回合数，不是机器人数量。500 轮模型的四项跟踪误差各有 16000 个有限样本，最长 env0 原片为 3.22s，仍有失败且没有完成整个 course。两个 checkpoint 来自不同训练运行，不能视为同一条逐轮配对实验。详见 [本地 pilot](usage_assets/reports/official-pilot-local-quality/summary.md) 与 [500 轮中间检查点](usage_assets/reports/official-progress-0500-local/summary.md)。
@@ -558,7 +559,7 @@ startup default pose bias同时修改qtarget中心与观测`q−default`基准�
 
 正式模型后的 [自动衔接](scripts/research/posttrain_coverage.py) 等待全部官方训练、质量评估和导出结束，核验七个PT的迭代、环境数、variant、seed和算法；学生内嵌五专家的完整MLP和观测normalizer还须逐tensor等于对应最终教师。随后才准备三套296源计划，并在固定GPU空闲时执行888个首次尝试。61项CPU调度回归及实际smoke模型的专家格式核验已通过；正式模型尚不存在，不能把这项准备工作记作888次完成。[检查证据](usage_assets/reports/posttrain-monitor/summary.md)。
 
-等待进程已实际部署在独立源码快照，远端全文件/镜像校验与只读dry-run通过，目前等待原五教师/两学生driver完成，没有额外GPU任务；正在训练的旧源码挂载未变。[真实部署回执](usage_assets/reports/posttrain-monitor-deployment/summary.md)与CPU报告分别保留，避免将代码准备、启动成功、最终策略质量混为同一结论。
+等待进程现已实际升级至独立的02bc源码快照，使用新的RO资产合同和coverage输出目录，PID4074213；只停止身份核验过的旧waiting进程，正式训练的容器/镜像/源码挂载及训练进程出生身份前后均未变。它仍等待原五教师/两学生driver完成，没有额外云GPU任务。[本次升级回执](usage_assets/reports/posttrain-monitor-ro-assets-v2/summary.md)与[最初部署历史](usage_assets/reports/posttrain-monitor-deployment/summary.md)分别保留，代码准备、启动成功与策略质量分别验收。
 
 正式部署模型还有独立的[选择性回传入口](scripts/research/pull_final_students.py)：输入是16阶段manifest、七个最终PT身份、有序专家证明与已成功CPU容器的回执，输出为两组学生ONNX及原始来源JSON。它不传教师图或PT，也不更新模型参数；只允许字节/SHA一致的显式文件集合。57项CPU检查和真实waiting检查通过，最终模型不存在时不创建目的目录。[证据](usage_assets/reports/final-student-transfer/summary.md)。最终两学生还需分别实际执行CPU ORT、本地12个有效指令及17个代表地形；公开ONNX的扫描不能作为自训策略验证。
 
@@ -606,3 +607,7 @@ IsaacLab的URDF converter会在asset_root下生成USD缓存。五个非默认教
 独立只读复核已逐段核对本说明604行版本的数学、维度、数据格式与实机边界，115份源码身份和154个本地引用通过；原报告绑定该版本SHA，后续追加的运行状态单独验收。[复核记录](usage_assets/reports/technical-pipeline-independent-review/summary.md)。
 
 逐源验收的后续执行器现采用schema2 selection/plan/case，明确绑定35个原始G1 URDF/mesh与独立RW转换根、五份harness源码SHA、原生参数及解析后配置。首次CPU准备复制资产，之后只校验，源码保持RO；原始资产或副本改变即拒绝。116项目标CPU回归通过，真实Isaac转换与运行证据另行记录。这只改变资产初始化与证据合同，不改变reference frame推进、暖身缓存公式、reward、label、loss或首次尝试停止规则。[修复与原始测试](usage_assets/reports/runtime-robot-assets/summary.md)。
+
+上述schema2合同已在新的真实RO源码Isaac运行中验收：同一iter500教师、原920帧source、1环境/1变体/seed42、cap920，实际158策略步后首次failed终止，boundary=false；35原资产及3356个封存输入SHA不变，USD生成在独立RW根。原生暖身/时间推进/RNG语义保留，两次缓存刷新公式与此前一致。初始化执行通过，技能仍失败，不能算296源覆盖。[实际质量、原日志与视频](usage_assets/reports/source-coverage-ro-assets-pilot/summary.md)。
+
+原生GUI与终端也已实际验收：低速command1和高速command6的label由原policy.velocity_command按帧写入，两NPZ分别169/196帧，manual c与STOP/o autosave均执行；双方原main/atexit及真实wrapper退出0、出生身份绑定的进程组为空。qpos仍是wxyz＋零XYZ占位＋29关节，不能据此恢复世界路径。离屏depth/video从GLFW切EGL，可见viewer仍GLFW；第四次析构abort原字节保留，第五次只改变该环境设置通过。该对照不证明所有heap竞态根除。[键盘/录制数据与真实退出证据](usage_assets/reports/native-keyboard-gui/summary.md)。

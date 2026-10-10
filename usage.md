@@ -4,7 +4,7 @@
 
 学习流程、输入输出、数据/label 来源与 real2sim2real 实现细节见独立的 [technical_pipeline.md](technical_pipeline.md)。
 
-最新纠正：北京时间15:48已有序停止旧629物理批次，原279 reported completed/5失败/1中断/344未运行均保留。旧监督遗漏最终worker退出码，已有10个reported completed及旧12指令的command02存在模拟器SIGSEGV；这些不能作为正常退出验收。修复监督与SDK后，原5个显式失败配置的新闭环全部正常退出，fresh629仍须独立执行。[新五例原生试跑](usage_assets/reports/sdk018-native-pilot/summary.md)。[停止回执](usage_assets/reports/sim2sim-cohort-halt/summary.md)、[逐日志实证](usage_assets/reports/worker-exit-completed-log-audit/report.md)。以下历史轨迹、阈值与时间快照仍保留原始范围。
+最新纠正：北京时间15:48已有序停止旧629物理批次，原279 reported completed/5失败/1中断/344未运行均保留。旧监督遗漏最终worker退出码，已有10个reported completed及旧12指令的command02存在模拟器SIGSEGV；这些不能作为正常退出验收。修复监督与SDK后，原5个显式失败配置的新闭环全部正常退出，fresh629已在新冻结计划下实际启动，完整终态仍待验收。[新五例原生试跑](usage_assets/reports/sdk018-native-pilot/summary.md)。[停止回执](usage_assets/reports/sim2sim-cohort-halt/summary.md)、[逐日志实证](usage_assets/reports/worker-exit-completed-log-audit/report.md)。以下历史轨迹、阈值与时间快照仍保留原始范围。
 
 先看真实结果：[新SDK全部12指令的正常退出复测与逐段视频](usage_assets/reports/sdk018-directions/summary.md)、[新SDK五个历史失败配置的视频与跌倒结果](usage_assets/reports/sdk018-native-pilot/summary.md)、[17 场景参考动作播放页](usage_assets/motion_matching/playback.html)、[旧17场景物理轨迹播放页](usage_assets/sim2sim/scenarios/playback.html)、[逐项原始报告](usage_assets/reports/)。参考动作来自生成数组，闭环录像来自公开 ONNX 策略驱动的 MuJoCo，训练录像来自实际 Isaac checkpoint；旧17场景页不证明完整正常退出。
 
@@ -344,3 +344,21 @@ CPU 测试统一在 Docker 中运行，分别保留根目录/训练和 motion ma
 五个教师preset重载曾暴露RO源码下URDF converter写缓存失败，因此未来296源×三策略的执行器也补齐了独立RW资产根。原始35个URDF/mesh的源/副本SHA、五份harness、原生CLI和实际配置共同绑定到schema2计划，原Python仍RO。116项目标Docker CPU检查通过；初轮110通过、1项异常类型检查失败的原XML保留。[修复源码、最小差异和测试证据](usage_assets/reports/runtime-robot-assets/summary.md)。该项本身不计作888次物理验收。
 
 新技术说明的独立源码复核绑定604行版本SHA，核对115份源码与154个本地链接；未发现新的实质性数学/格式/标签来源错误。[原始复核](usage_assets/reports/technical-pipeline-independent-review/summary.md)。
+
+真实单源验证使用原iter500教师和完整920帧locomotion source，实际158策略步（3.16仿真秒）后首次failed，timeout=0、reference boundary=false。35资产的USD转换在RW目录实际完成，3356封存输入SHA不变；四项tracking指标各158有限样本，三段原生录像完整解码。[配置、标签/时钟、质量与原始回执](usage_assets/reports/source-coverage-ro-assets-pilot/summary.md)，[最长原片3.18秒](usage_assets/isaac/source-coverage-ro-assets-pilot/teacher-iter500-source000.mp4)。
+
+![新RO源码单源Isaac实际画面；技能跟踪失败，未完成整段source](usage_assets/isaac/source-coverage-ro-assets-pilot/teacher-iter500-source000.png)
+
+正式训练后的逐源watch已于北京时间18:09实际升级为PID4074213，使用同步核验的02bc源码与新的`coverage-official-final-ro-assets-v2`目录，waiting、gpu_started=false。只通过pidfd停止精确身份的旧waiting进程；原status/log/launch字节保留，正式训练容器/镜像/源码挂载/训练PID出生身份与全部Docker IDs前后完全一致。[两阶段真实升级、25项CPU门卫与旧原始归档](usage_assets/reports/posttrain-monitor-ro-assets-v2/summary.md)。
+
+### 原生GUI、键盘与录制的实际验收
+
+第五次真实平地接口验收通过，前四次失败原日志/退出码/计划全部保留。窗口8/9控制吊架；独占真实终端的`]`启动策略，`c`开始/手动保存，`=`切换速度，`o`停止并自动保存，`i`保持；真实X11按住/松开w产生低速command1和高速command6。两份原NPZ169/196帧，fps50，标签来自原policy.velocity_command；qpos的XYZ是占位零，不能当作世界轨迹或完整训练bundle。双方原main/atexit返回、实际wrapper均0、出生身份绑定的进程组为空，无TERM/KILL兜底。
+
+第四次在保存视频和atexit之后原生abort，整体保留为失败；第五次只将离屏depth/video的`MUJOCO_GL`从glfw改egl，可见passive viewer仍GLFW，生产GUI compose同样修复。一次对照不能证明所有内存问题已根除。[五次实际尝试、完整NPZ/视频解码与源码身份](usage_assets/reports/native-keyboard-gui/summary.md)、[可播放原片与全部截图](usage_assets/reports/native-keyboard-gui/playback.html)。
+
+![真实MuJoCo初始窗口；机器人仅部分在画面内](usage_assets/reports/native-keyboard-gui/attempts/05-egl-completed/outputs/initial-stiff.png)
+
+![真实终端的高速command、停止自动保存与保持日志](usage_assets/reports/native-keyboard-gui/attempts/05-egl-completed/outputs/policy-terminal.png)
+
+[该次真实原片](usage_assets/reports/native-keyboard-gui/attempts/05-egl-completed/outputs/video/episode_0_1791626513.mp4)。forward6原截图因Camera tracking OFF而只有地板，原样保留，不作为高速步态可视化证据；命令输入由真实keys/state/NPZ标签证明。GUI接口通过不等于障碍通关、实时性能或实机成功。
