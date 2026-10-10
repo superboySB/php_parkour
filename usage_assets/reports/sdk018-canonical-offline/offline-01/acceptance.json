@@ -1,0 +1,239 @@
+{
+  "status": "failed",
+  "observed_utc": "2026-10-10T08:53:53.371099+00:00",
+  "image_id": "sha256:2be18521015b2a84ef7a4442af9a94ef041a19feb9ce385ae15424b1dc158d8f",
+  "revision": "6cb2ae2492ef7bf66da7c5a72da87d6f60f0636f",
+  "gpu_uuid": "GPU-1803972d-e774-ee96-e6f6-1ee1ce47bb25",
+  "no_source_bind": true,
+  "network_mode": "none",
+  "quality_verified": false,
+  "scope": "Baked image imports, pinned environments, actual16env2iter Isaac training, weights, teacher ONNX CPU and TensorBoard; no convergence or full schedule",
+  "commands": [
+    {
+      "argv": [
+        "docker",
+        "start",
+        "dacee0f4980b0bee4a580fabb607a7abb8efc5a031067d519433f5463173c918"
+      ],
+      "started_unix": 1791622433.4394155,
+      "log": "container-start.log",
+      "returncode": 0,
+      "finished_unix": 1791622433.65389,
+      "log_sha256": "22ffb4f8915db28f72118a5300b024de5bd316feebf148038141c855ded179d9"
+    },
+    {
+      "argv": [
+        "docker",
+        "exec",
+        "dacee0f4980b0bee4a580fabb607a7abb8efc5a031067d519433f5463173c918",
+        "/opt/php/bin/train-python",
+        "scripts/research/verify_runtime.py",
+        "--require-gpu",
+        "--output",
+        "/outputs/runtime.json"
+      ],
+      "started_unix": 1791622433.661495,
+      "log": "doctor.log",
+      "returncode": 0,
+      "finished_unix": 1791622435.428061,
+      "log_sha256": "2293a9c5255b126592446385e776c3d28372411ef2fc643d0e5cae2a95345148"
+    },
+    {
+      "argv": [
+        "docker",
+        "exec",
+        "-e",
+        "CUDA_VISIBLE_DEVICES=",
+        "dacee0f4980b0bee4a580fabb607a7abb8efc5a031067d519433f5463173c918",
+        "/opt/php/bin/train-python",
+        "-c",
+        "import hashlib,importlib.metadata as md,json,pathlib,unitree_interface; p=list(pathlib.Path(unitree_interface.__file__).parent.glob('unitree_interface.cpython-*.so'));assert len(p)==1;print(json.dumps({'version':md.version('far-unitree-sdk'),'extension':str(p[0]),'sha256':hashlib.sha256(p[0].read_bytes()).hexdigest()}))"
+      ],
+      "started_unix": 1791622435.4283636,
+      "log": "train-sdk.json",
+      "returncode": 0,
+      "finished_unix": 1791622435.543251,
+      "log_sha256": "a7cb70eaa7a78647c65bdfb25b50dcbbf9badacf2d648f050c48f8e298971ddb"
+    },
+    {
+      "argv": [
+        "docker",
+        "exec",
+        "-e",
+        "CUDA_VISIBLE_DEVICES=",
+        "dacee0f4980b0bee4a580fabb607a7abb8efc5a031067d519433f5463173c918",
+        "/opt/php/bin/inference-python",
+        "-c",
+        "import hashlib,importlib.metadata as md,json,pathlib,unitree_interface; p=list(pathlib.Path(unitree_interface.__file__).parent.glob('unitree_interface.cpython-*.so'));assert len(p)==1;print(json.dumps({'version':md.version('far-unitree-sdk'),'extension':str(p[0]),'sha256':hashlib.sha256(p[0].read_bytes()).hexdigest()}))"
+      ],
+      "started_unix": 1791622435.5435355,
+      "log": "inference-sdk.json",
+      "returncode": 0,
+      "finished_unix": 1791622435.6629617,
+      "log_sha256": "1b6b2ce8ee840af5a6562fe8fdb5ba651f38be09e307498832c6624f49f90b0b"
+    },
+    {
+      "argv": [
+        "docker",
+        "exec",
+        "-e",
+        "CUDA_VISIBLE_DEVICES=",
+        "dacee0f4980b0bee4a580fabb607a7abb8efc5a031067d519433f5463173c918",
+        "/opt/php/bin/train-python",
+        "-m",
+        "pip",
+        "freeze"
+      ],
+      "started_unix": 1791622435.6632578,
+      "log": "train.freeze.txt",
+      "returncode": 0,
+      "finished_unix": 1791622435.9802258,
+      "log_sha256": "ac2ac6131af37ec9a815e00e8e54fcba4b7b6afe57188925dca31dad2ad43e3e"
+    },
+    {
+      "argv": [
+        "docker",
+        "exec",
+        "-e",
+        "CUDA_VISIBLE_DEVICES=",
+        "dacee0f4980b0bee4a580fabb607a7abb8efc5a031067d519433f5463173c918",
+        "/opt/php/bin/train-python",
+        "-m",
+        "pip",
+        "check"
+      ],
+      "started_unix": 1791622435.9806395,
+      "log": "train-pip-check.log",
+      "returncode": 1,
+      "finished_unix": 1791622436.448566,
+      "log_sha256": "a55aa8399af9281b4e30cd1d127155f31fc7c306bc24fcb606351136683fc6ed"
+    },
+    {
+      "argv": [
+        "docker",
+        "exec",
+        "-e",
+        "CUDA_VISIBLE_DEVICES=",
+        "dacee0f4980b0bee4a580fabb607a7abb8efc5a031067d519433f5463173c918",
+        "/opt/php/bin/motion-python",
+        "-m",
+        "pip",
+        "freeze"
+      ],
+      "started_unix": 1791622436.4489105,
+      "log": "motion.freeze.txt",
+      "returncode": 0,
+      "finished_unix": 1791622436.6138904,
+      "log_sha256": "622fc360243892e38508f52345566967f9b063072a6a38be6b515438ffcae4c8"
+    },
+    {
+      "argv": [
+        "docker",
+        "exec",
+        "-e",
+        "CUDA_VISIBLE_DEVICES=",
+        "dacee0f4980b0bee4a580fabb607a7abb8efc5a031067d519433f5463173c918",
+        "/opt/php/bin/motion-python",
+        "-m",
+        "pip",
+        "check"
+      ],
+      "started_unix": 1791622436.6141715,
+      "log": "motion-pip-check.log",
+      "returncode": 0,
+      "finished_unix": 1791622436.8310235,
+      "log_sha256": "9261363b733079a641c2e4cc9bc46ffa1d8336945a87f807b6cf68847dbc9b09"
+    },
+    {
+      "argv": [
+        "docker",
+        "exec",
+        "-e",
+        "CUDA_VISIBLE_DEVICES=",
+        "dacee0f4980b0bee4a580fabb607a7abb8efc5a031067d519433f5463173c918",
+        "/opt/php/bin/inference-python",
+        "-m",
+        "pip",
+        "freeze"
+      ],
+      "started_unix": 1791622436.8313098,
+      "log": "inference.freeze.txt",
+      "returncode": 0,
+      "finished_unix": 1791622436.9963171,
+      "log_sha256": "ddd6dfea37a68e2f7c6e71be256ef39bbdb7397eac57fac9d815d764266d420f"
+    },
+    {
+      "argv": [
+        "docker",
+        "exec",
+        "-e",
+        "CUDA_VISIBLE_DEVICES=",
+        "dacee0f4980b0bee4a580fabb607a7abb8efc5a031067d519433f5463173c918",
+        "/opt/php/bin/inference-python",
+        "-m",
+        "pip",
+        "check"
+      ],
+      "started_unix": 1791622436.9966094,
+      "log": "inference-pip-check.log",
+      "returncode": 0,
+      "finished_unix": 1791622437.1637962,
+      "log_sha256": "9261363b733079a641c2e4cc9bc46ffa1d8336945a87f807b6cf68847dbc9b09"
+    }
+  ],
+  "create_argv": [
+    "docker",
+    "create",
+    "--name",
+    "php-sdk018-offline-63a0397791701a",
+    "--gpus",
+    "device=GPU-1803972d-e774-ee96-e6f6-1ee1ce47bb25",
+    "--network",
+    "none",
+    "--ipc",
+    "private",
+    "--init",
+    "--shm-size",
+    "8g",
+    "-e",
+    "PYTHONDONTWRITEBYTECODE=1",
+    "-e",
+    "HF_HUB_OFFLINE=1",
+    "-e",
+    "WANDB_MODE=disabled",
+    "-e",
+    "OMP_NUM_THREADS=4",
+    "-e",
+    "LOGGER=tensorboard",
+    "--mount",
+    "type=bind,src=/home/dzp/projects/php_parkour/outputs/research/assets,dst=/data/assets,readonly",
+    "--mount",
+    "type=bind,src=/home/dzp/projects/php_parkour/outputs/research/sdk018-canonical-offline-01/cache,dst=/data/cache",
+    "--mount",
+    "type=bind,src=/home/dzp/projects/php_parkour/outputs/research/sdk018-canonical-offline-01,dst=/outputs",
+    "-w",
+    "/workspace/php_parkour",
+    "--entrypoint",
+    "/bin/bash",
+    "sha256:2be18521015b2a84ef7a4442af9a94ef041a19feb9ce385ae15424b1dc158d8f",
+    "-lc",
+    "exec sleep infinity"
+  ],
+  "container_id": "dacee0f4980b0bee4a580fabb607a7abb8efc5a031067d519433f5463173c918",
+  "sdk": {
+    "train": {
+      "version": "0.1.8",
+      "extension": "/isaac-sim/kit/python/lib/python3.11/site-packages/unitree_interface/unitree_interface.cpython-311-x86_64-linux-gnu.so",
+      "sha256": "9304320e194ca6fb0bc4f85699a533bcc3051f577bd823914903aedc9b1b0926"
+    },
+    "inference": {
+      "version": "0.1.8",
+      "extension": "/opt/php/envs/inference/lib/python3.12/site-packages/unitree_interface/unitree_interface.cpython-312-x86_64-linux-gnu.so",
+      "sha256": "fdedc667b19b8257c4a2e2cc70d8a99c65e9425d29366426f73a75ac1d5664d4"
+    }
+  },
+  "error": "AssertionError: ",
+  "owned_container_stop": "Flag --time has been deprecated, use --timeout instead\ndacee0f4980b0bee4a580fabb607a7abb8efc5a031067d519433f5463173c918",
+  "owned_container_running_after_stop": false,
+  "finished_utc": "2026-10-10T08:53:57.225504+00:00"
+}

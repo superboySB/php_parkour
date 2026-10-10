@@ -5,6 +5,7 @@ import importlib.util
 import json
 from pathlib import Path
 from types import SimpleNamespace
+import sys
 
 import pytest
 
@@ -72,3 +73,73 @@ def test_atomic_report_rejects_nonfinite_json(tmp_path):
     with pytest.raises(ValueError):
         quality.atomic_json(report, {"error": float("nan")})
     assert json.loads(report.read_text()) == {"status": "old-complete"}
+
+
+def prepare_native_main(tmp_path, monkeypatch, native):
+    from holosoma.config_types.eval_callback import EvalCallbacksConfig
+    checkpoint = tmp_path / "original.pt"
+    checkpoint.write_bytes(b"opaque checkpoint; no mock physics or model load")
+    report = tmp_path / "quality.json"
+    argv = ["eval_quality", "teacher", "--quality-output", str(report), "--checkpoint", str(checkpoint)]
+    monkeypatch.setattr(sys, "argv", argv)
+    original = EvalCallbacksConfig.collect_active_callbacks
+    monkeypatch.setattr(quality.importlib, "import_module", lambda name: SimpleNamespace(main=lambda: native(checkpoint, report)))
+    return checkpoint, report, argv, EvalCallbacksConfig, original
+
+
+def valid_main_report(checkpoint):
+    return {"schema_version": 1, "status": "completed", "checkpoint": str(checkpoint),
+            "checkpoint_sha256": quality.sha256(checkpoint), "control_steps": 100, "num_envs": 16,
+            "finite_actions": True, "finite_root_states": True}
+
+
+def test_native_return_without_rollout_report_is_nonzero_failure(tmp_path, monkeypatch):
+    _, report, argv, callbacks, original = prepare_native_main(tmp_path, monkeypatch, lambda *_: None)
+    with pytest.raises(RuntimeError, match="without a fresh quality report"):
+        quality.main()
+    assert not report.exists()
+    assert callbacks.collect_active_callbacks is original and sys.argv is argv
+
+
+def test_existing_quality_report_is_preserved_and_never_reused(tmp_path, monkeypatch):
+    calls = []
+    _, report, _, callbacks, original = prepare_native_main(tmp_path, monkeypatch, lambda *_: calls.append(1))
+    report.write_bytes(b"historical raw evidence\n")
+    with pytest.raises(SystemExit) as error:
+        quality.main()
+    assert error.value.code == 2 and not calls
+    assert report.read_bytes() == b"historical raw evidence\n" and callbacks.collect_active_callbacks is original
+
+
+@pytest.mark.parametrize("field,value", [("checkpoint_sha256", "0" * 64), ("control_steps", 0),
+    ("control_steps", True), ("num_envs", 0), ("finite_actions", False), ("finite_root_states", False),
+    ("checkpoint", "/different/model.pt"), ("status", "running")])
+def test_fresh_but_invalid_rollout_report_does_not_pass(tmp_path, monkeypatch, field, value):
+    def native(checkpoint, report):
+        data = valid_main_report(checkpoint)
+        data[field] = value
+        report.write_text(json.dumps(data))
+    _, report, argv, callbacks, original = prepare_native_main(tmp_path, monkeypatch, native)
+    with pytest.raises(RuntimeError, match="does not prove a finite rollout"):
+        quality.main()
+    assert report.is_file() and callbacks.collect_active_callbacks is original and sys.argv is argv
+
+
+def test_checkpoint_mutation_after_native_return_is_rejected(tmp_path, monkeypatch):
+    def native(checkpoint, report):
+        report.write_text(json.dumps(valid_main_report(checkpoint)))
+        checkpoint.write_bytes(b"changed checkpoint")
+    prepare_native_main(tmp_path, monkeypatch, native)
+    with pytest.raises(RuntimeError, match="does not prove a finite rollout"):
+        quality.main()
+
+
+def test_fresh_finite_rollout_accepts_failed_resets_without_claiming_skill_quality(tmp_path, monkeypatch):
+    def native(checkpoint, report):
+        data = valid_main_report(checkpoint)
+        data.update(failed_resets=900, quality_verified=False)
+        report.write_text(json.dumps(data))
+    _, report, argv, callbacks, original = prepare_native_main(tmp_path, monkeypatch, native)
+    quality.main()
+    assert callbacks.collect_active_callbacks is original and sys.argv is argv
+    assert json.loads(report.read_text())["quality_verified"] is False

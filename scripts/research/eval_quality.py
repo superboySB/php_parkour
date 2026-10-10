@@ -189,11 +189,14 @@ def main():
     parser.add_argument("kind", choices=("teacher", "student"))
     parser.add_argument("--quality-output", type=Path, required=True)
     args, native_argv = parser.parse_known_args()
+    if args.quality_output.exists() or args.quality_output.is_symlink():
+        parser.error("Use a fresh quality output; preserve previous rollout evidence")
     if "--checkpoint" not in native_argv:
         parser.error("native --checkpoint is required")
     checkpoint = native_argv[native_argv.index("--checkpoint") + 1]
     if not Path(checkpoint).is_file():
         parser.error("Use an existing, resolved local PT checkpoint")
+    checkpoint_sha = sha256(checkpoint)
     from holosoma.config_types.eval_callback import EvalCallbacksConfig
     collect = EvalCallbacksConfig.collect_active_callbacks
 
@@ -203,9 +206,29 @@ def main():
                                       {"output": str(args.quality_output.resolve()), "checkpoint": checkpoint, "argv": native_argv})
         return configs
 
-    EvalCallbacksConfig.collect_active_callbacks = with_quality
-    sys.argv = [f"eval_{args.kind}", *native_argv]
-    importlib.import_module(f"wbt_training.training_runs.eval_{args.kind}").main()
+    previous_argv = sys.argv
+    try:
+        EvalCallbacksConfig.collect_active_callbacks = with_quality
+        sys.argv = [f"eval_{args.kind}", *native_argv]
+        importlib.import_module(f"wbt_training.training_runs.eval_{args.kind}").main()
+    finally:
+        EvalCallbacksConfig.collect_active_callbacks = collect
+        sys.argv = previous_argv
+    # The upstream evaluator can catch a setup exception and return normally.
+    # A zero process exit without this callback's fresh report is not a rollout.
+    if not args.quality_output.is_file() or args.quality_output.is_symlink():
+        raise RuntimeError("Native evaluator returned without a fresh quality report; inspect the retained traceback")
+    report = json.loads(args.quality_output.read_text())
+    if (not isinstance(report, dict) or report.get("schema_version") != 1
+            or report.get("status") != "completed"
+            or not isinstance(report.get("checkpoint"), str)
+            or Path(report["checkpoint"]).resolve() != Path(checkpoint).resolve()
+            or report.get("checkpoint_sha256") != checkpoint_sha
+            or sha256(checkpoint) != checkpoint_sha
+            or type(report.get("control_steps")) is not int or report["control_steps"] <= 0
+            or type(report.get("num_envs")) is not int or report["num_envs"] <= 0
+            or report.get("finite_actions") is not True or report.get("finite_root_states") is not True):
+        raise RuntimeError("Fresh quality report does not prove a finite rollout of the requested checkpoint")
 
 
 if __name__ == "__main__":

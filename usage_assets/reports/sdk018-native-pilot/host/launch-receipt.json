@@ -1,0 +1,538 @@
+{
+  "schema_version": 1,
+  "status": "completed",
+  "plan_sha256": "73ee3b6f55b5148220218ae5f63b59865aedb61b0da16a002129ee1b5fcd425e",
+  "started_unix": 1791621702.3782485,
+  "endpoint": {
+    "context": "default",
+    "endpoint": "unix:///var/run/docker.sock"
+  },
+  "gpu_preflight": {
+    "selected_gpu_uuid": "GPU-1803972d-e774-ee96-e6f6-1ee1ce47bb25",
+    "matching_compute_processes": []
+  },
+  "create_argv": [
+    "docker",
+    "create",
+    "--name",
+    "php-sdk018-pilot-996e187b847eb755",
+    "--network",
+    "none",
+    "--ipc",
+    "private",
+    "--init",
+    "--shm-size",
+    "8g",
+    "--gpus",
+    "device=GPU-1803972d-e774-ee96-e6f6-1ee1ce47bb25",
+    "--workdir",
+    "/workspace/php_parkour",
+    "--entrypoint",
+    "/bin/bash",
+    "--env",
+    "PHP_DOCKER=1",
+    "--env",
+    "WANDB_MODE=disabled",
+    "--env",
+    "WANDB_DISABLED=true",
+    "--env",
+    "HF_HUB_OFFLINE=1",
+    "--env",
+    "HF_DATASETS_OFFLINE=1",
+    "--env",
+    "TRANSFORMERS_OFFLINE=1",
+    "--env",
+    "MUJOCO_EGL_DEVICE_ID=0",
+    "--env",
+    "PYTHONDONTWRITEBYTECODE=1",
+    "--env",
+    "NVIDIA_DRIVER_CAPABILITIES=compute,utility,graphics",
+    "--mount",
+    "type=bind,src=/home/dzp/projects/php_parkour/outputs/research/sdk018-native-pilot-20261010T0915/source,dst=/workspace/php_parkour,readonly",
+    "--mount",
+    "type=bind,src=/home/dzp/projects/php_parkour/outputs/research/sdk018-native-pilot-20261010T0915/inputs,dst=/data,readonly",
+    "--mount",
+    "type=bind,src=/home/dzp/projects/php_parkour/outputs/research/sdk018-native-pilot-20261010T0915/outputs,dst=/outputs",
+    "--mount",
+    "type=bind,src=/home/dzp/projects/php_parkour/outputs/research/sdk018-native-pilot-20261010T0915/cache,dst=/data/cache",
+    "sha256:caf61487b69ce478980b3bf9df38a7f1fcaaae4b109d971dfbea10b09bf441aa",
+    "-lc",
+    "exec sleep infinity"
+  ],
+  "native_started": true,
+  "container_id": "8d64156bd99f523047b7ef66bfcd72339da81b9daf3e0c56e958c9aa95499c84",
+  "gpu_before_native": {
+    "selected_gpu_uuid": "GPU-1803972d-e774-ee96-e6f6-1ee1ce47bb25",
+    "matching_compute_processes": []
+  },
+  "observer_argv": [
+    "/usr/bin/python3",
+    "/home/dzp/projects/php_parkour/outputs/research/sdk018-native-pilot-20261010T0915/host/observe_container_pids.py",
+    "--container-id",
+    "8d64156bd99f523047b7ef66bfcd72339da81b9daf3e0c56e958c9aa95499c84",
+    "--expected-image",
+    "sha256:caf61487b69ce478980b3bf9df38a7f1fcaaae4b109d971dfbea10b09bf441aa",
+    "--output",
+    "/home/dzp/projects/php_parkour/outputs/research/sdk018-native-pilot-20261010T0915/host/observer",
+    "--stop-file",
+    "/home/dzp/projects/php_parkour/outputs/research/sdk018-native-pilot-20261010T0915/host/observer-stop",
+    "--interval",
+    "0.2",
+    "--max-seconds",
+    "900"
+  ],
+  "native_start_unix": 1791621702.7246757,
+  "native_argv": [
+    "docker",
+    "exec",
+    "8d64156bd99f523047b7ef66bfcd72339da81b9daf3e0c56e958c9aa95499c84",
+    "/opt/php/bin/inference-python",
+    "/workspace/php_parkour/scripts/research/sdk018_pilot_executor.py",
+    "--plan",
+    "/data/native-plan.json",
+    "--summary",
+    "/outputs/pilot-summary.json"
+  ],
+  "docker_exec_host_pid": 579699,
+  "driver_timeout_seconds": 850,
+  "driver_returncode": 0,
+  "observer_returncode": 0,
+  "host_native_mappings": [
+    {
+      "case_id": "low_speed_step:0041:right_45_walk1.5s_step0s",
+      "role": "simulator",
+      "native_entry_sha256": "87be2b2857985f4475f730c09f085a0e63c57dbde4a12f4b377feda332f5adae",
+      "mappings": [
+        {
+          "role": "simulator",
+          "worker_output": "/outputs/cases/low_speed_step-0041-744bdf020e7b",
+          "host_tid": 580708,
+          "host_tgid": 579803,
+          "container_tid": 55,
+          "container_tgid": 29,
+          "nspid": [
+            580708,
+            55
+          ],
+          "owner_start_time_clock_ticks": 104969769,
+          "nstgid": [
+            579803,
+            29
+          ],
+          "status": {
+            "Name": "command_writer",
+            "State": "S (sleeping)",
+            "Tgid": "579803",
+            "Pid": "580708",
+            "PPid": "579798",
+            "NStgid": [
+              579803,
+              29
+            ],
+            "NSpid": [
+              580708,
+              55
+            ],
+            "Threads": "18"
+          },
+          "start_time_clock_ticks": 104970309,
+          "first_observed_utc": "2026-10-10T08:41:48.772117+00:00",
+          "last_observed_utc": "2026-10-10T08:42:04.167138+00:00"
+        }
+      ]
+    },
+    {
+      "case_id": "low_speed_step:0041:right_45_walk1.5s_step0s",
+      "role": "inference",
+      "native_entry_sha256": "1837a1c80063537793aa53ae26f2bedc0a63c41871b337163a059739ea194a23",
+      "mappings": [
+        {
+          "role": "inference",
+          "worker_output": "/outputs/cases/low_speed_step-0041-744bdf020e7b",
+          "host_tid": 580915,
+          "host_tgid": 580744,
+          "container_tid": 74,
+          "container_tgid": 62,
+          "nspid": [
+            580915,
+            74
+          ],
+          "owner_start_time_clock_ticks": 104970330,
+          "nstgid": [
+            580744,
+            62
+          ],
+          "status": {
+            "Name": "command_writer",
+            "State": "S (sleeping)",
+            "Tgid": "580744",
+            "Pid": "580915",
+            "PPid": "579797",
+            "NStgid": [
+              580744,
+              62
+            ],
+            "NSpid": [
+              580915,
+              74
+            ],
+            "Threads": "15"
+          },
+          "start_time_clock_ticks": 104970431,
+          "first_observed_utc": "2026-10-10T08:41:49.886709+00:00",
+          "last_observed_utc": "2026-10-10T08:42:02.833649+00:00"
+        }
+      ]
+    },
+    {
+      "case_id": "low_speed_climb_58:0022:left_90_walk2.0s_plat0s",
+      "role": "simulator",
+      "native_entry_sha256": "b3af5b62fc83a4e35ae99dc9895a70742bc0b92dbbe35ebc45c40c4428c91742",
+      "mappings": [
+        {
+          "role": "simulator",
+          "worker_output": "/outputs/cases/low_speed_climb_58-0022-865815b831c2",
+          "host_tid": 584460,
+          "host_tgid": 583520,
+          "container_tid": 275,
+          "container_tgid": 249,
+          "nspid": [
+            584460,
+            275
+          ],
+          "owner_start_time_clock_ticks": 104971940,
+          "nstgid": [
+            583520,
+            249
+          ],
+          "status": {
+            "Name": "command_writer",
+            "State": "S (sleeping)",
+            "Tgid": "583520",
+            "Pid": "584460",
+            "PPid": "583515",
+            "NStgid": [
+              583520,
+              249
+            ],
+            "NSpid": [
+              584460,
+              275
+            ],
+            "Threads": "18"
+          },
+          "start_time_clock_ticks": 104972517,
+          "first_observed_utc": "2026-10-10T08:42:10.728084+00:00",
+          "last_observed_utc": "2026-10-10T08:42:26.338281+00:00"
+        }
+      ]
+    },
+    {
+      "case_id": "low_speed_climb_58:0022:left_90_walk2.0s_plat0s",
+      "role": "inference",
+      "native_entry_sha256": "385396a7698a80e5e39cc626e2f2a5c6372792681c2998e04a039213e4e7fbc7",
+      "mappings": [
+        {
+          "role": "inference",
+          "worker_output": "/outputs/cases/low_speed_climb_58-0022-865815b831c2",
+          "host_tid": 584695,
+          "host_tgid": 584525,
+          "container_tid": 294,
+          "container_tgid": 282,
+          "nspid": [
+            584695,
+            294
+          ],
+          "owner_start_time_clock_ticks": 104972541,
+          "nstgid": [
+            584525,
+            282
+          ],
+          "status": {
+            "Name": "command_writer",
+            "State": "S (sleeping)",
+            "Tgid": "584525",
+            "Pid": "584695",
+            "PPid": "583514",
+            "NStgid": [
+              584525,
+              282
+            ],
+            "NSpid": [
+              584695,
+              294
+            ],
+            "Threads": "15"
+          },
+          "start_time_clock_ticks": 104972637,
+          "first_observed_utc": "2026-10-10T08:42:12.042626+00:00",
+          "last_observed_utc": "2026-10-10T08:42:25.002309+00:00"
+        }
+      ]
+    },
+    {
+      "case_id": "low_speed_climb_58:0031:right_45_walk2.0s_plat1.2s",
+      "role": "simulator",
+      "native_entry_sha256": "9cd09d4056d2d95f99e662106ba032ce22b9558076079276e1a26969c004ed40",
+      "mappings": [
+        {
+          "role": "simulator",
+          "worker_output": "/outputs/cases/low_speed_climb_58-0031-8ce5f91111d1",
+          "host_tid": 588215,
+          "host_tgid": 587290,
+          "container_tid": 495,
+          "container_tgid": 469,
+          "nspid": [
+            588215,
+            495
+          ],
+          "owner_start_time_clock_ticks": 104974128,
+          "nstgid": [
+            587290,
+            469
+          ],
+          "status": {
+            "Name": "command_writer",
+            "State": "S (sleeping)",
+            "Tgid": "587290",
+            "Pid": "588215",
+            "PPid": "587285",
+            "NStgid": [
+              587290,
+              469
+            ],
+            "NSpid": [
+              588215,
+              495
+            ],
+            "Threads": "18"
+          },
+          "start_time_clock_ticks": 104974674,
+          "first_observed_utc": "2026-10-10T08:42:32.465938+00:00",
+          "last_observed_utc": "2026-10-10T08:42:47.864749+00:00"
+        }
+      ]
+    },
+    {
+      "case_id": "low_speed_climb_58:0031:right_45_walk2.0s_plat1.2s",
+      "role": "inference",
+      "native_entry_sha256": "a0ea3d33ead418a696b131d710337632459b65fd40a3d6b5c9b13e926ec1463e",
+      "mappings": [
+        {
+          "role": "inference",
+          "worker_output": "/outputs/cases/low_speed_climb_58-0031-8ce5f91111d1",
+          "host_tid": 588400,
+          "host_tgid": 588222,
+          "container_tid": 514,
+          "container_tgid": 502,
+          "nspid": [
+            588400,
+            514
+          ],
+          "owner_start_time_clock_ticks": 104974689,
+          "nstgid": [
+            588222,
+            502
+          ],
+          "status": {
+            "Name": "command_writer",
+            "State": "S (sleeping)",
+            "Tgid": "588222",
+            "Pid": "588400",
+            "PPid": "587284",
+            "NStgid": [
+              588222,
+              502
+            ],
+            "NSpid": [
+              588400,
+              514
+            ],
+            "Threads": "15"
+          },
+          "start_time_clock_ticks": 104974786,
+          "first_observed_utc": "2026-10-10T08:42:33.561085+00:00",
+          "last_observed_utc": "2026-10-10T08:42:46.313111+00:00"
+        }
+      ]
+    },
+    {
+      "case_id": "high_speed_climb_58:0000:run_forward_0.6s_step0.1s",
+      "role": "simulator",
+      "native_entry_sha256": "27a5cb2302390a4b0d420b1ebb97978e0f39700cbc33f6a1ff486e32d3658fff",
+      "mappings": [
+        {
+          "role": "simulator",
+          "worker_output": "/outputs/cases/high_speed_climb_58-0000-ab1b00bb0e5b",
+          "host_tid": 592178,
+          "host_tgid": 591334,
+          "container_tid": 715,
+          "container_tgid": 689,
+          "nspid": [
+            592178,
+            715
+          ],
+          "owner_start_time_clock_ticks": 104976279,
+          "nstgid": [
+            591334,
+            689
+          ],
+          "status": {
+            "Name": "command_writer",
+            "State": "S (sleeping)",
+            "Tgid": "591334",
+            "Pid": "592178",
+            "PPid": "591329",
+            "NStgid": [
+              591334,
+              689
+            ],
+            "NSpid": [
+              592178,
+              715
+            ],
+            "Threads": "18"
+          },
+          "start_time_clock_ticks": 104976822,
+          "first_observed_utc": "2026-10-10T08:42:53.767438+00:00",
+          "last_observed_utc": "2026-10-10T08:43:09.378128+00:00"
+        }
+      ]
+    },
+    {
+      "case_id": "high_speed_climb_58:0000:run_forward_0.6s_step0.1s",
+      "role": "inference",
+      "native_entry_sha256": "b4280c910422c773c70d63f9c191aaba41914d48cf4bf7575da0e36f2a398ccd",
+      "mappings": [
+        {
+          "role": "inference",
+          "worker_output": "/outputs/cases/high_speed_climb_58-0000-ab1b00bb0e5b",
+          "host_tid": 592404,
+          "host_tgid": 592225,
+          "container_tid": 734,
+          "container_tgid": 722,
+          "nspid": [
+            592404,
+            734
+          ],
+          "owner_start_time_clock_ticks": 104976841,
+          "nstgid": [
+            592225,
+            722
+          ],
+          "status": {
+            "Name": "command_writer",
+            "State": "S (sleeping)",
+            "Tgid": "592225",
+            "Pid": "592404",
+            "PPid": "591310",
+            "NStgid": [
+              592225,
+              722
+            ],
+            "NSpid": [
+              592404,
+              734
+            ],
+            "Threads": "15"
+          },
+          "start_time_clock_ticks": 104976938,
+          "first_observed_utc": "2026-10-10T08:42:55.083078+00:00",
+          "last_observed_utc": "2026-10-10T08:43:07.821889+00:00"
+        }
+      ]
+    },
+    {
+      "case_id": "high_speed_climb_58:0023:run_left_90_1.5s_step1.0s",
+      "role": "simulator",
+      "native_entry_sha256": "c2b279a43674776fbff31185d071efb4e41d44a942b9f2756bbba5512f06fa01",
+      "mappings": [
+        {
+          "role": "simulator",
+          "worker_output": "/outputs/cases/high_speed_climb_58-0023-a4aad2a02ca6",
+          "host_tid": 595885,
+          "host_tgid": 595018,
+          "container_tid": 935,
+          "container_tgid": 909,
+          "nspid": [
+            595885,
+            935
+          ],
+          "owner_start_time_clock_ticks": 104978448,
+          "nstgid": [
+            595018,
+            909
+          ],
+          "status": {
+            "Name": "command_writer",
+            "State": "S (sleeping)",
+            "Tgid": "595018",
+            "Pid": "595885",
+            "PPid": "595012",
+            "NStgid": [
+              595018,
+              909
+            ],
+            "NSpid": [
+              595885,
+              935
+            ],
+            "Threads": "18"
+          },
+          "start_time_clock_ticks": 104978983,
+          "first_observed_utc": "2026-10-10T08:43:15.510009+00:00",
+          "last_observed_utc": "2026-10-10T08:43:31.113082+00:00"
+        }
+      ]
+    },
+    {
+      "case_id": "high_speed_climb_58:0023:run_left_90_1.5s_step1.0s",
+      "role": "inference",
+      "native_entry_sha256": "f120bff618dc39f45880f22d730c4c19c8a05dc81eed0ce71d24a4df035fb583",
+      "mappings": [
+        {
+          "role": "inference",
+          "worker_output": "/outputs/cases/high_speed_climb_58-0023-a4aad2a02ca6",
+          "host_tid": 596096,
+          "host_tgid": 595921,
+          "container_tid": 954,
+          "container_tgid": 942,
+          "nspid": [
+            596096,
+            954
+          ],
+          "owner_start_time_clock_ticks": 104979009,
+          "nstgid": [
+            595921,
+            942
+          ],
+          "status": {
+            "Name": "command_writer",
+            "State": "S (sleeping)",
+            "Tgid": "595921",
+            "Pid": "596096",
+            "PPid": "595011",
+            "NStgid": [
+              595921,
+              942
+            ],
+            "NSpid": [
+              596096,
+              954
+            ],
+            "Threads": "13"
+          },
+          "start_time_clock_ticks": 104979105,
+          "first_observed_utc": "2026-10-10T08:43:16.606955+00:00",
+          "last_observed_utc": "2026-10-10T08:43:29.564277+00:00"
+        }
+      ]
+    }
+  ],
+  "native_summary_sha256": "d3438101202f10c813acce204a61eef6cd0f53e7651c4bad95bc1e74e3fada24",
+  "observer_summary_sha256": "b17ed92a0af4859b56b82f5363fb4a7c8f8e5cd4a5bcfbfd35e1959b6361ec53",
+  "owned_container_stop": "Flag --time has been deprecated, use --timeout instead\n8d64156bd99f523047b7ef66bfcd72339da81b9daf3e0c56e958c9aa95499c84",
+  "owned_container_running_after_stop": false,
+  "driver_returncode_after_container_stop": 0,
+  "finished_unix": 1791621811.8574796
+}

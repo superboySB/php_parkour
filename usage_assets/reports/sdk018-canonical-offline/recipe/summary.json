@@ -1,0 +1,180 @@
+{
+  "schema_version": 1,
+  "status": "proposal_ready_not_applied_not_built",
+  "source_sdk018_candidate_image": "sha256:caf61487b69ce478980b3bf9df38a7f1fcaaae4b109d971dfbea10b09bf441aa",
+  "old_canonical_image": "sha256:88254ac0b90a3056375145601d741aa3e08726e18412d201a3c7e7915a23996f",
+  "old_lock_source_image": "sha256:4a0aa12db11137e88db530fe871229d5bfe146e14db254f326f64c69b947cab2",
+  "future_canonical_image": null,
+  "cpu_container_id": "21cd2fece0d74990721d69f86d0650b292cf7b44ba8564bddc1fc56179797f1a",
+  "cpu_exit_code": 0,
+  "cpu_runc_network_none_readonly_no_gpu": true,
+  "new_freezes_byte_equal_prior_actual_candidate": {
+    "train": true,
+    "motion": true,
+    "inference": true
+  },
+  "constraint_counts": {
+    "train": 117,
+    "inference": 66,
+    "motion": 82
+  },
+  "exact_constraint_versions_verified_against_candidate_metadata": true,
+  "patch_sha256": "c741cb57b7ecb8d7f427b27015d837eaa742d3590b232ad36a3a8df5474085db",
+  "original_files": [
+    {
+      "path": "docker/Dockerfile",
+      "sha256": "f46b2567ee7bf8176902be63c7f28a0a923880fd801d0b87a71f3a29d8480ef0"
+    },
+    {
+      "path": "docker/constraints.train-added.txt",
+      "sha256": "09c0224902402206cac2c46df1c894859b1538e02ddc911d9289bb5ae9bee298"
+    },
+    {
+      "path": "docker/constraints.inference.txt",
+      "sha256": "297b7044752b56db4080bbf972c9ae15c33249b8b4cbb8f8807a88b2b8f9bdd4"
+    },
+    {
+      "path": "docker/runtime-locks.json",
+      "sha256": "9bcba6a6b71e8c3c9b8460ea074c3235ff5945638c2d7f50fa0bb574b9d5d3bd"
+    }
+  ],
+  "proposed_files": [
+    {
+      "path": "docker/Dockerfile",
+      "sha256": "e5e086b5fc7a8c740979e12754801a44d397a0f885a6c698d57f4aebace37e45"
+    },
+    {
+      "path": "docker/constraints.train-added.txt",
+      "sha256": "862bf043c833780984b52f6a10fd33226157f73f5424269d3d8ef108c682376c"
+    },
+    {
+      "path": "docker/constraints.inference.txt",
+      "sha256": "0e6bd3fe17724e295052b3fd1b8a495606002d54f845d1f64ab2dc5820e5b764"
+    },
+    {
+      "path": "docker/runtime-locks.json",
+      "sha256": "a91689aadb6f7527178b4d319ff1c6782bb775af7903596410c23ab983271758"
+    }
+  ],
+  "solver": {
+    "schema_version": 1,
+    "observed_utc": "2026-10-10T08:45:37.701035+00:00",
+    "source_image": "sha256:caf61487b69ce478980b3bf9df38a7f1fcaaae4b109d971dfbea10b09bf441aa",
+    "status": "passed",
+    "runtimes": [
+      {
+        "runtime": "train",
+        "freeze_sha256": "82bd60f80585895ec5fafcd5bea42dc5f8ff04e66d35b127d68856b9d2780c92",
+        "metadata_sha256": "c4982b984d90889aea7ae9baac5531c6b3f59f7d13d3e3772121d6003cb5a46e",
+        "solver_checks": [
+          {
+            "extra": "booster",
+            "argv": [
+              "/opt/php/bin/train-python",
+              "-m",
+              "pip",
+              "install",
+              "--dry-run",
+              "--no-index",
+              "--no-cache-dir",
+              "--disable-pip-version-check",
+              "--report",
+              "/audit/actual-freezes/train-positive-booster-report.json",
+              "-c",
+              "/audit/proposed/docker/constraints.train-added.txt",
+              "holosoma[booster]",
+              "far-unitree-sdk==0.1.8"
+            ],
+            "returncode": 0,
+            "expected_success": true
+          },
+          {
+            "extra": "unitree,booster",
+            "argv": [
+              "/opt/php/bin/train-python",
+              "-m",
+              "pip",
+              "install",
+              "--dry-run",
+              "--no-index",
+              "--no-cache-dir",
+              "--disable-pip-version-check",
+              "--report",
+              "/audit/actual-freezes/train-negative-unitree-report.json",
+              "-c",
+              "/audit/proposed/docker/constraints.train-added.txt",
+              "holosoma[unitree,booster]",
+              "far-unitree-sdk==0.1.8"
+            ],
+            "returncode": 1,
+            "expected_success": false
+          }
+        ]
+      },
+      {
+        "runtime": "inference",
+        "freeze_sha256": "744cea20ce6407c7be524f79de49d82775880ddb9d29cea37d4eba898c43dd8a",
+        "metadata_sha256": "c7fb08567e2c6fff712eb40d537f69f933c7a5350a294ce7c6b6185a2df706b4",
+        "solver_checks": [
+          {
+            "extra": "booster",
+            "argv": [
+              "/opt/php/bin/inference-python",
+              "-m",
+              "pip",
+              "install",
+              "--dry-run",
+              "--no-index",
+              "--no-cache-dir",
+              "--disable-pip-version-check",
+              "--report",
+              "/audit/actual-freezes/inference-positive-booster-report.json",
+              "-c",
+              "/audit/proposed/docker/constraints.inference.txt",
+              "holosoma-inference[booster]",
+              "far-unitree-sdk==0.1.8"
+            ],
+            "returncode": 0,
+            "expected_success": true
+          },
+          {
+            "extra": "unitree,booster",
+            "argv": [
+              "/opt/php/bin/inference-python",
+              "-m",
+              "pip",
+              "install",
+              "--dry-run",
+              "--no-index",
+              "--no-cache-dir",
+              "--disable-pip-version-check",
+              "--report",
+              "/audit/actual-freezes/inference-negative-unitree-report.json",
+              "-c",
+              "/audit/proposed/docker/constraints.inference.txt",
+              "holosoma-inference[unitree,booster]",
+              "far-unitree-sdk==0.1.8"
+            ],
+            "returncode": 1,
+            "expected_success": false
+          }
+        ]
+      },
+      {
+        "runtime": "motion",
+        "freeze_sha256": "622fc360243892e38508f52345566967f9b063072a6a38be6b515438ffcae4c8",
+        "metadata_sha256": "053b897a6b6ba3e3cace7de02ec821daa66ffa59b548f06f009ad5e09fee7747",
+        "solver_checks": []
+      }
+    ],
+    "scope": "Actual candidate pip freeze and existing installed-environment dry-run; no install, SDK module import/constructor, DDS, GPU or fresh all-dependency solve"
+  },
+  "limits": [
+    "No tracked source, existing image/tag/container, native job or host package modified.",
+    "Only a new owned stopped CPU audit container was created. No SDK module constructor, DDS or GPU use.",
+    "Existing candidate train/inference dry-runs preserve all packages; this is not a fresh dependency resolution.",
+    "SDK018 candidate freezes contain direct local wheel URIs, while future normal index installs may produce ==0.1.8; do not fabricate future canonical freeze bytes.",
+    "Local full build may use network and pip cache; dual SDK wheels and cached882 do not prove offline bootstrap from NVIDIA base. Cloud should receive complete verified built image offline.",
+    "New canonical build, fresh actual freeze/API/binary checks, source image identity and regression tests remain future root actions."
+  ]
+}

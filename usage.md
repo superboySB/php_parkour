@@ -4,7 +4,7 @@
 
 学习流程、输入输出、数据/label 来源与 real2sim2real 实现细节见独立的 [technical_pipeline.md](technical_pipeline.md)。
 
-最新纠正：北京时间15:48已有序停止旧629物理批次，原279 reported completed/5失败/1中断/344未运行均保留。旧监督遗漏最终worker退出码，已有10个reported completed及旧12指令的command02存在模拟器SIGSEGV；这些不能作为正常退出验收。后续将修复SDK及监督并新开批次，不修改旧结果伪装通过。[停止回执](usage_assets/reports/sim2sim-cohort-halt/summary.md)、[逐日志实证](usage_assets/reports/worker-exit-completed-log-audit/report.md)。以下历史轨迹、阈值与时间快照仍保留原始范围。
+最新纠正：北京时间15:48已有序停止旧629物理批次，原279 reported completed/5失败/1中断/344未运行均保留。旧监督遗漏最终worker退出码，已有10个reported completed及旧12指令的command02存在模拟器SIGSEGV；这些不能作为正常退出验收。修复监督与SDK后，原5个显式失败配置的新闭环全部正常退出，fresh629仍须独立执行。[新五例原生试跑](usage_assets/reports/sdk018-native-pilot/summary.md)。[停止回执](usage_assets/reports/sim2sim-cohort-halt/summary.md)、[逐日志实证](usage_assets/reports/worker-exit-completed-log-audit/report.md)。以下历史轨迹、阈值与时间快照仍保留原始范围。
 
 先看真实结果：[17 场景物理闭环视频](usage_assets/sim2sim/scenarios/playback.html)、[17 场景参考动作播放页](usage_assets/motion_matching/playback.html)、[12 指令物理闭环视频](usage_assets/sim2sim/directions.mp4)、[逐项原始报告](usage_assets/reports/)。参考动作来自生成数组，闭环录像来自公开 ONNX 策略驱动的 MuJoCo，训练录像来自实际 Isaac checkpoint。
 
@@ -147,7 +147,7 @@ smoke 采用显式缩小的并行环境、布局和迭代数，检查实际梯�
 
 初版镜像的云端 **22/22 项 smoke** 已完成：五类教师、六种教师 preset、五类教师评估、两种学生训练、两种学生评估与两种独立导出。每次训练均实际更新权重；两类学生导出的双 ONNX 各通过 30 组真实推理。全部阶段耗时 683.109 秒，13 个训练 run 的 TensorBoard loss/reward 都是有限值。[初版云端汇总及原始报告](usage_assets/reports/training-cloud-summary.md)保留 checkpoint、源代码快照和模型哈希。
 
-最终统一镜像及冻结源码 `3439cb7` 又完整复跑 **22/22 项，通过、退出码 0**，耗时 711.748 秒。13 个训练阶段逐一验证了两轮之间权重的有限性和非零更新；五教师共 60 组真实 ONNX 推理，两学生独立导出各 30 组推理均通过。七次新版质量评估、29 份原始 TensorBoard events、140 个下载产物 SHA 和运行前后 1903 个源码文件均已复核。[最终验收汇总](usage_assets/reports/training-cloud-final/summary.md)、[逐项报告](usage_assets/reports/training-cloud-final/summary.json)、[本轮视频与来源 SHA](usage_assets/reports/training-cloud-final/media.json)。未收敛的失败短片也完整保留，例如[教师 locomotion](usage_assets/videos/final-cloud/eval-teacher-locomotion.mp4)和[学生 finetune](usage_assets/videos/final-cloud/eval-student-finetune.mp4)，不能作为技能成功证据。
+首版冻结统一镜像及源码 `3439cb7` 又完整复跑 **22/22 项，通过、退出码 0**，耗时 711.748 秒。13 个训练阶段逐一验证了两轮之间权重的有限性和非零更新；五教师共 60 组真实 ONNX 推理，两学生独立导出各 30 组推理均通过。七次新版质量评估、29 份原始 TensorBoard events、140 个下载产物 SHA 和运行前后 1903 个源码文件均已复核。[最终验收汇总](usage_assets/reports/training-cloud-final/summary.md)、[逐项报告](usage_assets/reports/training-cloud-final/summary.json)、[本轮视频与来源 SHA](usage_assets/reports/training-cloud-final/media.json)。未收敛的失败短片也完整保留，例如[教师 locomotion](usage_assets/videos/final-cloud/eval-teacher-locomotion.mp4)和[学生 finetune](usage_assets/videos/final-cloud/eval-student-finetune.mp4)，不能作为技能成功证据。
 
 进一步对六种教师preset各自保存的PT/ONNX实跑CPU检查：72个图内参考查询与60个确定性动作均值对照全部通过，最大绝对误差6.33e-8，输入模型未变且CUDA未初始化。三个no-heightscan actor/critic为160/286维，其余为449/575维，pelvis/torso anchor和缩放配置分别核对。YAML与PT有原生`robot_action_dim`→29展开差异，原比较false保留且没有改写输入。新增8项错配拒绝测试通过，独立复核也通过；五个非默认preset的Isaac重载仍待GPU空闲，不能用CPU检查替代。[六配置来源、输出与原始报告](usage_assets/reports/teacher-presets-cpu/summary.md)。
 
@@ -261,7 +261,7 @@ bash scripts/research/docker.sh sim scripts/research/sim2sim.py \
 
 15:33的新只读PID/计数快照为237完成、2执行失败、1运行、389待运行，原driver和native后代仍存活。[原始快照](usage_assets/reports/technical-pipeline-review/scan-counts-pids.json)。第二项是`low_speed_climb_58:0022:left_90_walk2.0s_plat0s`：500ticks、10仿真秒、无吊架轨迹有限且未触发姿态阈值，但模拟器PID与shell的`Segmentation fault`记录直接匹配，父进程最终exit1。[14份原文件、两条内核记录及共同模式](usage_assets/reports/sim2sim-worker-failure-second/report.md)。这明确保留执行错误，不能因body数据完整就改记成功；具体kernel线程与worker仍缺完整映射。
 
-后续只读审计检查275个reported completed的550份worker日志，发现10份模拟器段错误且封存SHA完全一致；旧12指令command02也有同样退出故障，说明原监督门卫存在实质漏记。旧批次已停止并完整保留340项原依赖集合的76.77MB本地归档，另逐项证明可由记录的Git提交恢复。[原字节与Git来源](usage_assets/reports/sim2sim-cohort-halt/summary.md)。上游SDK0.1.8已有等待writer结束后再析构的修复；独立候选`caf61487…`离线构建及无GPU导入/API检查通过，原镜像和pins未变。[上游源码与二进制审计](usage_assets/reports/unitree-lifecycle-independent/report.md)、[候选实际CPU结果](usage_assets/reports/unitree-sdk018-candidate/summary.md)。新worker门卫已应用并通过CPU回归；候选native尝试遇到启动错误，退出闭环及fresh629仍待完成。
+后续只读审计检查275个reported completed的550份worker日志，发现10份模拟器段错误且封存SHA完全一致；旧12指令command02也有同样退出故障，说明原监督门卫存在实质漏记。旧批次已停止并完整保留340项原依赖集合的76.77MB本地归档，另逐项证明可由记录的Git提交恢复。[原字节与Git来源](usage_assets/reports/sim2sim-cohort-halt/summary.md)。上游SDK0.1.8已有等待writer结束后再析构的修复；独立候选`caf61487…`离线构建及无GPU导入/API检查通过，当时原镜像和pins未变；当前主Docker已另行升级并构建SDK0.1.8统一镜像，旧运行容器仍保留。[上游源码与二进制审计](usage_assets/reports/unitree-lifecycle-independent/report.md)、[候选实际CPU结果](usage_assets/reports/unitree-sdk018-candidate/summary.md)。新worker门卫已应用并通过CPU回归；候选前两次启动错误已保留；补齐动态入口后原五个失败配置的新试跑正常退出，fresh629尚待完成。[五例真实视频与退出收据](usage_assets/reports/sdk018-native-pilot/summary.md)。
 
 ```bash
 bash scripts/research/docker.sh sim scripts/research/sim2sim_scene_matrix.py \
@@ -283,7 +283,7 @@ python3 scripts/research/cloud.py pull
 
 CPU 测试统一在 Docker 中运行，分别保留根目录/训练和 motion matching 的 JUnit、日志、计数及日志 SHA-256。`PHP_DOCKER=0` 只用于隔离原生安装路径的 subprocess double 测试，解释器仍在容器内；真实容器路径由 doctor、训练和闭环运行验证。
 
-最终镜像 `88254ac0…`、源码 `64ebc5f` 上完整复跑：根目录及训练 **289 passed、0 failed、0 skipped**；动作匹配 **213 passed、12 failed、0 skipped**。[本次汇总](usage_assets/reports/cpu-tests-final.json)与[原始 JUnit/日志](usage_assets/reports/cpu-final/)包含全部结果。
+首版冻结镜像 `88254ac0…`、源码 `64ebc5f` 上完整复跑：根目录及训练 **289 passed、0 failed、0 skipped**；动作匹配 **213 passed、12 failed、0 skipped**。[本次汇总](usage_assets/reports/cpu-tests-final.json)与[原始 JUnit/日志](usage_assets/reports/cpu-final/)包含全部结果。
 
 此后恢复逻辑又补充了参数与教师来源检查：环境数、注册表、FINETUNE 或有序教师 SHA 不符时拒绝恢复，允许合法延长总迭代数。相关 **45/45 回归通过**，两种学生自身恢复也已覆盖。[官方驱动与默认参数审计](usage_assets/reports/official-driver-audit/audit.md)保留当前脚本 SHA、实际配置计划和 JUnit；这批检查独立于上述 `64ebc5f` 全量测试记录。
 
@@ -295,9 +295,9 @@ CPU 测试统一在 Docker 中运行，分别保留根目录/训练和 motion ma
 
 首次完整镜像归档 **12,014,827,234 字节**，包 SHA-256 `332e292e5b0f542c2dfec6bf1b4c007d623f6acef313c3b37b03ba1d2eaccb83`，两端 Config/RootFS 指纹相同。部署时物理 GPU 1 没有任何进程、显存 1 MiB、利用率 0%，对应 UUID `GPU-27eb1141-ab74-ebdd-42c2-6549fb7253e5`；容器内只见这张卡。[传输记录](usage_assets/reports/cloud-image-transfer.json)、[部署记录](usage_assets/reports/cloud-deployment.json)、[仅公钥登录验证](usage_assets/reports/cloud-ssh-key-check.json)。最终重建的镜像另行记录如下。
 
-最终镜像为 `sha256:88254ac0b90a3056375145601d741aa3e08726e18412d201a3c7e7915a23996f`，对应干净源码提交 `64ebc5f`，镜像内记录大小为 22,704,771,469 字节。独立容器只挂只读资产、输出和空缓存，`--network none`、私有 IPC，**没有宿主源码挂载**：三环境 doctor、全部 265 项锁定版本、真实 16 环境两轮 Isaac 训练、有限权重更新、教师 ONNX 12 组真实 CPU 推理和离线 TensorBoard 均通过。[完整离线证明](usage_assets/reports/runtime-final-offline-summary.json)及[原始记录](usage_assets/reports/runtime-final-offline/)记录源码边界、模型与镜像 SHA；motion/inference 的 `pip check` 通过，train 仍保留前述三项上游元数据冲突。
+首版冻结镜像为 `sha256:88254ac0b90a3056375145601d741aa3e08726e18412d201a3c7e7915a23996f`，对应干净源码提交 `64ebc5f`，镜像内记录大小为 22,704,771,469 字节。独立容器只挂只读资产、输出和空缓存，`--network none`、私有 IPC，**没有宿主源码挂载**：三环境 doctor、全部 265 项锁定版本、真实 16 环境两轮 Isaac 训练、有限权重更新、教师 ONNX 12 组真实 CPU 推理和离线 TensorBoard 均通过。[完整离线证明](usage_assets/reports/runtime-final-offline-summary.json)及[原始记录](usage_assets/reports/runtime-final-offline/)记录源码边界、模型与镜像 SHA；motion/inference 的 `pip check` 通过，train 仍保留前述三项上游元数据冲突。
 
-最终归档 **10,858,424,068 字节**、SHA-256 `e6c0483f15242e9da95aaa136e21eb10b746a2e423a5e206f03e174b76d5e4c3` 已完整传输并在云端加载，两端 Config/RootFS 指纹为 `2a43037e2397fac3e343e8d621dd42c41ea7c27da82602789d575fddda112482`。[最终镜像传输核验](usage_assets/reports/cloud-final-image-transfer.json)保留本地/远端镜像 ID；Docker 存储实现导致两端 manifest ID 不同，层内容与配置已独立核对。
+首版冻结归档 **10,858,424,068 字节**、SHA-256 `e6c0483f15242e9da95aaa136e21eb10b746a2e423a5e206f03e174b76d5e4c3` 已完整传输并在云端加载，两端 Config/RootFS 指纹为 `2a43037e2397fac3e343e8d621dd42c41ea7c27da82602789d575fddda112482`。[最终镜像传输核验](usage_assets/reports/cloud-final-image-transfer.json)保留本地/远端镜像 ID；Docker 存储实现导致两端 manifest ID 不同，层内容与配置已独立核对。
 
 最终云端部署也已完成：仍选物理 GPU 1，实际挂载源码树 `0093aa40fbae2bcf219d39ace222e0c4d8a71e305551939a5a1b9c0e40c683ab`（来自 `3439cb7`），包含镜像构建之后的恢复来源检查修复。三套运行环境 doctor 通过。[最终部署](usage_assets/reports/cloud-final-deployment.json)、[最终云端 doctor](usage_assets/reports/cloud-final-runtime.json)。镜像内封存源码 `64ebc5f` 的独立断网证明与这次挂载源码运行分别记录。
 
@@ -307,6 +307,28 @@ CPU 测试统一在 Docker 中运行，分别保留根目录/训练和 motion ma
 
 发布器对schema3使用与矩阵相同的三收据校验，并保留seal原始SHA到复制阶段，拒绝“校验后、复制前”发生变化的历史文件。34项CPU回归与独立注入复审通过；旧schema2只可生成明确标注未证明正常退出的历史预览，不能发布完整629通过页。[发布复制校验与原失败反例](usage_assets/reports/publisher-schema3-review/review.md)。
 
-候选SDK018的两次隔离启动原始失败均已保留：首次Docker只读挂载点错误，第二次首例加载`holosoma.bridge.unitree`失败，尚无本轮策略rollout和SDK析构通过证据。该错误证明旧340项冻结依赖集合遗漏metadata动态入口与部分父包初始化；历史文件不改，新集合376项、矩阵78项CPU测试通过后，还须实际CPU入口导入再启动下一次原生尝试。[两次启动日志、进程收据、源码和新增测试](usage_assets/reports/sdk018-native-setup/summary.md)。
+候选SDK018的两次隔离启动原始失败均已保留：首次Docker只读挂载点错误，第二次首例加载`holosoma.bridge.unitree`失败，这两次本身没有策略rollout或SDK析构通过证据。该错误证明旧340项冻结依赖集合遗漏metadata动态入口与部分父包初始化；历史文件不改，新集合376项、矩阵78项CPU测试通过后，已实际CPU导入train150/inference49个仓库模块及所选metadata入口，并完成新五例native闭环。[两次启动日志、进程收据、源码和新增测试](usage_assets/reports/sdk018-native-setup/summary.md)。
 
 补齐动态入口后的当前四模块联合CPU回归为172项测试加19个子用例全部通过，未跳过；[本轮命令、精确源码与原始JUnit](usage_assets/reports/worker-exit-integrated/review.json)独立于较早的全仓CPU测试统计。
+
+主Dockerfile及约束现已升级为SDK0.1.8。干净源码`6cb2ae2`重新构建的统一镜像`2be18521…`，实际以`--network none`、私有PID/IPC、只读资产、独立空缓存且**没有宿主源码挂载**运行：三个环境doctor、265版本、真实Isaac16环境×两轮×24步、非零有限权重更新、12组教师ONNX推理全部通过；52个TensorBoard scalar tag的两步样本均有限。train的原三条上游pip元数据冲突如实保留。[新镜像完整日志、版本和模型SHA](usage_assets/reports/sdk018-canonical-offline/summary.md)。旧0.1.6镜像的历史证明没有改写。
+
+新完整镜像包10,897,464,145字节已上传服务器并加载，两端归档SHA与Config/RootFS内容均复核一致。云端官方训练的container/image/PID/StartedAt和挂载内容不变，旧research tag保留。[上传、首次顺序误报及独立核验](usage_assets/reports/sdk018-canonical-upload/summary.md)。截至北京时间17:21，第一教师TensorBoard到step7629，所核loss/reward样本均有限；这仍不是第一教师完成，更不是七模型完成。
+
+先行SDK0.1.8候选还对旧批次五个显式失败配置各做一次新原生闭环：3类场景、2500策略ticks、5父进程/10worker全部返回0、最终进程组为空，精确PID出生时钟与host command_writer映射保留，5原MP4完整解码。高速攀爬配置0000检测到跌倒，其它四例只是在10秒内没触发同一启发式。[逐例表、两个真实帧与全部视频](usage_assets/reports/sdk018-native-pilot/summary.md)。该结果检验了本轮退出完整性，不冒充629覆盖或全部技能成功。
+
+五非默认教师的首次重载虽父进程0，但每例因只读URDF资产目录无法生成USD缓存而未开始rollout，均记失败。[原始日志与无报告证据](usage_assets/reports/teacher-presets-reload-ro-failure/summary.md)。入口现拒绝覆盖旧报告，缺少有效新quality.json即非零退出；14项CPU检查通过。[源码及测试](usage_assets/reports/eval-quality-exit-guard/summary.md)。后续独立资产目录重试的结果另行核对，不覆盖这五次失败。
+
+独立可写资产目录下的五次重试现已完成实测与独立后验，每例16环境×100策略步、seed42/1variant，四项tracking指标各1600有限样本，finite_actions/root为true，保存YAML的160/449维观测、anchor和scale均与各自原PT一致。32段新MP4全部完整解码，5份TensorBoard的17项scalar与报告相同；原source、PT/ONNX及35份原始/复制URDF/mesh的SHA未变。累计251次failed episode resets、0 timeout，quality_verified=false。这是有界重载通过，短录像不证明100原源动作覆盖或收敛。[完整配置/质量/失败计数与原始记录](usage_assets/reports/teacher-preset-reload-sdk018-v3/summary.md)。
+
+| 五个非默认preset | 输入维度 | failed resets | 最长原始episode录像 |
+| --- | ---: | ---: | --- |
+| no-heightscan | 160 | 50 | [0.94秒](usage_assets/isaac/teacher-presets-sdk018-v3/g1-wbt-terrain-no-heightscan.mp4) |
+| no-heightscan-noscale | 160 | 51 | [0.62秒](usage_assets/isaac/teacher-presets-sdk018-v3/g1-wbt-terrain-no-heightscan-noscale.mp4) |
+| no-heightscan-pelvis | 160 | 50 | [0.88秒](usage_assets/isaac/teacher-presets-sdk018-v3/g1-wbt-terrain-no-heightscan-pelvis.mp4) |
+| ref | 449 | 51 | [0.84秒](usage_assets/isaac/teacher-presets-sdk018-v3/g1-wbt-terrain-ref.mp4) |
+| ref-pelvis | 449 | 49 | [0.96秒](usage_assets/isaac/teacher-presets-sdk018-v3/g1-wbt-terrain-ref-pelvis.mp4) |
+
+![no-heightscan实际episode中点帧](usage_assets/isaac/teacher-presets-sdk018-v3/g1-wbt-terrain-no-heightscan.png)
+
+全629新版批次已通过完整5206文件冻结核验、同镜像实际CPU入口/17场景配置预检与19项外层检查，当前仅记为准备完成；未来须有629例和1258个worker的真实正常终态及629原视频完整解码。[准备输入与新计划](usage_assets/reports/fresh629-sdk018-preparation/summary.md)。

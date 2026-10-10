@@ -4,7 +4,7 @@
 
 截至 2026-10-10，完整官方五教师、两学生训练仍在云端运行；本文中的算法说明来自源码和已执行的有界实验，不表示完整日程或真机验收已经完成。
 
-北京时间15:48，旧629物理扫描已因SDK退出异常及父监督漏查最终worker退出码而有序中断，全部相关本地进程退出。原279项reported completed中也已发现崩溃日志，因此这些状态不能作为正常退出验收；下一步须用修复后的新源码、镜像与计划重跑。[原状态及停止回执](usage_assets/reports/sim2sim-cohort-halt/summary.md)、[漏记崩溃实证](usage_assets/reports/worker-exit-completed-log-audit/report.md)。下文带具体时间的运行快照均保留历史含义。
+北京时间15:48，旧629物理扫描已因SDK退出异常及父监督漏查最终worker退出码而有序中断，全部相关本地进程退出。原279项reported completed中也已发现崩溃日志，因此这些状态不能作为正常退出验收；修复监督和SDK后，原五个显式失败配置的新试跑已正常退出，fresh629仍须独立执行。[原状态及停止回执](usage_assets/reports/sim2sim-cohort-halt/summary.md)、[漏记崩溃实证](usage_assets/reports/worker-exit-completed-log-audit/report.md)、[新SDK五例闭环](usage_assets/reports/sdk018-native-pilot/summary.md)。下文带具体时间的运行快照均保留历史含义。
 
 ## 1. 先把整个系统连起来
 
@@ -216,7 +216,7 @@ Isaac 内部状态包含关节、根/身体运动、接触和参考帧等。策�
 | `ref-pelvis` | 449 / 575 | pelvis | `0.25 × effort_limit / Kp` |
 | `no-heightscan-pelvis` | 160 / 286 | pelvis | 同上 |
 
-no-heightscan移除289维地形oracle，剩余状态仍按原有term名字排序，动作输出都是29维。pelvis配置改变参考anchor，不能仅凭相同输入形状互换。当前学生五专家流程构造449维teacher输入并剥离路由列；160维ablation不能直接插入该流程，缩放或anchor不同的教师也不能冒充正式noscale专家。六份两轮smoke模型共72个图内参考查询与60个PT/ONNX动作均值对照通过，最大误差约6.33e-8；这不证明Isaac重载、实际PD缩放表现或技能收敛。
+no-heightscan移除289维地形oracle，剩余状态仍按原有term名字排序，动作输出都是29维。pelvis配置改变参考anchor，不能仅凭相同输入形状互换。当前学生五专家流程构造449维teacher输入并剥离路由列；160维ablation不能直接插入该流程，缩放或anchor不同的教师也不能冒充正式noscale专家。六份两轮smoke模型共72个图内参考查询与60个PT/ONNX动作均值对照通过，最大误差约6.33e-8。之后五个非默认preset也逐一完成16环境×100步的实际Isaac重载，原生保存YAML确认输入/anchor/scale未变、四项tracking指标各1600样本有限；它们累计251次failed episode resets、quality_verified=false，仍不证明收敛。[重载的真实质量、配置和短录像](usage_assets/reports/teacher-preset-reload-sdk018-v3/summary.md)。
 
 Actor 各项默认还叠加均匀噪声：角速度 ±0.2、线速度 ±0.5、关节位置 ±0.01、关节速度 ±0.5、参考相对旋转 ±0.05、参考相对位置 ±0.25。Critic 的外层噪声关闭。默认 eval 保留 actor 配置的外层噪声；`set_is_evaluating()` 不会自动关闭它。
 
@@ -438,7 +438,7 @@ KP/KD由preset公式 `Kp=armature*ω²`、`Kd=2*ζ*armature*ω`给定，ω约62.
 
 源码：[robot_config.py:118–131](wbt_training/config_values/robot_config.py#L118)；[robot.py:237–260](thirdparty/holosoma/src/holosoma_inference/holosoma_inference/config/config_values/robot.py#L237)；[basic_sdk2py_bridge.py:104–108](thirdparty/holosoma/src/holosoma/holosoma/bridge/base/basic_sdk2py_bridge.py#L104)。
 
-DDS接口为`far-unitree-sdk==0.1.6`的G1/HG/PR路径。CPU只读wheel确认`unitree_hg::msg::dds_::LowCmd_`、`LowState_`及`rt/lowcmd`、`rt/lowstate`字面量；preset配置29个活动motor，不是HG wire类型全部槽都参与策略。当前网卡为lo，物理网络与固件执行周期没有本次实测。
+DDS接口为G1/HG/PR路径。早期`far-unitree-sdk==0.1.6`只读wheel审计确认`unitree_hg::msg::dds_::LowCmd_`、`LowState_`及`rt/lowcmd`、`rt/lowstate`字面量；preset配置29个活动motor，不是HG wire类型全部槽都参与策略。当前主Docker约束与新统一镜像使用0.1.8，train/inference两份实际原生扩展SHA已核对，五配置native闭环正常退出；旧wheel审计保留原版本语义，不冒充新wheel逐字节审计。当前网卡为lo，物理网络与固件执行周期没有本次实测。[新SDK与原生证据](usage_assets/reports/sdk018-native-pilot/summary.md)、[新统一镜像](usage_assets/reports/sdk018-canonical-offline/summary.md)。
 
 源码：[unitree_interface.py:26–39,66–103](thirdparty/holosoma/src/holosoma_inference/holosoma_inference/sdk/unitree/unitree_interface.py#L26)。task默认domain0，但Pythoncreate_robot实际只传网卡、robot type和message type；不能把任意domain_id变更说成已验。
 
@@ -591,6 +591,10 @@ low-step配置41的首次attempt仍记为执行失败：推理完成JSON后约53
 
 发布器对schema3使用与矩阵相同的三收据校验，并保留seal原始SHA到复制阶段，拒绝“校验后、复制前”发生变化的历史文件。34项CPU回归与独立注入复审通过；旧schema2只可生成明确标注未证明正常退出的历史预览，不能发布完整629通过页。[发布复制校验与原失败反例](usage_assets/reports/publisher-schema3-review/review.md)。
 
-隔离快照的实际启动又暴露依赖集合边界：旧340份没有覆盖metadata动态选择的Unitree bridge和部分父包初始化文件，不能称完整Python导入闭包。两次失败分别是只读挂载点缺失和`holosoma.bridge.unitree`缺失，均未验证SDK/DDS正常退出。当前376份集合保守加入所有bridge Python和父包初始化副作用，新增两项回归后矩阵78项CPU测试通过；仍须先实际导入入口，再以新快照重跑原生闭环。[失败原字节、修复和范围](usage_assets/reports/sdk018-native-setup/summary.md)。
+隔离快照的实际启动又暴露依赖集合边界：旧340份没有覆盖metadata动态选择的Unitree bridge和部分父包初始化文件，不能称完整Python导入闭包。两次失败分别是只读挂载点缺失和`holosoma.bridge.unitree`缺失，均未验证SDK/DDS正常退出。376份集合保守加入所有bridge Python和父包初始化副作用，新增两项回归后矩阵78项CPU测试通过；随后实际CPU预检确认train150/inference49个仓库模块与所选metadata入口都在冻结SHA集合内，再完成五个历史失败配置的native闭环。全部10worker终态0且进程组为空；一个高速攀爬配置仍跌倒。该五例既不统计排除间歇性竞态，也不代替完整629。[失败原字节、修复和范围](usage_assets/reports/sdk018-native-setup/summary.md)、[新五例的实际入口、收据与视频](usage_assets/reports/sdk018-native-pilot/summary.md)。
 
 当前四模块联合CPU回归为172项测试加19个子用例全部通过；[精确源码、命令与原始JUnit](usage_assets/reports/worker-exit-integrated/review.json)绑定本轮修复版本。该结果不包含原生SDK/DDS、Isaac重载或fresh629物理运行。
+
+IsaacLab的URDF converter会在asset_root下生成USD缓存。五个非默认教师首次重载因只读源码下的converted_rank*写入失败，原生eval捕获异常返回0但没有任何rollout报告；本轮将原始URDF/mesh按SHA复制至独立RW数据目录，再用公有asset_root参数重试，源Python仍RO。当前`eval_quality.py`在checkpoint SHA不变、正整数实际步数/环境数、finite actions/root等检查满足且生成全新quality报告后才正常退出，不能再凭父进程0认定已经仿真。[首次失败原字节](usage_assets/reports/teacher-presets-reload-ro-failure/summary.md)、[报告门卫14项CPU验证](usage_assets/reports/eval-quality-exit-guard/summary.md)。这些运行约束不改变PPO奖励、DAgger动作标签或网络输入输出。
+
+独立可写资产目录的五次重试均已生成实测报告，五份原始PT/ONNX和原始/复制的35份URDF/mesh全部SHA未变。32段实际短MP4完整解码、5份TensorBoard各17项scalar与质量报告一致；保留251次失败重置，不冒充稳定策略。新SDK0.1.8统一Docker由6cb2ae2完整构建，265版本及断网实际训练/ONNX验收通过，10.90GB完整镜像也已离线上传远端并核验，云端原训练进程未替换。[五preset复测](usage_assets/reports/teacher-preset-reload-sdk018-v3/summary.md)、[完整镜像验收](usage_assets/reports/sdk018-canonical-offline/summary.md)、[镜像传输与身份](usage_assets/reports/sdk018-canonical-upload/summary.md)。

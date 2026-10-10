@@ -301,7 +301,7 @@ docker exec -e CUDA_VISIBLE_DEVICES= -e OMP_NUM_THREADS=1 php-parkour-research \
   --output /outputs/teacher-presets-cpu-new
 ```
 
-本次六份实际模型的72个参考用例与60个均值对照已通过，五个非默认配置的Isaac重载评估仍待GPU空闲。[结果与边界](usage_assets/reports/teacher-presets-cpu/summary.md)。
+本次六份实际模型的72个参考用例与60个均值对照已通过。[CPU结果与边界](usage_assets/reports/teacher-presets-cpu/summary.md)。五个非默认配置随后也各自完成实际Isaac重载：16环境×100控制步、四项tracking指标各1600个有限样本，保持其原160/449维输入、anchor与动作缩放。累计251次failed episode resets，quality_verified=false；最长录像仅0.62–0.96秒，不能当作完整长片或收敛。[真实质量、YAML、短录像与独立验证](usage_assets/reports/teacher-preset-reload-sdk018-v3/summary.md)。只读源码运行须另设可写robot资产缓存目录，见后文。
 
 完整日程也可交给单个可续跑 driver：
 
@@ -415,7 +415,9 @@ docker exec -e OMP_NUM_THREADS=4 php-parkour-research \
 
 最终结果页用[完整发布工具](scripts/research/publish_full_scene_matrix.py)生成；它等待真实driver终态exit0与全部629项证据，保留所有阈值和历史attempt，并逐字节复制原视频/轨迹/日志。初版24项CPU检查和两例浏览器预览通过，新版另有34项CPU回归；旧扫描已停止，尚无新629完成页。[首次失败原字节与时间线](usage_assets/reports/sim2sim-worker-failure/report.md)保留父进程exit1，不能只凭worker JSON补造成功。发布命令须显式指定独立冻结的`--expected-plan-sha256`与`--expected-harness-sha256`；新版完整发布还检查两worker退出与三份进程收据。旧schema2只允许保留历史预览，不能发布完整验收。[初版发布工具检查与命令](usage_assets/reports/full-scene-publisher/summary.md)、[新版回归](usage_assets/reports/publisher-schema3-review/review.md)。
 
-SDK0.1.8已在独立离线候选镜像中完成CPU导入/API对照，train Kit与inference两处SDK都替换，其他包版本和motion freeze未变；未修改主Dockerfile/pins或原镜像。该候选尚未跑native闭环，不能当作最终Docker配置或已修复的证据。[官方Wait修复及归因边界](usage_assets/reports/unitree-lifecycle-independent/report.md)、[候选镜像精确recipe与CPU结果](usage_assets/reports/unitree-sdk018-candidate/summary.md)。
+主Dockerfile与train/inference约束现已使用SDK0.1.8；Holosoma的unitree extra硬钉0.1.6，因此安装采用booster extra加显式SDK0.1.8，其他版本保持约束。新统一镜像`2be18521…`由干净提交`6cb2ae2`完整构建，实际断网、无宿主源码挂载的265版本核验、Isaac16环境两轮训练/权重更新、12组教师ONNX推理及TensorBoard均通过。[新统一镜像原始证据](usage_assets/reports/sdk018-canonical-offline/summary.md)。原0.1.6镜像及云端官方训练容器不替换；新镜像另行完整上传并核验，旧训练不因升级中断。
+
+先行候选SDK0.1.8已对原5个显式失败配置完成实际MuJoCo/DDS/深度共享内存闭环：每例500ticks，10个worker全部正常退出，进程组最终为空，原视频全部完整解码。一个高速攀爬配置仍跌倒；正常退出不等于技能通过，也不证明竞态的唯一原因。[五例输入、收据、真实截图与视频](usage_assets/reports/sdk018-native-pilot/summary.md)、[上游Wait修复及归因边界](usage_assets/reports/unitree-lifecycle-independent/report.md)。fresh629必须独立执行，不能把这五例拼入旧结果。
 
 ## 8. 验收与定位问题
 
@@ -433,6 +435,12 @@ motion/inference 的 `pip check` 已通过。NVIDIA 基础训练环境仍有三�
 
 发布器对schema3使用与矩阵相同的三收据校验，并保留seal原始SHA到复制阶段，拒绝“校验后、复制前”发生变化的历史文件。34项CPU回归与独立注入复审通过；旧schema2只可生成明确标注未证明正常退出的历史预览，不能发布完整629通过页。[发布复制校验与原失败反例](usage_assets/reports/publisher-schema3-review/review.md)。
 
-候选隔离运行已实际尝试，但两次启动均失败：首次只读数据挂载点缺失，第二次冻结源码遗漏动态Unitree入口；均未验证SDK退出修复。旧340项仅为原计划的依赖集合，不是完整导入闭包。当前376项补入全部bridge Python及父包初始化文件，矩阵78项CPU回归通过；下一次冻结运行须先在同镜像、同只读快照中实际导入所选入口，再启动DDS/GPU。旧快照及失败不覆盖重写。[原始启动错误与修复](usage_assets/reports/sdk018-native-setup/summary.md)。
+候选隔离运行的前两次启动失败均保留：首次只读数据挂载点缺失，第二次冻结源码遗漏动态Unitree入口；这两次本身没有SDK退出验证。旧340项仅为原计划的依赖集合，不是完整导入闭包。376项补入全部bridge Python及父包初始化文件，矩阵78项CPU回归通过；随后同镜像/同只读快照的实际CPU预检导入train150/inference49个仓库模块、所选Unitree metadata入口和五份CLI配置，再执行了上述五例原生闭环。[原始启动错误与修复](usage_assets/reports/sdk018-native-setup/summary.md)、[实际预检与五例终态](usage_assets/reports/sdk018-native-pilot/summary.md)。
+
+Isaac评估将URDF转换缓存写在`robot.asset.asset_root`下。源码只读时须把原始G1 URDF/mesh按SHA复制至独立可写数据目录，并传`--robot.asset.asset-root /outputs/<独立资产目录>/robots`；不要把Python源码改为可写来容纳缓存。本轮五非默认教师首次重载因该缓存路径失败、虽然父进程返回0却没有quality.json，原失败保留。[原始失败](usage_assets/reports/teacher-presets-reload-ro-failure/summary.md)。评估入口现拒绝复用旧报告，并在没有新有效报告时非零退出；14项CPU检查通过。[退出门卫源码与测试](usage_assets/reports/eval-quality-exit-guard/summary.md)。
 
 当前四模块联合CPU回归172项测试加19个子用例全部通过，精确源码和原始JUnit见[本轮联合记录](usage_assets/reports/worker-exit-integrated/review.json)。
+
+新的SDK0.1.8完整629批次已单独冻结3297份源码及1887份场景输入，合计5206文件SHA通过独立核验；同镜像runc/noGPU/network-none容器的all-configs计划、17场景CLI与两角色实际imports都通过，外层19项CPU检查通过。它使用独立目录和全容器残留进程门卫，保留原生默认单例wall413秒，不能resume旧批次。当前这是准备证据，实际启动与629终态另记。[完整准备记录和计划SHA](usage_assets/reports/fresh629-sdk018-preparation/summary.md)。
+
+新统一镜像已完整传输并在远端加载，10.90GB归档两端SHA和层内容一致；原训练容器及research tag保留。[实际上传回执](usage_assets/reports/sdk018-canonical-upload/summary.md)。

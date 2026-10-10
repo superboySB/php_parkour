@@ -1,0 +1,428 @@
+{
+  "status": "passed",
+  "observed_utc": "2026-10-10T08:55:34.550040+00:00",
+  "image_id": "sha256:2be18521015b2a84ef7a4442af9a94ef041a19feb9ce385ae15424b1dc158d8f",
+  "revision": "6cb2ae2492ef7bf66da7c5a72da87d6f60f0636f",
+  "gpu_uuid": "GPU-1803972d-e774-ee96-e6f6-1ee1ce47bb25",
+  "no_source_bind": true,
+  "network_mode": "none",
+  "quality_verified": false,
+  "scope": "Baked image imports, pinned environments, actual16env2iter Isaac training, weights, teacher ONNX CPU and TensorBoard; no convergence or full schedule",
+  "commands": [
+    {
+      "argv": [
+        "docker",
+        "start",
+        "a9a28207024233fb1d5f746f0dcef9f088657f40bb5660556e5f74de7bebdf29"
+      ],
+      "started_unix": 1791622534.618965,
+      "log": "container-start.log",
+      "returncode": 0,
+      "finished_unix": 1791622534.8335445,
+      "log_sha256": "f8d51ce84e14a24e319db0a2584090da708389fbfc3dd0d52af6f5ef6ad5c3ee"
+    },
+    {
+      "argv": [
+        "docker",
+        "exec",
+        "a9a28207024233fb1d5f746f0dcef9f088657f40bb5660556e5f74de7bebdf29",
+        "/opt/php/bin/train-python",
+        "scripts/research/verify_runtime.py",
+        "--require-gpu",
+        "--output",
+        "/outputs/runtime.json"
+      ],
+      "started_unix": 1791622534.8410344,
+      "log": "doctor.log",
+      "returncode": 0,
+      "finished_unix": 1791622536.5074806,
+      "log_sha256": "2293a9c5255b126592446385e776c3d28372411ef2fc643d0e5cae2a95345148"
+    },
+    {
+      "argv": [
+        "docker",
+        "exec",
+        "-e",
+        "CUDA_VISIBLE_DEVICES=",
+        "a9a28207024233fb1d5f746f0dcef9f088657f40bb5660556e5f74de7bebdf29",
+        "/opt/php/bin/train-python",
+        "-c",
+        "import hashlib,importlib.metadata as md,json,pathlib,unitree_interface; p=list(pathlib.Path(unitree_interface.__file__).parent.glob('unitree_interface.cpython-*.so'));assert len(p)==1;print(json.dumps({'version':md.version('far-unitree-sdk'),'extension':str(p[0]),'sha256':hashlib.sha256(p[0].read_bytes()).hexdigest()}))"
+      ],
+      "started_unix": 1791622536.5078375,
+      "log": "train-sdk.json",
+      "returncode": 0,
+      "finished_unix": 1791622536.6227305,
+      "log_sha256": "a7cb70eaa7a78647c65bdfb25b50dcbbf9badacf2d648f050c48f8e298971ddb"
+    },
+    {
+      "argv": [
+        "docker",
+        "exec",
+        "-e",
+        "CUDA_VISIBLE_DEVICES=",
+        "a9a28207024233fb1d5f746f0dcef9f088657f40bb5660556e5f74de7bebdf29",
+        "/opt/php/bin/inference-python",
+        "-c",
+        "import hashlib,importlib.metadata as md,json,pathlib,unitree_interface; p=list(pathlib.Path(unitree_interface.__file__).parent.glob('unitree_interface.cpython-*.so'));assert len(p)==1;print(json.dumps({'version':md.version('far-unitree-sdk'),'extension':str(p[0]),'sha256':hashlib.sha256(p[0].read_bytes()).hexdigest()}))"
+      ],
+      "started_unix": 1791622536.6230164,
+      "log": "inference-sdk.json",
+      "returncode": 0,
+      "finished_unix": 1791622536.7399518,
+      "log_sha256": "1b6b2ce8ee840af5a6562fe8fdb5ba651f38be09e307498832c6624f49f90b0b"
+    },
+    {
+      "argv": [
+        "docker",
+        "exec",
+        "-e",
+        "CUDA_VISIBLE_DEVICES=",
+        "a9a28207024233fb1d5f746f0dcef9f088657f40bb5660556e5f74de7bebdf29",
+        "/opt/php/bin/train-python",
+        "-m",
+        "pip",
+        "freeze"
+      ],
+      "started_unix": 1791622536.7402458,
+      "log": "train.freeze.txt",
+      "returncode": 0,
+      "finished_unix": 1791622537.0574489,
+      "log_sha256": "ac2ac6131af37ec9a815e00e8e54fcba4b7b6afe57188925dca31dad2ad43e3e"
+    },
+    {
+      "argv": [
+        "docker",
+        "exec",
+        "-e",
+        "CUDA_VISIBLE_DEVICES=",
+        "a9a28207024233fb1d5f746f0dcef9f088657f40bb5660556e5f74de7bebdf29",
+        "/opt/php/bin/train-python",
+        "-m",
+        "pip",
+        "check"
+      ],
+      "started_unix": 1791622537.0577786,
+      "log": "train-pip-check.log",
+      "returncode": 1,
+      "finished_unix": 1791622537.475714,
+      "log_sha256": "a55aa8399af9281b4e30cd1d127155f31fc7c306bc24fcb606351136683fc6ed"
+    },
+    {
+      "argv": [
+        "docker",
+        "exec",
+        "-e",
+        "CUDA_VISIBLE_DEVICES=",
+        "a9a28207024233fb1d5f746f0dcef9f088657f40bb5660556e5f74de7bebdf29",
+        "/opt/php/bin/motion-python",
+        "-m",
+        "pip",
+        "freeze"
+      ],
+      "started_unix": 1791622537.476003,
+      "log": "motion.freeze.txt",
+      "returncode": 0,
+      "finished_unix": 1791622537.6432383,
+      "log_sha256": "622fc360243892e38508f52345566967f9b063072a6a38be6b515438ffcae4c8"
+    },
+    {
+      "argv": [
+        "docker",
+        "exec",
+        "-e",
+        "CUDA_VISIBLE_DEVICES=",
+        "a9a28207024233fb1d5f746f0dcef9f088657f40bb5660556e5f74de7bebdf29",
+        "/opt/php/bin/motion-python",
+        "-m",
+        "pip",
+        "check"
+      ],
+      "started_unix": 1791622537.6435213,
+      "log": "motion-pip-check.log",
+      "returncode": 0,
+      "finished_unix": 1791622537.8107708,
+      "log_sha256": "9261363b733079a641c2e4cc9bc46ffa1d8336945a87f807b6cf68847dbc9b09"
+    },
+    {
+      "argv": [
+        "docker",
+        "exec",
+        "-e",
+        "CUDA_VISIBLE_DEVICES=",
+        "a9a28207024233fb1d5f746f0dcef9f088657f40bb5660556e5f74de7bebdf29",
+        "/opt/php/bin/inference-python",
+        "-m",
+        "pip",
+        "freeze"
+      ],
+      "started_unix": 1791622537.8110628,
+      "log": "inference.freeze.txt",
+      "returncode": 0,
+      "finished_unix": 1791622537.9781616,
+      "log_sha256": "ddd6dfea37a68e2f7c6e71be256ef39bbdb7397eac57fac9d815d764266d420f"
+    },
+    {
+      "argv": [
+        "docker",
+        "exec",
+        "-e",
+        "CUDA_VISIBLE_DEVICES=",
+        "a9a28207024233fb1d5f746f0dcef9f088657f40bb5660556e5f74de7bebdf29",
+        "/opt/php/bin/inference-python",
+        "-m",
+        "pip",
+        "check"
+      ],
+      "started_unix": 1791622537.978461,
+      "log": "inference-pip-check.log",
+      "returncode": 0,
+      "finished_unix": 1791622538.1457202,
+      "log_sha256": "9261363b733079a641c2e4cc9bc46ffa1d8336945a87f807b6cf68847dbc9b09"
+    },
+    {
+      "argv": [
+        "docker",
+        "exec",
+        "-e",
+        "CUDA_VISIBLE_DEVICES=",
+        "a9a28207024233fb1d5f746f0dcef9f088657f40bb5660556e5f74de7bebdf29",
+        "/opt/php/bin/train-python",
+        "-c",
+        "import hashlib,importlib.metadata as md,json,pathlib,re\nroot=pathlib.Path('/workspace/php_parkour'); forbidden=[str(p) for p in [root/'.git',root/'outputs',root/'.env.local',root/'thirdparty/holosoma/.git'] if p.exists()]; assert not forbidden\nout={}\nfor name in ('train-added','motion','inference'):\n p=pathlib.Path('/opt/php-build/constraints.'+name+'.txt'); items={}\n for line in p.read_text().splitlines():\n  line=line.split('#',1)[0].strip()\n  if line: a,b=line.split('==');items[re.sub(r'[-_.]+','-',a).lower()]=b\n out[name]={'count':len(items),'sha256':hashlib.sha256(p.read_bytes()).hexdigest(),'pins':items}\npathlib.Path('/outputs/baked-source-and-pins.json').write_text(json.dumps({'forbidden_paths':forbidden,'constraints':out},indent=2)+'\\n')\n"
+      ],
+      "started_unix": 1791622538.146057,
+      "log": "baked-source-and-pins.log",
+      "returncode": 0,
+      "finished_unix": 1791622538.2631953,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "exec",
+        "a9a28207024233fb1d5f746f0dcef9f088657f40bb5660556e5f74de7bebdf29",
+        "/opt/php/bin/train-python",
+        "scripts/research/train_pipeline.py",
+        "teachers",
+        "--profile",
+        "smoke",
+        "--skills",
+        "locomotion",
+        "--num-envs",
+        "16",
+        "--iterations",
+        "2",
+        "--output",
+        "/outputs/training"
+      ],
+      "started_unix": 1791622538.2640684,
+      "log": "train-driver.log",
+      "returncode": 0,
+      "finished_unix": 1791622554.9571712,
+      "log_sha256": "1569793f7176ddac2e138b2da73b0c75e0750d3ec6029a7eaaec8439dffa43ca"
+    },
+    {
+      "argv": [
+        "docker",
+        "exec",
+        "-e",
+        "CUDA_VISIBLE_DEVICES=",
+        "a9a28207024233fb1d5f746f0dcef9f088657f40bb5660556e5f74de7bebdf29",
+        "/opt/php/bin/train-python",
+        "scripts/research/verify_weight_update.py",
+        "--before",
+        "/outputs/training/smoke/teacher-locomotion/PHP-research/20261010_085547-teacher-locomotion-locomotion/model_00000.pt",
+        "--after",
+        "/outputs/training/smoke/teacher-locomotion/PHP-research/20261010_085547-teacher-locomotion-locomotion/model_00001.pt",
+        "--output",
+        "/outputs/weight-update.json"
+      ],
+      "started_unix": 1791622554.957645,
+      "log": "weight-update.log",
+      "returncode": 0,
+      "finished_unix": 1791622555.8287904,
+      "log_sha256": "a0f7a103985a56f2f0569f5b74a760292e05262c73f3acaf4cc3dd7cd4c8c469"
+    },
+    {
+      "argv": [
+        "docker",
+        "exec",
+        "-e",
+        "CUDA_VISIBLE_DEVICES=",
+        "a9a28207024233fb1d5f746f0dcef9f088657f40bb5660556e5f74de7bebdf29",
+        "/opt/php/bin/inference-python",
+        "scripts/research/validate_teacher_onnx.py",
+        "--model",
+        "/outputs/training/smoke/teacher-locomotion/PHP-research/20261010_085547-teacher-locomotion-locomotion/model_00001.onnx",
+        "--output",
+        "/outputs/teacher-onnx.json"
+      ],
+      "started_unix": 1791622555.829146,
+      "log": "teacher-onnx.log",
+      "returncode": 0,
+      "finished_unix": 1791622556.0990224,
+      "log_sha256": "641513bf63520f2cbb9e52b7aac8350c649d9f7da8436766487925044f7036ba"
+    },
+    {
+      "argv": [
+        "docker",
+        "exec",
+        "-e",
+        "CUDA_VISIBLE_DEVICES=",
+        "a9a28207024233fb1d5f746f0dcef9f088657f40bb5660556e5f74de7bebdf29",
+        "/opt/php/bin/train-python",
+        "-c",
+        "import json,math,pathlib\nfrom tensorboard.backend.event_processing.event_accumulator import EventAccumulator\np=next(pathlib.Path('/outputs/training').rglob('events.out.tfevents.*'));e=EventAccumulator(str(p),size_guidance={'scalars':0});e.Reload();tags=e.Tags()['scalars'];assert tags\nrows={t:{'samples':len(e.Scalars(t)),'steps':[s.step for s in e.Scalars(t)],'all_finite':all(math.isfinite(s.value) for s in e.Scalars(t))} for t in tags};assert all(r['all_finite'] for r in rows.values());assert all(t in rows for t in ('Loss/Value','Loss/Surrogate','Loss/Entropy','Train/mean_reward'))\npathlib.Path('/outputs/tensorboard.json').write_text(json.dumps({'status':'passed','event':str(p),'tags':rows},indent=2)+'\\n')\n"
+      ],
+      "started_unix": 1791622556.0993423,
+      "log": "tensorboard.log",
+      "returncode": 0,
+      "finished_unix": 1791622556.569272,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "create_argv": [
+    "docker",
+    "create",
+    "--name",
+    "php-sdk018-offline-39816c09d57bdf",
+    "--gpus",
+    "device=GPU-1803972d-e774-ee96-e6f6-1ee1ce47bb25",
+    "--network",
+    "none",
+    "--ipc",
+    "private",
+    "--init",
+    "--shm-size",
+    "8g",
+    "-e",
+    "PYTHONDONTWRITEBYTECODE=1",
+    "-e",
+    "HF_HUB_OFFLINE=1",
+    "-e",
+    "WANDB_MODE=disabled",
+    "-e",
+    "OMP_NUM_THREADS=4",
+    "-e",
+    "LOGGER=tensorboard",
+    "--mount",
+    "type=bind,src=/home/dzp/projects/php_parkour/outputs/research/assets,dst=/data/assets,readonly",
+    "--mount",
+    "type=bind,src=/home/dzp/projects/php_parkour/outputs/research/sdk018-canonical-offline-02/cache,dst=/data/cache",
+    "--mount",
+    "type=bind,src=/home/dzp/projects/php_parkour/outputs/research/sdk018-canonical-offline-02,dst=/outputs",
+    "-w",
+    "/workspace/php_parkour",
+    "--entrypoint",
+    "/bin/bash",
+    "sha256:2be18521015b2a84ef7a4442af9a94ef041a19feb9ce385ae15424b1dc158d8f",
+    "-lc",
+    "exec sleep infinity"
+  ],
+  "container_id": "a9a28207024233fb1d5f746f0dcef9f088657f40bb5660556e5f74de7bebdf29",
+  "sdk": {
+    "train": {
+      "version": "0.1.8",
+      "extension": "/isaac-sim/kit/python/lib/python3.11/site-packages/unitree_interface/unitree_interface.cpython-311-x86_64-linux-gnu.so",
+      "sha256": "9304320e194ca6fb0bc4f85699a533bcc3051f577bd823914903aedc9b1b0926"
+    },
+    "inference": {
+      "version": "0.1.8",
+      "extension": "/opt/php/envs/inference/lib/python3.12/site-packages/unitree_interface/unitree_interface.cpython-312-x86_64-linux-gnu.so",
+      "sha256": "fdedc667b19b8257c4a2e2cc70d8a99c65e9425d29366426f73a75ac1d5664d4"
+    }
+  },
+  "pip_check": {
+    "motion": 0,
+    "inference": 0,
+    "train": 1,
+    "train_known_metadata_conflicts": [
+      "nvidia-srl-usd 2.0.0 requires usd-core, which is not installed.",
+      "nvidia-srl-usd-to-urdf 1.0.2 requires usd-core, which is not installed.",
+      "dex-retargeting 0.4.6 has requirement lxml>=5.2.2, but you have lxml 4.9.4."
+    ],
+    "isaac_wrapper_nonzero_diagnostic": true
+  },
+  "matched_dependency_pins": {
+    "train-added": 117,
+    "motion": 82,
+    "inference": 66
+  },
+  "native_training": {
+    "label": "teacher-locomotion",
+    "profile": "smoke",
+    "started_utc": "2026-10-10T08:55:38.331019+00:00",
+    "command": [
+      "bash",
+      "/workspace/php_parkour/wbt_training/training_runs/run_terrain_teacher.sh",
+      "--training.headless",
+      "True",
+      "--training.num-envs",
+      "16",
+      "--training.name",
+      "teacher-locomotion",
+      "--training.project",
+      "PHP-research",
+      "--logger.base-dir",
+      "/outputs/training/smoke/teacher-locomotion",
+      "--training.seed",
+      "42",
+      "--algo.config.num-learning-iterations",
+      "2",
+      "--algo.config.save-interval",
+      "1",
+      "--algo.config.num-mini-batches",
+      "4",
+      "--training.preprocess-hook-kwargs",
+      "{\"add_onpath_obstacle\": true, \"num_variants\": 1, \"obstacle_seed\": 42}"
+    ],
+    "environment": {
+      "LOGGER": "tensorboard",
+      "NGPUS": "1",
+      "CUDA_VISIBLE_DEVICES": "0",
+      "HSSIM_PYTHON": "/opt/php/bin/train-python",
+      "REGISTRY": "file:///data/assets/motions-locomotion"
+    },
+    "settings": {
+      "profile": "smoke",
+      "skills": [
+        "locomotion"
+      ],
+      "assets": "/data/assets",
+      "num_envs": 16,
+      "iterations_target": 2,
+      "registries": "file:///data/assets/motions-locomotion",
+      "finetune": null,
+      "source_checkpoints": [],
+      "eval_steps": null,
+      "eval_quality_schema": null
+    },
+    "overrides": {
+      "num_envs": 16,
+      "iterations_target": 2
+    },
+    "quality_verified": false,
+    "scope": "execution smoke only",
+    "status": "passed",
+    "returncode": 0,
+    "finished_utc": "2026-10-10T08:55:54.086714+00:00",
+    "elapsed_seconds": 15.755714799044654,
+    "log": "/outputs/training/smoke/teacher-locomotion-1791622538331133235.log",
+    "performance": {
+      "iteration_samples": 2,
+      "median_collection_plus_learning_seconds": 0.6659999999999999,
+      "measured_num_envs": 16,
+      "estimate_scope": "Measured collection+learning only; excludes simulator initialization, exports/checkpoint writes and evaluation. No scaling to another environment count."
+    },
+    "checkpoint": "/outputs/training/smoke/teacher-locomotion/PHP-research/20261010_085547-teacher-locomotion-locomotion/model_00001.pt",
+    "checkpoint_iteration": 1,
+    "checkpoint_sha256": "c0c9aaec55f9ed9cc23eb76c12d9d282ebbf549603ba13ba3d355823c28f08f3"
+  },
+  "finite_weight_update_verified": true,
+  "teacher_onnx_cpu_passed": true,
+  "tensorboard_finite_passed": true,
+  "owned_container_stop": "Flag --time has been deprecated, use --timeout instead\na9a28207024233fb1d5f746f0dcef9f088657f40bb5660556e5f74de7bebdf29",
+  "owned_container_running_after_stop": false,
+  "finished_utc": "2026-10-10T08:55:56.734758+00:00"
+}

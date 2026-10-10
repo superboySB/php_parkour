@@ -1,0 +1,9 @@
+# Five preset reload: independent terminal post-validation
+
+All five original smoke PTs reached a parent exit code of zero but failed native initialization. Each retained raw log contains one OSError traceback: IsaacLab UrdfConverter attempts to create `converted_rank0_pid*` below the read-only Holosoma robot asset directory. No quality.json, rollout metrics, native saved evaluation config, MP4 or TensorBoard rollout evidence was produced. This cohort fails post-validation; these are initialization failures, not measured skill failures. Empty or absent metrics do not establish finiteness.
+
+The exact original 5 PT, 5 YAML, 5 ONNX and 5 training manifest inputs remain byte-for-byte unchanged (20 SHA checks). The actual new-canonical CPU receipt is bound to image/CID, current plan and helper hashes; its five saved contracts are 160/449 observations with the expected anchor and scaling. This proves CPU checkpoint/config compatibility only. Each planned rollout was iteration1,16env,100steps,1variant,seed42; actual rollout duration and failure counts remain unavailable.
+
+`review.json` records the original error line numbers and full input/provenance fingerprints. `retained/` contains byte-exact copies of the five logs, original driver/container/CPU receipts, plan/helpers and the preparation26-test JUnit. No existing raw file was changed; no new container, package, GPU, Isaac or DDS job was started for this audit.
+
+A future fresh attempt needs a writable generated-USD directory while keeping Python source frozen. The native implementation currently derives that directory from `robot.asset.asset_root`; an explicit independent robot-asset copy plus a parsed asset_root override is a possible fix, pending a separately reviewed plan. This review does not apply it or reinterpret the present five attempts as passes.

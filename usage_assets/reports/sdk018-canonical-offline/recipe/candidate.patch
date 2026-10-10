@@ -1,0 +1,104 @@
+--- a/docker/Dockerfile
++++ b/docker/Dockerfile
+@@ -44,11 +44,13 @@
+ 
+ # Retain NVIDIA's Torch/CUDA/Isaac stack. NumPy 1 is needed by Holosoma;
+ # motion matching and pinocchio require NumPy 2 and use separate venvs.
++# Upstream [unitree] still pins SDK 0.1.6. Select booster alone and pin the
++# reviewed Unitree SDK explicitly without modifying the Holosoma submodule.
+ RUN --mount=type=cache,target=/root/.cache/pip \
+     PIP_CONSTRAINT=/opt/php-build/constraints.build.txt train-python -m pip install \
+       -c /opt/php-build/isaacsim-5.1.txt -c /opt/php-build/constraints.train.txt \
+       -c /opt/php-build/constraints.train-added.txt \
+-      -e 'thirdparty/holosoma/src/holosoma[unitree,booster]' \
++      -e 'thirdparty/holosoma/src/holosoma[booster]' 'far-unitree-sdk==0.1.8' \
+       'mujoco==3.8.1' 'mujoco-python-viewer==0.1.4' 'av==16.1.0' \
+       'quadprog==0.1.13' 'PyJWT==2.10.1' \
+     && /usr/bin/python3 -m venv /opt/php/envs/motion \
+@@ -63,7 +65,7 @@
+     && inference-python -m pip install \
+       --build-constraint /opt/php-build/constraints.build.txt \
+       -c /opt/php-build/constraints.inference.txt \
+-      -e 'thirdparty/holosoma/src/holosoma_inference[unitree,booster]' \
++      -e 'thirdparty/holosoma/src/holosoma_inference[booster]' 'far-unitree-sdk==0.1.8' \
+       'numpy==2.3.5' 'pytest==9.0.3' 'av==16.1.0'
+ 
+ COPY . .
+--- a/docker/constraints.train-added.txt
++++ b/docker/constraints.train-added.txt
+@@ -1,4 +1,4 @@
+-# Source image: sha256:4a0aa12db11137e88db530fe871229d5bfe146e14db254f326f64c69b947cab2
++# Source image: sha256:caf61487b69ce478980b3bf9df38a7f1fcaaae4b109d971dfbea10b09bf441aa
+ # New/changed dependencies relative to the pinned official NVIDIA base.
+ # Generated from /opt/php-build/train.freeze.txt; no local/editable entries.
+ argon2-cffi==25.1.0
+@@ -24,7 +24,7 @@
+ etils==1.14.0
+ evdev==2.0.0
+ far-booster-sdk==0.1.1
+-far-unitree-sdk==0.1.6
++far-unitree-sdk==0.1.8
+ fastjsonschema==2.22.2
+ Flask==3.1.3
+ flatbuffers==25.12.19
+--- a/docker/constraints.inference.txt
++++ b/docker/constraints.inference.txt
+@@ -1,4 +1,4 @@
+-# Source image: sha256:4a0aa12db11137e88db530fe871229d5bfe146e14db254f326f64c69b947cab2
++# Source image: sha256:caf61487b69ce478980b3bf9df38a7f1fcaaae4b109d971dfbea10b09bf441aa
+ # Complete validated runtime dependencies; Python 3.12.
+ # Generated from /opt/php-build/inference.freeze.txt; no local/editable entries.
+ annotated-types==0.8.0
+@@ -21,7 +21,7 @@
+ eigenpy==3.13.0
+ evdev==2.0.0
+ far-booster-sdk==0.1.1
+-far-unitree-sdk==0.1.6
++far-unitree-sdk==0.1.8
+ flatbuffers==25.12.19
+ googleapis-common-protos==1.75.5
+ idna==3.20
+--- a/docker/runtime-locks.json
++++ b/docker/runtime-locks.json
+@@ -1,12 +1,12 @@
+ {
+-  "source_image": "sha256:4a0aa12db11137e88db530fe871229d5bfe146e14db254f326f64c69b947cab2",
++  "source_image": "sha256:caf61487b69ce478980b3bf9df38a7f1fcaaae4b109d971dfbea10b09bf441aa",
+   "lock_format": "pip constraints; editable/local/VCS project installs excluded",
+   "environments": {
+     "train": {
+       "constraint_file": "constraints.train-added.txt",
+       "package_count": 117,
+-      "freeze_sha256": "c9d11c85dd1e62a36659d663ed3a5310a61eda5ac5a3f0dd2399b4929bc6eb7f",
+-      "constraint_sha256": "09c0224902402206cac2c46df1c894859b1538e02ddc911d9289bb5ae9bee298"
++      "freeze_sha256": "82bd60f80585895ec5fafcd5bea42dc5f8ff04e66d35b127d68856b9d2780c92",
++      "constraint_sha256": "862bf043c833780984b52f6a10fd33226157f73f5424269d3d8ef108c682376c"
+     },
+     "motion": {
+       "constraint_file": "constraints.motion.txt",
+@@ -17,14 +17,22 @@
+     "inference": {
+       "constraint_file": "constraints.inference.txt",
+       "package_count": 66,
+-      "freeze_sha256": "a40529bb2161e7d0483193a08c0a648635e99ec7fbfbfaac54a45985b09787a2",
+-      "constraint_sha256": "297b7044752b56db4080bbf972c9ae15c33249b8b4cbb8f8807a88b2b8f9bdd4"
++      "freeze_sha256": "744cea20ce6407c7be524f79de49d82775880ddb9d29cea37d4eba898c43dd8a",
++      "constraint_sha256": "0e6bd3fe17724e295052b3fd1b8a495606002d54f845d1f64ab2dc5820e5b764"
+     }
+   },
+   "build": {
+     "constraint_file": "constraints.build.txt",
+     "package_count": 3,
+     "constraint_sha256": "d230e95244eca1a535be692a508050897acb01470a7a11e83058e4d8bcd385d3",
+-    "validation": "motion/inference pip fresh --ignore-installed --dry-run reports exactly match runtime locks"
++    "validation": "Build backend constraints unchanged. Prior fresh-resolution proof applied to SDK016; new SDK018 proof here is installed-environment metadata/dry-run only, not a full fresh solve."
++  },
++  "lock_provenance": {
++    "status": "actual_sdk018_candidate_runtime_not_future_canonical_image",
++    "base_image": "sha256:88254ac0b90a3056375145601d741aa3e08726e18412d201a3c7e7915a23996f",
++    "observed_utc": "2026-10-10T08:45:37.701035+00:00",
++    "freeze_receipt_sha256": "da808d0df5f91f15a34002a87ae9cebe37093ad0aad69b4393f15924b9923598",
++    "canonical_sdk018_image_built": false,
++    "validation": "Fresh pip freeze from fixed existing SDK018 candidate, Docker runc/network none/read-only/no GPU; train/inference installed-env dry-run with booster+explicit018 passed, unitree+018 rejected; no full fresh solve."
+   }
+ }
