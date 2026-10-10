@@ -1,0 +1,309 @@
+--- a/scripts/research/pull_final_students.py
++++ b/scripts/research/pull_final_students.py
+@@ -22,8 +22,9 @@
+ 
+ REPO = Path(__file__).resolve().parents[2] if __file__ != "<stdin>" else Path.cwd()
+ REMOTE_ROOT = "/diff/dzp_is_sb/php-parkour-research"
+-TREE = "8d9ee8a4dea5cccb8bac5664fb779fe8f5a102d6fd38104649ab28bd33010772"
+-MONITOR_SHA = "00b7ad8d215f04d603ae696cafa613d15cd1287066a1387ddde376ba7203dff0"
++TREE = "02bc110026d8402cd6046afecb039ee40fbd918c760554ad86f7effa678f9f3c"
++MONITOR_SHA = "58b8978cb24d8a194133e6344c1fa415632413d83c92b18a21ebcc3b75ed5dfc"
++COVERAGE_DIRECTORY = "coverage-official-final-ro-assets-v2"
+ IMAGE = "sha256:631d9e53768a3cc65372b394d0aa266a34ee92004141a9817824001ade30e3bd"
+ PAIR = ("student.onnx", "depth_backbone.onnx")
+ KINDS = ("pure", "finetune")
+@@ -69,6 +70,14 @@
+             and ".." not in path.parts and not any(ord(x) < 32 for x in value)
+             and str(path) == value, f"Unsafe relative path: {value}")
+     return path
++
++
++def coverage_directory(value):
++    """One explicit coverage child of remote_root/outputs, never an arbitrary path."""
++    path = relative_path(value)
++    require(len(path.parts) == 1 and re.fullmatch(r"coverage-[A-Za-z0-9][A-Za-z0-9_.-]{0,95}", value),
++            "Coverage output must be one safe coverage-* directory relative to remote_root/outputs")
++    return value
+ 
+ 
+ def regular_file(root, relative):
+@@ -97,6 +106,9 @@
+             and cpu.get("simulation_started") is False and cpu.get("quality_verified") is False
+             and cpu.get("total_sources") == 296 and cpu.get("finished_utc")
+             and re.fullmatch(r"[0-9a-f]{64}", cpu.get("inventory_sha256", "")), "Incomplete CPU scientific receipt")
++    require(selection.get("schema_version") == 2
++            and cpu.get("runtime_robot_assets") == selection["runtime_robot_assets"],
++            "CPU receipt does not bind the schema2 shared runtime robot assets")
+     reports = cpu.get("checkpoints", [])
+     require(len(reports) == 7 and [x["label"] for x in reports] == list(pc.TRAINING), "CPU receipt lacks ordered seven final PTs")
+     targets = {"teacher": "holosoma.agents.ppo.ppo.PPO", "pure": "wbt_training.utils.student_teacher.PhpDistillation",
+@@ -126,10 +138,11 @@
+             and all(x.get("sources") == 296 and re.fullmatch(r"[0-9a-f]{64}", x.get("sha256", "")) for x in plans), "Incomplete three full-source CPU plans")
+ 
+ 
+-def remote_probe(root, tree, pc):
++def remote_probe(root, tree, pc, coverage_output=COVERAGE_DIRECTORY):
+     """Pure read-only gate. pc is the exact reviewed frozen monitor module."""
+     root = Path(root)
+-    official, coverage = root / "outputs/official-full", root / "outputs/coverage-official-final"
++    coverage_output = coverage_directory(coverage_output)
++    official, coverage = root / "outputs/official-full", root / "outputs" / coverage_output
+     # Reject manifest aliases before the native gate reads them.
+     for label in pc.LABELS:
+         relative = f"official/manifests/{label}.json"
+@@ -137,6 +150,8 @@
+     stages, blockers = pc.stage_status(official)
+     cpu_present = (coverage / "cpu-ready.json").is_file()
+     waiting = {"status": "waiting", "observed_utc": now(), "canonical_stage_count": 16,
++               "remote_root": str(root), "source_tree": tree, "monitor_sha256": MONITOR_SHA,
++               "coverage_output": coverage_output, "host_coverage_output": str(coverage),
+                "stage_blockers": blockers, "cpu_ready_present": cpu_present, "gpu_started": False,
+                "transfer_started": False, "quality_verified": False}
+     if blockers: return waiting
+@@ -168,7 +183,8 @@
+         require(path == PurePosixPath(pc.COVERAGE) / item["policy"] / "plan.json", "CPU plan path changed")
+         actual_plan = regular_file(coverage, str(path.relative_to(pc.COVERAGE)))
+         data = read(actual_plan)
+-        require(sha(actual_plan) == item["sha256"] and data.get("policy") == item["policy"]
++        require(sha(actual_plan) == item["sha256"] and data.get("schema_version") == 2
++                and data.get("runtime_robot_assets") == selection["runtime_robot_assets"] and data.get("policy") == item["policy"]
+                 and data.get("selected_sources") == data.get("inventory_total_sources") == len(data["cases"]) == 296,
+                 "CPU complete-source plan changed")
+     files, pairs = {}, []
+@@ -181,7 +197,7 @@
+             read(path)
+         files[relative] = {"relative":relative, "sha256":sha(path), "bytes":path.stat().st_size}
+     for label in pc.LABELS: add(f"official-full/official/manifests/{label}.json")
+-    for filename in ("selection.json", "cpu-ready.json"): add(f"coverage-official-final/{filename}")
++    for filename in ("selection.json", "cpu-ready.json"): add(f"{coverage_output}/{filename}")
+     add("official-full/official/teacher-onnx-validation/summary.json")
+     for item in selection["teacher_reports"]: add(str(PurePosixPath(item["path"]).relative_to("/outputs")))
+     for kind in KINDS:
+@@ -205,7 +221,8 @@
+         add(str(PurePosixPath(stages[f"eval-student-{kind}"]["evaluation_quality_report"]).relative_to("/outputs")))
+         pairs.append({"kind":kind, "checkpoint":selection["checkpoints"][f"student-{kind}"],
+                       "bundle":entry["bundle"], "report":report, "models":model_records})
+-    payload = {"schema_version":1, "remote_root":str(root), "source_tree":tree, "monitor_sha256":MONITOR_SHA,
++    payload = {"schema_version":2, "remote_root":str(root), "source_tree":tree, "monitor_sha256":MONITOR_SHA,
++               "coverage_output":coverage_output, "host_coverage_output":str(coverage),
+                "image":IMAGE, "selection_identity":selection["input_identity"], "checkpoints":selection["checkpoints"],
+                "cpu_container":name, "cpu_container_exit_code":0, "pairs":pairs,
+                "files":sorted(files.values(),key=lambda x:x["relative"]), "quality_verified":False}
+@@ -216,8 +233,14 @@
+ def validate_receipt(receipt):
+     require(receipt.get("status") == "ready" and receipt["snapshot_identity"] == identity(receipt["payload"]), "Remote immutable receipt identity differs")
+     payload = receipt["payload"]
+-    require(payload["schema_version"] == 1 and payload["monitor_sha256"] == MONITOR_SHA and payload["image"] == IMAGE,
++    require(payload["schema_version"] == 2 and payload["monitor_sha256"] == MONITOR_SHA and payload["image"] == IMAGE,
+             "Remote receipt uses another source/image contract")
++    coverage_output = coverage_directory(payload["coverage_output"])
++    remote_root = PurePosixPath(payload["remote_root"])
++    require(remote_root.is_absolute() and ".." not in remote_root.parts
++            and payload["host_coverage_output"] == str(remote_root / "outputs" / coverage_output)
++            and re.fullmatch(r"[0-9a-f]{64}", payload["source_tree"]),
++            "Remote receipt coverage path/source identity differs")
+     require([x["kind"] for x in payload["pairs"]] == list(KINDS) and len(payload["pairs"]) == 2, "Expected two ordered final pairs")
+     require(set(payload["checkpoints"]) == {f"teacher-{s}" for s in SKILLS} | {f"student-{k}" for k in KINDS}, "Receipt lacks seven canonical checkpoints")
+     for skill in SKILLS:
+@@ -242,7 +265,7 @@
+                     and record in files, "Model path/hash is not bound to its explicit bundle")
+             expected_models.add(record["relative"])
+     expected_json = {f"official-full/official/manifests/{label}.json" for label in LABELS}
+-    expected_json |= {"coverage-official-final/selection.json", "coverage-official-final/cpu-ready.json",
++    expected_json |= {f"{coverage_output}/selection.json", f"{coverage_output}/cpu-ready.json",
+                       "official-full/official/teacher-onnx-validation/summary.json"}
+     expected_json |= {f"official-full/official/teacher-onnx-validation/{skill}.json" for skill in SKILLS}
+     expected_json |= {f"official-full/official/eval-student-{kind}/quality.json" for kind in KINDS}
+@@ -268,14 +291,21 @@
+ 
+ def observe_remote(args):
+     command = ["ssh", "-p", "22", "-o", "BatchMode=yes", args.host, "python3", "-B", "-", "probe",
+-               "--remote-root", args.remote_root, "--source-tree", args.source_tree]
++               "--remote-root", args.remote_root, "--source-tree", args.source_tree,
++               "--coverage-output", coverage_directory(args.coverage_output)]
+     result = subprocess.run(command, input=Path(__file__).read_bytes(), capture_output=True, check=True)
+     receipt = json.loads(result.stdout)
+     if receipt.get("status") == "ready":
+         validate_receipt(receipt)
+-        require(receipt["payload"]["remote_root"] == args.remote_root and receipt["payload"]["source_tree"] == args.source_tree,
+-                "SSH receipt belongs to another requested remote root/source")
+-    else: require(receipt.get("status") == "waiting", "Unknown remote observation status")
++        observed = receipt["payload"]
++    else:
++        require(receipt.get("status") == "waiting", "Unknown remote observation status")
++        observed = receipt
++    require(observed["remote_root"] == args.remote_root and observed["source_tree"] == args.source_tree
++            and observed["coverage_output"] == args.coverage_output
++            and observed["host_coverage_output"] == str(PurePosixPath(args.remote_root) / "outputs" / args.coverage_output)
++            and observed["monitor_sha256"] == MONITOR_SHA,
++            "SSH receipt belongs to another requested remote root/source/coverage directory")
+     return receipt
+ 
+ 
+@@ -292,6 +322,9 @@
+     if before["status"] == "waiting": return before
+     tool_sha = sha(__file__)
+     files = validate_receipt(before)
++    require(before["payload"]["remote_root"] == args.remote_root and before["payload"]["source_tree"] == args.source_tree
++            and before["payload"]["coverage_output"] == coverage_directory(args.coverage_output),
++            "Fetch receipt belongs to another requested remote root/source/coverage directory")
+     require(re.fullmatch(r"final-[0-9a-f]{12}-[0-9a-f]{12}-[0-9a-f]{12}",before["cohort"]), "Invalid immutable cohort name")
+     destination = args.output_root / before["cohort"] / args.attempt
+     require(not any(path.is_symlink() for path in [destination,*destination.parents]), "Transfer destination has a symlink ancestor")
+@@ -339,14 +372,17 @@
+     parser.add_argument("--host",default="tencent-231")
+     parser.add_argument("--remote-root",default=REMOTE_ROOT)
+     parser.add_argument("--source-tree",default=TREE)
++    parser.add_argument("--coverage-output",default=COVERAGE_DIRECTORY,
++                        help="One safe coverage-* directory relative to remote-root/outputs; must match selection.json")
+     parser.add_argument("--output-root",type=Path,default=REPO/"outputs/research/final-student-transfer")
+     parser.add_argument("--attempt",default="initial",help="Fresh immutable attempt name; choose a new name after reviewing a retained partial failure")
+     args=parser.parse_args()
++    coverage_directory(args.coverage_output)
+     require(re.fullmatch(r"[A-Za-z0-9_@.][A-Za-z0-9_@.-]*",args.host) and re.fullmatch(r"/diff/dzp_is_sb/[A-Za-z0-9_./-]+",args.remote_root)
+             and ".." not in PurePosixPath(args.remote_root).parts, "Unsafe SSH host/remote root")
+     require(re.fullmatch(r"[0-9a-f]{64}",args.source_tree) and re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]{0,63}",args.attempt), "Invalid source tree/attempt name")
+     if args.action=="probe":
+-        result=remote_probe(Path(args.remote_root),args.source_tree,load_monitor(args.remote_root,args.source_tree))
++        result=remote_probe(Path(args.remote_root),args.source_tree,load_monitor(args.remote_root,args.source_tree),args.coverage_output)
+     else:
+         require(not any(path.is_symlink() for path in [args.output_root,*args.output_root.parents]), "Output tree has a symlink ancestor")
+         args.output_root=args.output_root.resolve()
+--- a/tests/test_pull_final_students.py
++++ b/tests/test_pull_final_students.py
+@@ -21,12 +21,14 @@
+ 
+ 
+ @pytest.fixture
+-def ready(canonical, monkeypatch):
++def ready(canonical, monkeypatch, request):
+     args, stages = canonical
+-    args.coverage_output = args.root / "outputs/coverage-official-final"
++    directory = getattr(request, "param", pf.COVERAGE_DIRECTORY)
++    args.coverage_output = args.root / "outputs" / directory
+     args.image = pf.IMAGE
+     source = args.root / "source" / args.source_tree
+-    selection = {"schema_version":1, "training_source_tree":pc.TRAIN_TREE,
++    robot_assets = {"schema_version":1, "fixture":"control-plane contract identity only; filesystem checks are tested separately"}
++    selection = {"schema_version":2, "runtime_robot_assets":robot_assets, "training_source_tree":pc.TRAIN_TREE,
+         "coverage_source_tree":args.source_tree, "image":pf.IMAGE,
+         "image_contents_sha256":pc.IMAGE_CONTENTS, "gpu_uuid":args.gpu_uuid,
+         "official_output":pc.OFFICIAL, "coverage_output":pc.COVERAGE,
+@@ -48,9 +50,10 @@
+     plans = []
+     for policy in pc.POLICIES:
+         path = args.coverage_output / policy / "plan.json"
+-        save(path, {"policy":policy,"selected_sources":296,"inventory_total_sources":296,"cases":[{}]*296})
++        save(path, {"schema_version":2,"runtime_robot_assets":robot_assets,
++                    "policy":policy,"selected_sources":296,"inventory_total_sources":296,"cases":[{}]*296})
+         plans.append({"policy":policy,"sources":296,"path":f"{pc.COVERAGE}/{policy}/plan.json","sha256":pf.sha(path)})
+-    cpu = {"status":"cpu_scientific_checks_passed", "input_identity":selection["input_identity"],
++    cpu = {"status":"cpu_scientific_checks_passed", "input_identity":selection["input_identity"], "runtime_robot_assets":robot_assets,
+         "simulation_started":False, "quality_verified":False, "total_sources":296,
+         "inventory_sha256":"a"*64, "finished_utc":"2026-10-10T10:00:00+00:00", "checkpoints":reports,"plans":plans}
+     save(args.coverage_output / "selection.json", selection)
+@@ -71,12 +74,12 @@
+         return subprocess.CompletedProcess(argv,0,json.dumps([info]),"")
+     monkeypatch.setattr(pc.subprocess,"run",inspect)
+     transfer = SimpleNamespace(host="tencent-231", remote_root=str(args.root),source_tree=args.source_tree,
+-        output_root=args.root/"local",attempt="initial")
++        coverage_output=directory,output_root=args.root/"local",attempt="initial")
+     return SimpleNamespace(args=args,stages=stages,selection=selection,cpu=cpu,info=info,transfer=transfer)
+ 
+ 
+ def probe(fixture):
+-    return pf.remote_probe(fixture.args.root,fixture.args.source_tree,pc)
++    return pf.remote_probe(fixture.args.root,fixture.args.source_tree,pc,fixture.transfer.coverage_output)
+ 
+ 
+ def save_stage(fixture,label):
+@@ -282,7 +285,11 @@
+         assert argv[:6] == ["ssh","-p","22","-o","BatchMode=yes","tencent-231"]
+         assert "probe" in argv and "-B" in argv and kwargs["input"] == Path(pf.__file__).read_bytes()
+         assert not any(x in argv for x in ("docker","rsync","fetch"))
+-        return subprocess.CompletedProcess(argv,0,json.dumps({"status":"waiting","canonical_stage_count":16,"cpu_ready_present":False}).encode(),b"")
++        assert argv[argv.index("--coverage-output")+1] == pf.COVERAGE_DIRECTORY
++        assert argv[argv.index("--source-tree")+1] == pf.TREE
++        return subprocess.CompletedProcess(argv,0,json.dumps({"status":"waiting","canonical_stage_count":16,"cpu_ready_present":False,
++            "remote_root":pf.REMOTE_ROOT,"source_tree":pf.TREE,"monitor_sha256":pf.MONITOR_SHA,
++            "coverage_output":pf.COVERAGE_DIRECTORY,"host_coverage_output":pf.REMOTE_ROOT+"/outputs/"+pf.COVERAGE_DIRECTORY}).encode(),b"")
+     monkeypatch.setattr(pf.subprocess,"run",ssh)
+     assert pf.main() == 0 and json.loads(capsys.readouterr().out)["status"] == "waiting"
+     assert not output.exists()
+@@ -291,3 +298,76 @@
+ @pytest.mark.parametrize("path",["../escape","/absolute","x/../y","x//y","x\nname",""])
+ def test_relative_paths_reject_ambiguous_or_escaping_names(path):
+     with pytest.raises(ValueError): pf.relative_path(path)
++
++
++def test_defaults_match_new_reviewed_watcher_source_and_coverage():
++    assert pf.TREE == "02bc110026d8402cd6046afecb039ee40fbd918c760554ad86f7effa678f9f3c"
++    assert pf.MONITOR_SHA == pf.sha(pc.__file__)
++    assert pf.COVERAGE_DIRECTORY == "coverage-official-final-ro-assets-v2"
++
++
++@pytest.mark.parametrize("value", ("../coverage-other", "/absolute/coverage-other", "coverage-a/child", "coverage-a//b",
++                                  "official-full", "coverage-", "coverage-a\nname", ".", ""))
++def test_coverage_output_is_only_a_safe_relative_coverage_child(value):
++    with pytest.raises(ValueError):
++        pf.coverage_directory(value)
++
++
++@pytest.mark.parametrize("ready", ["coverage-another-reviewed-cohort"], indirect=True)
++def test_explicit_coverage_directory_controls_both_probe_and_exact_whitelist(ready):
++    receipt = probe(ready)
++    files = pf.validate_receipt(receipt)
++    assert receipt["payload"]["coverage_output"] == ready.transfer.coverage_output
++    assert receipt["payload"]["host_coverage_output"] == str(ready.args.coverage_output)
++    coverage_json = {item["relative"] for item in files if item["relative"].startswith("coverage-")}
++    assert coverage_json == {ready.transfer.coverage_output+"/selection.json", ready.transfer.coverage_output+"/cpu-ready.json"}
++    assert len(files) == 32 and sum(item["relative"].endswith(".json") for item in files) == 28
++
++
++def test_old_cpu_directory_does_not_substitute_for_new_watcher_output(ready):
++    original = ready.args.coverage_output / "cpu-ready.json"
++    old = ready.args.root / "outputs/coverage-official-final/cpu-ready.json"
++    old.parent.mkdir()
++    original.rename(old)
++    receipt = probe(ready)
++    assert receipt["status"] == "waiting" and receipt["cpu_ready_present"] is False
++    assert receipt["coverage_output"] == pf.COVERAGE_DIRECTORY
++    assert old.exists() and not original.exists()
++
++
++@pytest.mark.parametrize("change", ("selection_path", "asset_contract", "schema"))
++def test_new_selection_cpu_shared_contract_is_required(ready, change):
++    if change == "selection_path":
++        ready.selection["host_coverage_output"] = str(ready.args.root / "outputs/coverage-official-final")
++        ready.selection["input_identity"] = pf.identity({key:value for key,value in ready.selection.items() if key != "input_identity"})
++        ready.cpu["input_identity"] = ready.selection["input_identity"]
++    elif change == "asset_contract":
++        ready.cpu["runtime_robot_assets"] = {"different":"not the shared assets"}
++    else:
++        ready.selection["schema_version"] = 1
++        ready.selection["input_identity"] = pf.identity({key:value for key,value in ready.selection.items() if key != "input_identity"})
++        ready.cpu["input_identity"] = ready.selection["input_identity"]
++    save(ready.args.coverage_output / "selection.json", ready.selection)
++    save(ready.args.coverage_output / "cpu-ready.json", ready.cpu)
++    with pytest.raises(ValueError):
++        probe(ready)
++
++
++@pytest.mark.parametrize("change", ("coverage_output", "host_coverage_output", "source_tree", "monitor_sha256"))
++def test_waiting_ssh_status_must_echo_requested_source_and_coverage(ready, monkeypatch, change):
++    value = {"status":"waiting", "remote_root":ready.transfer.remote_root, "source_tree":ready.transfer.source_tree,
++             "monitor_sha256":pf.MONITOR_SHA, "coverage_output":ready.transfer.coverage_output,
++             "host_coverage_output":str(ready.args.coverage_output)}
++    value[change] = "coverage-official-final" if change == "coverage_output" else "wrong"
++    monkeypatch.setattr(pf.subprocess, "run", lambda *_a, **_k: subprocess.CompletedProcess([],0,json.dumps(value).encode(),b""))
++    with pytest.raises(ValueError, match="requested"):
++        pf.observe_remote(ready.transfer)
++
++
++def test_fetch_cannot_start_from_another_coverage_receipt(ready, monkeypatch):
++    receipt = probe(ready)
++    ready.transfer.coverage_output = "coverage-unrelated"
++    monkeypatch.setattr(pf.subprocess, "run", lambda *_a, **_k: pytest.fail("Wrong cohort started a transfer"))
++    with pytest.raises(ValueError, match="another requested"):
++        pf.fetch(ready.transfer, receipt)
++    assert not ready.transfer.output_root.exists()

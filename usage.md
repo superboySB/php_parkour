@@ -331,7 +331,7 @@ CPU 测试统一在 Docker 中运行，分别保留根目录/训练和 motion ma
 
 ![no-heightscan实际episode中点帧](usage_assets/isaac/teacher-presets-sdk018-v3/g1-wbt-terrain-no-heightscan.png)
 
-全629新版批次已通过完整5206文件冻结核验、同镜像实际CPU入口/17场景配置预检与19项外层检查，当前仅记为准备完成；未来须有629例和1258个worker的真实正常终态及629原视频完整解码。[准备输入与新计划](usage_assets/reports/fresh629-sdk018-preparation/summary.md)。
+全629新版批次已通过完整5206文件冻结核验、同镜像实际CPU入口/17场景配置预检与19项外层检查。[准备输入与新计划](usage_assets/reports/fresh629-sdk018-preparation/summary.md)不计作实际完成；后续启动与首两例后验见下文。全量验收仍须629例和1258个worker真实正常终态及629原视频完整解码。
 
 新统一镜像上的12方向指令已全部实际复测并独立核验：每例8仿真秒/400ticks，24worker退出码0且进程组最终为空，24份精确host command_writer映射、12段原MP4完整解码、3332冻结文件SHA均通过。命令0–11、seed42、平地独立重置和原配置相同，实际单例wall373秒，无120秒override；宿主总耗时248.185秒。12例均未触发存活启发式失败，但不据此声称动作质量或越障成功。[逐例路径/转角、真实截图和全部视频](usage_assets/reports/sdk018-directions/summary.md)。旧command02的异常记录仍保留，新结果不改写历史。
 
@@ -362,3 +362,18 @@ CPU 测试统一在 Docker 中运行，分别保留根目录/训练和 motion ma
 ![真实终端的高速command、停止自动保存与保持日志](usage_assets/reports/native-keyboard-gui/attempts/05-egl-completed/outputs/policy-terminal.png)
 
 [该次真实原片](usage_assets/reports/native-keyboard-gui/attempts/05-egl-completed/outputs/video/episode_0_1791626513.mp4)。forward6原截图因Camera tracking OFF而只有地板，原样保留，不作为高速步态可视化证据；命令输入由真实keys/state/NPZ标签证明。GUI接口通过不等于障碍通关、实时性能或实机成功。
+
+### 新版629批次的真实启动与首两例
+
+2026-10-10 10:02 UTC已启动独立新版629批次，原生容器`2d09d396…`、统一SDK0.1.8镜像2be、固定GPU与network none；5206文件输入冻结不变。10:10:23 UTC固定快照为21 completed/1 running/607 planned。独立CPU后验仅验最前两例：每例500策略ticks、首末10仿真秒，4 worker退出0且进程组为空、4 host command_writer出生身份映射、两原MP4全片解码均通过；第二例确实跌倒。[完整原始启动、固定快照与检查过程](usage_assets/reports/fresh629-start-first-two/summary.md)。
+
+| 首两例 | 执行完整性 | 物理结果与原片 |
+| --- | --- | --- |
+| random_locomotion cfg0000 | 正常退出 | 未触发生存阈值；[原片](usage_assets/sim2sim/fresh629-start-first-two/random-locomotion-cfg0000.mp4) |
+| random_locomotion cfg0001 | 正常退出 | 触发跌倒阈值；[原片](usage_assets/sim2sim/fresh629-start-first-two/random-locomotion-cfg0001.mp4) |
+
+![第二例真实跌倒帧，来自原MP4的12秒位置](usage_assets/sim2sim/fresh629-start-first-two/random-locomotion-cfg0001.png)
+
+这是发布ONNX对的几何扫描，quality/course均false；首两例不是629全量验收。初次CPU checker错误假设轨迹起点为0的失败原件也已保留，改为依据实际ACK偏移检查首末10秒跨度后通过，没有改动原生轨迹。
+
+学生回传入口同步绑定新watch的02bc源码、`coverage-official-final-ro-assets-v2`和schema2共享资产合同，77/77 Docker CPU检查通过。10:19 UTC root真实SSH status为waiting，16阶段阻塞，没有cpu-ready、GPU验收或模型回传；四ONNX加28JSON白名单保持。[最小补丁、原JUnit与真实等待响应](usage_assets/reports/final-student-transfer-ro-assets-integration/summary.md)。旧57项与15:26状态只作历史记录，不与新测试相加。

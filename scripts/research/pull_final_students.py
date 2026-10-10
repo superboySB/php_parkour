@@ -22,8 +22,9 @@ from types import SimpleNamespace
 
 REPO = Path(__file__).resolve().parents[2] if __file__ != "<stdin>" else Path.cwd()
 REMOTE_ROOT = "/diff/dzp_is_sb/php-parkour-research"
-TREE = "8d9ee8a4dea5cccb8bac5664fb779fe8f5a102d6fd38104649ab28bd33010772"
-MONITOR_SHA = "00b7ad8d215f04d603ae696cafa613d15cd1287066a1387ddde376ba7203dff0"
+TREE = "02bc110026d8402cd6046afecb039ee40fbd918c760554ad86f7effa678f9f3c"
+MONITOR_SHA = "58b8978cb24d8a194133e6344c1fa415632413d83c92b18a21ebcc3b75ed5dfc"
+COVERAGE_DIRECTORY = "coverage-official-final-ro-assets-v2"
 IMAGE = "sha256:631d9e53768a3cc65372b394d0aa266a34ee92004141a9817824001ade30e3bd"
 PAIR = ("student.onnx", "depth_backbone.onnx")
 KINDS = ("pure", "finetune")
@@ -71,6 +72,14 @@ def relative_path(value):
     return path
 
 
+def coverage_directory(value):
+    """One explicit coverage child of remote_root/outputs, never an arbitrary path."""
+    path = relative_path(value)
+    require(len(path.parts) == 1 and re.fullmatch(r"coverage-[A-Za-z0-9][A-Za-z0-9_.-]{0,95}", value),
+            "Coverage output must be one safe coverage-* directory relative to remote_root/outputs")
+    return value
+
+
 def regular_file(root, relative):
     path = Path(root)
     for part in relative_path(relative).parts:
@@ -97,6 +106,9 @@ def verify_cpu_receipt(cpu, selection, pc):
             and cpu.get("simulation_started") is False and cpu.get("quality_verified") is False
             and cpu.get("total_sources") == 296 and cpu.get("finished_utc")
             and re.fullmatch(r"[0-9a-f]{64}", cpu.get("inventory_sha256", "")), "Incomplete CPU scientific receipt")
+    require(selection.get("schema_version") == 2
+            and cpu.get("runtime_robot_assets") == selection["runtime_robot_assets"],
+            "CPU receipt does not bind the schema2 shared runtime robot assets")
     reports = cpu.get("checkpoints", [])
     require(len(reports) == 7 and [x["label"] for x in reports] == list(pc.TRAINING), "CPU receipt lacks ordered seven final PTs")
     targets = {"teacher": "holosoma.agents.ppo.ppo.PPO", "pure": "wbt_training.utils.student_teacher.PhpDistillation",
@@ -126,10 +138,11 @@ def verify_cpu_receipt(cpu, selection, pc):
             and all(x.get("sources") == 296 and re.fullmatch(r"[0-9a-f]{64}", x.get("sha256", "")) for x in plans), "Incomplete three full-source CPU plans")
 
 
-def remote_probe(root, tree, pc):
+def remote_probe(root, tree, pc, coverage_output=COVERAGE_DIRECTORY):
     """Pure read-only gate. pc is the exact reviewed frozen monitor module."""
     root = Path(root)
-    official, coverage = root / "outputs/official-full", root / "outputs/coverage-official-final"
+    coverage_output = coverage_directory(coverage_output)
+    official, coverage = root / "outputs/official-full", root / "outputs" / coverage_output
     # Reject manifest aliases before the native gate reads them.
     for label in pc.LABELS:
         relative = f"official/manifests/{label}.json"
@@ -137,6 +150,8 @@ def remote_probe(root, tree, pc):
     stages, blockers = pc.stage_status(official)
     cpu_present = (coverage / "cpu-ready.json").is_file()
     waiting = {"status": "waiting", "observed_utc": now(), "canonical_stage_count": 16,
+               "remote_root": str(root), "source_tree": tree, "monitor_sha256": MONITOR_SHA,
+               "coverage_output": coverage_output, "host_coverage_output": str(coverage),
                "stage_blockers": blockers, "cpu_ready_present": cpu_present, "gpu_started": False,
                "transfer_started": False, "quality_verified": False}
     if blockers: return waiting
@@ -168,7 +183,8 @@ def remote_probe(root, tree, pc):
         require(path == PurePosixPath(pc.COVERAGE) / item["policy"] / "plan.json", "CPU plan path changed")
         actual_plan = regular_file(coverage, str(path.relative_to(pc.COVERAGE)))
         data = read(actual_plan)
-        require(sha(actual_plan) == item["sha256"] and data.get("policy") == item["policy"]
+        require(sha(actual_plan) == item["sha256"] and data.get("schema_version") == 2
+                and data.get("runtime_robot_assets") == selection["runtime_robot_assets"] and data.get("policy") == item["policy"]
                 and data.get("selected_sources") == data.get("inventory_total_sources") == len(data["cases"]) == 296,
                 "CPU complete-source plan changed")
     files, pairs = {}, []
@@ -181,7 +197,7 @@ def remote_probe(root, tree, pc):
             read(path)
         files[relative] = {"relative":relative, "sha256":sha(path), "bytes":path.stat().st_size}
     for label in pc.LABELS: add(f"official-full/official/manifests/{label}.json")
-    for filename in ("selection.json", "cpu-ready.json"): add(f"coverage-official-final/{filename}")
+    for filename in ("selection.json", "cpu-ready.json"): add(f"{coverage_output}/{filename}")
     add("official-full/official/teacher-onnx-validation/summary.json")
     for item in selection["teacher_reports"]: add(str(PurePosixPath(item["path"]).relative_to("/outputs")))
     for kind in KINDS:
@@ -205,7 +221,8 @@ def remote_probe(root, tree, pc):
         add(str(PurePosixPath(stages[f"eval-student-{kind}"]["evaluation_quality_report"]).relative_to("/outputs")))
         pairs.append({"kind":kind, "checkpoint":selection["checkpoints"][f"student-{kind}"],
                       "bundle":entry["bundle"], "report":report, "models":model_records})
-    payload = {"schema_version":1, "remote_root":str(root), "source_tree":tree, "monitor_sha256":MONITOR_SHA,
+    payload = {"schema_version":2, "remote_root":str(root), "source_tree":tree, "monitor_sha256":MONITOR_SHA,
+               "coverage_output":coverage_output, "host_coverage_output":str(coverage),
                "image":IMAGE, "selection_identity":selection["input_identity"], "checkpoints":selection["checkpoints"],
                "cpu_container":name, "cpu_container_exit_code":0, "pairs":pairs,
                "files":sorted(files.values(),key=lambda x:x["relative"]), "quality_verified":False}
@@ -216,8 +233,14 @@ def remote_probe(root, tree, pc):
 def validate_receipt(receipt):
     require(receipt.get("status") == "ready" and receipt["snapshot_identity"] == identity(receipt["payload"]), "Remote immutable receipt identity differs")
     payload = receipt["payload"]
-    require(payload["schema_version"] == 1 and payload["monitor_sha256"] == MONITOR_SHA and payload["image"] == IMAGE,
+    require(payload["schema_version"] == 2 and payload["monitor_sha256"] == MONITOR_SHA and payload["image"] == IMAGE,
             "Remote receipt uses another source/image contract")
+    coverage_output = coverage_directory(payload["coverage_output"])
+    remote_root = PurePosixPath(payload["remote_root"])
+    require(remote_root.is_absolute() and ".." not in remote_root.parts
+            and payload["host_coverage_output"] == str(remote_root / "outputs" / coverage_output)
+            and re.fullmatch(r"[0-9a-f]{64}", payload["source_tree"]),
+            "Remote receipt coverage path/source identity differs")
     require([x["kind"] for x in payload["pairs"]] == list(KINDS) and len(payload["pairs"]) == 2, "Expected two ordered final pairs")
     require(set(payload["checkpoints"]) == {f"teacher-{s}" for s in SKILLS} | {f"student-{k}" for k in KINDS}, "Receipt lacks seven canonical checkpoints")
     for skill in SKILLS:
@@ -242,7 +265,7 @@ def validate_receipt(receipt):
                     and record in files, "Model path/hash is not bound to its explicit bundle")
             expected_models.add(record["relative"])
     expected_json = {f"official-full/official/manifests/{label}.json" for label in LABELS}
-    expected_json |= {"coverage-official-final/selection.json", "coverage-official-final/cpu-ready.json",
+    expected_json |= {f"{coverage_output}/selection.json", f"{coverage_output}/cpu-ready.json",
                       "official-full/official/teacher-onnx-validation/summary.json"}
     expected_json |= {f"official-full/official/teacher-onnx-validation/{skill}.json" for skill in SKILLS}
     expected_json |= {f"official-full/official/eval-student-{kind}/quality.json" for kind in KINDS}
@@ -268,14 +291,21 @@ def validate_receipt(receipt):
 
 def observe_remote(args):
     command = ["ssh", "-p", "22", "-o", "BatchMode=yes", args.host, "python3", "-B", "-", "probe",
-               "--remote-root", args.remote_root, "--source-tree", args.source_tree]
+               "--remote-root", args.remote_root, "--source-tree", args.source_tree,
+               "--coverage-output", coverage_directory(args.coverage_output)]
     result = subprocess.run(command, input=Path(__file__).read_bytes(), capture_output=True, check=True)
     receipt = json.loads(result.stdout)
     if receipt.get("status") == "ready":
         validate_receipt(receipt)
-        require(receipt["payload"]["remote_root"] == args.remote_root and receipt["payload"]["source_tree"] == args.source_tree,
-                "SSH receipt belongs to another requested remote root/source")
-    else: require(receipt.get("status") == "waiting", "Unknown remote observation status")
+        observed = receipt["payload"]
+    else:
+        require(receipt.get("status") == "waiting", "Unknown remote observation status")
+        observed = receipt
+    require(observed["remote_root"] == args.remote_root and observed["source_tree"] == args.source_tree
+            and observed["coverage_output"] == args.coverage_output
+            and observed["host_coverage_output"] == str(PurePosixPath(args.remote_root) / "outputs" / args.coverage_output)
+            and observed["monitor_sha256"] == MONITOR_SHA,
+            "SSH receipt belongs to another requested remote root/source/coverage directory")
     return receipt
 
 
@@ -292,6 +322,9 @@ def fetch(args, before):
     if before["status"] == "waiting": return before
     tool_sha = sha(__file__)
     files = validate_receipt(before)
+    require(before["payload"]["remote_root"] == args.remote_root and before["payload"]["source_tree"] == args.source_tree
+            and before["payload"]["coverage_output"] == coverage_directory(args.coverage_output),
+            "Fetch receipt belongs to another requested remote root/source/coverage directory")
     require(re.fullmatch(r"final-[0-9a-f]{12}-[0-9a-f]{12}-[0-9a-f]{12}",before["cohort"]), "Invalid immutable cohort name")
     destination = args.output_root / before["cohort"] / args.attempt
     require(not any(path.is_symlink() for path in [destination,*destination.parents]), "Transfer destination has a symlink ancestor")
@@ -339,14 +372,17 @@ def main():
     parser.add_argument("--host",default="tencent-231")
     parser.add_argument("--remote-root",default=REMOTE_ROOT)
     parser.add_argument("--source-tree",default=TREE)
+    parser.add_argument("--coverage-output",default=COVERAGE_DIRECTORY,
+                        help="One safe coverage-* directory relative to remote-root/outputs; must match selection.json")
     parser.add_argument("--output-root",type=Path,default=REPO/"outputs/research/final-student-transfer")
     parser.add_argument("--attempt",default="initial",help="Fresh immutable attempt name; choose a new name after reviewing a retained partial failure")
     args=parser.parse_args()
+    coverage_directory(args.coverage_output)
     require(re.fullmatch(r"[A-Za-z0-9_@.][A-Za-z0-9_@.-]*",args.host) and re.fullmatch(r"/diff/dzp_is_sb/[A-Za-z0-9_./-]+",args.remote_root)
             and ".." not in PurePosixPath(args.remote_root).parts, "Unsafe SSH host/remote root")
     require(re.fullmatch(r"[0-9a-f]{64}",args.source_tree) and re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]{0,63}",args.attempt), "Invalid source tree/attempt name")
     if args.action=="probe":
-        result=remote_probe(Path(args.remote_root),args.source_tree,load_monitor(args.remote_root,args.source_tree))
+        result=remote_probe(Path(args.remote_root),args.source_tree,load_monitor(args.remote_root,args.source_tree),args.coverage_output)
     else:
         require(not any(path.is_symlink() for path in [args.output_root,*args.output_root.parents]), "Output tree has a symlink ancestor")
         args.output_root=args.output_root.resolve()

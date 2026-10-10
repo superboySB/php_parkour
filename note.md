@@ -370,7 +370,7 @@ python3 -B scripts/research/pull_final_students.py status
 python3 -B scripts/research/pull_final_students.py fetch
 ```
 
-目标为`outputs/research/final-student-transfer/<cohort>/initial/`，其中`models/pure/`与`models/finetune/`各有`student.onnx`和`depth_backbone.onnx`。工具校验远端前后身份、本地原文件集合及SHA，保留失败的partial目录；审阅失败后用新的`--attempt`，不会覆盖历史。它不运行ORT或仿真。当前真实status仍是waiting，57项CPU检查通过；最终两组模型尚未回传，更不能拿发布模型的629扫描代替自训模型验收。[检查证据](usage_assets/reports/final-student-transfer/summary.md)。
+目标为`outputs/research/final-student-transfer/<cohort>/initial/`，其中`models/pure/`与`models/finetune/`各有`student.onnx`和`depth_backbone.onnx`。工具校验远端前后身份、本地原文件集合及SHA，保留失败的partial目录；审阅失败后用新的`--attempt`，不会覆盖历史。它不运行ORT或仿真。初版15:26真实status为waiting，57项CPU检查通过；该记录保留为历史。更新后的77项检查与10:19真实状态见本文末段；最终两组模型尚未回传，更不能拿发布模型的629扫描代替自训模型验收。[初版检查证据](usage_assets/reports/final-student-transfer/summary.md)。
 
 先验证公开 ONNX 双图的结构、元数据和真实 CPU 推理：
 
@@ -447,7 +447,7 @@ Isaac评估将URDF转换缓存写在`robot.asset.asset_root`下。源码只读�
 
 当前四模块联合CPU回归172项测试加19个子用例全部通过，精确源码和原始JUnit见[本轮联合记录](usage_assets/reports/worker-exit-integrated/review.json)。
 
-新的SDK0.1.8完整629批次已单独冻结3297份源码及1887份场景输入，合计5206文件SHA通过独立核验；同镜像runc/noGPU/network-none容器的all-configs计划、17场景CLI与两角色实际imports都通过，外层19项CPU检查通过。它使用独立目录和全容器残留进程门卫，保留原生默认单例wall413秒，不能resume旧批次。当前这是准备证据，实际启动与629终态另记。[完整准备记录和计划SHA](usage_assets/reports/fresh629-sdk018-preparation/summary.md)。
+新的SDK0.1.8完整629批次已单独冻结3297份源码及1887份场景输入，合计5206文件SHA通过独立核验；同镜像runc/noGPU/network-none容器的all-configs计划、17场景CLI与两角色实际imports都通过，外层19项CPU检查通过。它使用独立目录和全容器残留进程门卫，保留原生默认单例wall413秒，不能resume旧批次。该[准备记录和计划SHA](usage_assets/reports/fresh629-sdk018-preparation/summary.md)只验准备阶段。后续已于10:02 UTC实际启动新版批次；10:10 UTC固定快照21 completed/1 running/607 planned，首两例完整退出和视频后验通过，其中第二例真实跌倒。[实际启动、固定快照与原片](usage_assets/reports/fresh629-start-first-two/summary.md)。整批629终态仍待验收。
 
 新统一镜像已完整传输并在远端加载，10.90GB归档两端SHA和层内容一致；原训练容器及research tag保留。[实际上传回执](usage_assets/reports/sdk018-canonical-upload/summary.md)。
 
@@ -460,3 +460,5 @@ Isaac评估将URDF转换缓存写在`robot.asset.asset_root`下。源码只读�
 [116项目标Docker CPU测试和初轮失败原记录](usage_assets/reports/runtime-robot-assets/summary.md)已保存；真实RO源码的Isaac初始化另有独立验收，不能从CPU测试推断仿真或技能成功。
 
 真实只读源码单源验收已完成：原iter500教师初始化并执行158策略步后首次跟踪失败；完整920帧输入和cap920保留，35原资产及3356封存输入SHA不变。独立CPU后验、实际保存配置与三段视频全片解码通过。[真实RO源码/RW资产运行证据](usage_assets/reports/source-coverage-ro-assets-pilot/summary.md)。这证明初始化与评估流程可运行，技能质量仍为false。
+
+学生选择性回传入口现默认使用02bc源码与`coverage-official-final-ro-assets-v2`目录，`status`与`fetch`均支持显式`--coverage-output coverage-official-final-ro-assets-v2`。等待和就绪响应均核对源树、monitor SHA与coverage相对/绝对目录；ready还核对schema2共享资产合同。77/77 Docker CPU测试通过，10:19 UTC真实`status`返回waiting，16阶段仍阻塞、cpu_ready_present=false、transfer_started=false。[修改前后源码、精确命令与真实响应](usage_assets/reports/final-student-transfer-ro-assets-integration/summary.md)。先等待原官方driver，不以旧目录或中间PT替代最终模型。

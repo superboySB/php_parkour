@@ -21,12 +21,14 @@ from test_posttrain_coverage import canonical, save
 
 
 @pytest.fixture
-def ready(canonical, monkeypatch):
+def ready(canonical, monkeypatch, request):
     args, stages = canonical
-    args.coverage_output = args.root / "outputs/coverage-official-final"
+    directory = getattr(request, "param", pf.COVERAGE_DIRECTORY)
+    args.coverage_output = args.root / "outputs" / directory
     args.image = pf.IMAGE
     source = args.root / "source" / args.source_tree
-    selection = {"schema_version":1, "training_source_tree":pc.TRAIN_TREE,
+    robot_assets = {"schema_version":1, "fixture":"control-plane contract identity only; filesystem checks are tested separately"}
+    selection = {"schema_version":2, "runtime_robot_assets":robot_assets, "training_source_tree":pc.TRAIN_TREE,
         "coverage_source_tree":args.source_tree, "image":pf.IMAGE,
         "image_contents_sha256":pc.IMAGE_CONTENTS, "gpu_uuid":args.gpu_uuid,
         "official_output":pc.OFFICIAL, "coverage_output":pc.COVERAGE,
@@ -48,9 +50,10 @@ def ready(canonical, monkeypatch):
     plans = []
     for policy in pc.POLICIES:
         path = args.coverage_output / policy / "plan.json"
-        save(path, {"policy":policy,"selected_sources":296,"inventory_total_sources":296,"cases":[{}]*296})
+        save(path, {"schema_version":2,"runtime_robot_assets":robot_assets,
+                    "policy":policy,"selected_sources":296,"inventory_total_sources":296,"cases":[{}]*296})
         plans.append({"policy":policy,"sources":296,"path":f"{pc.COVERAGE}/{policy}/plan.json","sha256":pf.sha(path)})
-    cpu = {"status":"cpu_scientific_checks_passed", "input_identity":selection["input_identity"],
+    cpu = {"status":"cpu_scientific_checks_passed", "input_identity":selection["input_identity"], "runtime_robot_assets":robot_assets,
         "simulation_started":False, "quality_verified":False, "total_sources":296,
         "inventory_sha256":"a"*64, "finished_utc":"2026-10-10T10:00:00+00:00", "checkpoints":reports,"plans":plans}
     save(args.coverage_output / "selection.json", selection)
@@ -71,12 +74,12 @@ def ready(canonical, monkeypatch):
         return subprocess.CompletedProcess(argv,0,json.dumps([info]),"")
     monkeypatch.setattr(pc.subprocess,"run",inspect)
     transfer = SimpleNamespace(host="tencent-231", remote_root=str(args.root),source_tree=args.source_tree,
-        output_root=args.root/"local",attempt="initial")
+        coverage_output=directory,output_root=args.root/"local",attempt="initial")
     return SimpleNamespace(args=args,stages=stages,selection=selection,cpu=cpu,info=info,transfer=transfer)
 
 
 def probe(fixture):
-    return pf.remote_probe(fixture.args.root,fixture.args.source_tree,pc)
+    return pf.remote_probe(fixture.args.root,fixture.args.source_tree,pc,fixture.transfer.coverage_output)
 
 
 def save_stage(fixture,label):
@@ -282,7 +285,11 @@ def test_readonly_cli_uses_stdin_probe_without_creating_output(tmp_path,monkeypa
         assert argv[:6] == ["ssh","-p","22","-o","BatchMode=yes","tencent-231"]
         assert "probe" in argv and "-B" in argv and kwargs["input"] == Path(pf.__file__).read_bytes()
         assert not any(x in argv for x in ("docker","rsync","fetch"))
-        return subprocess.CompletedProcess(argv,0,json.dumps({"status":"waiting","canonical_stage_count":16,"cpu_ready_present":False}).encode(),b"")
+        assert argv[argv.index("--coverage-output")+1] == pf.COVERAGE_DIRECTORY
+        assert argv[argv.index("--source-tree")+1] == pf.TREE
+        return subprocess.CompletedProcess(argv,0,json.dumps({"status":"waiting","canonical_stage_count":16,"cpu_ready_present":False,
+            "remote_root":pf.REMOTE_ROOT,"source_tree":pf.TREE,"monitor_sha256":pf.MONITOR_SHA,
+            "coverage_output":pf.COVERAGE_DIRECTORY,"host_coverage_output":pf.REMOTE_ROOT+"/outputs/"+pf.COVERAGE_DIRECTORY}).encode(),b"")
     monkeypatch.setattr(pf.subprocess,"run",ssh)
     assert pf.main() == 0 and json.loads(capsys.readouterr().out)["status"] == "waiting"
     assert not output.exists()
@@ -291,3 +298,76 @@ def test_readonly_cli_uses_stdin_probe_without_creating_output(tmp_path,monkeypa
 @pytest.mark.parametrize("path",["../escape","/absolute","x/../y","x//y","x\nname",""])
 def test_relative_paths_reject_ambiguous_or_escaping_names(path):
     with pytest.raises(ValueError): pf.relative_path(path)
+
+
+def test_defaults_match_new_reviewed_watcher_source_and_coverage():
+    assert pf.TREE == "02bc110026d8402cd6046afecb039ee40fbd918c760554ad86f7effa678f9f3c"
+    assert pf.MONITOR_SHA == pf.sha(pc.__file__)
+    assert pf.COVERAGE_DIRECTORY == "coverage-official-final-ro-assets-v2"
+
+
+@pytest.mark.parametrize("value", ("../coverage-other", "/absolute/coverage-other", "coverage-a/child", "coverage-a//b",
+                                  "official-full", "coverage-", "coverage-a\nname", ".", ""))
+def test_coverage_output_is_only_a_safe_relative_coverage_child(value):
+    with pytest.raises(ValueError):
+        pf.coverage_directory(value)
+
+
+@pytest.mark.parametrize("ready", ["coverage-another-reviewed-cohort"], indirect=True)
+def test_explicit_coverage_directory_controls_both_probe_and_exact_whitelist(ready):
+    receipt = probe(ready)
+    files = pf.validate_receipt(receipt)
+    assert receipt["payload"]["coverage_output"] == ready.transfer.coverage_output
+    assert receipt["payload"]["host_coverage_output"] == str(ready.args.coverage_output)
+    coverage_json = {item["relative"] for item in files if item["relative"].startswith("coverage-")}
+    assert coverage_json == {ready.transfer.coverage_output+"/selection.json", ready.transfer.coverage_output+"/cpu-ready.json"}
+    assert len(files) == 32 and sum(item["relative"].endswith(".json") for item in files) == 28
+
+
+def test_old_cpu_directory_does_not_substitute_for_new_watcher_output(ready):
+    original = ready.args.coverage_output / "cpu-ready.json"
+    old = ready.args.root / "outputs/coverage-official-final/cpu-ready.json"
+    old.parent.mkdir()
+    original.rename(old)
+    receipt = probe(ready)
+    assert receipt["status"] == "waiting" and receipt["cpu_ready_present"] is False
+    assert receipt["coverage_output"] == pf.COVERAGE_DIRECTORY
+    assert old.exists() and not original.exists()
+
+
+@pytest.mark.parametrize("change", ("selection_path", "asset_contract", "schema"))
+def test_new_selection_cpu_shared_contract_is_required(ready, change):
+    if change == "selection_path":
+        ready.selection["host_coverage_output"] = str(ready.args.root / "outputs/coverage-official-final")
+        ready.selection["input_identity"] = pf.identity({key:value for key,value in ready.selection.items() if key != "input_identity"})
+        ready.cpu["input_identity"] = ready.selection["input_identity"]
+    elif change == "asset_contract":
+        ready.cpu["runtime_robot_assets"] = {"different":"not the shared assets"}
+    else:
+        ready.selection["schema_version"] = 1
+        ready.selection["input_identity"] = pf.identity({key:value for key,value in ready.selection.items() if key != "input_identity"})
+        ready.cpu["input_identity"] = ready.selection["input_identity"]
+    save(ready.args.coverage_output / "selection.json", ready.selection)
+    save(ready.args.coverage_output / "cpu-ready.json", ready.cpu)
+    with pytest.raises(ValueError):
+        probe(ready)
+
+
+@pytest.mark.parametrize("change", ("coverage_output", "host_coverage_output", "source_tree", "monitor_sha256"))
+def test_waiting_ssh_status_must_echo_requested_source_and_coverage(ready, monkeypatch, change):
+    value = {"status":"waiting", "remote_root":ready.transfer.remote_root, "source_tree":ready.transfer.source_tree,
+             "monitor_sha256":pf.MONITOR_SHA, "coverage_output":ready.transfer.coverage_output,
+             "host_coverage_output":str(ready.args.coverage_output)}
+    value[change] = "coverage-official-final" if change == "coverage_output" else "wrong"
+    monkeypatch.setattr(pf.subprocess, "run", lambda *_a, **_k: subprocess.CompletedProcess([],0,json.dumps(value).encode(),b""))
+    with pytest.raises(ValueError, match="requested"):
+        pf.observe_remote(ready.transfer)
+
+
+def test_fetch_cannot_start_from_another_coverage_receipt(ready, monkeypatch):
+    receipt = probe(ready)
+    ready.transfer.coverage_output = "coverage-unrelated"
+    monkeypatch.setattr(pf.subprocess, "run", lambda *_a, **_k: pytest.fail("Wrong cohort started a transfer"))
+    with pytest.raises(ValueError, match="another requested"):
+        pf.fetch(ready.transfer, receipt)
+    assert not ready.transfer.output_root.exists()

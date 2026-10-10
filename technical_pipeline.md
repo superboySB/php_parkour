@@ -4,7 +4,7 @@
 
 截至 2026-10-10，完整官方五教师、两学生训练仍在云端运行；本文中的算法说明来自源码和已执行的有界实验，不表示完整日程或真机验收已经完成。
 
-北京时间15:48，旧629物理扫描已因SDK退出异常及父监督漏查最终worker退出码而有序中断，全部相关本地进程退出。原279项reported completed中也已发现崩溃日志，因此这些状态不能作为正常退出验收；修复监督和SDK后，原五个显式失败配置的新试跑已正常退出，fresh629仍须独立执行。[原状态及停止回执](usage_assets/reports/sim2sim-cohort-halt/summary.md)、[漏记崩溃实证](usage_assets/reports/worker-exit-completed-log-audit/report.md)、[新SDK五例闭环](usage_assets/reports/sdk018-native-pilot/summary.md)。下文带具体时间的运行快照均保留历史含义。
+北京时间15:48，旧629物理扫描已因SDK退出异常及父监督漏查最终worker退出码而有序中断，全部相关本地进程退出。原279项reported completed中也已发现崩溃日志，因此这些状态不能作为正常退出验收；修复监督和SDK后，原五个显式失败配置的新试跑已正常退出，fresh629已按新的独立冻结计划启动，完整终态仍待验收。[原状态及停止回执](usage_assets/reports/sim2sim-cohort-halt/summary.md)、[漏记崩溃实证](usage_assets/reports/worker-exit-completed-log-audit/report.md)、[新SDK五例闭环](usage_assets/reports/sdk018-native-pilot/summary.md)。下文带具体时间的运行快照均保留历史含义。
 
 ## 1. 先把整个系统连起来
 
@@ -561,7 +561,7 @@ startup default pose bias同时修改qtarget中心与观测`q−default`基准�
 
 等待进程现已实际升级至独立的02bc源码快照，使用新的RO资产合同和coverage输出目录，PID4074213；只停止身份核验过的旧waiting进程，正式训练的容器/镜像/源码挂载及训练进程出生身份前后均未变。它仍等待原五教师/两学生driver完成，没有额外云GPU任务。[本次升级回执](usage_assets/reports/posttrain-monitor-ro-assets-v2/summary.md)与[最初部署历史](usage_assets/reports/posttrain-monitor-deployment/summary.md)分别保留，代码准备、启动成功与策略质量分别验收。
 
-正式部署模型还有独立的[选择性回传入口](scripts/research/pull_final_students.py)：输入是16阶段manifest、七个最终PT身份、有序专家证明与已成功CPU容器的回执，输出为两组学生ONNX及原始来源JSON。它不传教师图或PT，也不更新模型参数；只允许字节/SHA一致的显式文件集合。57项CPU检查和真实waiting检查通过，最终模型不存在时不创建目的目录。[证据](usage_assets/reports/final-student-transfer/summary.md)。最终两学生还需分别实际执行CPU ORT、本地12个有效指令及17个代表地形；公开ONNX的扫描不能作为自训策略验证。
+正式部署模型还有独立的[选择性回传入口](scripts/research/pull_final_students.py)：输入是16阶段manifest、七个最终PT身份、有序专家证明与已成功CPU容器的回执，输出为两组学生ONNX及原始来源JSON。它不传教师图或PT，也不更新模型参数；只允许字节/SHA一致的显式文件集合。原57项CPU检查和真实waiting检查保留为[历史证据](usage_assets/reports/final-student-transfer/summary.md)。后续入口已对准02bc源码和`coverage-official-final-ro-assets-v2`，新增目录、来源和schema2共享资产合同检查；77/77 Docker CPU测试通过，10:19 UTC真实SSH检查仍为waiting、16阶段阻塞、未开始回传。[新版本和真实响应](usage_assets/reports/final-student-transfer-ro-assets-integration/summary.md)。最终模型不存在时不创建目的目录。最终两学生还需分别实际执行CPU ORT、本地12个有效指令及17个代表地形；公开ONNX的扫描不能作为自训策略验证。
 
 首次真实尝试发现 WBT 的 `reset_all → init_buffers` 清零 relative body target，下一步却先 termination/reward/log、后 `command.step` 刷新目标；这使三个片段在策略开始前误终止。独立工具仅在 warmup 前提取原生 `MotionCommand.step` 的同一对齐公式，刷新两个缓存，保留公式/文件 SHA 和缓存前后值，并核对时间、采样 ID、边界及 RNG 不变。没有推进后回写时钟或放宽失败条件，也没有更换云端训练源码。修复后相同PT和完整源进入158/21/21个实际策略步，随后真正跟踪失败，尚无片段完成。[前后真实结果与原生公式推导](usage_assets/reports/source-coverage-pilot/summary.md)。旧64env报告统计的是策略阶段，不含这些warmup误终止；其原始数值保留。
 
@@ -611,3 +611,5 @@ IsaacLab的URDF converter会在asset_root下生成USD缓存。五个非默认教
 上述schema2合同已在新的真实RO源码Isaac运行中验收：同一iter500教师、原920帧source、1环境/1变体/seed42、cap920，实际158策略步后首次failed终止，boundary=false；35原资产及3356个封存输入SHA不变，USD生成在独立RW根。原生暖身/时间推进/RNG语义保留，两次缓存刷新公式与此前一致。初始化执行通过，技能仍失败，不能算296源覆盖。[实际质量、原日志与视频](usage_assets/reports/source-coverage-ro-assets-pilot/summary.md)。
 
 原生GUI与终端也已实际验收：低速command1和高速command6的label由原policy.velocity_command按帧写入，两NPZ分别169/196帧，manual c与STOP/o autosave均执行；双方原main/atexit及真实wrapper退出0、出生身份绑定的进程组为空。qpos仍是wxyz＋零XYZ占位＋29关节，不能据此恢复世界路径。离屏depth/video从GLFW切EGL，可见viewer仍GLFW；第四次析构abort原字节保留，第五次只改变该环境设置通过。该对照不证明所有heap竞态根除。[键盘/录制数据与真实退出证据](usage_assets/reports/native-keyboard-gui/summary.md)。
+
+新版629批次已于10:02 UTC实际启动，使用统一2be镜像与独立冻结目录。10:10 UTC固定快照为21 completed/1 running/607 planned；首两例的5206输入SHA、4 worker正常退出/空组、4 host出生身份映射和两MP4全片解码已独立验收，第二例真实跌倒。这里只证明首两例执行完整性，629全量终态、课程成功和自训学生验收仍待完成。[原生启动、首两例与失败原片](usage_assets/reports/fresh629-start-first-two/summary.md)。
