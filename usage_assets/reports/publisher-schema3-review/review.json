@@ -1,0 +1,99 @@
+{
+  "schema_version": 1,
+  "observed_utc": "2026-10-10T08:28:03.222236+00:00",
+  "status": "passed_after_root_fix_no_remaining_blocker",
+  "reviewed_sources": [
+    {
+      "path": "scripts/research/publish_full_scene_matrix.py",
+      "sha256": "5b0d967f96f0d62ca474dcf4746e53f0a4aecd459790d0591aa31d2e89679a7a",
+      "bytes": 39128,
+      "snapshot": "reviewed-sources/publish_full_scene_matrix.py"
+    },
+    {
+      "path": "scripts/research/sim2sim_scene_matrix.py",
+      "sha256": "b92f7920fb41db6303747b3923b4418d1721de510a368b2ca8c6010756b2570d",
+      "bytes": 39627,
+      "snapshot": "reviewed-sources/sim2sim_scene_matrix.py"
+    },
+    {
+      "path": "tests/test_publish_full_scene_matrix.py",
+      "sha256": "c00cd287a2c9439426b33bb0889d8a9755aa5b13a2bd6dca911383eb1d7d99fd",
+      "bytes": 22536,
+      "snapshot": "reviewed-sources/test_publish_full_scene_matrix.py"
+    }
+  ],
+  "scope": "Independent read-only publisher/schema3 integration review and Docker CPU fixtures; no tracked edits or native/DDS/GPU work.",
+  "cpu_validation": {
+    "command": "docker exec php-parkour-research /opt/php/bin/motion-python -m pytest -q /workspace/php_parkour/tests/test_publish_full_scene_matrix.py --junitxml=/workspace/php_parkour/outputs/research/publisher-schema3-independent-review/publisher-race-fixed-tests.xml",
+    "observed_stdout": "34 passed in 0.33s",
+    "junit_statistics": {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "34",
+      "time": "0.325",
+      "timestamp": "2026-10-10T08:26:12.110175+00:00",
+      "hostname": "dzp-MS-7E30"
+    },
+    "junit_sha256": "ffd4e97df38ff5bc1c44ee38e598aa8f74e79cc47d85d5ad41b167eefb9e3a62",
+    "limitations": "Tests replace real scenario counts with two synthetic cases and dummy model/video bytes. No 629 execution, real ONNX, actual media decode, policy quality or native shutdown is certified."
+  },
+  "resolved_finding": {
+    "severity": "blocking_before_fix",
+    "initial_publisher_sha256": "2245e686b0d9d6aac2b4a8c7edf2315cd4896dff507ce51fd0eeb807ff388336",
+    "initial_reproduction": "historical-copy-race.json",
+    "issue": "Archive re-fingerprinting replaced original sealed expected hashes, accepting a historical file modified after seal verification and before archive fingerprinting.",
+    "fix_source_lines": "scripts/research/publish_full_scene_matrix.py:277-282",
+    "fix": "Sealed archives retain original evidence files/bytes/SHA plus the original case-evidence record through copying. Only unsealed history is fingerprinted from current bytes.",
+    "independent_fixed_reproduction": "historical-copy-race-fixed.json",
+    "fixed_result": "Original synthetic injection now refuses publication with Verified artifact changed before copy. Root added the matching tracked regression; independent final 34 tests pass."
+  },
+  "verified_contracts": [
+    {
+      "claim": "Independent expected plan/harness identities are required; no hardcoded cohort digest remains.",
+      "source": "scripts/research/publish_full_scene_matrix.py:93",
+      "detail": "Both inputs must be lowercase64hex; canonical plan identity recomputed and equals expected value; expected matrix harness hash must exist in frozen dependencies and terminal receipt. Scenario/order/count/seed42/10sec remain fixed by contract."
+    },
+    {
+      "claim": "Full publication accepts only schema3 and actual terminal exit0/completed629/coverage/matrix hash.",
+      "source": "scripts/research/publish_full_scene_matrix.py:125",
+      "detail": "Schema2 is accepted only for at most two-case preview under ignored outputs/research. Full publication refuses running/partial/failed receipts."
+    },
+    {
+      "claim": "Legacy schema2 preview is clearly not normal worker-exit or coverage acceptance.",
+      "source": "scripts/research/publish_full_scene_matrix.py:334",
+      "detail": "summary legacy_normal_exit_unverified=true; preview=true and configuration_coverage_complete=false; page title and warning state worker exits unverified and cannot be acceptance."
+    },
+    {
+      "claim": "Schema3 uses shared native worker receipt validator and binds all three SHA/bytes records plus retained-file membership.",
+      "source": "scripts/research/publish_full_scene_matrix.py:181",
+      "detail": "sim2sim_scene_matrix.validate_worker_receipts enforces supervisor2/entry1, source hash, faulthandler, ordered two workers, unique spawn/entry/completion/final events, signed zeros, exact native entry argv/output/birth, known native membership and observed group identity, retired empty groups, intact ownership, and no cleanup/errors/kill events."
+    },
+    {
+      "claim": "All listed prior attempts are retained without status filtering.",
+      "source": "scripts/research/publish_full_scene_matrix.py:248",
+      "detail": "Sealed histories verify every original file/identity/execution; unsealed histories explicitly label current fingerprints only. Duplicate attempts and otherwise unrecorded nested attempt directories are refused. Copy stage retains all files and parent logs; root race fix preserves sealed expectations."
+    },
+    {
+      "claim": "Original evidence stays read-only and publication is staged into a separate empty output.",
+      "source": "scripts/research/publish_full_scene_matrix.py:360",
+      "detail": "Output cannot be inside raw matrix/driver-receipt directories; nonempty destinations refused; copies compare source before/after and destination SHA; exceptions clean only the new staging directory. Full plan/matrix/receipt bytes are rechecked before rename."
+    }
+  ],
+  "old_five_boundary": {
+    "presence_report": "old-five-attempt-presence.json",
+    "cases": 5,
+    "parent_log_hashes_match": true,
+    "claim": "Original failed directories and parent logs remain present; publisher does not edit/remove inputs.",
+    "important_scope": "A new schema3 cohort is separate from the abandoned legacy cohort. It does not automatically merge those five foreign-plan attempts into fresh cases; retain/link their existing halt/forensic audit as historical evidence. Every attempt actually listed in a published case is copied."
+  },
+  "limits": [
+    "Current publisher result is infrastructure verification only, not complete629 physical coverage or SDK018 acceptance.",
+    "Explicit expected hashes must be independently obtained from the reviewed frozen new cohort; choosing arbitrary matching caller values is not independent provenance.",
+    "Legacy preview still requires retained original input/dependency bytes at the mapped paths. A changed current source tree can legitimately fail that old hash gate; do not mislabel it as an environment fault.",
+    "An unsealed historical attempt can only preserve currently available bytes; this does not retroactively prove its shutdown or reconstruct missing files.",
+    "The initial 33-test JUnit and initial race proof are historical; current acceptance is the final34-test JUnit plus fixed reproduction.",
+    "Original five media were only listed by existence, not re-decoded/rehash-verified by this read-only source review."
+  ]
+}

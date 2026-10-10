@@ -1,0 +1,30 @@
+{
+  "argv": [
+    "/opt/php/envs/motion/bin/python",
+    "-u",
+    "-c",
+    "import pathlib,subprocess,sys,time\nchild=subprocess.Popen([sys.executable,'-u','-c',sys.argv[1],sys.argv[2]])\nwhile not pathlib.Path(sys.argv[2]).exists():time.sleep(.01)\nwhile not pathlib.Path(sys.argv[3]).exists():time.sleep(.01)\n",
+    "import json,os,pathlib,signal,sys,time\nsignal.signal(signal.SIGTERM, signal.SIG_IGN)\npathlib.Path(sys.argv[1]).write_text(json.dumps({'pid':os.getpid(),'pgid':os.getpgrp(),'sid':os.getsid(0)}))\ntime.sleep(60)\n",
+    "/workspace/php_parkour/outputs/research/worker-exit-diagnostics-proposal/owned-cpu-groups-01/orphan-child-ready.json",
+    "/workspace/php_parkour/outputs/research/worker-exit-diagnostics-proposal/owned-cpu-groups-01/release-wrapper"
+  ],
+  "start_new_session": true,
+  "identity": {
+    "pid": 72533,
+    "pid_namespace": "current container",
+    "observed_unix": 1791620227.649149,
+    "proc_status": {
+      "Name": "python",
+      "Tgid": "72533",
+      "Pid": "72533",
+      "PPid": "72526",
+      "NSpid": "72533",
+      "Threads": "1"
+    },
+    "state": "R",
+    "process_group_id": 72533,
+    "session_id": 72533,
+    "start_time_clock_ticks": 104822210,
+    "cmdline": "/opt/php/envs/motion/bin/python -u -c import pathlib,subprocess,sys,time\nchild=subprocess.Popen([sys.executable,'-u','-c',sys.argv[1],sys.argv[2]])\nwhile not pathlib.Path(sys.argv[2]).exists():time.sleep(.01)\nwhile not pathlib.Path(sys.argv[3]).exists():time.sleep(.01)\n import json,os,pathlib,signal,sys,time\nsignal.signal(signal.SIGTERM, signal.SIG_IGN)\npathlib.Path(sys.argv[1]).write_text(json.dumps({'pid':os.getpid(),'pgid':os.getpgrp(),'sid':os.getsid(0)}))\ntime.sleep(60)\n /workspace/php_parkour/outputs/research/worker-exit-diagnostics-proposal/owned-cpu-groups-01/orphan-child-ready.json /workspace/php_parkour/outputs/research/worker-exit-diagnostics-proposal/owned-cpu-groups-01/release-wrapper "
+  }
+}

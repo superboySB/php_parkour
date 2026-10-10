@@ -1,0 +1,13 @@
+# Publisher/schema3 independent review
+
+**Passed after root fixed one reproduced copy-time integrity bug. No remaining blocking finding.** Current publisher SHA is `5b0d967f96f0d62ca474dcf4746e53f0a4aecd459790d0591aa31d2e89679a7a`; shared matrix validator is `b92f7920fb41db6303747b3923b4418d1721de510a368b2ca8c6010756b2570d`. No tracked source, original result, media or runtime dependency was edited by this review.
+
+The initial publisher accepted a synthetic historical file changed immediately after original seal verification: archive re-fingerprinting replaced the sealed expected SHA. `historical-copy-race.json` records that initial failure. Root now preserves sealed file/bytes/SHA expectations through copying (`publish_full_scene_matrix.py:277–282`); the same independent injection is rejected before publication (`historical-copy-race-fixed.json`).
+
+Independent final Docker CPU run: **34 passed**, 0 failures/errors/skips (`publisher-race-fixed-tests.xml`). The fixtures use two synthetic cases and dummy media/model bytes. This is not native execution, media decoding, complete629 coverage or SDK018 quality evidence. The initial33 XML is retained only as history.
+
+Required explicit plan/harness hashes, canonical plan identity, schema3-only full publication, terminal driver exit0 and completed629/coverage/hash gates are present. Legacy schema2 can produce only a two-case-or-smaller ignored preview; its summary/title/warning explicitly mark worker exits unverified and deny acceptance. Schema3 imports the shared receipt validator, binds three raw receipt SHA/bytes records, and requires their inclusion in retained evidence. The shared validator checks source, entry argv/PID/birth, known native membership, final zeros, retired empty groups, intact ownership and clean final receipt.
+
+Historical attempts are copied without success filtering. Sealed files retain original expectations; unsealed history is labelled current-byte preservation only. Duplicate/unlisted retry directories are rejected. Original old five failure directories and parent-log SHA values remain present (`old-five-attempt-presence.json`); their media were not reread. A fresh schema3 cohort does not automatically import five foreign-plan legacy attempts. Their existing halt/forensic reports must remain linked separately, while all attempts listed within each published case are copied.
+
+The publisher stages into a separate empty destination and removes only its own staging on failure. Its existing full gate still requires actual terminal629 evidence before a complete publication can be created. See `review.json` for line references, commands, source fingerprints and scope limits; `evidence-manifest.json` binds this review and original/fixed CPU proofs.

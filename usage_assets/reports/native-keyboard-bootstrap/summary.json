@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "utc": "2026-10-10T08:06:27.061651+00:00",
+  "status": "proposal_cpu_verified_not_applied",
+  "production_or_submodule_modified": false,
+  "native_gui_controls_verified": false,
+  "gpu_dds_or_simulation_run": false,
+  "proposed_root_launcher": {
+    "source": "proposed/run_native_policy.py",
+    "destination": "scripts/research/run_native_policy.py",
+    "sha256": "bf388b4842a3866eac59d03aacc4afcbff532278d48e1e4f586e707bd64730f0"
+  },
+  "proposed_wrapper": {
+    "source": "proposed/run_php_inference.sh",
+    "destination": "run_php_inference.sh",
+    "sha256": "6cc6c3a445891ec81345294d3236711118c2ee8257c40fd6988945179d5fc9e5",
+    "patch": "run_php_inference.patch"
+  },
+  "test_source": {
+    "path": "test_bootstrap.py",
+    "sha256": "49b2686f5251e3c244696dac1194587615340c865c3478b3e40915dd3949fce4"
+  },
+  "unit_tests": {
+    "count": 23,
+    "passed": 23,
+    "junit": "tests.xml"
+  },
+  "real_pty": {
+    "report": "pty-report.json",
+    "keys": [
+      "]",
+      "w",
+      "c",
+      "o",
+      "i"
+    ],
+    "original_after_escape": "AttributeError: NoneType has no attribute start, preserved original log",
+    "patched_after_escape": "normal listener thread exit, no exception",
+    "both_subscribers_received_all_keys": true,
+    "terminal_flags_and_attributes_restored": true,
+    "gui_event_dispatch": false
+  },
+  "native_entry_cli_help": {
+    "log": "native-help.log",
+    "exit_code": 0,
+    "note": "Copied proposed shell wrapper; placeholder files only for path/parser checks, no ONNX model load or policy construction."
+  },
+  "guard_contract": {
+    "native_keyboard_full_sha256": "99706aaadf8057e61a501dd96bd1d9dc34ef82fd82b66342d496ff639a704039",
+    "native_runner_full_sha256": "59890b843f5854f5b10632b74afcb1434795a72a6f9e8e17bd7be35ac76ab966",
+    "sshkeyboard_version": "2.3.1",
+    "sshkeyboard_full_sha256": "d23f6bc9b156e650436290504709ee4d69e692434f5118d2e28584d981cf3dc8",
+    "live_method_source_and_alias_checked": true,
+    "reject_active_listener": true
+  },
+  "scope_boundary": "Only listener return handling is fixed; while blocking, original key delivery already works. Esc ends listener, not the policy controller. Native GUI/DDS controls still require their separate real bounded plan."
+}

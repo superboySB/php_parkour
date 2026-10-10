@@ -413,7 +413,7 @@ docker exec -e OMP_NUM_THREADS=4 php-parkour-research \
 
 这是17场景全部629个配置各自几何上的有界测试，每例500次策略控制。配置数不是独立几何数：固定计划有580个不同OBJ文件SHA，50个平地配置共享同一OBJ；没有做几何等价性判定。[计数核验](usage_assets/reports/sim2sim-configuration-vs-mesh.json)。各例使用恒定forward command，不按参考轨迹回放，也不把存活10秒视为完成课程。旧后台批次已在北京时间15:48有序停止，原目录保持不动；其SDK0.1.6退出段错误与监督漏查需要修复，**不能继续resume该批次作为最终验收**。[实际停止、279 reported completed/5失败/1中断/344未运行及原源码](usage_assets/reports/sim2sim-cohort-halt/summary.md)。具体旧启动时间和两段预检视频见[扫描记录](usage_assets/reports/sim2sim-all-configs-start/summary.md)。
 
-最终结果页用[完整发布工具](scripts/research/publish_full_scene_matrix.py)生成；它等待真实driver终态exit0与全部629项证据，保留所有阈值和历史attempt，并逐字节复制原视频/轨迹/日志。目前只有工具的24项CPU检查和两例浏览器预览通过，旧扫描已停止且不能发布完成页。[首次失败原字节与时间线](usage_assets/reports/sim2sim-worker-failure/report.md)保留父进程exit1，不能只凭worker JSON补造成功。工具目前仅接受旧固定plan identity；修复后新批次还须更新并审阅发布期望值。[发布工具检查与精确命令](usage_assets/reports/full-scene-publisher/summary.md)。
+最终结果页用[完整发布工具](scripts/research/publish_full_scene_matrix.py)生成；它等待真实driver终态exit0与全部629项证据，保留所有阈值和历史attempt，并逐字节复制原视频/轨迹/日志。初版24项CPU检查和两例浏览器预览通过，新版另有34项CPU回归；旧扫描已停止，尚无新629完成页。[首次失败原字节与时间线](usage_assets/reports/sim2sim-worker-failure/report.md)保留父进程exit1，不能只凭worker JSON补造成功。发布命令须显式指定独立冻结的`--expected-plan-sha256`与`--expected-harness-sha256`；新版完整发布还检查两worker退出与三份进程收据。旧schema2只允许保留历史预览，不能发布完整验收。[初版发布工具检查与命令](usage_assets/reports/full-scene-publisher/summary.md)、[新版回归](usage_assets/reports/publisher-schema3-review/review.md)。
 
 SDK0.1.8已在独立离线候选镜像中完成CPU导入/API对照，train Kit与inference两处SDK都替换，其他包版本和motion freeze未变；未修改主Dockerfile/pins或原镜像。该候选尚未跑native闭环，不能当作最终Docker配置或已修复的证据。[官方Wait修复及归因边界](usage_assets/reports/unitree-lifecycle-independent/report.md)、[候选镜像精确recipe与CPU结果](usage_assets/reports/unitree-sdk018-candidate/summary.md)。
 
@@ -426,3 +426,13 @@ python3 scripts/research/cpu_tests.py --output-dir outputs/research/cpu-tests
 测试、矩阵与录像输出目录都应使用新的空目录，避免把旧产物记作新结果。查看子进程退出状态和对应 JSON，不能仅根据日志里出现一次 `ready` 判断通过。镜像依赖问题修改 Dockerfile/约束后重建；数据问题先运行 `verify_assets.py --verify-only`；checkpoint 问题确认 teacher/student 类型、注册表次序与文件路径；仿真问题保留完整日志再重跑。修复记录及最终验证范围见 [usage.md](usage.md)。
 
 motion/inference 的 `pip check` 已通过。NVIDIA 基础训练环境仍有三条上游元数据冲突：两个 SRL/URDF 包声明缺少 `usd-core` distribution（运行时 `pxr` 已随 Isaac 提供），以及 SRL 的 `lxml<5` 与 Dex retargeting 的 `lxml>=5.2` 不兼容。当前遵循 SRL 的 4.9.4；实际 Isaac 训练、加载和录像另外验证，不能把这些运行成功写成训练环境 `pip check` 全通过，也不要在宿主安装 `usd-core` 来绕过。
+
+原生推理入口的键盘监听修复：`run_php_inference.sh`经根目录引导器调用原生`run_policy.py`，核对固定Holosoma与sshkeyboard源码SHA后，仅修正同步`listen_keyboard()`返回后错误调用`.start()/.join()`。两订阅队列真实PTY收键与Esc退出已验证，应用后23项CPU回归通过；真实MuJoCo窗口/策略按键仍须单独验收。[原始异常、修复及范围](usage_assets/reports/native-keyboard-bootstrap/summary.md)。
+
+本地退出验收修复已应用：父监督现在检查最终两worker退出码，按独立PGID/SID和PID出生时间追踪已知成员；身份未知时拒绝发送信号，清理等待后仍有成员则失败。新schema3计划强制fatal-signal诊断，封存必须绑定双方入口和最终退出三份收据，不能只读body JSON的completed。应用后监督37项加19子用例、矩阵76项、发布34项CPU回归通过；这些检查及真实普通CPU进程组测试尚不代表SDK/DDS物理运行已通过。[监督修复原始证据](usage_assets/reports/worker-exit-supervisor/review.json)、[独立封存审查](usage_assets/reports/worker-exit-sealing-review/review.md)。
+
+发布器对schema3使用与矩阵相同的三收据校验，并保留seal原始SHA到复制阶段，拒绝“校验后、复制前”发生变化的历史文件。34项CPU回归与独立注入复审通过；旧schema2只可生成明确标注未证明正常退出的历史预览，不能发布完整629通过页。[发布复制校验与原失败反例](usage_assets/reports/publisher-schema3-review/review.md)。
+
+候选隔离运行已实际尝试，但两次启动均失败：首次只读数据挂载点缺失，第二次冻结源码遗漏动态Unitree入口；均未验证SDK退出修复。旧340项仅为原计划的依赖集合，不是完整导入闭包。当前376项补入全部bridge Python及父包初始化文件，矩阵78项CPU回归通过；下一次冻结运行须先在同镜像、同只读快照中实际导入所选入口，再启动DDS/GPU。旧快照及失败不覆盖重写。[原始启动错误与修复](usage_assets/reports/sdk018-native-setup/summary.md)。
+
+当前四模块联合CPU回归172项测试加19个子用例全部通过，精确源码和原始JUnit见[本轮联合记录](usage_assets/reports/worker-exit-integrated/review.json)。

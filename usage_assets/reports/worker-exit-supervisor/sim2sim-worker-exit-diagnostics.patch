@@ -1,0 +1,338 @@
+--- a/scripts/research/sim2sim.py
++++ b/scripts/research/sim2sim.py
+@@ -10,12 +10,14 @@
+ from __future__ import annotations
+ 
+ import argparse
++import copy
+ import csv
+ import dataclasses
+ import hashlib
+ import json
+ import os
+ import random
++import signal
+ import subprocess
+ import sys
+ import time
+@@ -30,6 +32,131 @@
+     temporary = path.with_suffix(path.suffix + ".tmp")
+     temporary.write_text(json.dumps(value, indent=2) + "\n")
+     temporary.replace(path)
++
++
++def process_identity(pid: int) -> dict:
++    """Raw Linux namespace identity; NSpid may omit the host namespace."""
++    value = {"pid": pid, "pid_namespace": "current container", "observed_unix": time.time()}
++    proc = Path("/proc") / str(pid)
++    try:
++        status = {}
++        for line in (proc / "status").read_text().splitlines():
++            key, _, data = line.partition(":")
++            if key in ("Name", "Pid", "PPid", "Tgid", "NSpid", "Threads"):
++                status[key] = data.strip()
++        value["proc_status"] = status
++        stat = (proc / "stat").read_text()
++        fields = stat[stat.rfind(")") + 2:].split()
++        value.update(state=fields[0], process_group_id=int(fields[2]), session_id=int(fields[3]),
++                     start_time_clock_ticks=int(fields[19]))
++        value["cmdline"] = (proc / "cmdline").read_bytes().replace(b"\x00", b" ").decode(errors="replace")
++    except OSError as error:
++        value["proc_unavailable"] = str(error)
++    return value
++
++
++def process_return_status(process) -> dict:
++    """A wrapper's positive exit code does not reveal its child's signal."""
++    code = process.poll()
++    number = -code if code is not None and code < 0 else None
++    try:
++        name = signal.Signals(number).name if number is not None else None
++    except ValueError:
++        name = "UNKNOWN"
++    return {"returncode": code, "signal_number": number, "signal_name": name,
++            "exit_code": code if code is not None and code >= 0 else None,
++            "status": "running" if code is None else "exited",
++            "scope": "direct Popen process; wrappers may mask a native child signal"}
++
++
++def process_group_members(pgid: int, sid: int) -> list[dict]:
++    """Observe non-zombie members of this exact private group/session."""
++    members = []
++    for proc in Path("/proc").iterdir():
++        if not proc.name.isdecimal():
++            continue
++        try:
++            stat = (proc / "stat").read_text()
++        except (FileNotFoundError, ProcessLookupError):
++            continue
++        fields = stat[stat.rfind(")") + 2:].split()
++        if int(fields[2]) == pgid and int(fields[3]) == sid and fields[0] != "Z":
++            members.append({"pid": int(proc.name), "state": fields[0], "parent_pid": int(fields[1]),
++                            "process_group_id": int(fields[2]), "session_id": int(fields[3]),
++                            "start_time_clock_ticks": int(fields[19])})
++    return sorted(members, key=lambda value: value["pid"])
++
++
++def worker_group_status(group: dict) -> dict:
++    """Absorb new members only through a still-live known birth identity."""
++    try:
++        members = process_group_members(group["process_group_id"], group["session_id"])
++    except (OSError, ValueError, IndexError) as error:
++        group.update(ownership_lost=True, ownership_state="unknown", ownership_reason="proc observation failed")
++        return copy.deepcopy(group) | {"live_members": None, "ownership_verified": False, "observation_error": str(error)}
++    leader = group.get("leader_identity")
++    known = {(item["pid"], item["start_time_clock_ticks"]) for item in group.get("known_members", [])}
++    live = {(item["pid"], item["start_time_clock_ticks"]) for item in members}
++    reused_leader = leader is not None and any(item["pid"] == leader["pid"] and
++                    item["start_time_clock_ticks"] != leader["start_time_clock_ticks"] for item in members)
++    reason = None
++    if not leader:
++        reason = "spawn leader birth identity unavailable"
++    elif group.get("ownership_lost"):
++        reason = group.get("ownership_reason", "previous ownership continuity lost")
++    elif reused_leader:
++        reason = "leader PID birth identity changed"
++    elif members and group.get("retired"):
++        reason = "retired empty group number reappeared"
++    elif members and not (known & live):
++        reason = "no live known member anchors group ownership"
++    if reason:
++        group.update(ownership_lost=True, ownership_state="unknown", ownership_reason=reason)
++    elif not members:
++        group.update(retired=True, ownership_state="retired_empty", ownership_reason=None)
++    else:
++        combined = {(item["pid"], item["start_time_clock_ticks"]): dict(item) for item in group.get("known_members", [])}
++        combined.update({(item["pid"], item["start_time_clock_ticks"]):
++                         {"pid": item["pid"], "start_time_clock_ticks": item["start_time_clock_ticks"]} for item in members})
++        group.update(known_members=sorted(combined.values(), key=lambda item: (item["pid"], item["start_time_clock_ticks"])),
++                     ownership_state="owned", ownership_reason=None)
++    return copy.deepcopy(group) | {"live_members": members, "ownership_verified": reason is None}
++
++
++def wait_worker_shutdown(process, group: dict, timeout: float) -> bool:
++    deadline = time.monotonic() + timeout
++    observed = worker_group_status(group)
++    if not observed["ownership_verified"]:
++        raise RuntimeError("Worker group ownership unknown: " + observed["ownership_reason"])
++    try:
++        process.wait(timeout=timeout)
++    except subprocess.TimeoutExpired:
++        return False
++    while True:
++        observed = worker_group_status(group)
++        if not observed["ownership_verified"]:
++            raise RuntimeError("Worker group ownership unknown: " + observed["ownership_reason"])
++        if not observed["live_members"]:
++            return True
++        if time.monotonic() >= deadline:
++            return False
++        time.sleep(0.1)
++
++
++def signal_worker_group(group: dict, number: int) -> bool:
++    pgid, sid = group["process_group_id"], group["session_id"]
++    if pgid <= 1 or pgid != sid or pgid == os.getpgrp():
++        raise RuntimeError("Refusing to signal an unisolated or parent process group")
++    observed = worker_group_status(group)
++    if not observed["ownership_verified"]:
++        raise RuntimeError("Refusing to signal unknown worker group: " + observed["ownership_reason"])
++    if not observed["live_members"]:
++        return False
++    try:
++        os.killpg(pgid, number)
++    except ProcessLookupError:
++        return False
++    return True
+ 
+ 
+ def simulator(config: dict, output: Path) -> None:
+@@ -300,6 +427,7 @@
+     parser.add_argument("--seconds-per-command", type=float, default=8)
+     parser.add_argument("--isolate-commands", action="store_true", help="Launch a fresh simulator/policy per command so a fall cannot contaminate later commands")
+     parser.add_argument("--record-policy", action="store_true", help="Test native recording toggle, autosave on STOP, and damping command delivery")
++    parser.add_argument("--python-faulthandler", action="store_true", help="New cohort only: enable Python fatal-signal tracebacks in both worker logs")
+     parser.add_argument("--course-guide", action="store_true", help="For bundled step course only: external test input controller steers existing high-speed commands toward +X/y=0 and stands after x>62 m; not learned navigation")
+     parser.add_argument("--seed", type=int, default=42)
+     parser.add_argument("--gl", choices=("osmesa", "egl"), default="osmesa", help="CPU OSMesa by default; EGL uses NVIDIA graphics")
+@@ -313,6 +441,8 @@
+     args = parser.parse_args()
+     output = args.output.resolve()
+     if args.worker:
++        save(output / f"{args.worker}-process-start.json", {"schema_version": 1, "role": args.worker, "argv": sys.argv,
++             "process": process_identity(os.getpid()), "python_faulthandler": os.environ.get("PYTHONFAULTHANDLER")})
+         config = json.loads((output / "run.json").read_text())
+         try:
+             (simulator if args.worker == "simulator" else inference)(config, output)
+@@ -356,6 +486,8 @@
+                 command += ["--wall-timeout", str(args.wall_timeout)]
+             if args.record_policy:
+                 command += ["--record-policy"]
++            if args.python_faulthandler:
++                command += ["--python-faulthandler"]
+             result = subprocess.run(command, check=False)
+             report = output / f"command-{code:02d}" / "result.json"
+             results.append({"command": code, "returncode": result.returncode, "report": str(report),
+@@ -373,6 +505,7 @@
+               "mesh_sha256": hashlib.sha256(args.mesh.read_bytes()).hexdigest() if args.mesh else None,
+               "commands": commands, "duration": len(commands) * args.seconds_per_command, "seconds_per_command": args.seconds_per_command,
+               "record_policy": args.record_policy,
++              "python_faulthandler": args.python_faulthandler,
+               "course_guide": args.course_guide,
+               "settle_seconds": args.settle_seconds, "startup_timeout": args.startup_timeout, "seed": args.seed, "gl": args.gl, "ort_threads": args.ort_threads,
+               "egl_device_id": os.environ.get("MUJOCO_EGL_DEVICE_ID", "0") if args.gl == "egl" else None,
+@@ -381,14 +514,51 @@
+     save(output / "run.json", config)
+     env = os.environ | {"MUJOCO_GL": args.gl, "PYOPENGL_PLATFORM": args.gl, "LOGURU_LEVEL": "INFO",
+                         "OMP_NUM_THREADS": "1", "MKL_NUM_THREADS": "1", "MUJOCO_EGL_DEVICE_ID": os.environ.get("MUJOCO_EGL_DEVICE_ID", "0")}
++    if args.python_faulthandler:
++        env["PYTHONFAULTHANDLER"] = "1"
+     script = str(Path(__file__).resolve())
+     processes = []
++    worker_roles = []
++    worker_launches = []
++    worker_identities = []
++    worker_groups = []
++    worker_events = []
++    worker_entries_observed = set()
+     files = []
+     started = time.monotonic()
++    parent_identity = process_identity(os.getpid())
++
++    def record_workers(event: str, **detail) -> dict:
++        workers = [{"role": role, "launch": launch, "identity_at_spawn": identity,
++                    "process_group": worker_group_status(group),
++                    **process_return_status(process)}
++                   for role, launch, identity, group, process in zip(worker_roles, worker_launches, worker_identities, worker_groups, processes)]
++        entry = {"event": event, "observed_unix": time.time(),
++                 "elapsed_seconds": time.monotonic() - started, "workers": workers, **detail}
++        worker_events.append(entry)
++        save(output / "worker-processes.json", {"schema_version": 2, "parent": parent_identity,
++             "harness_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
++             "python_faulthandler": env.get("PYTHONFAULTHANDLER"), "events": worker_events})
++        return entry
++
++    def refresh_worker_observations() -> None:
++        for group in worker_groups:
++            worker_group_status(group)
++        for role in worker_roles:
++            path = output / f"{role}-process-start.json"
++            if role not in worker_entries_observed and path.exists():
++                data = path.read_bytes()
++                entry = json.loads(data)
++                record_workers("worker_entry_observed", role=role, entry_sha256=hashlib.sha256(data).hexdigest(),
++                               entry_process=entry.get("process"))
++                worker_entries_observed.add(role)
++
++    record_workers("orchestrator_started")
+     try:
+         for role, executable in (("simulator", args.sim_python), ("inference", args.inference_python)):
+             if role == "inference":
+                 while not (output / "sim-ready.json").exists():
++                    refresh_worker_observations()
+                     if processes[0].poll() is not None:
+                         raise RuntimeError("Simulator exited before initialization; inspect simulator.log")
+                     if time.monotonic() - started > args.startup_timeout:
+@@ -396,15 +566,42 @@
+                     time.sleep(0.2)
+             log = (output / f"{role}.log").open("w")
+             files.append(log)
+-            processes.append(subprocess.Popen([executable, script, "--worker", role, "--output", str(output)], cwd=ROOT, env=env, stdout=log, stderr=subprocess.STDOUT))
++            launch = [executable, script, "--worker", role, "--output", str(output)]
++            process = subprocess.Popen(launch, cwd=ROOT, env=env, stdout=log, stderr=subprocess.STDOUT,
++                                       start_new_session=True)
++            processes.append(process)
++            worker_roles.append(role)
++            worker_launches.append(launch)
++            worker_groups.append({"process_group_id": process.pid, "session_id": process.pid,
++                                  "source": "Popen start_new_session=True; private session/group leader PID",
++                                  "leader_identity": None, "known_members": [], "retired": False, "ownership_lost": False})
++            worker_identities.append({"pid": process.pid})
++            worker_identities[-1].update(process_identity(process.pid))
++            identity = worker_identities[-1]
++            birth = identity.get("start_time_clock_ticks")
++            if (identity.get("process_group_id") == process.pid and identity.get("session_id") == process.pid
++                    and type(birth) is int and birth > 0):
++                leader = {"pid": process.pid, "start_time_clock_ticks": birth}
++                worker_groups[-1].update(leader_identity=leader, known_members=[dict(leader)])
++            record_workers("worker_spawned", role=role)
++            if worker_groups[-1].get("ownership_state") == "unknown":
++                raise RuntimeError("Worker spawn birth/session/group identity could not be verified")
+         timeout = config["wall_timeout"]
+         while any(process.poll() is None for process in processes):
++            refresh_worker_observations()
+             if any(process.poll() not in (None, 0) for process in processes):
+                 raise RuntimeError("A worker failed; inspect worker logs and error JSON")
+             if time.monotonic() - started > timeout:
+                 raise TimeoutError("Closed-loop rollout exceeded its time bound")
+             time.sleep(0.2)
++        refresh_worker_observations()
++        terminal = record_workers("workers_loop_complete")
++        if any(worker["returncode"] != 0 for worker in terminal["workers"]):
++            raise RuntimeError("Workers ended with nonzero status; inspect worker-processes.json and worker logs")
++        if any(worker["process_group"]["live_members"] != [] or not worker["process_group"]["ownership_verified"] for worker in terminal["workers"]):
++            raise RuntimeError("Worker process groups remain live or unobservable after direct workers exited")
+         summary = {"status": "completed", "elapsed_seconds": time.monotonic() - started, "config": config,
++                   "worker_status_report": "worker-processes.json", "worker_status_at_completion": terminal,
+                    "simulation": json.loads((output / "simulation.json").read_text()),
+                    "inference": {k: v for k, v in json.loads((output / "inference.json").read_text()).items() if k != "samples"},
+                    "videos": [str(p.relative_to(output)) for p in sorted((output / "video").glob("**/*.mp4"))],
+@@ -429,22 +626,45 @@
+         save(output / "result.json", summary)
+         print(json.dumps(summary, indent=2))
+     except BaseException as error:
+-        save(output / "error.json", {"status": "failed", "error": str(error), "elapsed_seconds": time.monotonic() - started})
++        detected = record_workers("error_detected", error_type=type(error).__name__, error=str(error))
++        save(output / "error.json", {"status": "failed", "error": str(error), "elapsed_seconds": time.monotonic() - started,
++             "worker_status_at_error": detected, "worker_status_report": "worker-processes.json"})
+         raise
+     finally:
+-        (output / "stop").touch()
+-        for process in processes:
+-            if process.poll() is None:
++        cleanup_errors = []
++        unreaped_roles = []
++
++        def cleanup_call(function, *arguments, **keywords):
++            try:
++                return function(*arguments, **keywords)
++            except BaseException as error:
++                cleanup_errors.append(error)
++
++        cleanup_call((output / "stop").touch)
++        cleanup_call(record_workers, "finally_enter")
++        try:
++            for role, process, group in zip(worker_roles, processes, worker_groups):
+                 try:
+-                    process.wait(timeout=10)
+-                except subprocess.TimeoutExpired:
+-                    process.terminate()
+-                    try:
+-                        process.wait(timeout=5)
+-                    except subprocess.TimeoutExpired:
+-                        process.kill()
+-        for log in files:
+-            log.close()
++                    if not wait_worker_shutdown(process, group, 10):
++                        signalled = signal_worker_group(group, signal.SIGTERM)
++                        cleanup_call(record_workers, "terminate_requested", role=role, group_signalled=signalled)
++                        if not wait_worker_shutdown(process, group, 5):
++                            signalled = signal_worker_group(group, signal.SIGKILL)
++                            cleanup_call(record_workers, "kill_requested", role=role, group_signalled=signalled)
++                            if not wait_worker_shutdown(process, group, 5):
++                                unreaped_roles.append(role)
++                except BaseException as error:
++                    cleanup_errors.append(error)
++                    unreaped_roles.append(role)
++        finally:
++            if unreaped_roles:
++                cleanup_errors.append(RuntimeError("Worker process groups remain unreaped: " + ", ".join(unreaped_roles)))
++            cleanup_call(record_workers, "finally_wait_complete", unreaped_roles=unreaped_roles,
++                         cleanup_errors=[{"type": type(error).__name__, "error": str(error)} for error in cleanup_errors])
++            for log in files:
++                cleanup_call(log.close)
++        if cleanup_errors:
++            raise cleanup_errors[0]
+ 
+ 
+ if __name__ == "__main__":

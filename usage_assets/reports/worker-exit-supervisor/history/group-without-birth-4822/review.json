@@ -1,0 +1,123 @@
+{
+  "schema_version": 2,
+  "created_utc": "2026-10-10T08:04:09.846006+00:00",
+  "status": "candidate_only_not_applied",
+  "baseline_path": "scripts/research/sim2sim.py",
+  "baseline_sha256": "b286b1a6a9f883bc28aca3dab2256deefd4b567d1c71e2fa2f770a128c8d9879",
+  "candidate_sha256": "4822c5395b0e62cacb2d8bcb0cdb04cf72511afa66d28408399e78cdee4e2577",
+  "patch_sha256": "96cfadd7db2bfc60d5f1dbde685175e9a013a50afb60b7f4afa03f2587fc1805",
+  "production_bytes_equal_baseline": true,
+  "git_apply_check": {
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "cpu_validation": {
+    "runtime": "Docker php-parkour-research /opt/php/bin/motion-python",
+    "command": "docker exec php-parkour-research /opt/php/bin/motion-python -m pytest -q /workspace/php_parkour/outputs/research/worker-exit-diagnostics-proposal/test_worker_exit_diagnostics.py --junitxml=/workspace/php_parkour/outputs/research/worker-exit-diagnostics-proposal/cpu-tests-process-groups.xml",
+    "observed_stdout": "29 passed, 15 subtests passed in 0.13s",
+    "test_methods": 29,
+    "subtests": 15,
+    "junit_statistics": {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "44",
+      "time": "0.130",
+      "timestamp": "2026-10-10T08:00:59.679065+00:00",
+      "hostname": "dzp-MS-7E30"
+    },
+    "junit_sha256": "3aef3a805629cd135485a7f15b733024e594bb3e82a0aa9f58db568a0b0bbf4b",
+    "fixtures": "All subprocess.Popen/run and group signals replaced; no native workers, DDS, physics, ORT or GPU. Dummy model/media bytes are synthetic CPU fixtures, not runtime evidence."
+  },
+  "superseded_cpu_validation": {
+    "file": "cpu-tests.xml",
+    "test_methods": 20,
+    "subtests": 7,
+    "candidate_sha256": "a6aa12be8528cc243d286c3c01442734ee4a0f460bb0a51514e4cba9b22b946b",
+    "scope": "Initial wrapper-only proposal before independent cleanup/group review; retained as history, not validation of current candidate."
+  },
+  "independent_review": {
+    "reviewer": "/root/runtime",
+    "method": "Read-only source review; no native execution",
+    "finding": "No remaining blocker identified for exact private PGID/SID scope, parent-group guard, non-Z group gate, wrapper-zero/live-child failure and diagnostic I/O deferred until cleanup. proc observation failure remains unknown/unreaped and fails."
+  },
+  "meaningful_behavior_changes": [
+    "Post-loop terminal gate rejects any direct-Popen nonzero exit status or live/unobservable private group before constructing result.json.",
+    "Each worker launches with start_new_session=True, so its private PGID and SID are its Popen PID. Raw proc identity additionally records actual group/session/start ticks when available.",
+    "Cleanup waits for the direct wrapper and every observed non-Z member of its exact group/session, including orphan native children after wrapper exit.",
+    "Only that private nonempty group can receive SIGTERM then SIGKILL; parent/unisolated groups are rejected. Cleanup waits again after group kill.",
+    "Unknown or still-live groups are explicit unreaped failures, including when wrapper returned zero.",
+    "stop/receipt/log-close I/O errors are deferred until reaping and log-close attempts complete, then propagated so parent cannot report success.",
+    "Raw PID/argv/proc identity is persisted after Popen; worker interpreter separately writes its own entry identity.",
+    "error_detected and finally_wait_complete retain separate statuses and UTC/elapsed observation times.",
+    "Optional --python-faulthandler enables worker fatal-signal tracebacks for a future independent cohort."
+  ],
+  "event_schema": {
+    "parent_report": "worker-processes.json",
+    "worker_entry": "<role>-process-start.json",
+    "events": [
+      "orchestrator_started",
+      "worker_spawned",
+      "workers_loop_complete",
+      "error_detected",
+      "finally_enter",
+      "terminate_requested",
+      "kill_requested",
+      "finally_wait_complete"
+    ],
+    "signed_returncode": "negative = direct Popen process signal; positive = exit code, no inferred child signal",
+    "process_group": "expected PGID=SID=Popen PID; live_members has exact matching non-Z proc identities, [] means observed empty, null plus observation_error means unknown",
+    "namespace": "Identity belongs to observer namespace. NSpid may omit outer host namespace."
+  },
+  "limits": [
+    "Not applied to frozen 340-dependency cohort; cannot repair its old results or supply their missing worker return codes.",
+    "Only mocks and current-process /proc reads were exercised; SDK 0.1.8, actual process-group signaling and native shutdown remain unverified here.",
+    "A shell launcher may translate native SIGSEGV to positive exit code 1; worker self identity and fatal traceback/log remain needed for attribution.",
+    "Process groups are identified within the current namespace; no host PID/TID mapping is inferred.",
+    "proc observation failure is unknown/unreaped and fails; it is not evidence that a native child was cleaned up.",
+    "Non-Z membership is observed at discrete times; zombie descendant reaping by the system init is not claimed.",
+    "Do not execute ignored candidate as native: ROOT derives from file location. Apply reviewed patch only in a future independently planned cohort.",
+    "Future driver sealing must hash worker-processes.json and both *-process-start.json; require a final receipt with both returncodes zero, empty groups and no cleanup errors/unreaped roles.",
+    "A completed result may exist if subsequent cleanup/receipt writing fails; nonzero parent exit must prevent sealing it as a successful attempt.",
+    "No SDK lifecycle fix is included. Inherited PYTHONFAULTHANDLER is preserved and actual value is reported even if CLI flag is false."
+  ],
+  "recommended_next_checks": [
+    "Review then explicitly authorize application only after old cohort terminal/stop evidence is sealed.",
+    "Run CPU regressions on applied production source, and regenerate immutable source/dependency/image/plan identities.",
+    "Use a new cohort with explicit faulthandler for bounded native pilots. Preserve wrapper/interpreter identities, group membership observations and final worker receipts.",
+    "Only after pilots verify clean native shutdown and strengthened sealing, launch fresh complete coverage. Keep all old cohorts historical."
+  ],
+  "test_methods": [
+    "test_status_preserves_signed_codes_and_does_not_infer_wrapper_signal",
+    "test_current_process_identity_records_namespace_and_start_time",
+    "test_exited_identity_is_explicitly_unavailable",
+    "test_normal_completion_and_final_wait_record_both_zero",
+    "test_spawn_pid_is_persisted_before_second_worker_launch",
+    "test_both_workers_already_nonzero_cannot_skip_terminal_gate",
+    "test_policy_crash_error_snapshot_precedes_survivor_final_wait",
+    "test_premature_startup_exit_is_retained",
+    "test_startup_timeout_retains_pending_and_final_status",
+    "test_rollout_timeout_records_both_pending_then_waited",
+    "test_cleanup_terminate_receipt_preserves_sigterm",
+    "test_cleanup_kill_is_waited_and_preserves_sigkill",
+    "test_unreaped_after_kill_remains_pending_not_success",
+    "test_wrapper_zero_with_live_child_cannot_be_completed",
+    "test_orphan_child_receives_group_term_then_kill_even_with_zero_wrapper",
+    "test_still_live_group_after_kill_is_final_failure",
+    "test_process_group_scan_filters_session_other_groups_and_zombies",
+    "test_signal_never_targets_parent_unisolated_or_empty_foreign_group",
+    "test_group_scan_error_is_explicit_unknown_and_cannot_pass",
+    "test_receipt_write_failures_still_reap_group_close_logs_and_fail",
+    "test_stop_marker_io_failure_still_reaps_group_and_closes_logs",
+    "test_spawn_identity_failure_still_reaps_known_private_group",
+    "test_partial_spawn_failure_retains_first_pid_and_final_status",
+    "test_postprocess_failure_keeps_zero_worker_codes_and_failed_parent",
+    "test_keyboard_interrupt_still_writes_final_receipt",
+    "test_faulthandler_is_explicitly_propagated_to_workers",
+    "test_worker_self_pid_is_written_before_function_and_no_exit_claim",
+    "test_worker_python_exception_preserves_start_pid_and_error_json",
+    "test_isolated_command_wrapper_propagates_faulthandler"
+  ]
+}

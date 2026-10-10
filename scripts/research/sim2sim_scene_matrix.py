@@ -127,8 +127,13 @@ def dependencies() -> list[dict]:
         files.update(path for path in values.rglob("*.py") if "tests" not in path.parts)
     for relative in ("simulator/mujoco", "simulator/base_simulator", "simulator/shared", "simulator/plugins", "managers/terrain"):
         files.update(path for path in (packages["holosoma"] / relative).rglob("*.py") if "tests" not in path.parts)
+    # SDK bridges are selected through installed entry-point metadata, so no
+    # Python import statement necessarily names their implementation module.
+    files.update((packages["holosoma"] / "bridge").rglob("*.py"))
     files.update((packages["holosoma_inference"] / "sdk/unitree").glob("*.py"))
     files.update(ROOT / "docker/bin" / name for name in ("train-python", "inference-python", "activate"))
+    assets = packages["holosoma"] / "data/robots/g1"
+    files.update(path for path in assets.rglob("*") if path.is_file() and "__pycache__" not in path.parts)
 
     def resolve(module):
         root, _, tail = module.partition(".")
@@ -140,7 +145,31 @@ def dependencies() -> list[dict]:
                 return candidate
         return None
 
-    pending, checked = list(files), set()
+    seeds, files, pending, checked = files, set(), [], set()
+
+    def include(path):
+        candidates = [path]
+        # Importing a leaf executes every regular parent package __init__.
+        # Those initializers can import other leaves as a side effect, and
+        # must themselves enter the AST work queue, including for seed files.
+        for directory in packages.values():
+            if path.is_relative_to(directory):
+                parent = path.parent
+                while parent.is_relative_to(directory):
+                    initializer = parent / "__init__.py"
+                    if initializer.is_file():
+                        candidates.append(initializer)
+                    if parent == directory:
+                        break
+                    parent = parent.parent
+                break
+        for candidate in candidates:
+            if candidate not in files:
+                files.add(candidate)
+                pending.append(candidate)
+
+    for path in seeds:
+        include(path)
     while pending:
         path = pending.pop()
         if path in checked or path.suffix != ".py":
@@ -162,15 +191,14 @@ def dependencies() -> list[dict]:
                 names = [module, *(module + "." + alias.name for alias in node.names)]
             for name in names:
                 candidate = resolve(name)
-                if candidate is not None and candidate not in files:
-                    files.add(candidate)
-                    pending.append(candidate)
-    assets = ROOT / "thirdparty/holosoma/src/holosoma/holosoma/data/robots/g1"
-    files.update(path for path in assets.rglob("*") if path.is_file() and "__pycache__" not in path.parts)
+                if candidate is not None:
+                    include(candidate)
     return [fingerprint(path) for path in sorted(files)]
 
 
 def verify_inputs(plan: dict, selection: dict) -> None:
+    if plan.get("schema_version") != 3:
+        raise ValueError("New native acceptance requires schema3 worker exit receipts; preserve legacy raw evidence")
     for item in [plan["source_matrix_record"], *plan["dependencies"], *plan["models"], *selection["source_files"]]:
         if digest(Path(item["path"])) != item["sha256"]:
             raise ValueError(f"Planned input changed; use a fresh plan: {item['path']}")
@@ -224,12 +252,19 @@ def make_plan(args) -> dict:
         selection["launch"] = [sys.executable, str(ROOT / "scripts/research/sim2sim.py"), "--models", str(args.models.resolve()),
                                "--terrain", "custom", "--mesh", selection["mesh"], "--commands", str(selection["command"]),
                                "--seconds-per-command", str(args.seconds), "--seed", str(args.seed), "--gl", args.gl,
+                               "--python-faulthandler",
                                "--sim-python", args.sim_python, "--inference-python", args.inference_python, "--output", str(output)]
-    plan = {"schema_version": 2, "status": "planned", "seed": args.seed, "image_id": args.image_id,
+    closure = dependencies()
+    harness = [item for item in closure if item["path"] == str(ROOT / "scripts/research/sim2sim.py")]
+    if len(harness) != 1:
+        raise ValueError("Native harness must be an explicit unique frozen dependency")
+    plan = {"schema_version": 3, "status": "planned", "seed": args.seed, "image_id": args.image_id,
             "source_matrix": str(args.matrix.resolve()), "source_matrix_sha256": digest(args.matrix),
             "source_matrix_record": fingerprint(args.matrix), "models": models,
             "model_sha256": {Path(item["path"]).name: item["sha256"] for item in models},
-            "dependencies": dependencies(), "all_configurations": args.all_configs,
+            "dependencies": closure, "worker_harness_record": harness[0],
+            "worker_interpreters": {"simulator": args.sim_python, "inference": args.inference_python},
+            "python_faulthandler": True, "all_configurations": args.all_configs,
             "runtime_environment": {"MUJOCO_EGL_DEVICE_ID": os.environ.get("MUJOCO_EGL_DEVICE_ID", "0")},
             "container_matrix_lock": str(GLOBAL_LOCK),
             "concurrency_scope": "One matrix driver per container; all manual native sim2sim jobs must also be serialized",
@@ -245,6 +280,116 @@ def make_plan(args) -> dict:
     return plan
 
 
+def validate_worker_receipts(directory: Path, plan: dict, result: dict, translate=lambda value: value) -> list[dict]:
+    """Validate immutable native shutdown evidence; optional host path mapping.
+
+    `directory` is the actual evidence directory in the observer namespace.
+    translate maps retained native absolute paths to that namespace without
+    rewriting the original JSON. Returns the three mandatory fingerprints.
+    """
+    def require(condition, message):
+        if not condition:
+            raise ValueError("Native worker receipts: " + message)
+
+    require(plan.get("schema_version") == 3 and plan.get("python_faulthandler") is True,
+            "schema3 and fatal-signal diagnostics are required")
+    harness = plan["worker_harness_record"]
+    require(harness in plan["dependencies"] and re.fullmatch(r"[0-9a-f]{64}", harness["sha256"])
+            and Path(translate(harness["path"])).resolve() == (ROOT / "scripts/research/sim2sim.py").resolve()
+            and sum(item["path"] == harness["path"] for item in plan["dependencies"]) == 1,
+            "harness SHA is not bound to the frozen dependency closure")
+    require(set(plan["worker_interpreters"]) == {"simulator", "inference"}, "two native interpreters required")
+    directory = Path(directory).resolve()
+    paths = [directory / name for name in ("worker-processes.json", "simulator-process-start.json", "inference-process-start.json")]
+    require(all(path.is_file() and not path.is_symlink() and path.stat().st_size > 0 for path in paths),
+            "three fresh regular receipt files required")
+    receipt = json.loads(paths[0].read_text())
+    require(receipt.get("schema_version") == 2 and receipt.get("harness_sha256") == harness["sha256"]
+            and receipt.get("python_faulthandler") == "1", "supervisor source/diagnostic contract differs")
+    events = receipt["events"]
+    require(events and events[-1].get("event") == "finally_wait_complete"
+            and sum(event.get("event") == "finally_wait_complete" for event in events) == 1,
+            "final waited cleanup event must exist exactly once and be last")
+    require(not any(event.get("event") in ("error_detected", "terminate_requested", "kill_requested") for event in events),
+            "failed/terminated attempts cannot be sealed as normal completion")
+    require(all(isinstance(event.get("elapsed_seconds"), (int, float))
+                and math.isfinite(event["elapsed_seconds"]) and event["elapsed_seconds"] >= 0 for event in events)
+            and [e["elapsed_seconds"] for e in events] == sorted(e["elapsed_seconds"] for e in events),
+            "event chronology is missing or nonmonotonic")
+    final = events[-1]
+    require(final.get("unreaped_roles") == [] and final.get("cleanup_errors") == [], "cleanup is incomplete or failed")
+    completion = [event for event in events if event.get("event") == "workers_loop_complete"]
+    require(len(completion) == 1 and result.get("worker_status_report") == "worker-processes.json"
+            and result.get("worker_status_at_completion") == completion[0], "result is not bound to the observed terminal workers")
+    roles = ("simulator", "inference")
+
+    def by_role(event):
+        workers = event["workers"]
+        require([item.get("role") for item in workers] == list(roles), "two ordered workers required")
+        return {item["role"]: item for item in workers}
+
+    def clean(worker):
+        require(type(worker.get("returncode")) is int and type(worker.get("exit_code")) is int
+                and worker["returncode"] == worker["exit_code"] == 0 and worker.get("status") == "exited"
+                and "signal_number" in worker and "signal_name" in worker
+                and worker["signal_number"] is None and worker["signal_name"] is None
+                and worker["process_group"].get("live_members") == []
+                and worker["process_group"].get("ownership_verified") is True
+                and worker["process_group"].get("ownership_state") == "retired_empty"
+                and worker["process_group"].get("retired") is True
+                and worker["process_group"].get("ownership_lost") is False
+                and not worker["process_group"].get("observation_error"), "worker is nonzero, alive or unobservable")
+
+    last, completed = by_role(final), by_role(completion[0])
+    for role, path in zip(roles, paths[1:]):
+        spawn_events = [event for event in events if event.get("event") == "worker_spawned" and event.get("role") == role]
+        require(len(spawn_events) == 1, "missing/duplicate spawn event: " + role)
+        spawned = [worker for worker in spawn_events[0]["workers"] if worker.get("role") == role]
+        require(len(spawned) == 1, "spawn worker identity missing: " + role)
+        spawn = spawned[0]
+        identity_at_spawn = spawn["identity_at_spawn"]
+        pid, birth = identity_at_spawn["pid"], identity_at_spawn["start_time_clock_ticks"]
+        require(type(pid) is int and pid > 1 and type(birth) is int and birth > 0
+                and identity_at_spawn["process_group_id"] == identity_at_spawn["session_id"] == pid,
+                "spawn is not an observed private session leader")
+        launch = spawn["launch"]
+        require(len(launch) == 6 and launch[:4] == [plan["worker_interpreters"][role], harness["path"], "--worker", role]
+                and launch[4] == "--output" and Path(translate(launch[5])).resolve() == directory,
+                "worker launch/interpreter/output differs from the native plan")
+        for worker in (completed[role], last[role]):
+            clean(worker)
+            require(worker["launch"] == launch and worker["identity_at_spawn"] == identity_at_spawn
+                    and worker["process_group"]["process_group_id"] == worker["process_group"]["session_id"] == pid
+                    and worker["process_group"].get("leader_identity") == {"pid": pid, "start_time_clock_ticks": birth},
+                    "worker identity changed between spawn, completion and cleanup")
+        entry = json.loads(path.read_text())
+        require(entry.get("schema_version") == 1 and entry.get("role") == role and entry.get("argv") == launch[1:]
+                and entry.get("python_faulthandler") == "1", "native entry argv/role/diagnostics differ")
+        native = entry["process"]
+        native_pid, native_birth = native["pid"], native["start_time_clock_ticks"]
+        require(type(native_pid) is int and native_pid > 1 and type(native_birth) is int and native_birth >= birth
+                and native["process_group_id"] == native["session_id"] == pid, "native entry is outside the observed private session")
+        entry_events = [event for event in events if event.get("event") == "worker_entry_observed" and event.get("role") == role]
+        require(len(entry_events) == 1 and entry_events[0].get("entry_sha256") == digest(path)
+                and entry_events[0].get("entry_process") == native
+                and events.index(spawn_events[0]) < events.index(entry_events[0]) < events.index(completion[0]),
+                "native entry was not uniquely observed and SHA-bound before completion")
+        native_identity = {"pid": native_pid, "start_time_clock_ticks": native_birth}
+        require(all(native_identity in worker["process_group"].get("known_members", [])
+                    for worker in (completed[role], last[role])),
+                "native entry birth is absent from terminal ownership history")
+        if native_pid == pid:
+            require(native_birth == birth, "native leader PID was reused")
+        else:
+            observed = [member for event in events for worker in event.get("workers", []) if worker.get("role") == role
+                        for member in worker.get("process_group", {}).get("live_members", []) or []]
+            require(any(type(member.get("pid")) is int and type(member.get("start_time_clock_ticks")) is int
+                        and member["pid"] == native_pid and member["start_time_clock_ticks"] == native_birth
+                        and member.get("process_group_id") == member.get("session_id") == pid for member in observed),
+                    "native child PID/birth was never independently observed in its worker group")
+    return [fingerprint(path) for path in paths]
+
+
 def validate_result(path: Path, plan: dict, selection: dict) -> dict:
     result = json.loads(path.read_text())
     cfg, sim, inference = result["config"], result["simulation"], result["inference"]
@@ -255,11 +400,13 @@ def validate_result(path: Path, plan: dict, selection: dict) -> dict:
             or cfg["commands"] != [selection["command"]] or cfg["seed"] != plan["seed"]
             or cfg["gl"] != selection["launch"][selection["launch"].index("--gl") + 1]
             or cfg["duration"] != plan["seconds_per_configuration"] or cfg["record_policy"] or cfg["course_guide"]
+            or cfg.get("python_faulthandler") is not True or "--python-faulthandler" not in selection["launch"]
             or inference["ticks"] != expected_ticks or inference["control_period_simulation_seconds"] != .02
             or not inference["lifecycle"]["damping_mode_active"] or not inference["lifecycle"]["policy_action_disabled"]
             or not sim["gantry_disabled_during_policy"] or sim["policy_simulation_seconds"] < cfg["duration"]
             or result.get("quality_verified") is not False or result.get("obstacle_course_completion_verified") is not False):
         raise ValueError("Native closed-loop result identity, duration, ticks or lifecycle mismatch")
+    validate_worker_receipts(path.parent, plan, result)
     rows = list(csv.DictReader((path.parent / "trajectory.csv").open()))
     if not rows or any(not math.isfinite(float(value)) for row in rows for value in row.values()):
         raise ValueError("Missing or nonfinite native trajectory")
@@ -284,6 +431,7 @@ def retain_evidence(directory: Path, plan: dict, selection: dict, launch: list[s
     result = validate_result(directory / "result.json", plan, selection)
     files = [fingerprint(path) for path in sorted(directory.rglob("*")) if path.is_file()]
     evidence = {"schema_version": 1, "case_input": case_input(plan, selection), "files": files,
+                "worker_receipts": validate_worker_receipts(directory, plan, result),
                 "execution": {"output": str(directory), "launch": launch, "log": fingerprint(log_path), "returncode": 0},
                 "result_sha256": digest(directory / "result.json"), "expected_policy_ticks": round(plan["seconds_per_configuration"] / .02),
                 "scope": "Native closed-loop execution evidence; survival is heuristic and course completion unverified"}
@@ -311,6 +459,10 @@ def verify_completed(attempt: dict, plan: dict, selection: dict) -> None:
             raise ValueError(f"Completed artifact changed: {artifact['path']}")
     result_path = Path(attempt["output"]) / "result.json"
     result = validate_result(result_path, plan, selection)
+    if evidence.get("worker_receipts") != validate_worker_receipts(result_path.parent, plan, result):
+        raise ValueError("Completed native worker receipts changed or were not sealed")
+    if not all(item in evidence["files"] for item in evidence["worker_receipts"]):
+        raise ValueError("Mandatory native worker receipts are absent from retained hashes")
     if selection.get("result") != result or selection.get("result_report") != str(result_path):
         raise ValueError("Completed matrix result summary changed")
 

@@ -1,0 +1,262 @@
+{
+  "schema_version": 1,
+  "status": "passed",
+  "candidate_sha256": "d9f958830bfb887b18239ee25a2306ddf1c88201bc1415571e6b6665263cd873",
+  "scope": "Actual owned ordinary CPU Python groups in Docker. No SDK, DDS, MuJoCo, Isaac, ONNX or GPU.",
+  "actual_group_signals": true,
+  "cases": [
+    {
+      "case": "actual_direct_group_term",
+      "status": "passed",
+      "before": {
+        "process_group_id": 72532,
+        "session_id": 72532,
+        "leader_identity": {
+          "pid": 72532,
+          "start_time_clock_ticks": 104822210
+        },
+        "known_members": [
+          {
+            "pid": 72532,
+            "start_time_clock_ticks": 104822210
+          }
+        ],
+        "retired": false,
+        "ownership_lost": false,
+        "ownership_state": "owned",
+        "ownership_reason": null,
+        "live_members": [
+          {
+            "pid": 72532,
+            "state": "R",
+            "parent_pid": 72526,
+            "process_group_id": 72532,
+            "session_id": 72532,
+            "start_time_clock_ticks": 104822210
+          }
+        ],
+        "ownership_verified": true
+      },
+      "direct_status": {
+        "returncode": -15,
+        "signal_number": 15,
+        "signal_name": "SIGTERM",
+        "exit_code": null,
+        "status": "exited",
+        "scope": "direct Popen process; wrappers may mask a native child signal"
+      },
+      "final": {
+        "process_group_id": 72532,
+        "session_id": 72532,
+        "leader_identity": {
+          "pid": 72532,
+          "start_time_clock_ticks": 104822210
+        },
+        "known_members": [
+          {
+            "pid": 72532,
+            "start_time_clock_ticks": 104822210
+          }
+        ],
+        "retired": true,
+        "ownership_lost": false,
+        "ownership_state": "retired_empty",
+        "ownership_reason": null,
+        "live_members": [],
+        "ownership_verified": true
+      }
+    },
+    {
+      "case": "actual_zero_wrapper_owned_orphan_term_then_kill",
+      "status": "passed",
+      "initial": {
+        "process_group_id": 72533,
+        "session_id": 72533,
+        "leader_identity": {
+          "pid": 72533,
+          "start_time_clock_ticks": 104822210
+        },
+        "known_members": [
+          {
+            "pid": 72533,
+            "start_time_clock_ticks": 104822210
+          },
+          {
+            "pid": 72534,
+            "start_time_clock_ticks": 104822211
+          }
+        ],
+        "retired": false,
+        "ownership_lost": false,
+        "ownership_state": "owned",
+        "ownership_reason": null,
+        "live_members": [
+          {
+            "pid": 72533,
+            "state": "S",
+            "parent_pid": 72526,
+            "process_group_id": 72533,
+            "session_id": 72533,
+            "start_time_clock_ticks": 104822210
+          },
+          {
+            "pid": 72534,
+            "state": "S",
+            "parent_pid": 72533,
+            "process_group_id": 72533,
+            "session_id": 72533,
+            "start_time_clock_ticks": 104822211
+          }
+        ],
+        "ownership_verified": true
+      },
+      "child_identity": {
+        "pid": 72534,
+        "pid_namespace": "current container",
+        "observed_unix": 1791620227.6797662,
+        "proc_status": {
+          "Name": "python",
+          "Tgid": "72534",
+          "Pid": "72534",
+          "PPid": "72533",
+          "NSpid": "72534",
+          "Threads": "1"
+        },
+        "state": "S",
+        "process_group_id": 72533,
+        "session_id": 72533,
+        "start_time_clock_ticks": 104822211,
+        "cmdline": "/opt/php/envs/motion/bin/python -u -c import json,os,pathlib,signal,sys,time\nsignal.signal(signal.SIGTERM, signal.SIG_IGN)\npathlib.Path(sys.argv[1]).write_text(json.dumps({'pid':os.getpid(),'pgid':os.getpgrp(),'sid':os.getsid(0)}))\ntime.sleep(60)\n /workspace/php_parkour/outputs/research/worker-exit-diagnostics-proposal/owned-cpu-groups-01/orphan-child-ready.json "
+      },
+      "wrapper_status": {
+        "returncode": 0,
+        "signal_number": null,
+        "signal_name": null,
+        "exit_code": 0,
+        "status": "exited",
+        "scope": "direct Popen process; wrappers may mask a native child signal"
+      },
+      "after_wrapper_zero": {
+        "process_group_id": 72533,
+        "session_id": 72533,
+        "leader_identity": {
+          "pid": 72533,
+          "start_time_clock_ticks": 104822210
+        },
+        "known_members": [
+          {
+            "pid": 72533,
+            "start_time_clock_ticks": 104822210
+          },
+          {
+            "pid": 72534,
+            "start_time_clock_ticks": 104822211
+          }
+        ],
+        "retired": false,
+        "ownership_lost": false,
+        "ownership_state": "owned",
+        "ownership_reason": null,
+        "live_members": [
+          {
+            "pid": 72534,
+            "state": "S",
+            "parent_pid": 1,
+            "process_group_id": 72533,
+            "session_id": 72533,
+            "start_time_clock_ticks": 104822211
+          }
+        ],
+        "ownership_verified": true
+      },
+      "after_term": {
+        "process_group_id": 72533,
+        "session_id": 72533,
+        "leader_identity": {
+          "pid": 72533,
+          "start_time_clock_ticks": 104822210
+        },
+        "known_members": [
+          {
+            "pid": 72533,
+            "start_time_clock_ticks": 104822210
+          },
+          {
+            "pid": 72534,
+            "start_time_clock_ticks": 104822211
+          }
+        ],
+        "retired": false,
+        "ownership_lost": false,
+        "ownership_state": "owned",
+        "ownership_reason": null,
+        "live_members": [
+          {
+            "pid": 72534,
+            "state": "S",
+            "parent_pid": 1,
+            "process_group_id": 72533,
+            "session_id": 72533,
+            "start_time_clock_ticks": 104822211
+          }
+        ],
+        "ownership_verified": true
+      },
+      "final": {
+        "process_group_id": 72533,
+        "session_id": 72533,
+        "leader_identity": {
+          "pid": 72533,
+          "start_time_clock_ticks": 104822210
+        },
+        "known_members": [
+          {
+            "pid": 72533,
+            "start_time_clock_ticks": 104822210
+          },
+          {
+            "pid": 72534,
+            "start_time_clock_ticks": 104822211
+          }
+        ],
+        "retired": true,
+        "ownership_lost": false,
+        "ownership_state": "retired_empty",
+        "ownership_reason": null,
+        "live_members": [],
+        "ownership_verified": true
+      }
+    },
+    {
+      "case": "different_group_not_owned_by_old_identity_is_refused",
+      "status": "passed",
+      "refusal": "Refusing to signal unknown worker group: retired empty group number reappeared",
+      "still_alive_before_its_own_authorized_cleanup": true,
+      "final_after_own_cleanup": {
+        "process_group_id": 72535,
+        "session_id": 72535,
+        "leader_identity": {
+          "pid": 72535,
+          "start_time_clock_ticks": 104822264
+        },
+        "known_members": [
+          {
+            "pid": 72535,
+            "start_time_clock_ticks": 104822264
+          }
+        ],
+        "retired": true,
+        "ownership_lost": false,
+        "ownership_state": "retired_empty",
+        "ownership_reason": null,
+        "live_members": [],
+        "ownership_verified": true
+      }
+    }
+  ],
+  "cleanup_fallback": [],
+  "limits": [
+    "This does not verify actual SDK018, native shell launchers or simulator cleanup.",
+    "Orphan zombies may remain pending system-init reaping; only non-Z live members are gated."
+  ]
+}

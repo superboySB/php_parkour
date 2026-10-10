@@ -1,0 +1,36 @@
+{
+  "plan_schema_version": 3,
+  "supervisor_schema_version": 2,
+  "entry_schema_version": 1,
+  "roles": [
+    "simulator",
+    "inference"
+  ],
+  "required_files": [
+    "worker-processes.json",
+    "simulator-process-start.json",
+    "inference-process-start.json"
+  ],
+  "plan_fields": [
+    "worker_harness_record",
+    "worker_interpreters",
+    "python_faulthandler"
+  ],
+  "harness": "unique dependency SHA; translate(native source path) == ROOT/scripts/research/sim2sim.py",
+  "launch": [
+    "frozen role interpreter",
+    "frozen native harness path",
+    "--worker",
+    "role",
+    "--output",
+    "native attempt path"
+  ],
+  "entry_event": "one per role after spawn and before workers_loop_complete, entry_sha256 exact raw-file SHA, entry_process exact raw entry process",
+  "terminal": "unique finally_wait_complete last; both ordered roles rc0/exit_code0/exited/no signal, live_members=[], ownership_verified=true, ownership_state=retired_empty, retired=true, ownership_lost=false, leader_identity matches original spawn, known_members includes native entry pid/startticks; cleanup_errors=[], unreaped_roles=[]",
+  "result_binding": "worker_status_at_completion equals exact workers_loop_complete event; both completion and final require clean workers",
+  "wrapper_child": "native entry PID may differ from wrapper; private PGID/SID same, native birth must be independently observed live and retained as known; original leader birth must match if PID equal",
+  "evidence": "all three raw receipt fingerprints in evidence.worker_receipts and evidence.files; parent launch returncode 0; resume repeats checks",
+  "host_api": "validate_worker_receipts(directory,plan,result,translate=host_path) -> three observed-host fingerprints; raw native reports unchanged",
+  "fixture": "tests/test_sim2sim_scene_matrix.py:native_worker_receipt_fixture(output,plan)",
+  "legacy": "schema2 plans rejected for new sealing; historical raw never rewritten"
+}

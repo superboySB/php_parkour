@@ -1,0 +1,166 @@
+{
+  "schema_version": 3,
+  "created_utc": "2026-10-10T08:19:51.745468+00:00",
+  "status": "candidate_only_not_applied",
+  "baseline_path": "scripts/research/sim2sim.py",
+  "baseline_sha256": "b286b1a6a9f883bc28aca3dab2256deefd4b567d1c71e2fa2f770a128c8d9879",
+  "production_bytes_equal_baseline": true,
+  "candidate_sha256": "d9f958830bfb887b18239ee25a2306ddf1c88201bc1415571e6b6665263cd873",
+  "patch_sha256": "cb3d152451fb8273832350ec2c9db44b80cab08e24421811ffe49da394daa771",
+  "git_apply_check": {
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "mock_cpu_validation": {
+    "runtime": "Docker php-parkour-research /opt/php/bin/motion-python",
+    "test_methods": 37,
+    "subtests": 19,
+    "junit_statistics": {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "56",
+      "time": "0.199",
+      "timestamp": "2026-10-10T08:17:07.350535+00:00",
+      "hostname": "dzp-MS-7E30"
+    },
+    "junit_sha256": "c596bff0b14b6affb69741fcf41cc0a19dbffe682762de8639bacb791de1482d",
+    "observed_stdout": "37 passed, 19 subtests passed in 0.20s",
+    "command": "docker exec php-parkour-research /opt/php/bin/motion-python -m pytest -q /workspace/php_parkour/outputs/research/worker-exit-diagnostics-proposal/test_worker_exit_diagnostics.py --junitxml=/workspace/php_parkour/outputs/research/worker-exit-diagnostics-proposal/cpu-tests-birth-identity.xml",
+    "scope": "All harness orchestration Popen/run/group signals mocked. Synthetic model/media bytes are fixtures, not runtime evidence."
+  },
+  "actual_owned_cpu_validation": {
+    "status": "passed",
+    "cases": 3,
+    "result": "owned-cpu-groups-01/result.json",
+    "result_sha256": "82ee8c86e6d3b4a2386b39f895f9afa8ae7246ec1b95d7ed47b510c0a0c3433d",
+    "cleanup_fallback": [],
+    "command": "docker exec php-parkour-research /opt/php/bin/motion-python /workspace/php_parkour/outputs/research/worker-exit-diagnostics-proposal/verify_owned_cpu_groups.py --output /workspace/php_parkour/outputs/research/worker-exit-diagnostics-proposal/owned-cpu-groups-01",
+    "scope": "Actual owned ordinary CPU Python groups in Docker. No SDK, DDS, MuJoCo, Isaac, ONNX or GPU.",
+    "proofs": [
+      "Actual direct group SIGTERM produces signed Popen returncode -15 and empty non-Z group.",
+      "Owned wrapper exits zero; previously observed child ignores TERM, survives bounded wait, receives group KILL, then non-Z group empty.",
+      "Different real group cannot be signalled through an old birth identity; it remains alive and is subsequently cleaned up only using its own captured identity."
+    ]
+  },
+  "superseded_history": {
+    "path": "history/group-without-birth-4822",
+    "candidate_sha256": "4822c5395b0e62cacb2d8bcb0cdb04cf72511afa66d28408399e78cdee4e2577",
+    "reason": "Independent validation proved PGID/SID number-only signaling could hit a reused leader or unknown-only orphan. Entire prior proposal files retained original bytes."
+  },
+  "source_changes": [
+    "Final worker nonzero gate after loop; no successful result unless direct rc0 and groups empty/ownership verified.",
+    "Independent session/group for each worker; initial leader pid/startticks must be actually read with matching PGID/SID.",
+    "Known member identities persist as pid/startticks. New members are absorbed only while at least one still-live known identity anchors exact group/session.",
+    "Reused leader birth, missing spawn birth, only unknown members, proc errors, or retired-group reappearance become sticky unknown; no signal is sent.",
+    "Observed empty group retires permanently; its numeric PGID/SID cannot be revived.",
+    "Polling refreshes group identities. First worker entry is observed with original entry SHA and native identity; it can differ from wrapper PID.",
+    "Historical group snapshots deep-copied to prevent later known-member absorption changing earlier events.",
+    "Cleanup waits direct worker and group; owned groups receive TERM then KILL with bounded wait. Unknown/live groups remain failures.",
+    "Diagnostic/stop-marker/log-close I/O errors are deferred until reaping/close attempts, then propagated.",
+    "Optional faulthandler env for a fresh cohort; inherited settings reported."
+  ],
+  "receipt_contract": {
+    "worker_processes_schema": 2,
+    "worker_entry_schema": 1,
+    "parent_receipt": "worker-processes.json",
+    "entries": [
+      "simulator-process-start.json",
+      "inference-process-start.json"
+    ],
+    "group_fields": [
+      "process_group_id",
+      "session_id",
+      "leader_identity",
+      "known_members",
+      "retired",
+      "ownership_lost",
+      "ownership_state",
+      "ownership_reason",
+      "ownership_verified",
+      "live_members"
+    ],
+    "ownership_states": [
+      "owned",
+      "retired_empty",
+      "unknown"
+    ],
+    "identity_fields": [
+      "pid",
+      "start_time_clock_ticks"
+    ],
+    "events": [
+      "orchestrator_started",
+      "worker_spawned",
+      "worker_entry_observed",
+      "workers_loop_complete",
+      "error_detected",
+      "finally_enter",
+      "terminate_requested",
+      "kill_requested",
+      "finally_wait_complete"
+    ],
+    "entry_event_fields": [
+      "role",
+      "entry_sha256",
+      "entry_process"
+    ],
+    "future_final_seal_requirements": [
+      "Parent returncode 0 and both direct worker returncodes 0.",
+      "Final finally_wait_complete event: empty groups, ownership_verified true, ownership_state retired_empty, retired true, ownership_lost false, cleanup_errors empty, unreaped_roles empty.",
+      "Hash and bind both raw entries, parent raw receipt and current harness/plan/result identity; native entry pid/startticks must be a known member and its PGID/SID must match expected private group."
+    ]
+  },
+  "limits": [
+    "No production/frozen-cohort source or old result was modified; patch does not repair historical missing worker statuses.",
+    "Actual process-group tests use only owned ordinary CPU Python children in Docker. SDK018, actual shell launchers, DDS, physics and GPU shutdown remain untested by this proposal.",
+    "A positive wrapper code does not identify its native child signal; actual self PID and fatal logs remain needed for attribution.",
+    "proc identity is within observer namespace; host PID/TID mapping is not inferred.",
+    "Unknown ownership is deliberately not signalled and may remain live/unreaped; report cannot claim cleanup succeeded.",
+    "Zombies are excluded from live membership; orphan reaping by system init is not verified.",
+    "Observation and signal are separate Linux operations; captured birth/continuous identity guards reduce reuse ambiguity but do not form a kernel-atomic process-group handle.",
+    "Do not run ignored candidate as simulator: ROOT is based on its temporary location. Reviewed application requires fresh plan/source/image/cohort and strengthened matrix sealing.",
+    "A result may have been written before final receipt/cleanup failure; nonzero parent exit must prevent successful sealing."
+  ],
+  "test_methods": [
+    "test_status_preserves_signed_codes_and_does_not_infer_wrapper_signal",
+    "test_current_process_identity_records_namespace_and_start_time",
+    "test_exited_identity_is_explicitly_unavailable",
+    "test_normal_completion_and_final_wait_record_both_zero",
+    "test_spawn_pid_is_persisted_before_second_worker_launch",
+    "test_native_entry_receipt_is_hashed_and_bound_to_observed_birth",
+    "test_both_workers_already_nonzero_cannot_skip_terminal_gate",
+    "test_policy_crash_error_snapshot_precedes_survivor_final_wait",
+    "test_premature_startup_exit_is_retained",
+    "test_startup_timeout_retains_pending_and_final_status",
+    "test_rollout_timeout_records_both_pending_then_waited",
+    "test_cleanup_terminate_receipt_preserves_sigterm",
+    "test_cleanup_kill_is_waited_and_preserves_sigkill",
+    "test_unreaped_after_kill_remains_pending_not_success",
+    "test_wrapper_zero_with_live_child_cannot_be_completed",
+    "test_orphan_child_receives_group_term_then_kill_even_with_zero_wrapper",
+    "test_still_live_group_after_kill_is_final_failure",
+    "test_process_group_scan_filters_session_other_groups_and_zombies",
+    "test_signal_never_targets_parent_unisolated_or_empty_foreign_group",
+    "test_reused_leader_birth_is_not_signalled_even_with_old_orphan_anchor",
+    "test_only_unknown_orphan_is_not_signalled_or_absorbed",
+    "test_known_orphan_can_anchor_group_after_leader_exit",
+    "test_empty_retired_group_never_revives_by_numeric_or_old_identity_match",
+    "test_unavailable_spawn_birth_never_trusts_or_signals_new_members",
+    "test_event_group_snapshots_do_not_mutate_when_members_are_absorbed",
+    "test_proc_observation_loss_is_sticky_and_prevents_later_signals",
+    "test_group_scan_error_is_explicit_unknown_and_cannot_pass",
+    "test_receipt_write_failures_still_reap_group_close_logs_and_fail",
+    "test_stop_marker_io_failure_still_reaps_group_and_closes_logs",
+    "test_spawn_identity_failure_is_unknown_and_never_blindly_signalled",
+    "test_partial_spawn_failure_retains_first_pid_and_final_status",
+    "test_postprocess_failure_keeps_zero_worker_codes_and_failed_parent",
+    "test_keyboard_interrupt_still_writes_final_receipt",
+    "test_faulthandler_is_explicitly_propagated_to_workers",
+    "test_worker_self_pid_is_written_before_function_and_no_exit_claim",
+    "test_worker_python_exception_preserves_start_pid_and_error_json",
+    "test_isolated_command_wrapper_propagates_faulthandler"
+  ]
+}

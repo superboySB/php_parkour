@@ -1,0 +1,72 @@
+{
+  "schema_version": 1,
+  "status": "passed",
+  "started_utc": "2026-10-10T08:30:01.104500+00:00",
+  "finished_utc": "2026-10-10T08:30:01.111207+00:00",
+  "scope": "Read-only preflight on only our existing php-parkour-research init PID; stdlib import and docker inspect only.",
+  "observer_source": "outputs/research/sdk018-native-isolation-proposal/observe_container_pids.py",
+  "observer_sha256": "6ce994d8c041bf289d55430526ed09d6f0c22f6fecaf47516900072e27d8ce54",
+  "inspect_command": [
+    "docker",
+    "inspect",
+    "--format",
+    "{{json .Id}} {{json .State.Pid}} {{json .State.Status}}",
+    "php-parkour-research"
+  ],
+  "inspect_before_stdout": "\"1ebbab06208baadedae8c27d645b34202e4ea6a107d7b967d716a4429c5a5020\" 4135327 \"running\"\n",
+  "inspect_after_stdout": "\"1ebbab06208baadedae8c27d645b34202e4ea6a107d7b967d716a4429c5a5020\" 4135327 \"running\"\n",
+  "full_container_id": "1ebbab06208baadedae8c27d645b34202e4ea6a107d7b967d716a4429c5a5020",
+  "host_init_pid": 4135327,
+  "capture_pid_result": {
+    "host_pid": 4135327,
+    "container_pid": 1,
+    "nspid": [
+      4135327,
+      1
+    ],
+    "role": null,
+    "status": {
+      "Name": "docker-init",
+      "State": "S (sleeping)",
+      "Tgid": "4135327",
+      "Pid": "4135327",
+      "PPid": "4135304",
+      "NStgid": [
+        4135327,
+        1
+      ],
+      "NSpid": [
+        4135327,
+        1
+      ],
+      "Threads": "1"
+    },
+    "state": "S",
+    "host_ppid": 4135304,
+    "host_pgid": 4135327,
+    "host_sid": 4135327,
+    "start_time_clock_ticks": 103128994,
+    "cmdline_sha256": "e3901943ba1343971061fbc866cc2460557d670add3ba1b30915549021d64ac0",
+    "program_basename": "docker-init",
+    "command_writer_threads": [],
+    "cgroup_sha256": "93dfd0a6b0deb762255ed9dbfa0a551957b0f06a07d577359aa1bcd6c9279e8d"
+  },
+  "checks": {
+    "host_proc_status_readable": true,
+    "host_proc_stat_readable": true,
+    "host_proc_cgroup_readable": true,
+    "exact_container_cgroup_validated_by_capture_pid": true,
+    "host_to_container_init_nspid": [
+      4135327,
+      1
+    ],
+    "host_pid_birth_unchanged": true,
+    "container_identity_and_init_pid_unchanged": true
+  },
+  "limitations": [
+    "inspect_identity was deliberately not called: current research container uses its existing network configuration, and this test does not validate isolated network/IPC/PID settings.",
+    "Only the init process was collected; no other container/process or SDK command_writer thread was inspected.",
+    "No native lifecycle, SDK018, DDS, policy, GPU or full observer mapping coverage is demonstrated.",
+    "No create/exec/start/stop/kill, package installation or process signals were used."
+  ]
+}

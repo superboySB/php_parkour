@@ -56,7 +56,8 @@ fi
 
 # Both paths belong in one Python-list CLI token; the config accepts one model
 # path or a list, and the depth student requires the backbone/student pair.
-python3 "$HOLOSOMA_ROOT/src/holosoma_inference/holosoma_inference/run_policy.py" \
+python3 "$PHP_ROOT/scripts/research/run_native_policy.py" \
+    "$HOLOSOMA_ROOT/src/holosoma_inference/holosoma_inference/run_policy.py" \
     inference:g1-wbt-distillation-d435i \
     --task.interface lo \
     --task.model-path "['${BACKBONE}','${STUDENT}']" \

@@ -20,10 +20,13 @@ from pathlib import Path
 import shutil
 import struct
 import tempfile
+import re
+import sys
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+from scripts.research.sim2sim_scene_matrix import validate_worker_receipts
 
 ROOT = Path(__file__).resolve().parents[2]
-FIXED_PLAN_SHA256 = "571dfb1e11c1cb862f8b6e8a3b8760b5cb899e039a5bfeb3b1012213d0b59158"
-HARNESS_SHA256 = "284e3eabfc888303f5090f0d3c22dd8a3c35c5478285dc030778209079d746d2"
 SCENARIO_COUNTS = dict(zip((
     "random_locomotion", "low_speed_step", "high_speed_step", "low_speed_climb_58", "high_speed_climb_58",
     "low_speed_climb_76", "high_speed_climb_76", "low_speed_climb_94", "high_speed_climb_94",
@@ -87,12 +90,14 @@ def option(command: list, flag: str) -> str:
     return command[command.index(flag) + 1]
 
 
-def validate_plan(plan: dict, matrix: dict) -> None:
+def validate_plan(plan: dict, matrix: dict, expected_plan: str, expected_harness: str, preview: bool) -> None:
+    if any(not isinstance(value, str) or not re.fullmatch(r"[0-9a-f]{64}", value) for value in (expected_plan, expected_harness)):
+        raise ValueError("Explicit expected plan and harness SHA256 are required")
     content = {k: v for k, v in plan.items() if k != "plan_sha256"}
-    if identity(content) != plan.get("plan_sha256") or plan.get("plan_sha256") != FIXED_PLAN_SHA256:
+    if identity(content) != plan.get("plan_sha256") or plan.get("plan_sha256") != expected_plan:
         raise ValueError("Frozen plan identity changed")
     expected_total = sum(SCENARIO_COUNTS.values())
-    if (plan.get("schema_version") != 2 or plan.get("status") != "planned" or plan.get("all_configurations") is not True
+    if ((plan.get("schema_version") != 3 and not (preview and plan.get("schema_version") == 2)) or plan.get("status") != "planned" or plan.get("all_configurations") is not True
             or plan.get("planned_configurations") != expected_total or plan.get("planned_scenarios") != len(SCENARIO_COUNTS)
             or plan.get("seed") != 42 or plan.get("seconds_per_configuration") != 10
             or plan.get("quality_verified") is not False or plan.get("obstacle_course_completion_verified") is not False
@@ -100,7 +105,7 @@ def validate_plan(plan: dict, matrix: dict) -> None:
         raise ValueError("Expected the fixed 17-scenario/629-configuration, seed42, 10-second plan")
     if any(matrix.get(k) != v for k, v in plan.items() if k not in ("status", "selections")) or len(matrix["selections"]) != expected_total:
         raise ValueError("Matrix immutable fields differ from the frozen plan")
-    if not any(Path(r["path"]).name == "sim2sim_scene_matrix.py" and r["sha256"] == HARNESS_SHA256 for r in plan["dependencies"]):
+    if not any(Path(r["path"]).name == "sim2sim_scene_matrix.py" and r["sha256"] == expected_harness for r in plan["dependencies"]):
         raise ValueError("Frozen production harness missing from plan dependencies")
     seen = set()
     ordinal = 0
@@ -117,13 +122,13 @@ def validate_plan(plan: dict, matrix: dict) -> None:
             ordinal += 1
 
 
-def validate_driver(receipt: dict, launch: dict, wrapper: Path, plan: dict, matrix: dict, matrix_sha: str, preview: bool) -> None:
+def validate_driver(receipt: dict, launch: dict, wrapper: Path, plan: dict, matrix: dict, matrix_sha: str, preview: bool, expected_harness: str) -> None:
     if (digest(wrapper) != launch["launcher_sha256"] or launch.get("launch_exit_code") != 0
             or receipt.get("image_id") != plan["image_id"] or launch.get("image_id") != plan["image_id"]
-            or receipt.get("harness_sha256") != HARNESS_SHA256 or receipt.get("quality_verified") is not False):
+            or receipt.get("harness_sha256") != expected_harness or receipt.get("quality_verified") is not False):
         raise ValueError("Driver wrapper, image or frozen harness identity mismatch")
     command = receipt["command"]
-    if ("--all-configs" not in command or "--resume" not in command
+    if ("--all-configs" not in command
             or option(command, "--matrix") != plan["source_matrix"]
             or option(command, "--models") != str(Path(plan["models"][0]["path"]).parent)
             or option(command, "--image-id") != plan["image_id"] or float(option(command, "--seconds")) != 10
@@ -172,6 +177,15 @@ def validate_case(plan: dict, row: dict) -> dict:
     result = load_bytes(result_path.read_bytes())
     if result != row["result"]:
         raise ValueError("Embedded and independent native results differ")
+    if plan.get("schema_version") == 3:
+        receipts = validate_worker_receipts(directory, plan, result, translate=host_path)
+        expected_receipts = {host_path(record["path"]).resolve(): record for record in evidence.get("worker_receipts", [])}
+        if (len(expected_receipts) != 3 or any(record["sha256"] != expected_receipts.get(Path(record["path"]), {}).get("sha256")
+                or record["bytes"] != expected_receipts.get(Path(record["path"]), {}).get("bytes") for record in receipts)):
+            raise ValueError("Worker process receipt fingerprints differ from retained evidence")
+        required = {directory / name for name in ("worker-processes.json", "simulator-process-start.json", "inference-process-start.json")}
+        if not required.issubset(retained):
+            raise ValueError("Worker process receipts absent from retained evidence")
     cfg, sim, inference = result["config"], result["simulation"], result["inference"]
     if (any(item.get("status") != "completed" for item in (result, sim, inference)) or cfg["model_sha256"] != plan["model_sha256"]
             or cfg["mesh"] != row["mesh"] or cfg["mesh_sha256"] != row["mesh_sha256"]
@@ -260,16 +274,21 @@ def validate_attempt_archive(plan: dict, row: dict, attempt: dict, all_directori
             raise ValueError("Historical sealed artifact set changed")
         if evidence.get("result_sha256") and digest(directory / "result.json") != evidence["result_sha256"]:
             raise ValueError("Historical sealed result checksum changed")
+        # Keep the original seal's expectations through copying. Rehashing here
+        # would accept a file changed after check_record verified the seal.
+        fingerprints = [{**record, "path": str(host_path(record["path"]).resolve())}
+                        for record in [*evidence["files"], attempt["evidence"]]]
+    else:
+        fingerprints = [{"path": str(p), "bytes": p.stat().st_size, "sha256": digest(p)} for p in files]
     # No seal means only the current original bytes can be fingerprinted. This
     # is preserved failed-attempt history, never retroactively verified physics.
-    fingerprints = [{"path": str(p), "bytes": p.stat().st_size, "sha256": digest(p)} for p in files]
     return {"sealed": sealed, "integrity_scope": "retained seal and files verified" if sealed else "unsealed history: current original byte fingerprints only",
             "files": fingerprints}
 
 
-def validate_all(plan: dict, matrix: dict, receipt: dict, launch: dict, wrapper: Path, matrix_sha: str, preview_count=0) -> list[dict]:
-    validate_plan(plan, matrix)
-    validate_driver(receipt, launch, wrapper, plan, matrix, matrix_sha, bool(preview_count))
+def validate_all(plan: dict, matrix: dict, receipt: dict, launch: dict, wrapper: Path, matrix_sha: str, preview_count=0, *, expected_plan=None, expected_harness=None) -> list[dict]:
+    validate_plan(plan, matrix, expected_plan, expected_harness, bool(preview_count))
+    validate_driver(receipt, launch, wrapper, plan, matrix, matrix_sha, bool(preview_count), expected_harness)
     for record in [plan["source_matrix_record"], *plan["dependencies"], *plan["models"],
                    *(record for row in plan["selections"] for record in row["source_files"])]:
         check_record(record)
@@ -311,14 +330,18 @@ def make_page(summary: dict, cases: list[dict]) -> str:
     data = json.dumps(cases, ensure_ascii=False, allow_nan=False).replace("<", "\\u003c").replace("&", "\\u0026")
     title = "PREVIEW · 2-case interface check" if summary["preview"] else "G1 · all 629 configuration rollouts"
     if summary["preview"]:
-        title = f'PREVIEW · {len(cases)} actual cases · full629 not certified'
+        title = f'PREVIEW · {len(cases)} cases · full629 not certified'
+        if summary.get("legacy_normal_exit_unverified"):
+            title += ' · historical status, worker exits unverified'
     scene_options = ''.join(f'<option value="{html.escape(s)}">{html.escape(s)}</option>' for s in SCENARIO_COUNTS)
     scene_rows = ''.join(f'<tr><td>{html.escape(r["scenario"])}</td><td>{r["configurations"]}</td><td>{r["threshold_events"]}</td><td>{r["no_threshold_events"]}</td></tr>' for r in summary["scenarios"])
     return '''<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>''' + html.escape(title) + '''</title><style>
 :root{color-scheme:dark}*{box-sizing:border-box}body{background:#101a27;color:#edf4fc;font:15px/1.6 system-ui;margin:0;padding:24px}header,.toolbar,.pager,main,footer{max-width:1500px;margin:0 auto 22px}h1{font-size:29px;margin:0}a{color:#92c9ff}p{color:#c0d0e0}.warning{padding:14px;background:#503627;border:1px solid #bc8357;border-radius:8px}.toolbar,.pager{display:flex;gap:10px;flex-wrap:wrap;align-items:center}input,select,button{font:inherit;color:inherit;background:#23374d;border:1px solid #647c95;border-radius:6px;padding:8px}input{min-width:240px;flex:1}button{cursor:pointer}button:disabled{opacity:.4}main{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,430px),1fr));gap:20px}article{background:#1d2e43;padding:17px;border-radius:10px;min-width:0}h2{font-size:19px;margin:0}.name,code{overflow-wrap:anywhere}.small{font-size:12px}.badge{display:inline-block;border-radius:20px;padding:3px 10px;background:#285542}.threshold{background:#713c2c}video,img{display:block;width:100%;background:#101923;border-radius:5px}video{aspect-ratio:16/9}.facts{display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:13px}.facts span{padding:4px;background:#142338}details{margin:12px 0}summary{cursor:pointer}table{border-collapse:collapse;font-size:13px}td,th{border-bottom:1px solid #41536a;padding:5px 14px;text-align:left}.preview{color:#ffc27f}footer{font-size:13px;color:#a8bed4}
 </style></head><body><header><h1>''' + html.escape(title) + '''</h1><p class="warning">''' + (
-        '本页仅为两例以内的真实完成结果预览，测试离线页面与媒体；完整629扫描尚未通过发布门卫。' if summary['preview'] else
+        ('本页仅为两例以内的历史reported completed身体数据预览；旧监督未证明全部worker正常退出，不能作为通过验收。'
+         if summary.get('legacy_normal_exit_unverified') else
+         '本页仅为两例以内的实际结果预览，测试离线页面与媒体；完整629扫描尚未通过发布门卫。') if summary['preview'] else
         '固定计划的629个配置均完成10秒物理rollout及500策略ticks。629是配置数量，不代表629种独立几何，更不代表629种技能成功。') + '''
 使用发布学生ONNX、原生DDS/深度SHM、MuJoCo/PD，恒定forward输入；不是reference replay。所有高度/倾斜阈值事件与历史失败attempt原样保留。未触发阈值不等于课程完成；正常攀爬也可能触发倾斜阈值。quality_verified=false。</p>
 <p><a href="summary.json">机器汇总</a> · <a href="cases.json">逐配置JSON</a> · <a href="cases.csv">逐配置CSV</a> · <a href="matrix.json">原始matrix</a> · <a href="plan.json">固定plan</a> · <a href="evidence-manifest.json">完整SHA清单</a></p>
@@ -346,7 +369,8 @@ def publish(args) -> dict:
     raw = {name: path.read_bytes() for name, path in (("plan.json", args.plan), ("matrix.json", args.matrix),
            ("driver-receipt.json", args.driver_receipt), ("driver-launch.json", args.driver_launch))}
     plan, matrix, receipt, launch = (load_bytes(raw[name]) for name in ("plan.json", "matrix.json", "driver-receipt.json", "driver-launch.json"))
-    verified = validate_all(plan, matrix, receipt, launch, args.driver_wrapper, hashlib.sha256(raw["matrix.json"]).hexdigest(), args.preview_case_count)
+    verified = validate_all(plan, matrix, receipt, launch, args.driver_wrapper, hashlib.sha256(raw["matrix.json"]).hexdigest(), args.preview_case_count,
+                            expected_plan=args.expected_plan_sha256, expected_harness=args.expected_harness_sha256)
     expected_copy_hashes = {host_path(r["path"]).resolve(): r["sha256"] for item in verified for r in item["evidence"]["files"]}
     for item in verified:
         for archive in item["attempt_archives"]:
@@ -409,6 +433,7 @@ def publish(args) -> dict:
             scenes.append({"scenario": name, "planned_configurations": SCENARIO_COUNTS[name], "configurations": len(rows), "threshold_events": flags,
                            "no_threshold_events": len(rows) - flags, "historical_noncompleted_attempts": sum(a["status"] != "completed" for r in rows for a in r["attempts"])})
         summary = {"schema_version": 1, "status": "preview" if preview else "completed_publication", "preview": preview,
+                   "legacy_normal_exit_unverified": plan.get("schema_version") == 2,
                    "observed_utc": dt.datetime.now(dt.timezone.utc).isoformat(), "plan_sha256": plan["plan_sha256"], "image_id": plan["image_id"],
                    "matrix_sha256": hashlib.sha256(raw["matrix.json"]).hexdigest(), "model_sha256": plan["model_sha256"], "configurations": len(cases),
                    "planned_configurations": sum(SCENARIO_COUNTS.values()), "policy_ticks": sum(r["policy_ticks"] for r in cases),
@@ -443,6 +468,10 @@ def publish(args) -> dict:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--expected-plan-sha256", required=True,
+                        help="Identity from the independently frozen cohort plan")
+    parser.add_argument("--expected-harness-sha256", required=True,
+                        help="SHA256 of that cohort sim2sim_scene_matrix.py source")
     for name in ("plan", "matrix", "driver-receipt", "driver-launch", "driver-wrapper", "output"):
         parser.add_argument("--" + name, type=Path, required=True)
     parser.add_argument("--preview-case-count", type=int, choices=(1, 2), default=0,

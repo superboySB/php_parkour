@@ -261,7 +261,7 @@ bash scripts/research/docker.sh sim scripts/research/sim2sim.py \
 
 15:33的新只读PID/计数快照为237完成、2执行失败、1运行、389待运行，原driver和native后代仍存活。[原始快照](usage_assets/reports/technical-pipeline-review/scan-counts-pids.json)。第二项是`low_speed_climb_58:0022:left_90_walk2.0s_plat0s`：500ticks、10仿真秒、无吊架轨迹有限且未触发姿态阈值，但模拟器PID与shell的`Segmentation fault`记录直接匹配，父进程最终exit1。[14份原文件、两条内核记录及共同模式](usage_assets/reports/sim2sim-worker-failure-second/report.md)。这明确保留执行错误，不能因body数据完整就改记成功；具体kernel线程与worker仍缺完整映射。
 
-后续只读审计检查275个reported completed的550份worker日志，发现10份模拟器段错误且封存SHA完全一致；旧12指令command02也有同样退出故障，说明原监督门卫存在实质漏记。旧批次已停止并完整保留340项原依赖的76.77MB本地归档，另逐项证明可由记录的Git提交恢复。[原字节与Git来源](usage_assets/reports/sim2sim-cohort-halt/summary.md)。上游SDK0.1.8已有等待writer结束后再析构的修复；独立候选`caf61487…`离线构建及无GPU导入/API检查通过，原镜像和pins未变。[上游源码与二进制审计](usage_assets/reports/unitree-lifecycle-independent/report.md)、[候选实际CPU结果](usage_assets/reports/unitree-sdk018-candidate/summary.md)。新worker门卫、候选native闭环及fresh629尚未执行。
+后续只读审计检查275个reported completed的550份worker日志，发现10份模拟器段错误且封存SHA完全一致；旧12指令command02也有同样退出故障，说明原监督门卫存在实质漏记。旧批次已停止并完整保留340项原依赖集合的76.77MB本地归档，另逐项证明可由记录的Git提交恢复。[原字节与Git来源](usage_assets/reports/sim2sim-cohort-halt/summary.md)。上游SDK0.1.8已有等待writer结束后再析构的修复；独立候选`caf61487…`离线构建及无GPU导入/API检查通过，原镜像和pins未变。[上游源码与二进制审计](usage_assets/reports/unitree-lifecycle-independent/report.md)、[候选实际CPU结果](usage_assets/reports/unitree-sdk018-candidate/summary.md)。新worker门卫已应用并通过CPU回归；候选native尝试遇到启动错误，退出闭环及fresh629仍待完成。
 
 ```bash
 bash scripts/research/docker.sh sim scripts/research/sim2sim_scene_matrix.py \
@@ -300,3 +300,13 @@ CPU 测试统一在 Docker 中运行，分别保留根目录/训练和 motion ma
 最终归档 **10,858,424,068 字节**、SHA-256 `e6c0483f15242e9da95aaa136e21eb10b746a2e423a5e206f03e174b76d5e4c3` 已完整传输并在云端加载，两端 Config/RootFS 指纹为 `2a43037e2397fac3e343e8d621dd42c41ea7c27da82602789d575fddda112482`。[最终镜像传输核验](usage_assets/reports/cloud-final-image-transfer.json)保留本地/远端镜像 ID；Docker 存储实现导致两端 manifest ID 不同，层内容与配置已独立核对。
 
 最终云端部署也已完成：仍选物理 GPU 1，实际挂载源码树 `0093aa40fbae2bcf219d39ace222e0c4d8a71e305551939a5a1b9c0e40c683ab`（来自 `3439cb7`），包含镜像构建之后的恢复来源检查修复。三套运行环境 doctor 通过。[最终部署](usage_assets/reports/cloud-final-deployment.json)、[最终云端 doctor](usage_assets/reports/cloud-final-runtime.json)。镜像内封存源码 `64ebc5f` 的独立断网证明与这次挂载源码运行分别记录。
+
+原生推理键盘入口已修复监听结束后的`None.start`异常；真实PTY的两订阅队列均收到`] w c o i`，Esc后恢复终端且不再抛异常，应用后的23项CPU检查通过。这不代表原生GUI/策略控制已验收，Esc只结束监听。[完整原始/修复记录](usage_assets/reports/native-keyboard-bootstrap/summary.md)。旧629终态的279项文本复审及全部5个显式失败配置见[最终日志补审计](usage_assets/reports/worker-exit-final-279/report.md)。
+
+本地退出验收修复已应用：父监督现在检查最终两worker退出码，按独立PGID/SID和PID出生时间追踪已知成员；身份未知时拒绝发送信号，清理等待后仍有成员则失败。新schema3计划强制fatal-signal诊断，封存必须绑定双方入口和最终退出三份收据，不能只读body JSON的completed。应用后监督37项加19子用例、矩阵76项、发布34项CPU回归通过；这些检查及真实普通CPU进程组测试尚不代表SDK/DDS物理运行已通过。[监督修复原始证据](usage_assets/reports/worker-exit-supervisor/review.json)、[独立封存审查](usage_assets/reports/worker-exit-sealing-review/review.md)。
+
+发布器对schema3使用与矩阵相同的三收据校验，并保留seal原始SHA到复制阶段，拒绝“校验后、复制前”发生变化的历史文件。34项CPU回归与独立注入复审通过；旧schema2只可生成明确标注未证明正常退出的历史预览，不能发布完整629通过页。[发布复制校验与原失败反例](usage_assets/reports/publisher-schema3-review/review.md)。
+
+候选SDK018的两次隔离启动原始失败均已保留：首次Docker只读挂载点错误，第二次首例加载`holosoma.bridge.unitree`失败，尚无本轮策略rollout和SDK析构通过证据。该错误证明旧340项冻结依赖集合遗漏metadata动态入口与部分父包初始化；历史文件不改，新集合376项、矩阵78项CPU测试通过后，还须实际CPU入口导入再启动下一次原生尝试。[两次启动日志、进程收据、源码和新增测试](usage_assets/reports/sdk018-native-setup/summary.md)。
+
+补齐动态入口后的当前四模块联合CPU回归为172项测试加19个子用例全部通过，未跳过；[本轮命令、精确源码与原始JUnit](usage_assets/reports/worker-exit-integrated/review.json)独立于较早的全仓CPU测试统计。

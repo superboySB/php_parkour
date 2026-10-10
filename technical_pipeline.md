@@ -548,8 +548,8 @@ startup default pose bias同时修改qtarget中心与观测`q−default`基准�
 | 正式训练 | 五教师各 20000 轮、纯学生 10000、混合学生 30000 的顺序 driver 已启动 | 截至本文快照，仍在第一教师；不能确认全部完成 |
 | 云端 PT 回传本地 | iteration 19 pilot 与正式 iteration 500 都真实加载，在 16GiB 卡运行 64env×250step | 模型传输与 Isaac 推理通路通过；两次均 `quality_verified=false` |
 | 逐原始源片段验收 | 296 对输入逐项校验、48 项 CPU 回归、3 次真实独立 Isaac 片段尝试 | teacher500为158策略步，两种student smoke各21步后失败；0片段完成，尚未跑完296源×三策略 |
-| 发布学生的物理 sim2sim | 原生 ONNX、DDS、深度 SHM、PD；平地 12 个有效 command 与 17 场景各一个 OBJ | 17 场景执行完成，但 14 场景出现高度/倾斜阈值事件，不能宣称全场景技能成功 |
-| 全部生成几何的物理扫描 | 固定17场景629配置计划已后台启动；15:12快照177完成、1执行失败、1运行、450待运行 | 每例500策略ticks、恒定forward command；保留原生退出异常，尚未完成629例，不以存活作为课程成功 |
+| 发布学生的物理 sim2sim | 原生 ONNX、DDS、深度 SHM、PD；平地 12 个有效 command 与 17 场景各一个 OBJ | 已有真实轨迹；14场景出现高度/倾斜事件，旧监督未证明所有worker正常退出，command02已发现漏记SIGSEGV |
+| 全部生成几何的物理扫描 | 旧629计划已于15:48停止；原状态279 reported completed、5执行失败、1中断、344未运行 | 已发现10份reported completed日志带SIGSEGV；旧状态不能用于完整验收，修复后须fresh计划重跑 |
 | 实体 G1 | 审计 SDK、映射与相机接口，没有本次真实机器人运行 | 未验证；论文作者的实机成绩不能记成本次结果 |
 
 正式 iteration 500 的同设置短评估记录 **75 次失败重置**，iteration 19 pilot 为 **3971 次**；这是 64 个环境反复终止的累计回合数，不是机器人数量。500 轮模型的四项跟踪误差各有 16000 个有限样本，最长 env0 原片为 3.22s，仍有失败且没有完成整个 course。两个 checkpoint 来自不同训练运行，不能视为同一条逐轮配对实验。详见 [本地 pilot](usage_assets/reports/official-pilot-local-quality/summary.md) 与 [500 轮中间检查点](usage_assets/reports/official-progress-0500-local/summary.md)。
@@ -568,7 +568,7 @@ CPU 测试也保留实际边界：根目录/训练 289 项通过；motion matchi
 
 后续需要等七个正式模型实际训练结束，核验最终 PT/ONNX 与配置/专家来源，再检查长 rollout 和逐源 clip / 场景覆盖。当前顶层 `motion_id=0` 与学生的 expert ID 都不足以证明 296 源片或 629 场景配置已覆盖。真实硬件还需独立完成相机 producer、IMU/外参/默认角核对及实机验收，之后才能宣称此次 real2sim2real 的最后一段已经完成。
 
-全629配置扫描使用发布学生ONNX和各配置的实际OBJ，依赖、模型和1887个输入文件均绑定SHA。两例预检各500策略ticks，其中一例有高度/倾斜阈值事件，原片完整解码通过；长扫描仍在运行。[启动与逐例快照](usage_assets/reports/sim2sim-all-configs-start/summary.md)保留当前状态，不能将运动学生成629组或后台启动回执当作629例物理完成。
+旧629配置扫描使用发布学生ONNX和各配置的实际OBJ，原计划选定的340份依赖、模型和1887个输入文件绑定SHA。两例预检各500策略ticks，其中一例有高度/倾斜阈值事件，原片完整解码通过；旧扫描现已停止。[启动时逐例快照](usage_assets/reports/sim2sim-all-configs-start/summary.md)保留历史状态，不能将运动学生成629组或后台启动回执当作629例物理完成。
 
 low-step配置41的首次attempt仍记为执行失败：推理完成JSON后约53ms出现内核`command_writer`段错误，父进程随后记录worker退出异常，模拟器继续保存完整轨迹和视频，父进程最终exit1。即使两个worker各自有完成JSON，也不能代替整个进程的正常终态；该次没有补写result或伪造通过。具体worker归属缺少旧PID映射，原14个文件与时间线完整保留。[失败取证](usage_assets/reports/sim2sim-worker-failure/report.md)。
 
@@ -584,3 +584,13 @@ low-step配置41的首次attempt仍记为执行失败：推理完成JSON后约53
 - [上述证据的 bytes/SHA 清单](usage_assets/reports/technical-audit/evidence-manifest.json)，以及 [usage.md](usage.md) 中原始训练、视频和浏览器验收记录。
 
 原算法源码审计对应 `79d82bb` 工作树与固定 Holosoma 子模块；之后的GUI保存修复有独立[修改前/后源码](usage_assets/reports/gui-workflows/source-after/manifest.json)与真实控件证据，旧审计的源码和哈希保留。正在云端长训的源码仍为冻结 `3439cb7` 快照，文档同步不会更换它。后续修改配置时应重新检查真实保存 YAML、模型 metadata 和文件内容 SHA，不能用镜像 tag、函数名或旧注释代替这些记录。
+
+当前部署入口还有一项兼容细节：固定版本`sshkeyboard.listen_keyboard()`同步阻塞并返回None，原生监听线程曾在返回后调用`.start/.join`而报错。根目录引导器仅替换该线程的`run`方法，保留键位、队列广播和重复延迟，并核对依赖版本/源码SHA；子模块保持原始提交。真实PTY验证的是事件传递与监听结束，尚不能替代GUI、DDS和机器人控制验收。[修复与原始证据](usage_assets/reports/native-keyboard-bootstrap/summary.md)。
+
+本地退出验收修复已应用：父监督现在检查最终两worker退出码，按独立PGID/SID和PID出生时间追踪已知成员；身份未知时拒绝发送信号，清理等待后仍有成员则失败。新schema3计划强制fatal-signal诊断，封存必须绑定双方入口和最终退出三份收据，不能只读body JSON的completed。应用后监督37项加19子用例、矩阵76项、发布34项CPU回归通过；这些检查及真实普通CPU进程组测试尚不代表SDK/DDS物理运行已通过。[监督修复原始证据](usage_assets/reports/worker-exit-supervisor/review.json)、[独立封存审查](usage_assets/reports/worker-exit-sealing-review/review.md)。
+
+发布器对schema3使用与矩阵相同的三收据校验，并保留seal原始SHA到复制阶段，拒绝“校验后、复制前”发生变化的历史文件。34项CPU回归与独立注入复审通过；旧schema2只可生成明确标注未证明正常退出的历史预览，不能发布完整629通过页。[发布复制校验与原失败反例](usage_assets/reports/publisher-schema3-review/review.md)。
+
+隔离快照的实际启动又暴露依赖集合边界：旧340份没有覆盖metadata动态选择的Unitree bridge和部分父包初始化文件，不能称完整Python导入闭包。两次失败分别是只读挂载点缺失和`holosoma.bridge.unitree`缺失，均未验证SDK/DDS正常退出。当前376份集合保守加入所有bridge Python和父包初始化副作用，新增两项回归后矩阵78项CPU测试通过；仍须先实际导入入口，再以新快照重跑原生闭环。[失败原字节、修复和范围](usage_assets/reports/sdk018-native-setup/summary.md)。
+
+当前四模块联合CPU回归为172项测试加19个子用例全部通过；[精确源码、命令与原始JUnit](usage_assets/reports/worker-exit-integrated/review.json)绑定本轮修复版本。该结果不包含原生SDK/DDS、Isaac重载或fresh629物理运行。

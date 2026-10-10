@@ -17,6 +17,62 @@ from scripts.research import sim2sim_scene_matrix as matrix
 REAL_RUNNING_CHILDREN = matrix.running_children
 
 
+def test_dependency_closure_includes_dynamic_bridges_and_every_parent_initializer():
+    records = matrix.dependencies()
+    by_path = {Path(item["path"]): item for item in records}
+    package_roots = [matrix.ROOT / path for path in (
+        "thirdparty/holosoma/src/holosoma/holosoma",
+        "thirdparty/holosoma/src/holosoma_inference/holosoma_inference", "wbt_training")]
+    bridge = package_roots[0] / "bridge"
+    dynamic = bridge / "unitree/unitree_sdk2py_bridge.py"
+    assert dynamic in by_path
+    assert by_path[dynamic] == matrix.fingerprint(dynamic)
+    assert set(bridge.rglob("*.py")).issubset(by_path)
+    for path in by_path:
+        for package_root in package_roots:
+            if not path.is_relative_to(package_root):
+                continue
+            parent = path.parent
+            while parent.is_relative_to(package_root):
+                initializer = parent / "__init__.py"
+                if initializer.is_file():
+                    assert initializer in by_path
+                    assert by_path[initializer] == matrix.fingerprint(initializer)
+                if parent == package_root:
+                    break
+                parent = parent.parent
+
+
+def test_dependency_parent_initializer_side_effect_imports_are_recursively_scanned(tmp_path, monkeypatch):
+    holosoma = tmp_path / "thirdparty/holosoma/src/holosoma/holosoma"
+    sources = {
+        "scripts/research/sim2sim.py": "import holosoma.hidden.deep.leaf\n",
+        "docker/bin/train-python": "fixture", "docker/bin/inference-python": "fixture", "docker/bin/activate": "fixture",
+        "thirdparty/holosoma/src/holosoma/holosoma/__init__.py": "import wbt_training.root_side_effect\n",
+        "thirdparty/holosoma/src/holosoma/holosoma/bridge/__init__.py": "from . import bridge_side_effect\n",
+        "thirdparty/holosoma/src/holosoma/holosoma/bridge/bridge_side_effect.py": "from wbt_training.nested import leaf\n",
+        "thirdparty/holosoma/src/holosoma/holosoma/bridge/unitree/__init__.py": "from . import unitree_sdk2py_bridge\n",
+        "thirdparty/holosoma/src/holosoma/holosoma/bridge/unitree/unitree_sdk2py_bridge.py": "# only dynamic entry point names this leaf\n",
+        "thirdparty/holosoma/src/holosoma/holosoma/hidden/__init__.py": "from . import parent_side_effect\n",
+        "thirdparty/holosoma/src/holosoma/holosoma/hidden/parent_side_effect.py": "from wbt_training import root_side_effect\n",
+        "thirdparty/holosoma/src/holosoma/holosoma/hidden/deep/__init__.py": "# deep package\n",
+        "thirdparty/holosoma/src/holosoma/holosoma/hidden/deep/leaf.py": "# AST discovered leaf\n",
+        "wbt_training/__init__.py": "from . import root_side_effect\n",
+        "wbt_training/root_side_effect.py": "# root initializer side effect\n",
+        "wbt_training/nested/__init__.py": "from . import initializer_only\n",
+        "wbt_training/nested/leaf.py": "# imported via bridge parent initializer\n",
+        "wbt_training/nested/initializer_only.py": "# no leaf import points here\n",
+    }
+    for relative, content in sources.items():
+        path = tmp_path / relative
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(content)
+    monkeypatch.setattr(matrix, "ROOT", tmp_path)
+    records = {Path(item["path"]): item for item in matrix.dependencies()}
+    assert all(tmp_path / relative in records for relative in sources)
+    assert records[holosoma / "bridge/unitree/unitree_sdk2py_bridge.py"] == matrix.fingerprint(holosoma / "bridge/unitree/unitree_sdk2py_bridge.py")
+
+
 def catalog():
     scenarios = []
     for name in matrix.SCENARIOS:
@@ -70,8 +126,10 @@ def run_fixture(tmp_path, monkeypatch):
     models.mkdir()
     for name in ("depth_backbone.onnx", "student.onnx"):
         (models / name).write_bytes(name.encode())
-    helper = tmp_path / "native-helper.py"
+    helper = tmp_path / "scripts/research/sim2sim.py"
+    helper.parent.mkdir(parents=True)
     helper.write_text("# Frozen native dependency fixture\n")
+    monkeypatch.setattr(matrix, "ROOT", tmp_path)
     source = tmp_path / "source.json"
     source.write_text("{}")
     selections = []
@@ -97,6 +155,46 @@ def run_fixture(tmp_path, monkeypatch):
     return args, plan, helper
 
 
+def native_worker_receipt_fixture(output, plan):
+    """Synthetic wrapper/native-child receipts, never real worker execution."""
+    workers = []
+    entries = []
+    for role, pid, native_pid in (("simulator",1101,1101),("inference",2201,2202)):
+        launch = [plan["worker_interpreters"][role],plan["worker_harness_record"]["path"],"--worker",role,"--output",str(output)]
+        born = pid*10
+        identity = {"pid":pid,"process_group_id":pid,"session_id":pid,"start_time_clock_ticks":born}
+        members = [dict(identity,state="S")]
+        leader = {"pid":pid,"start_time_clock_ticks":born}
+        worker = {"role":role,"launch":launch,"identity_at_spawn":identity,
+            "process_group":{"process_group_id":pid,"session_id":pid,"live_members":members,
+                "leader_identity":leader,"known_members":[dict(leader)],"retired":False,"ownership_lost":False,
+                "ownership_state":"owned","ownership_reason":None,"ownership_verified":True},
+            "returncode":None,"exit_code":None,"signal_number":None,"signal_name":None,"status":"running"}
+        workers.append(worker)
+        native = {"pid":native_pid,"process_group_id":pid,"session_id":pid,"start_time_clock_ticks":born+(native_pid!=pid)}
+        entries.append({"schema_version":1,"role":role,"argv":launch[1:],"process":native,"python_faulthandler":"1"})
+    for entry in entries:
+        matrix.write(output/f"{entry['role']}-process-start.json",entry)
+    events = [{"event":"orchestrator_started","elapsed_seconds":0.,"workers":[]},
+        {"event":"worker_spawned","role":"simulator","elapsed_seconds":.1,"workers":copy.deepcopy(workers[:1])},
+        {"event":"worker_spawned","role":"inference","elapsed_seconds":.2,"workers":copy.deepcopy(workers)}]
+    workers[1]["process_group"]["live_members"].append(dict(entries[1]["process"],state="S"))
+    workers[1]["process_group"]["known_members"].append({key:entries[1]["process"][key] for key in ("pid","start_time_clock_ticks")})
+    for index,entry in enumerate(entries):
+        events.append({"event":"worker_entry_observed","role":entry["role"],"elapsed_seconds":.3+index*.1,
+            "entry_sha256":matrix.digest(output/f"{entry['role']}-process-start.json"),
+            "entry_process":copy.deepcopy(entry["process"]),"workers":copy.deepcopy(workers)})
+    for worker in workers:
+        worker.update(returncode=0,exit_code=0,status="exited")
+        worker["process_group"].update(live_members=[],retired=True,ownership_state="retired_empty")
+    completion = {"event":"workers_loop_complete","elapsed_seconds":10.,"workers":copy.deepcopy(workers)}
+    events += [completion, {"event":"finally_enter","elapsed_seconds":10.1,"workers":copy.deepcopy(workers)},
+        {"event":"finally_wait_complete","elapsed_seconds":10.2,"workers":copy.deepcopy(workers),"unreaped_roles":[],"cleanup_errors":[]}]
+    receipt = {"schema_version":2,"harness_sha256":plan["worker_harness_record"]["sha256"],"python_faulthandler":"1","events":events}
+    matrix.write(output/"worker-processes.json",receipt)
+    return copy.deepcopy(completion)
+
+
 def native_output_fixture(output, plan, selection, ticks=500):
     output.mkdir(parents=True)
     (output / "video").mkdir()
@@ -110,12 +208,13 @@ def native_output_fixture(output, plan, selection, ticks=500):
     result = {"status": "completed", "quality_verified": False, "obstacle_course_completion_verified": False,
         "config": {"models": str(Path(plan["models"][0]["path"]).parent), "model_sha256": plan["model_sha256"],
             "mesh": selection["mesh"], "mesh_sha256": selection["mesh_sha256"], "commands": [selection["command"]],
-            "seed": plan["seed"], "duration": 10., "gl": "egl", "record_policy": False, "course_guide": False},
+            "seed": plan["seed"], "duration": 10., "gl": "egl", "record_policy": False, "course_guide": False,"python_faulthandler":True},
         "simulation": {"status": "completed", "gantry_disabled_during_policy": True, "policy_simulation_seconds": 10.014},
         "inference": {"status": "completed", "ticks": ticks, "control_period_simulation_seconds": .02,
             "lifecycle": {"damping_mode_active": True, "policy_action_disabled": True}},
         "videos": ["video/rollout.mp4"], "video_checks": [{"video": "video/rollout.mp4", "thumbnail": "video/rollout.png",
             "probe": {"format": {"duration": "14.0"}}}], "survival_passed": False}
+    result.update(worker_status_report="worker-processes.json",worker_status_at_completion=native_worker_receipt_fixture(output,plan))
     matrix.write(output / "result.json", result)
 
 
@@ -151,7 +250,8 @@ def test_resume_skips_only_verified_complete_case_then_finishes_subset(run_fixtu
     assert final["quality_verified"] is False and final["heuristic_survival_configurations"] == 0
 
 
-@pytest.mark.parametrize("artifact", ("video/rollout.mp4", "trajectory.csv", "result.json", "case-evidence.json"))
+@pytest.mark.parametrize("artifact", ("video/rollout.mp4", "trajectory.csv", "result.json", "case-evidence.json",
+                                    "worker-processes.json","simulator-process-start.json","inference-process-start.json"))
 def test_resume_refuses_changed_complete_evidence(run_fixture, monkeypatch, artifact):
     args, plan, helper = run_fixture
     fake_child(monkeypatch, plan)
@@ -337,3 +437,119 @@ def test_dependency_list_excludes_motion_gui_and_includes_native_execution():
     assert any(path.endswith("simulator/mujoco/mujoco.py") for path in paths)
     assert any(path.endswith("policies/depth_distillation.py") for path in paths)
     assert not any("/motion_matching/" in path or path.endswith("README.md") for path in paths)
+
+
+def test_schema3_plan_binds_harness_and_every_case_faulthandler(run_fixture):
+    args, plan, helper = run_fixture
+    assert plan["schema_version"] == 3 and plan["python_faulthandler"] is True
+    assert plan["worker_harness_record"] == matrix.fingerprint(helper)
+    assert plan["worker_harness_record"] in plan["dependencies"]
+    assert all("--python-faulthandler" in item["launch"] for item in plan["selections"])
+
+
+@pytest.mark.parametrize("fault", ["legacy","missing_supervisor","missing_entry","nonzero","running","signal",
+    "live_group","unknown_group","cleanup","unreaped","missing_final","duplicate_final","extra_after_final",
+    "completion_snapshot","harness","faulthandler","entry_role","entry_argv","entry_pid","entry_birth",
+    "entry_group","spawn_birth","spawn_launch","child_unobserved","reordered_roles","symlink",
+    "boolean_returncode","missing_signal","duplicate_harness","supervisor_schema","entry_schema",
+    "ownership_false","ownership_unknown","not_retired","ownership_lost","leader_birth","known_native_missing",
+    "entry_sha","entry_snapshot","missing_sim_entry_event","duplicate_entry_event","wrong_harness_path"])
+def test_worker_receipt_gate_rejects_adversarial_shutdown_evidence(run_fixture,fault):
+    args,plan,_ = run_fixture
+    output=args.output/"single"
+    selection=plan["selections"][0]
+    native_output_fixture(output,plan,selection)
+    result=matrix.json.loads((output/"result.json").read_text())
+    receipt=matrix.json.loads((output/"worker-processes.json").read_text())
+    entry=matrix.json.loads((output/"inference-process-start.json").read_text())
+    final=receipt["events"][-1]
+    worker=final["workers"][0]
+    if fault == "legacy": plan["schema_version"] = 2
+    elif fault == "missing_supervisor": (output/"worker-processes.json").unlink()
+    elif fault == "missing_entry": (output/"inference-process-start.json").unlink()
+    elif fault == "nonzero": worker["returncode"] = 1
+    elif fault == "running": worker["status"] = "running"
+    elif fault == "signal": worker["signal_number"] = 11
+    elif fault == "live_group": worker["process_group"]["live_members"] = [{"pid":999}]
+    elif fault == "unknown_group": worker["process_group"]["live_members"] = None
+    elif fault == "cleanup": final["cleanup_errors"] = [{"error":"log-close failed"}]
+    elif fault == "unreaped": final["unreaped_roles"] = ["simulator"]
+    elif fault == "missing_final": receipt["events"].pop()
+    elif fault == "duplicate_final": receipt["events"].append(copy.deepcopy(final))
+    elif fault == "extra_after_final": receipt["events"].append({"event":"unexpected","elapsed_seconds":11.})
+    elif fault == "completion_snapshot": result["worker_status_at_completion"]["workers"][0]["exit_code"] = 9
+    elif fault == "harness": receipt["harness_sha256"] = "f"*64
+    elif fault == "faulthandler": entry["python_faulthandler"] = None
+    elif fault == "entry_role": entry["role"] = "simulator"
+    elif fault == "entry_argv": entry["argv"][-1] = "/different/output"
+    elif fault == "entry_pid": entry["process"]["pid"] = 9999
+    elif fault == "entry_birth": entry["process"]["start_time_clock_ticks"] += 1
+    elif fault == "entry_group": entry["process"]["session_id"] = 7
+    elif fault == "spawn_birth": worker["identity_at_spawn"]["start_time_clock_ticks"] += 1
+    elif fault == "spawn_launch": worker["launch"][0] = "/different/python"
+    elif fault == "child_unobserved": receipt["events"] = [e for e in receipt["events"] if e["event"] != "worker_entry_observed"]
+    elif fault == "reordered_roles": final["workers"].reverse()
+    elif fault == "boolean_returncode": worker["returncode"] = False
+    elif fault == "missing_signal": worker.pop("signal_number")
+    elif fault == "duplicate_harness": plan["dependencies"].append(copy.deepcopy(plan["worker_harness_record"]))
+    elif fault == "supervisor_schema": receipt["schema_version"] = 1
+    elif fault == "entry_schema": entry["schema_version"] = 2
+    elif fault == "ownership_false": worker["process_group"]["ownership_verified"] = False
+    elif fault == "ownership_unknown": worker["process_group"]["ownership_state"] = "unknown"
+    elif fault == "not_retired": worker["process_group"]["retired"] = False
+    elif fault == "ownership_lost": worker["process_group"]["ownership_lost"] = True
+    elif fault == "leader_birth": worker["process_group"]["leader_identity"]["start_time_clock_ticks"] += 1
+    elif fault == "known_native_missing": final["workers"][1]["process_group"]["known_members"] = []
+    elif fault == "entry_sha": next(e for e in receipt["events"] if e["event"] == "worker_entry_observed")["entry_sha256"] = "f"*64
+    elif fault == "entry_snapshot": next(e for e in receipt["events"] if e["event"] == "worker_entry_observed")["entry_process"]["pid"] += 1
+    elif fault == "missing_sim_entry_event": receipt["events"] = [e for e in receipt["events"] if not(e["event"] == "worker_entry_observed" and e["role"] == "simulator")]
+    elif fault == "duplicate_entry_event": receipt["events"].insert(4,copy.deepcopy(receipt["events"][3]))
+    elif fault == "wrong_harness_path": plan["worker_harness_record"]["path"] = "/other/scripts/research/sim2sim.py"
+    else:
+        path=output/"inference-process-start.json";target=output/"alias.json";path.rename(target);path.symlink_to(target)
+    if fault != "missing_supervisor": matrix.write(output/"worker-processes.json",receipt)
+    if fault not in ("missing_entry","symlink"): matrix.write(output/"inference-process-start.json",entry)
+    with pytest.raises((ValueError,KeyError)):
+        matrix.validate_worker_receipts(output,plan,result)
+
+
+def test_retention_requires_three_worker_receipt_hashes(run_fixture,monkeypatch):
+    args,plan,_=run_fixture
+    fake_child(monkeypatch,plan)
+    args.case_limit=1
+    report=matrix.execute(args,plan)
+    attempt=report["selections"][0]["attempts"][0]
+    evidence=matrix.json.loads(Path(attempt["evidence"]["path"]).read_text())
+    assert {Path(item["path"]).name for item in evidence["worker_receipts"]} == {
+        "worker-processes.json","simulator-process-start.json","inference-process-start.json"}
+    assert all(item in evidence["files"] for item in evidence["worker_receipts"])
+    evidence["worker_receipts"] = []
+    matrix.write(Path(attempt["evidence"]["path"]),evidence)
+    attempt["evidence"] = matrix.fingerprint(Path(attempt["evidence"]["path"]))
+    with pytest.raises(ValueError,match="worker receipts"):
+        matrix.verify_completed(attempt,plan,report["selections"][0])
+
+
+def test_worker_receipts_validate_host_mapping_without_rewriting_raw(run_fixture):
+    args,plan,helper=run_fixture
+    native_dir=Path("/outputs/native/one-case")
+    native_harness="/workspace/php_parkour/scripts/research/sim2sim.py"
+    host_dir=args.output/"host-case"
+    native_output_fixture(host_dir,plan,plan["selections"][0])
+    # Model a retained native report accessed through an independent host mount.
+    receipt=json.loads((host_dir/"worker-processes.json").read_text())
+    plan["worker_harness_record"]["path"]=native_harness
+    for event in receipt["events"]:
+        for worker in event.get("workers",[]):
+            worker["launch"][-1]=str(native_dir)
+            worker["launch"][1]=native_harness
+    for role in ("simulator","inference"):
+        path=host_dir/f"{role}-process-start.json";entry=json.loads(path.read_text());entry["argv"][-1]=str(native_dir);entry["argv"][0]=native_harness;matrix.write(path,entry)
+        next(e for e in receipt["events"] if e["event"] == "worker_entry_observed" and e["role"] == role)["entry_sha256"] = matrix.digest(path)
+    result=json.loads((host_dir/"result.json").read_text())
+    result["worker_status_at_completion"]=copy.deepcopy(next(e for e in receipt["events"] if e["event"]=="workers_loop_complete"))
+    matrix.write(host_dir/"worker-processes.json",receipt)
+    before={p.name:p.read_bytes() for p in host_dir.glob("*.json")}
+    mapped={str(native_dir):host_dir,native_harness:helper}
+    records=matrix.validate_worker_receipts(host_dir,plan,result,translate=lambda p: mapped.get(p,p))
+    assert len(records)==3 and before=={p.name:p.read_bytes() for p in host_dir.glob("*.json")}

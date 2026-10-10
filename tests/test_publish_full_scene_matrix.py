@@ -12,6 +12,7 @@ from types import SimpleNamespace
 import pytest
 
 from scripts.research import publish_full_scene_matrix as pub
+from scripts.research import sim2sim_scene_matrix as worker_contract
 
 
 def write(path, value):
@@ -23,10 +24,42 @@ def record(path):
     return {"path": str(path), "bytes": path.stat().st_size, "sha256": pub.digest(path)}
 
 
+def worker_receipts(directory, plan):
+    """Synthetic shutdown observations, never native simulation evidence."""
+    workers = []
+    events = [{"event":"orchestrator_started", "elapsed_seconds":0., "workers":[]}]
+    for ordinal, role in enumerate(("simulator", "inference"), 1):
+        pid = ordinal * 101
+        ident = {"pid":pid, "process_group_id":pid, "session_id":pid, "start_time_clock_ticks":pid * 10}
+        launch = [plan["worker_interpreters"][role], plan["worker_harness_record"]["path"], "--worker", role, "--output", str(directory)]
+        workers.append({"role":role, "launch":launch, "identity_at_spawn":ident,
+            "process_group":{"process_group_id":pid, "session_id":pid, "live_members":[dict(ident,state="S")],
+                "leader_identity":{"pid":pid,"start_time_clock_ticks":pid * 10},
+                "known_members":[{"pid":pid,"start_time_clock_ticks":pid * 10}],
+                "ownership_verified":True,"ownership_state":"owned","ownership_lost":False,"retired":False,"ownership_reason":None},
+            "returncode":None, "exit_code":None, "signal_number":None, "signal_name":None, "status":"running"})
+        events.append({"event":"worker_spawned", "role":role, "elapsed_seconds":ordinal / 10, "workers":copy.deepcopy(workers)})
+        write(directory / f"{role}-process-start.json", {"schema_version":1, "role":role, "argv":launch[1:], "process":ident, "python_faulthandler":"1"})
+    for ordinal, role in enumerate(("simulator", "inference")):
+        path = directory / f"{role}-process-start.json"
+        entry = json.loads(path.read_text())
+        events.append({"event":"worker_entry_observed", "role":role, "elapsed_seconds":.3 + ordinal / 10,
+            "entry_sha256":pub.digest(path), "entry_process":entry["process"], "workers":copy.deepcopy(workers)})
+    for worker in workers:
+        worker["process_group"].update(retired=True,ownership_state="retired_empty")
+        worker.update(returncode=0, exit_code=0, status="exited")
+        worker["process_group"]["live_members"] = []
+    completion = {"event":"workers_loop_complete", "elapsed_seconds":10., "workers":copy.deepcopy(workers)}
+    events += [completion, {"event":"finally_wait_complete", "elapsed_seconds":10.1, "workers":copy.deepcopy(workers), "cleanup_errors":[], "unreaped_roles":[]}]
+    write(directory / "worker-processes.json", {"schema_version":2, "harness_sha256":plan["worker_harness_record"]["sha256"], "python_faulthandler":"1", "events":events})
+    return copy.deepcopy(completion)
+
+
 @pytest.fixture
 def fixture(tmp_path, monkeypatch):
     """Small contract fixture, never evidence of a real physical rollout."""
     monkeypatch.setattr(pub, "ROOT", tmp_path)
+    monkeypatch.setattr(worker_contract, "ROOT", tmp_path)
     monkeypatch.setattr(pub, "SCENARIO_COUNTS", {"random_locomotion": 1, "low_speed_step": 1})
     raw = tmp_path / "raw"
     source = tmp_path / "source.json"; write(source, {"fixture": True})
@@ -35,7 +68,7 @@ def fixture(tmp_path, monkeypatch):
         path = tmp_path / "models" / name; path.parent.mkdir(exist_ok=True); path.write_bytes(b"CPU fixture, not an ONNX model")
         models.append(record(path))
     harness = tmp_path / "sim2sim_scene_matrix.py"; harness.write_text("# CPU fixture, never simulation\n")
-    monkeypatch.setattr(pub, "HARNESS_SHA256", pub.digest(harness))
+    worker_harness = tmp_path / "scripts/research/sim2sim.py"; worker_harness.parent.mkdir(parents=True); worker_harness.write_text("# Synthetic worker source fixture\n")
     rows = []
     for i, scenario in enumerate(pub.SCENARIO_COUNTS):
         files = []
@@ -46,19 +79,20 @@ def fixture(tmp_path, monkeypatch):
         rows.append({"scenario": scenario, "configuration": "fixture-only", "configuration_index": 0, "available_configurations": 1,
                      "case_id": scenario + ":0000:fixture", "source_files": files, "mesh": files[2]["path"], "mesh_sha256": files[2]["sha256"],
                      "command": command, "output": str(output), "launch": ["fixture-python", "sim2sim.py", "--gl", "egl", "--output", str(output)]})
-    plan = {"schema_version": 2, "status": "planned", "all_configurations": True, "planned_configurations": 2, "planned_scenarios": 2,
+    plan = {"schema_version": 3, "status": "planned", "python_faulthandler": True,
+            "worker_harness_record": record(worker_harness), "worker_interpreters": {"simulator":"fixture-train", "inference":"fixture-inference"}, "all_configurations": True, "planned_configurations": 2, "planned_scenarios": 2,
             "seed": 42, "seconds_per_configuration": 10, "image_id": "sha256:" + "a" * 64, "source_matrix": str(source),
-            "source_matrix_sha256": pub.digest(source), "source_matrix_record": record(source), "dependencies": [record(harness)], "models": models,
+            "source_matrix_sha256": pub.digest(source), "source_matrix_record": record(source), "dependencies": [record(harness), record(worker_harness)], "models": models,
             "model_sha256": {Path(r["path"]).name: r["sha256"] for r in models}, "selections": rows,
             "quality_verified": False, "obstacle_course_completion_verified": False}
-    plan["plan_sha256"] = pub.identity(plan); monkeypatch.setattr(pub, "FIXED_PLAN_SHA256", plan["plan_sha256"])
+    plan["plan_sha256"] = pub.identity(plan)
     matrix = copy.deepcopy(plan)
     for i, row in enumerate(matrix["selections"]):
         directory = Path(row["output"]); directory.mkdir(parents=True)
         result = {"status": "completed", "quality_verified": False, "obstacle_course_completion_verified": False,
                   "config": {"model_sha256": plan["model_sha256"], "mesh_sha256": row["mesh_sha256"], "mesh": row["mesh"],
                              "models": str(tmp_path / "models"), "commands": [row["command"]], "seed": 42, "gl": "egl", "duration": 10,
-                             "record_policy": False, "course_guide": False},
+                             "record_policy": False, "course_guide": False, "python_faulthandler": True},
                   "simulation": {"status": "completed", "gantry_disabled_during_policy": True, "policy_simulation_seconds": 10.01,
                                  "fall_detected": bool(i), "minimum_pelvis_height_m": .1 if i else .7, "minimum_base_up_z": -.2 if i else 1,
                                  "final_base_up_z": 1, "path_length_xy_m": 1, "final_position_xyz_m": [1, 0, .7]},
@@ -67,6 +101,7 @@ def fixture(tmp_path, monkeypatch):
                   "survival_passed": not bool(i), "videos": ["video/fixture.mp4"],
                   "video_checks": [{"video": "video/fixture.mp4", "thumbnail": "video/fixture.png",
                                     "probe": {"format": {"duration": "13"}, "streams": [{"width": 2, "height": 2}]}}]}
+        result.update(worker_status_report="worker-processes.json", worker_status_at_completion=worker_receipts(directory, plan))
         write(directory / "result.json", result)
         with (directory / "trajectory.csv").open("w", newline="") as stream:
             writer = csv.writer(stream); writer.writerow(["policy_seconds", "x_m", "y_m", "pelvis_z_m", "base_up_z", "gantry_enabled", "base_yaw_rad"])
@@ -78,7 +113,8 @@ def fixture(tmp_path, monkeypatch):
             "case_id": row["case_id"], "source_files": row["source_files"], "launch": row["launch"]}
         evidence = {"case_input": case_input, "files": [record(p) for p in sorted(directory.rglob("*")) if p.is_file()],
                     "execution": {"output": str(directory), "launch": row["launch"], "log": record(log), "returncode": 0},
-                    "result_sha256": pub.digest(directory / "result.json"), "expected_policy_ticks": 500}
+                    "result_sha256": pub.digest(directory / "result.json"), "expected_policy_ticks": 500,
+                    "worker_receipts": [record(directory / name) for name in ("worker-processes.json", "simulator-process-start.json", "inference-process-start.json")]}
         write(directory / "case-evidence.json", evidence)
         row.update(status="completed", returncode=0, result=result, result_report=str(directory / "result.json"), attempts=[{
             "number": 1, "status": "completed", "returncode": 0, "output": str(directory), "launch": row["launch"], "log": record(log),
@@ -87,11 +123,11 @@ def fixture(tmp_path, monkeypatch):
     wrapper = tmp_path / "driver.py"; wrapper.write_text("# CPU receipt fixture\n")
     launch = {"launcher_sha256": pub.digest(wrapper), "launch_exit_code": 0, "image_id": plan["image_id"]}
     receipt = {"status": "completed", "returncode": 0, "completion_verified": True, "completed_configurations": 2, "finished_utc": "fixture-terminal",
-               "quality_verified": False, "image_id": plan["image_id"], "harness_sha256": pub.HARNESS_SHA256,
+               "quality_verified": False, "image_id": plan["image_id"], "harness_sha256": pub.digest(harness),
                "command": ["fixture-python", str(harness), "--all-configs", "--resume", "--matrix", str(source), "--models", str(tmp_path / "models"),
                            "--image-id", plan["image_id"], "--seconds", "10", "--output", str(raw)]}
     args = SimpleNamespace(plan=raw / "plan.json", matrix=raw / "matrix.json", driver_receipt=tmp_path / "host/receipt.json",
-                           driver_launch=tmp_path / "host/launch.json", driver_wrapper=wrapper, output=tmp_path / "publication", preview_case_count=0)
+                           driver_launch=tmp_path / "host/launch.json", driver_wrapper=wrapper, output=tmp_path / "publication", preview_case_count=0, expected_plan_sha256=plan["plan_sha256"], expected_harness_sha256=pub.digest(harness))
     def save():
         write(args.plan, plan); write(args.matrix, matrix); receipt["matrix_sha256"] = pub.digest(args.matrix)
         write(args.driver_receipt, receipt); write(args.driver_launch, launch)
@@ -100,7 +136,7 @@ def fixture(tmp_path, monkeypatch):
 
 
 def validate(f):
-    return pub.validate_all(f.plan, f.matrix, f.receipt, f.launch, f.args.driver_wrapper, pub.digest(f.args.matrix))
+    return pub.validate_all(f.plan, f.matrix, f.receipt, f.launch, f.args.driver_wrapper, pub.digest(f.args.matrix), expected_plan=f.args.expected_plan_sha256, expected_harness=f.args.expected_harness_sha256)
 
 
 def reseal(f, index=0):
@@ -200,7 +236,12 @@ def add_historical_attempt(f, sealed=True):
     latest = copy.deepcopy(original); latest.update(number=2, output=str(new))
     latest["launch"][-1] = str(new)
     evidence_path = new / "case-evidence.json"; evidence = json.loads(evidence_path.read_text())
-    for r in evidence["files"]: r["path"] = str(new / Path(r["path"]).relative_to(base))
+    row["result"]["worker_status_at_completion"] = worker_receipts(new, f.plan)
+    write(new / "result.json", row["result"])
+    evidence["files"] = [record(p) for p in sorted(new.rglob("*")) if p.is_file() and p != evidence_path]
+    evidence["result_sha256"] = pub.digest(new / "result.json")
+    evidence["worker_receipts"] = [record(new / name) for name in
+        ("worker-processes.json", "simulator-process-start.json", "inference-process-start.json")]
     evidence["execution"].update(output=str(new), launch=latest["launch"])
     write(evidence_path, evidence); latest["evidence"] = record(evidence_path)
     original["status"] = "execution_failed"  # e.g. an interrupted verification receipt; its seal is still checked.
@@ -231,3 +272,68 @@ def test_unrecorded_retry_directory_is_refused(fixture):
     base = add_historical_attempt(fixture)
     unknown = base / "attempt-0099"; unknown.mkdir(); (unknown / "keep.log").write_text("Unlisted history")
     with pytest.raises(ValueError, match="Unrecorded attempt"): validate(fixture)
+
+
+@pytest.mark.parametrize('fault', ['nonzero','unknown_group','cleanup','entry','missing_fingerprint','forged_fingerprint'])
+def test_resealed_worker_exit_or_receipt_failure_cannot_publish(fixture, fault):
+    row = fixture.matrix['selections'][0]; directory = Path(row['output'])
+    path = directory / 'worker-processes.json'; receipt = json.loads(path.read_text())
+    if fault == 'nonzero': receipt['events'][-1]['workers'][0]['returncode'] = 1
+    elif fault == 'unknown_group': receipt['events'][-1]['workers'][0]['process_group']['live_members'] = None
+    elif fault == 'cleanup': receipt['events'][-1]['cleanup_errors'] = [{'error':'synthetic cleanup failure'}]
+    elif fault == 'entry':
+        entry_path = directory / 'inference-process-start.json'; entry = json.loads(entry_path.read_text())
+        entry['process']['start_time_clock_ticks'] += 1; write(entry_path, entry)
+    write(path, receipt)
+    reseal(fixture)
+    seal_path = Path(row['attempts'][-1]['evidence']['path']); seal = json.loads(seal_path.read_text())
+    seal['worker_receipts'] = [record(directory / name) for name in
+        ('worker-processes.json','simulator-process-start.json','inference-process-start.json')]
+    if fault == 'missing_fingerprint': seal['worker_receipts'] = []
+    elif fault == 'forged_fingerprint': seal['worker_receipts'][0]['sha256'] = '0' * 64
+    write(seal_path, seal); row['attempts'][-1]['evidence'] = record(seal_path); fixture.save()
+    with pytest.raises(ValueError, match='worker receipts|Worker process receipt'):
+        validate(fixture)
+
+
+@pytest.mark.parametrize('field', ['expected_plan_sha256','expected_harness_sha256'])
+def test_explicit_unexpected_cohort_hash_refuses_publication(fixture, field):
+    setattr(fixture.args, field, '0' * 64)
+    with pytest.raises(ValueError, match='plan identity|harness'):
+        pub.publish(fixture.args)
+    assert not fixture.args.output.exists()
+
+
+def test_legacy_plan_can_only_produce_explicit_unverified_history_preview(fixture):
+    fixture.plan['schema_version'] = 2
+    fixture.plan.pop('plan_sha256'); fixture.plan['plan_sha256'] = pub.identity(fixture.plan)
+    fixture.args.expected_plan_sha256 = fixture.plan['plan_sha256']
+    fixture.matrix['schema_version'] = 2; fixture.matrix['plan_sha256'] = fixture.plan['plan_sha256']
+    for row in fixture.matrix['selections']:
+        path = Path(row['attempts'][0]['evidence']['path']); evidence = json.loads(path.read_text())
+        evidence['case_input']['plan_sha256'] = fixture.plan['plan_sha256']; write(path, evidence)
+        row['attempts'][0]['evidence'] = record(path)
+    fixture.save()
+    with pytest.raises(ValueError, match='fixed 17-scenario'):
+        pub.publish(fixture.args)
+    fixture.args.preview_case_count = 2; fixture.args.output = pub.ROOT / 'outputs/research/legacy-preview'
+    result = pub.publish(fixture.args)
+    assert result['legacy_normal_exit_unverified'] is True and result['configuration_coverage_complete'] is False
+    assert '不能作为通过验收' in (fixture.args.output / 'playback.html').read_text()
+
+
+def test_file_changed_after_seal_verification_is_rejected_at_copy(fixture, monkeypatch):
+    base = add_historical_attempt(fixture)
+    target = base / 'video/fixture.mp4'
+    original = pub.check_record
+    injected = []
+    def check_then_mutate(record_value):
+        path = original(record_value)
+        if path == target and not injected:
+            injected.append(True)
+            target.write_bytes(b'Changed after verified seal: synthetic CPU fixture only')
+        return path
+    monkeypatch.setattr(pub, 'check_record', check_then_mutate)
+    with pytest.raises(ValueError, match='changed before copy'):
+        pub.publish(fixture.args)
+    assert injected and not fixture.args.output.exists()

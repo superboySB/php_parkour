@@ -21,7 +21,8 @@ print(json.dumps(dict(python=sys.version, executable=sys.executable,
     torch_cuda=torch.version.cuda, cuda_available=torch.cuda.is_available(),
     cuda_devices=torch.cuda.device_count(), holosoma=holosoma.__file__,
     gpu=torch.cuda.get_device_name(0) if torch.cuda.is_available() else None,
-    php=wbt_training.__file__, unitree_sdk=unitree_interface.__file__)))
+    php=wbt_training.__file__, unitree_sdk=unitree_interface.__file__,
+    unitree_sdk_version=md.version('far-unitree-sdk'))))
 """,
     "motion": """
 import json, sys, numpy, scipy, mujoco, motion_matching, tkinter
@@ -30,12 +31,13 @@ print(json.dumps(dict(python=sys.version, executable=sys.executable,
     motion_matching=motion_matching.__file__, tkinter=tkinter.TkVersion)))
 """,
     "inference": """
-import json, sys, numpy, onnxruntime, pinocchio, holosoma_inference, unitree_interface
+import importlib.metadata as md, json, sys, numpy, onnxruntime, pinocchio, holosoma_inference, unitree_interface
 from holosoma_inference.policies.depth_distillation import DepthDistillationPolicy
 print(json.dumps(dict(python=sys.version, executable=sys.executable,
     numpy=numpy.__version__, pinocchio=pinocchio.__version__,
     onnxruntime=onnxruntime.__version__, providers=onnxruntime.get_available_providers(),
-    inference=holosoma_inference.__file__, unitree_sdk=unitree_interface.__file__)))
+    inference=holosoma_inference.__file__, unitree_sdk=unitree_interface.__file__,
+    unitree_sdk_version=md.version('far-unitree-sdk'))))
 """,
 }
 
