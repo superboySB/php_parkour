@@ -491,3 +491,5 @@ python3 -B usage_assets/reports/fresh629-publication-preparation/adapter/publish
 上述三个准备/方案包在出版前另经[94文件Git字节独立核对](usage_assets/reports/fresh629-publication-package-independent-review/summary.md)，原始清单、两次waiting和汇总失败均吻合。该审查绑定追加本链接之前的版本，不代表训练、完整629或云端接入完成。
 
 [完整功能覆盖清单](usage_assets/reports/final-function-coverage-ledger/index.md)逐项对应29项要求及已有证据，列出8个preset、17场景、29技能入口和五组有序训练数据。它封存了`b5095ba`版本的六份声明文档，仅为只读范围核对。复查新增两组实际验收缺口：完整命名方向键及MuJoCo窗口Backspace重置；teacher、pure student、finetune student从原生PT恢复优化器后继续学习。既有w键GUI、API方向扫描、模拟训练子进程的恢复检查及eval/export加载PT都不能关闭这两组缺口。补验将使用独立输出，等待当前629完整CPU终态、原容器停止及同一GPU锁释放后执行；现在尚无补验通过结论。
+
+[全键盘与Backspace补验准备包](usage_assets/reports/native-keyboard-reset-allkeys-preparation/index.md)已封存46项CPU控制检查、新cohort计划及真实Docker导入/配置解析收据；[原生续训补验准备包](usage_assets/reports/native-resume-acceptance-preparation/index.md)封存33项最终CPU检查、真实100段locomotion预处理、既有PT优化器结构核对和18步执行argv。两包都只证明准备状态；恢复外部源码/模型须遵守包内映射与SHA，不能直接启动缺少依赖的归档副本。真实补验仍等待现629正常退出和GPU释放，不需要在线账户。

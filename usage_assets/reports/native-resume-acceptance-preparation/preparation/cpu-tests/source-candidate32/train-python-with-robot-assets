@@ -1,0 +1,47 @@
+#!/usr/bin/env python3
+"""Frozen transport: append one public asset flag; never patch native learning."""
+import datetime as dt
+import json
+import os
+from pathlib import Path
+import sys
+import time
+from resume_evidence import (ENV_KEYS,LABELS,OUTPUT,load_contract,verify_sources,
+                             robot_contract,require,write_new,pipeline_argv)
+
+
+def forwarded(argv, asset_root):
+    if argv[:2] != ['-m','wbt_training.train_agent']:
+        return list(argv)
+    require('--robot.asset.asset-root' not in argv,'Ambiguous asset override')
+    return [*argv,'--robot.asset.asset-root',asset_root]
+
+
+def main():
+    contract=load_contract();verify_sources(contract)
+    before=sys.argv[1:];native=before[:2]==['-m','wbt_training.train_agent']
+    after=forwarded(before,contract['runtime_root'])
+    if native:
+        # A skip regression cannot accidentally start native training on a GPU.
+        if os.environ.get('PHP_RESUME_SKIP_ONLY')=='1':
+            raise RuntimeError('Skip-only command attempted native training')
+        robot=robot_contract();stage=os.environ.get('PHP_RESUME_STAGE_ID')
+        label=before[before.index('--training.name')+1]
+        require(label in LABELS and stage in (label+'-baseline-target2',label+'-resume-target4'), 'Unknown root-operated stage')
+        logical=json.loads(os.environ['PHP_RESUME_LOGICAL_COMMAND_JSON'])
+        resumed=stage.endswith('-resume-target4')
+        require(logical==pipeline_argv(label,4 if resumed else 2,resumed),'Original pipeline argv differs from fixed stage')
+        row={'schema_version':1,'created_utc':dt.datetime.now(dt.timezone.utc).isoformat(),'stage':stage,
+             'original_pipeline_argv':logical,'python_argv_before_transport':before,
+             'actual_exec_argv':['/opt/php/bin/train-python',*after],
+             'environment':{key:os.environ[key] for key in ENV_KEYS if key in os.environ},
+             'pid':os.getpid(),'pgid':os.getpgid(0),'sid':os.getsid(0),
+             'start_time_clock_ticks':Path('/proc/self/stat').read_text().rsplit(')',1)[1].split()[19],
+             'source_manifest':contract['source_manifest'],'used_source_fingerprints':contract['used_sources'],
+             'control_files':contract['control_files'],'robot_asset_manifest':robot['manifest'],
+             'scope':'Recorded immediately before real exec; receipt alone is not completion or proof of load.'}
+        write_new(OUTPUT/'exec-receipts'/f'{stage}-{time.time_ns()}.json',row)
+    os.execv('/opt/php/bin/train-python',['/opt/php/bin/train-python',*after])
+
+
+if __name__=='__main__':main()

@@ -1,0 +1,176 @@
+{
+  "scope": "CPU fixtures and an ordinary stdlib PTY child only; no Xserver/GUI/SDK objects/DDS/native/GPU",
+  "started_unix": 1791635298.5497575,
+  "endpoint": {
+    "context": "default",
+    "endpoint": "unix:///var/run/docker.sock"
+  },
+  "source_before": {
+    "check_recordings.py": {
+      "sha256": "f1e63d70d8b32fdf9a6b5e457f1d12334b0c269a67583e94f661e755fe71cd28",
+      "bytes": 4185
+    },
+    "common.py": {
+      "sha256": "170600fd7b4e6d8b8170f923bd82ff559ad55ac0a67eb4fb0f9b98fbec3d00d1",
+      "bytes": 4011
+    },
+    "container_runner.py": {
+      "sha256": "8de10c3f18f2009db5b1e38a3da69c2af41f8b6e0df022821ee61e6090162df5",
+      "bytes": 29181
+    },
+    "cpu_preflight.py": {
+      "sha256": "beb0d8e9d26338ae99404af34782fb3530f8ca92321ee34002908d440e488e1a",
+      "bytes": 5240
+    },
+    "host_observer.py": {
+      "sha256": "425178b1750f09214f489994e1f276b712f2b6d70439e693ef67a63f26b6c4c4",
+      "bytes": 3301
+    },
+    "host_runner.py": {
+      "sha256": "efb07570fb6ddd90f1e0a3469ea54fe010d75af30ae53736da5467e57d5914be",
+      "bytes": 30921
+    },
+    "observe_native.py": {
+      "sha256": "ddc668421cb6d81058b99981f497b80ef13745671540ac187a40d261cfc8ce67",
+      "bytes": 12668
+    },
+    "private_x11_probe.py": {
+      "sha256": "d4c3c710fccd5869c3dcf30613f5cede59df8db22ca6334876e98d76565b169e",
+      "bytes": 1703
+    },
+    "reset_checks.py": {
+      "sha256": "11acf7f4a4b75d74afc69a1984031e9b3c04fa0b1eb7274d0916bafe36680efe",
+      "bytes": 3122
+    },
+    "run_cpu_candidate.py": {
+      "sha256": "2c264faf6e6bd2994343b3b05cc02a7013368512c5f325647149da937c10466a",
+      "bytes": 4164
+    },
+    "run_cpu_tests.py": {
+      "sha256": "66dc79f93422d0654745b4adc902aeafd892f9ed19cf87e9b4784e49f9df7df3",
+      "bytes": 2979
+    },
+    "test_reset_keys.py": {
+      "sha256": "08b3fc921f1e5a05069df4ff5374df05ed7a3f126c0dfc731a8bccd87f0ee879",
+      "bytes": 15807
+    },
+    "test_runner.py": {
+      "sha256": "e9e7880edd3209e4661d61685b56a03fa75f2675fd4266c9fda8dbb5e95135de",
+      "bytes": 20696
+    },
+    "x11_owned.py": {
+      "sha256": "b0063e04f117863dea09ec6cfc967a3beda5577b10de50b688c842e8ce142917",
+      "bytes": 6960
+    }
+  },
+  "image_id": "sha256:2be18521015b2a84ef7a4442af9a94ef041a19feb9ce385ae15424b1dc158d8f",
+  "status": "passed",
+  "create_argv": [
+    "docker",
+    "create",
+    "--name",
+    "php-reset-allkeys-cpu-f7ca2b91ebf0c117",
+    "--runtime",
+    "runc",
+    "--network",
+    "none",
+    "--ipc",
+    "private",
+    "--init",
+    "--shm-size",
+    "1g",
+    "--workdir",
+    "/workspace/php_parkour",
+    "--entrypoint",
+    "/bin/bash",
+    "--env",
+    "CUDA_VISIBLE_DEVICES=",
+    "--env",
+    "NVIDIA_VISIBLE_DEVICES=void",
+    "--env",
+    "PYTHONDONTWRITEBYTECODE=1",
+    "--env",
+    "WANDB_MODE=disabled",
+    "--mount",
+    "type=bind,src=/home/dzp/projects/php_parkour/outputs/research/sdk018-canonical-build-6cb2ae2/context,dst=/workspace/php_parkour,readonly",
+    "--mount",
+    "type=bind,src=/home/dzp/projects/php_parkour/outputs/research/native-keyboard-reset-allkeys-preparation-01,dst=/controls,readonly",
+    "--mount",
+    "type=bind,src=/home/dzp/projects/php_parkour/outputs/research/native-keyboard-reset-allkeys-preparation-01/cpu-candidate-02,dst=/evidence",
+    "sha256:2be18521015b2a84ef7a4442af9a94ef041a19feb9ce385ae15424b1dc158d8f",
+    "-lc",
+    "exec sleep infinity"
+  ],
+  "container_id": "931ecd7341b29ad50653db4e728080e2a494f62912d901d9063d711f788a6f89",
+  "test_argv": [
+    "docker",
+    "exec",
+    "931ecd7341b29ad50653db4e728080e2a494f62912d901d9063d711f788a6f89",
+    "/opt/php/bin/inference-python",
+    "/controls/run_cpu_tests.py",
+    "--output",
+    "/evidence/tests"
+  ],
+  "returncode": 0,
+  "running_after_stop": false,
+  "own_container_removed": true,
+  "source_after": {
+    "check_recordings.py": {
+      "sha256": "f1e63d70d8b32fdf9a6b5e457f1d12334b0c269a67583e94f661e755fe71cd28",
+      "bytes": 4185
+    },
+    "common.py": {
+      "sha256": "170600fd7b4e6d8b8170f923bd82ff559ad55ac0a67eb4fb0f9b98fbec3d00d1",
+      "bytes": 4011
+    },
+    "container_runner.py": {
+      "sha256": "8de10c3f18f2009db5b1e38a3da69c2af41f8b6e0df022821ee61e6090162df5",
+      "bytes": 29181
+    },
+    "cpu_preflight.py": {
+      "sha256": "beb0d8e9d26338ae99404af34782fb3530f8ca92321ee34002908d440e488e1a",
+      "bytes": 5240
+    },
+    "host_observer.py": {
+      "sha256": "425178b1750f09214f489994e1f276b712f2b6d70439e693ef67a63f26b6c4c4",
+      "bytes": 3301
+    },
+    "host_runner.py": {
+      "sha256": "efb07570fb6ddd90f1e0a3469ea54fe010d75af30ae53736da5467e57d5914be",
+      "bytes": 30921
+    },
+    "observe_native.py": {
+      "sha256": "ddc668421cb6d81058b99981f497b80ef13745671540ac187a40d261cfc8ce67",
+      "bytes": 12668
+    },
+    "private_x11_probe.py": {
+      "sha256": "d4c3c710fccd5869c3dcf30613f5cede59df8db22ca6334876e98d76565b169e",
+      "bytes": 1703
+    },
+    "reset_checks.py": {
+      "sha256": "11acf7f4a4b75d74afc69a1984031e9b3c04fa0b1eb7274d0916bafe36680efe",
+      "bytes": 3122
+    },
+    "run_cpu_candidate.py": {
+      "sha256": "2c264faf6e6bd2994343b3b05cc02a7013368512c5f325647149da937c10466a",
+      "bytes": 4164
+    },
+    "run_cpu_tests.py": {
+      "sha256": "66dc79f93422d0654745b4adc902aeafd892f9ed19cf87e9b4784e49f9df7df3",
+      "bytes": 2979
+    },
+    "test_reset_keys.py": {
+      "sha256": "08b3fc921f1e5a05069df4ff5374df05ed7a3f126c0dfc731a8bccd87f0ee879",
+      "bytes": 15807
+    },
+    "test_runner.py": {
+      "sha256": "e9e7880edd3209e4661d61685b56a03fa75f2675fd4266c9fda8dbb5e95135de",
+      "bytes": 20696
+    },
+    "x11_owned.py": {
+      "sha256": "b0063e04f117863dea09ec6cfc967a3beda5577b10de50b688c842e8ce142917",
+      "bytes": 6960
+    }
+  },
+  "finished_unix": 1791635298.9935057
+}

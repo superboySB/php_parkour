@@ -1,0 +1,23 @@
+# 原生续训补验：准备归档
+
+本包仅发布冻结准备与真实 CPU 证据，原生 resume 缺口仍未关闭。教师、pure、finetune 的六次真实 baseline/resume 尚未执行；无 GPU 训练、收敛、正式五专家日程或真机成功声明。
+
+入口为[原准备说明](preparation/README.md)、[最终 readiness](preparation/readiness.json)、[18 条 root 命令数据](preparation/root-commands.json)、[冻结 contract](preparation/control/contract.json)及[原内层 manifest](preparation/preparation-manifest.json)。原72件/6,230,177B全部保持原字节；外层另纳入原manifest与[控制面最终独立审查](independent-controls-review/review.json)及[其摘要](independent-controls-review/summary.md)。完整来源/复制SHA见[发布清单](publication-manifest.json)。
+
+当前冻结 helper `resume_evidence.py` SHA为 `41133f5be5900ebd3ffc291af670c1a89ff26889ad5d4de07106b167cf9df6a0`，adapter为 `1e062cbd585681fd28febf3d302370428c60b697cd861460c1edf8c6b8045f45`。最终 CPU 为[33/33](preparation/cpu-tests/tests-frozen.xml)，0失败/错误/跳过，1.05s；[实际 launch](preparation/cpu-tests/frozen-launch.json)保留精确runc/network-none/GPU-hidden argv、真实退出0和控制文件前后SHA。[真实 CPU preflight](preparation/evidence/cpu-preflight.json)核3298源并解析三preset，public asset-root只改一个字段；离线预处理全部100个公开locomotion片段、一个terrain variant、seed42，未实例化算法/仿真或初始化CUDA。报告中的临时processed路径仅属已结束CPU容器，不作为以后native输入。
+
+历史[27项](preparation/cpu-tests/tests-initial.xml)、[29项](preparation/cpu-tests/tests-final.xml)、[30项](preparation/cpu-tests/tests-verified.xml)、[31项](preparation/cpu-tests/tests-prepared.xml)、[32项](preparation/cpu-tests/tests-ready.xml)及其当时控制源/日志/launch原件均保留，不与最终33项累计。它们验证控制面拒绝条件和CPU准备，不是实际恢复训练。既有[真实 optimizer schema](preparation/cpu-tests/actual-existing-optimizer-schema.json)及[native默认load的另一次CPU观察](preparation/cpu-tests/actual-existing-optimizer-schema-native-default.json)来自已存在五专家smoke PT，教师40/pure16/fine16是既有baseline计数；它们没有证明本次单专家resume。原smoke PT未打包，复跑这些schema观察须取回JSON绑定的准确路径/SHA，不能用同名新PT代替。
+
+[原科学审查](preparation/independent-scientific-review/review.json)与[摘要](preparation/independent-scientific-review/summary.md)保留了旧设计中mixed std状态可选这一问题。当前[protocol-correction](preparation/protocol-correction.json)、真实CPU schema及严格helper已要求mixed std state16→24→40、LR0和权重不变；旧审查原文未改写。控制面审查也保留草稿HSSIM activation环境和stdout日志两个阻塞及其修正：父pipeline核adapter，native activation后核canonical train-python；原生load/shutdown标记读原train.log DEBUG sink并归档。最终审查未决must-fix为0，真实native仍pending。
+
+原contract的“Only CPU preparation authorized”记录准备代理的执行范围与当时状态；用户已授权root开展实际训练和补验，不需要新增用户审批。root authorization是内部operator门卫。**root-commands只是数据，没有自动GPU生命周期controller**：root须等待现fresh629完整正常结束、driver/observer/CPU最终0、1258worker与629视频全片decode、原root session54334最终exit0、两actual GPU/CPU CID均停止且无native残留，持固定UUID共享mutex并核GPU compute idle后才串行启动新所属CID。已arm waiter若先持锁，应等待，不抢占或更改它。root自行保留每次真实exec退出码/stdout/stderr、容器inspect/top、native namespace→host出生身份，异常只停自己的CID，确认容器停止且无残留后再解锁；本包未声称这些未来门卫已实际完成。
+
+Root另做了[真实安装wrapper只读核查](root-wrapper-inspection/inspection.json)，保存[train-python原字节](root-wrapper-inspection/train-python.raw)与[Isaac python.sh原字节](root-wrapper-inspection/isaac-python.sh.raw)：同一CID/image/StartedAt前后一致、两次cat返回0，未启动native/GPU。train-python exec进入Isaac bash，但Isaac launcher另起Kit Python子进程；未来必须在存活时记录namespace→host的父子PID及出生身份，不能把adapter pre-exec wrapper PID当作Kit Python PID。此证据是读取已安装wrapper，不是新的GPU controller或实际resume。
+
+恢复前提是canonical SDK018镜像 `sha256:2be18521015b2a84ef7a4442af9a94ef041a19feb9ce385ae15424b1dc158d8f`、固定GPU `GPU-1803972d-e774-ee96-e6f6-1ee1ce47bb25` 和原路径下准确外部输入。先将本包 `preparation/` 相对文件映射回 `outputs/research/native-resume-acceptance-preparation-01/`，只创建缺失目标；已有文件必须字节/SHA完全一致，不覆盖不同内容、alive依赖或旧attempt。adapter须保持原可执行权限。不要运行历史candidate controls或混用其contract；最终只以readiness和当前control为准。
+
+外部完整source按[3298文件清单](preparation/source-manifest.json)每条 `source`→`path`、relative_path、bytes/SHA恢复，`control/source-manifest.json`是同一原字节清单。它基于 `source-coverage-ro-assets-pilot-preparation-01/source`，不是GUI的canonical+bytecode计数；唯一显式overlay为train_pipeline.py `5f85596f`→`29ec49da`，以清单记录的准确完整SHA恢复。371个原生Python文件未改。原[201 registry输入](preparation/registry-inputs.json)包含README及100motion/100terrain，须在原assets路径逐项一致。
+
+[35原始robot文件清单](preparation/evidence/runtime-robot-assets-manifest.json)与[asset contract](preparation/evidence/runtime-robot-assets-contract.json)记录URDF/OBJ/STL的源/副本SHA及独立RW generated规则。恢复原始source对应robot文件，再按contract恢复 `run-output-final-frozen/runtime-robot-assets/robots`，不能只放JSON冒充35个文件。归档 `evidence/cpu-preflight.json`、`evidence/runtime-robot-assets-contract.json`、`evidence/runtime-robot-assets-manifest.json`分别对应原final输出下的 `cpu-preflight.json`、`runtime-robot-assets-contract.json`、`runtime-robot-assets/manifest.json`；复制其历史原件时同样只能缺失或完全一致。大source、35资产正文、模型PT/ONNX、cache、生成USD与未来native输出都没有装入本小包。
+
+下一步依原README和root命令，单locomotion教师baseline2→target4后固定iter3教师SHA，再做两学生各自2→4；目标是验证原生model/optimizer/index继续训练与skip不启动native。它不恢复环境/RNG/课程/采样历史的逐位连续性，不替代五专家正式训练、cloud888/final58或技能质量验收。

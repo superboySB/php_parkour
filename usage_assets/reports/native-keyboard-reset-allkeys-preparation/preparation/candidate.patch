@@ -1,0 +1,911 @@
+--- source-before/check_recordings.py
++++ check_recordings.py
+@@ -5,6 +5,16 @@
+ import hashlib
+ import json
+ from pathlib import Path
++
++
++def check_allkeys(path: Path, minimum: int = 10) -> dict:
++    result = check(path, 1)
++    counts = result['command_frame_counts']
++    if any(counts.get(str(i), 0) < minimum for i in range(12)) or any(counts.get(str(i), 0) for i in range(12, 15)):
++        raise ValueError('Actual native recording must include every deployed label0..11 at least10times and no reserved labels')
++    result['all_deployed_labels_present'] = list(range(12))
++    result['minimum_actual_frames_per_label'] = minimum
++    return result
+ 
+ 
+ def check(path: Path, expected_code: int) -> dict:
+--- source-before/common.py
++++ common.py
+@@ -6,7 +6,10 @@
+ import os
+ from pathlib import Path
+ import subprocess
++import sys
+ import time
++
++sys.dont_write_bytecode = True
+ 
+ HARNESS_SHA = 'd9f958830bfb887b18239ee25a2306ddf1c88201bc1415571e6b6665263cd873'
+ 
+--- source-before/container_runner.py
++++ container_runner.py
+@@ -17,6 +17,7 @@
+ 
+ from common import (HARNESS_SHA, birth_group, cleanup_group, fingerprint, identity, load,
+                     sha, signal_native, verify_files, write)
++from reset_checks import LOW, HIGH, MIN_LABEL_TICKS, onehot_matches, validate_reset, validate_shutdown
+ 
+ 
+ def controlling_tty():
+@@ -71,6 +72,7 @@
+         if sha('/workspace/php_parkour/scripts/research/sim2sim.py') != HARNESS_SHA:
+             raise ValueError('Reviewed birth-identity supervisor changed')
+         self.workers, self.events, self.cleanup, self.errors = {}, [], [], []
++        self.normal_shutdown = {}
+         self.root = self.display = None
+ 
+     def initialize(self):
+@@ -216,23 +218,99 @@
+         self.record('xtest_key_up_requested', keysym=keysym, target_xid=target)
+         self.pump()
+ 
+-    def hold_forward(self, expected):
++    def label_count(self, code):
++        return self.state('inference').get('velocity_command_tick_counts', {}).get(str(code), 0)
++
++    def hold_direction(self, keysym, expected, reset_with_z=False):
+         self.guard_display()
+         self.focus_terminal()
+-        self.record('xtest_direction_down_requested', keysym='w', target_xid=self.terminal_xid)
+-        self.display.key(self.terminal_xid, 'w', True, self.allowed)
++        self.record('xtest_direction_down_requested', keysym=keysym, target_xid=self.terminal_xid)
++        self.display.key(self.terminal_xid, keysym, True, self.allowed)
+         try:
+-            self.wait(lambda: self.state('inference').get('policy', {}).get('active_velocity_command_idx') == expected,
++            self.wait(lambda: onehot_matches(self.state('inference').get('policy', {}), expected),
+                       'native direction command ' + str(expected))
+-            until = time.monotonic() + .8
+-            while time.monotonic() < until:
+-                self.pump()
+-            self.capture('forward-' + str(expected))
++            start = self.label_count(expected)
++            self.wait(lambda: self.label_count(expected) >= start + MIN_LABEL_TICKS,
++                      f'actual native label{expected} at least{MIN_LABEL_TICKS} control ticks')
++            self.record('direction_hold_verified', keysym=keysym, expected_code=expected,
++                        label_count_before=start, label_count_after=self.label_count(expected),
++                        actual_policy=self.state('inference').get('policy'))
++            if reset_with_z:
++                # z is a discrete true-PTY command, not a pynput held-direction key.
++                request = time.time()
++                self.tap('z')
++                self.wait(lambda: onehot_matches(self.state('inference').get('policy', {}), 0),
++                          'real z while direction held changes the native command to stand')
++                start_zero = self.label_count(0)
++                self.wait(lambda: self.label_count(0) >= start_zero + MIN_LABEL_TICKS,
++                          'real z produces10 actual stand control labels')
++                dispatch = [json.loads(line) for line in (self.output / 'inference/observations.jsonl').read_text().splitlines()]
++                dispatch = [v for v in dispatch if v.get('kind') == 'native_dispatch'
++                    and v.get('unix', 0) >= request and v.get('command') == 'ZERO_VELOCITY'
++                    and onehot_matches(v.get('before', {}), expected) and onehot_matches(v.get('after', {}), 0)]
++                if not dispatch:
++                    raise RuntimeError('True-PTY z did not produce the observed nonzero-to-zero native dispatch')
++                self.record('zero_key_verified', held_keysym=keysym, code_before=expected,
++                            request_unix=request, label_count_before=start_zero, label_count_after=self.label_count(0),
++                            native_zero_dispatch=dispatch)
+         finally:
+-            self.display.key(self.terminal_xid, 'w', False, self.allowed)
+-            self.record('xtest_direction_up_requested', keysym='w', target_xid=self.terminal_xid)
+-        self.wait(lambda: self.state('inference').get('policy', {}).get('active_velocity_command_idx') == 0,
++            self.display.key(self.terminal_xid, keysym, False, self.allowed)
++            self.record('xtest_direction_up_requested', keysym=keysym, target_xid=self.terminal_xid)
++        self.wait(lambda: onehot_matches(self.state('inference').get('policy', {}), 0),
+                   'native release returns to command0')
++        self.record('direction_release_verified', keysym=keysym, actual_policy=self.state('inference').get('policy'))
++
++    def viewer_controls(self):
++        initial = self.state('simulator')['simulation']
++        length, tracking, overlay = initial['gantry_length'], initial['camera_tracking'], initial['show_text_overlay']
++        self.tap('7', self.native_xid)
++        self.wait(lambda: self.state('simulator')['simulation']['gantry_length'] < length - .05,
++                  'native viewer7 raises gantry by reducing length')
++        self.tap('8', self.native_xid)
++        self.wait(lambda: abs(self.state('simulator')['simulation']['gantry_length'] - length) < 1e-8,
++                  'native viewer8 restores prior gantry length')
++        for key, field, baseline, label in (('y', 'camera_tracking', tracking, 'camera-tracking-toggled'),
++                                             ('g', 'show_text_overlay', overlay, 'viewer-menu-toggled')):
++            self.tap(key, self.native_xid)
++            self.wait(lambda: self.state('simulator')['simulation'][field] is not baseline,
++                      'native viewer' + key + ' toggles ' + field)
++            self.capture(label)
++            self.tap(key, self.native_xid)
++            self.wait(lambda: self.state('simulator')['simulation'][field] is baseline,
++                      'native viewer' + key + ' restores ' + field)
++        self.capture('viewer-controls-restored')
++
++    def reset_window(self):
++        before = self.state('simulator')
++        previous = len(before.get('physics_clock_drop_observations', []))
++        request = time.time()
++        self.capture('before-backspace')
++        self.record('backspace_physical_reset_requested', target_xid=self.native_xid,
++                    physical_state=before.get('simulation'), request_unix=request)
++        self.tap('BackSpace', self.native_xid)
++        self.wait(lambda: len(self.state('simulator').get('physics_clock_drop_observations', [])) > previous,
++                  'real own-window Backspace produces an observed MuJoCo clock drop')
++        state = self.state('simulator')
++        observations = state['physics_clock_drop_observations']
++        observation = observations[-1]
++        checked = validate_reset(observation, request, previous, len(observations))
++        ticks = observation['physics_ticks']
++        after_time = observation['after']['time']
++        policy_before = self.state('inference').get('control_ticks', 0)
++        heartbeat_before = self.state('inference').get('depth_heartbeat', {}).get('advances', 0)
++        self.wait(lambda: (lambda s: s.get('physics_ticks', 0) >= ticks + 25
++                            and s.get('simulation', {}).get('time', -1) > after_time + .02)
++                  (self.state('simulator')), 'actual physics and clock advance after Backspace')
++        self.wait(lambda: (lambda s: s.get('control_ticks', 0) > policy_before
++                    and s.get('depth_heartbeat', {}).get('advances', 0) > heartbeat_before
++                    and s.get('depth_heartbeat', {}).get('state') == 'OK')
++                  (self.state('inference')), 'native policy and depth producer continue after physical reset')
++        self.capture('after-backspace')
++        result = {'request_unix': request, 'window_xid': self.native_xid, 'observation': observation,
++                  'validation': checked, 'physics_after': self.state('simulator'),
++                  'inference_after': self.state('inference')}
++        write(self.output / 'backspace-reset.json', result)
++        return result
+ 
+     def guard_display(self):
+         allowed_pids = {os.getpid()}
+@@ -281,6 +359,9 @@
+                     original_main_lifecycle=state.get('lifecycle'), process_group=group)
+         if w['process'].returncode != 0 or state.get('lifecycle') != 'main_returned':
+             raise RuntimeError(role + ' did not complete original main with actual wrapper rc0')
++        observations = self.output / role / 'observations.jsonl'
++        evidence = validate_shutdown([json.loads(line) for line in observations.read_text().splitlines()])
++        self.normal_shutdown[role] = evidence | fingerprint(observations)
+         if not self.module.wait_worker_shutdown(w['process'], w['group'], 3):
+             raise RuntimeError(role + ' has a live descendant after wrapper rc0')
+ 
+@@ -306,6 +387,7 @@
+                   'original native liveness polls observed3 producer sequence advances')
+         self.initial_settle()
+         self.capture('initial-stiff')
++        self.viewer_controls()
+         self.tap('8', self.native_xid)
+         self.wait(lambda: self.state('simulator').get('simulation', {}).get('gantry_length', 0) > .55, 'actual gantry8 increase')
+         self.tap('9', self.native_xid)
+@@ -314,37 +396,38 @@
+         self.wait(lambda: self.state('inference').get('policy', {}).get('use_policy_action') is True, 'native ] starts policy')
+         self.tap('c')
+         self.wait(lambda: self.state('inference').get('policy', {}).get('_recording') is True, 'native recording begins')
+-        self.hold_forward(1)
+-        self.wait(lambda: self.state('inference').get('policy', {}).get('recorded_frames', 0) >= 80, 'manual clip80 actual frames')
++        for mode, table in ((0, LOW), (1, HIGH)):
++            if mode:
++                self.tap('equal')
++                self.wait(lambda: self.state('inference').get('policy', {}).get('speed_mode') == mode,
++                          'native = switches to HIGH speed mode')
++            for key, code in table.items():
++                self.hold_direction(key, code)
++            self.hold_direction('w', table['w'], reset_with_z=True)
++            self.capture('all-direction-keys-mode-' + str(mode))
++        self.tap('equal')
++        self.wait(lambda: self.state('inference').get('policy', {}).get('speed_mode') == 0,
++                  'native = switches back to LOW speed mode')
+         self.tap('c')
+         clips = lambda: sorted((self.output / 'recordings').glob('*.npz'))
+-        self.wait(lambda: len(clips()) == 1, 'native c manual save')
++        self.wait(lambda: len(clips()) == 1 and self.state('inference').get('policy', {}).get('_recording') is False,
++                  'native c saves the one actual all-direction recording')
+         manual = clips()[0]
+-        self.tap('equal')
+-        self.wait(lambda: self.state('inference').get('policy', {}).get('speed_mode') == 1, 'native = high speed')
+-        self.tap('c')
+-        self.wait(lambda: self.state('inference').get('policy', {}).get('_recording') is True, 'second real recorder starts')
+-        self.hold_forward(6)
+-        self.wait(lambda: self.state('inference').get('policy', {}).get('recorded_frames', 0) >= 45, 'autosave clip45 actual frames')
++        self.display.release_all()
+         self.tap('o')
+-        self.wait(lambda: self.state('inference').get('policy', {}).get('_damping_mode_active') is True and len(clips()) == 2,
+-                  'native o damping and automatic recording save')
+-        auto = next(p for p in clips() if p != manual)
++        self.wait(lambda: self.state('inference').get('policy', {}).get('_damping_mode_active') is True,
++                  'native o enters damping before the physical reset')
+         self.wait(lambda: all(v == 0 for v in self.state('inference').get('last_python_sender_gains', {}).get('kp', [1]))
+                   and all(v > 0 for v in self.state('inference').get('last_python_sender_gains', {}).get('kd', [0])),
+-                  'observed Python sender damping gains')
+-        self.capture('damping')
+-        self.tap('i')
+-        self.wait(lambda: self.state('inference').get('policy', {}).get('_stiff_hold_active') is True
+-                  and self.state('inference').get('policy', {}).get('_damping_mode_active') is False, 'native i stiff hold')
+-        self.capture('final-stiff')
++                  'observed Python sender damping gains before reset')
++        reset = self.reset_window()
+         self.record('terminal_capture', **self.display.capture(self.terminal_xid, self.output / 'policy-terminal.png', self.allowed))
+         self.interrupt('inference')
+         # DirectSimulation.run is while True with Ctrl-C handler; closing the
+         # passive viewer is not an exit guarantee. Use its original SIGINT path.
+         self.interrupt('simulator')
+-        from check_recordings import check
+-        recording_checks = [check(manual, 1), check(auto, 6)]
++        from check_recordings import check_allkeys
++        recording_checks = [check_allkeys(manual, MIN_LABEL_TICKS)]
+         videos = sorted((self.output / 'video').rglob('*.mp4'))
+         if not videos:
+             raise RuntimeError('Native video was not saved during simulator cleanup')
+@@ -353,6 +436,8 @@
+                 raise RuntimeError('Native worker emitted fatal/error text')
+         return {'recordings': recording_checks, 'video_decodes': [{'path': str(p), **decode(p)} for p in videos],
+                 'mandatory_native_key_transitions': True, 'actual_policy_window_and_tty': True,
++                'all_low_high_direction_keys_and_zero_verified': True, 'backspace_physical_reset': reset,
++                'normal_shutdown_evidence': self.normal_shutdown,
+                 'quality_verified': False, 'obstacle_course_completion_verified': False}
+ 
+     def close(self):
+--- source-before/host_runner.py
++++ host_runner.py
+@@ -7,6 +7,7 @@
+ from __future__ import annotations
+ import argparse
+ import fcntl
++import hashlib
+ import json
+ import os
+ from pathlib import Path
+@@ -27,7 +28,40 @@
+ SUPERVISOR = 'scripts/research/sim2sim.py'
+ OBSERVER_RELATIVE = 'outputs/research/sdk018-native-pilot-20261010T0915/host/observe_container_pids.py'
+ HELPERS = ('common.py', 'container_runner.py', 'observe_native.py', 'x11_owned.py', 'check_recordings.py',
+-           'cpu_preflight.py', 'host_observer.py', 'host_runner.py', 'private_x11_probe.py')
++           'cpu_preflight.py', 'host_observer.py', 'host_runner.py', 'private_x11_probe.py', 'reset_checks.py')
++PROJECT = Path('/home/dzp/projects/php_parkour')
++PREVIOUS = PROJECT / 'outputs/research/fresh629-sdk018-6cb2ae2-prepared02'
++PREVIOUS_PLAN_SHA = '44d6e71e8ef1d12c5b479d8e3bcb411c39e8d7daa1c3bac109d6edd7417502d0'
++
++
++def previous_completed():
++    paths = [PREVIOUS / 'host-plan.json', PREVIOUS / 'host/launch-receipt.json',
++             PREVIOUS / 'host/final-validation/full-validation.json']
++    if any(p.is_symlink() or not p.is_file() for p in paths):
++        raise ValueError('Fresh629 terminal CPU receipts unavailable; no GUI resource starts')
++    payloads = [p.read_bytes() for p in paths]
++    plan, receipt, post = [json.loads(raw) for raw in payloads]
++    before = {str(p): {'sha256': hashlib.sha256(raw).hexdigest(), 'bytes': len(raw)} for p, raw in zip(paths, payloads)}
++    if (plan['plan_sha256'] != PREVIOUS_PLAN_SHA or plan['image_id'] != IMAGE or plan['gpu_uuid'] != GPU
++            or receipt['plan_sha256'] != PREVIOUS_PLAN_SHA or receipt['status'] != 'completed'
++            or any(receipt.get(k) != 0 for k in ('driver_returncode', 'driver_returncode_after_stop',
++                     'observer_returncode', 'cpu_validation_returncode'))
++            or any(receipt.get(k, {}).get('running_after_stop') is not False
++                   for k in ('owned_gpu_container_stop', 'owned_cpu_container_stop'))
++            or post['status'] != 'passed' or post['configurations'] != 629 or post['scenarios'] != 17
++            or post['worker_exit0_empty_group_count'] != 1258 or post['full_decoded_mp4_count'] != 629
++            or receipt['full_validation_sha256'] != before[str(paths[2])]['sha256']):
++        raise ValueError('Fresh629 must finish native/CPU0 and stop both owned containers before GUI')
++    for key in ('container_id', 'cpu_container_id'):
++        cid = receipt[key]
++        if not re.fullmatch(r'[0-9a-f]{64}', cid):
++            raise ValueError('Fresh629 needs exact prior container IDs')
++        info = json.loads(command(['docker', 'inspect', '--type', 'container', cid]))[0]
++        if info['Id'] != cid or info['Image'] != IMAGE or info['State']['Running']:
++            raise ValueError('A fresh629 owned container is still running or has changed identity')
++    if any(fingerprint(p) != before[str(p)] for p in paths):
++        raise ValueError('Prior terminal receipts changed during validation')
++    return {'files': before, 'native629_terminal_cpu_passed': True, 'owned_gpu_cpu_stopped': True}
+ 
+ 
+ def command(argv, **kwargs):
+@@ -97,6 +131,9 @@
+         raise ValueError('Plan path/session identity differs')
+     if plan['container_hostname'] != 'php-gui-' + plan['token']:
+         raise ValueError('Private authority hostname is not bound to the unique session')
++    if (plan.get('project') != str(PROJECT) or plan.get('gpu_lock') != str(PROJECT / 'outputs/research' / ('.local-native-' + GPU + '.lock'))
++            or plan.get('previous_cohort') != str(PREVIOUS) or plan.get('previous_host_plan_sha256') != PREVIOUS_PLAN_SHA):
++        raise ValueError('Canonical workspace/shared GPU lock/previous cohort contract differs')
+     verify_files(path.parent, plan['files'])
+     # The operator host script and helpers must be the reviewed prepared bytes.
+     for name, expected in plan['operator_helpers'].items():
+@@ -108,7 +145,12 @@
+ def prepare(args):
+     source = args.source.resolve(strict=True)
+     project = args.project.resolve(strict=True)
++    if project != PROJECT:
++        raise ValueError('Use the reviewed canonical project and shared native GPU lock')
+     destination = args.destination.resolve()
++    if (destination.parent != PROJECT / 'outputs/research' or not destination.name.startswith('native-keyboard-reset-allkeys-')
++            or destination.name == 'native-keyboard-reset-allkeys-preparation-01'):
++        raise ValueError('Use a fresh dedicated native-keyboard-reset-allkeys cohort beside this preparation')
+     display_number(args.display)
+     if args.image != IMAGE:
+         raise ValueError('This reviewed runner requires the exact new canonical image')
+@@ -163,12 +205,17 @@
+             'image_id': IMAGE, 'image_rootfs': image['RootFS'], 'gpu_uuid': GPU, 'docker_endpoint': context_endpoint,
+             'gpu_lock': str(project / 'outputs/research' / ('.local-native-' + GPU + '.lock')),
+             'source_context': str(source), 'canonical_source_count': len(before), 'canonical_source_identity': identity(before),
++            'project': str(PROJECT), 'previous_cohort': str(PREVIOUS), 'previous_host_plan_sha256': PREVIOUS_PLAN_SHA,
+             'source_after_identity': identity(source_after), 'diagnostic_overlays': overlays,
+             'operator_helpers': {name: fingerprint(Path(__file__).parent / name) for name in HELPERS},
+             'host_observer_sha256': sha(observer), 'files': records(cohort),
+             'scope': 'One native MuJoCo plane GUI and real terminal keyboard workflow. No obstacle or robot-hardware success claim.',
+-            'expected_transitions': ['window8', 'window9', 'terminal]', 'held_w_code1', 'c_manual_save',
+-                                     'equal_speed', 'held_w_code6', 'o_damping_autosave', 'i_stiff', 'original_SIGINT_exit'],
++            'expected_transitions': ['window7_raise_8_restore', 'windowy_tracking_toggle_restore',
++                'windowg_menu_toggle_restore', 'window8', 'window9', 'terminal]', 'recording_on',
++                'LOW_w1_s11_a2_d4_q3_e5_each10ticks_release0', 'z_while_w1_to0', 'equal_HIGH',
++                'HIGH_w6_s11_a7_d9_q8_e10_each10ticks_release0', 'z_while_w6_to0', 'equal_LOW',
++                'recording_save_all12codes', 'o_damping', 'window_BackSpace_actual_clock_qpos_reset',
++                'physics_policy_depth_advance_after_reset', 'original_SIGINT_exit'],
+             'receipt_contract': 'GUI schema1; never reuse matrix worker argv validator',
+             'max_operator_seconds': 420}
+     plan['plan_sha256'] = identity(plan)
+@@ -246,6 +293,8 @@
+ 
+ 
+ def run(args):
++    if not args.root_authorized_start:
++        raise ValueError('Explicit root authorization required; this preparation does not launch native')
+     plan = checked_plan(args.plan.resolve(strict=True))
+     destination = Path(plan['cohort_root']).parent
+     host = destination / 'host'
+@@ -267,11 +316,14 @@
+     observer_group = execution_group = None
+     name = 'php-native-gui-' + plan['token']
+     auth = host / 'private.xauth'
++    if Path(plan['gpu_lock']).is_symlink() or Path(f'/tmp/php-native-gui-display-{number}.lock').is_symlink():
++        raise ValueError('Refuse symlinked shared GPU/display locks')
+     with Path(plan['gpu_lock']).open('a') as gpu_lock, Path(f'/tmp/php-native-gui-display-{number}.lock').open('a') as display_lock:
+         # Same cross-container lock as the new 629 sweep. Never wait while a job owns it.
+         fcntl.flock(gpu_lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+         fcntl.flock(display_lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+         try:
++            receipt['previous_fresh629'] = previous_completed()
+             if Path(f'/tmp/.X11-unix/X{number}').exists() or Path(f'/tmp/.X{number}-lock').exists():
+                 raise ValueError('Private display is already in use; do not reuse/remove it')
+             receipt['gpu_idle'] = gpu_idle()
+@@ -426,6 +478,7 @@
+     prep.add_argument('--display', default=':91')
+     launch = modes.add_parser('run', help='OPERATOR ONLY: real isolated GUI/native/DDS/GPU execution')
+     launch.add_argument('--plan', type=Path, required=True)
++    launch.add_argument('--root-authorized-start', action='store_true')
+     args = parser.parse_args()
+     if args.mode == 'prepare':
+         prepare(args); return 0
+--- source-before/observe_native.py
++++ observe_native.py
+@@ -99,6 +99,9 @@
+         with LOCK:
+             count = REPORT.get('control_ticks', 0) + 1
+             REPORT['control_ticks'] = count
++            # Read the same native command buffer used by the unchanged recorder.
++            label = policy_state(self)['velocity_command']
++            record_control_label(label, getattr(self, 'active_velocity_command_idx', None))
+             if count % 5 == 0:
+                 if not np.isfinite(command).all() or not np.isfinite(state).all():
+                     raise ValueError('Actual native command/state became nonfinite')
+@@ -127,11 +130,51 @@
+     DepthShmSensor.liveness = liveness
+ 
+ 
++def record_control_label(label, active):
++    if (not isinstance(label, list) or len(label) != 1 or len(label[0]) != 15
++            or any(v not in (0.0, 1.0) for v in label[0]) or sum(label[0]) != 1.0
++            or active != label[0].index(1.0)):
++        raise ValueError('Actual native velocity command is not the matching15-wide one-hot')
++    counts = REPORT.setdefault('velocity_command_tick_counts', {str(i): 0 for i in range(15)})
++    counts[str(active)] += 1
++
++
+ def simulator_state(sim):
+     # Read Classic MuJoCo data directly. Never refresh/cache/write native state.
+     state = [*sim.root_data.qpos[:7].tolist(), *sim.root_data.qvel[:6].tolist()]
+-    return {'root_state': state, 'root_layout': 'MuJoCo XYZ+wxyz+linear/angular qvel', 'gantry_enabled': bool(sim.virtual_gantry.enabled),
+-            'gantry_length': float(sim.virtual_gantry.length)}
++    result = {'root_state': state, 'root_layout': 'MuJoCo XYZ+wxyz+linear/angular qvel',
++              'gantry_enabled': bool(sim.virtual_gantry.enabled), 'gantry_length': float(sim.virtual_gantry.length),
++              'time': float(sim.root_data.time), 'qpos': sim.root_data.qpos.tolist(),
++              'qvel': sim.root_data.qvel.tolist(), 'ctrl': sim.root_data.ctrl.tolist(),
++              'model_qpos0': sim.root_model.qpos0.tolist(), 'nq': int(sim.root_model.nq),
++              'nv': int(sim.root_model.nv), 'nu': int(sim.root_model.nu),
++              'nkey': int(sim.root_model.nkey), 'physics_dt': float(sim.root_model.opt.timestep),
++              'camera_tracking': bool(sim.simulator_config.viewer.enable_tracking),
++              'show_text_overlay': bool(sim.show_text_overlay)}
++    # stdlib validation keeps this observer usable in isolated CPU fixtures.
++    from reset_checks import validate_state
++    validate_state(result)
++    return result
++
++
++def record_render(before, after):
++    previous = REPORT.get('last_render_transition')
++    transition = {'before': before, 'after': after, 'physics_ticks': REPORT.get('physics_ticks', 0),
++                  'render_index': REPORT.get('render_calls', 0) + 1}
++    REPORT['render_calls'] = transition['render_index']
++    candidates = [('within_original_render', before, after)]
++    if previous is not None:
++        candidates.append(('between_render_samples', previous['after'], before))
++    for scope, left, right in candidates:
++        if right['time'] < left['time']:
++            value = {'scope': scope, 'before': left, 'after': right,
++                     'physics_ticks': transition['physics_ticks'], 'render_index': transition['render_index'],
++                     'unix': time.time()}
++            REPORT.setdefault('physics_clock_drop_observations', []).append(value)
++            event('actual_physics_clock_drop', **value)
++    REPORT['last_render_transition'] = transition
++    REPORT['simulation'] = after
++    event('original_render_readonly_before_after', **transition)
+ 
+ 
+ def install_simulator():
+@@ -139,6 +182,16 @@
+     from holosoma.simulator.mujoco.mujoco import MuJoCo
+     from holosoma.utils.sim_utils import DirectSimulation
+     original_init, original_key, original_step = DirectSimulation.initialize, MuJoCo._key_callback, MuJoCo.simulate_at_each_physics_step
++    original_render = MuJoCo.render
++
++    @functools.wraps(original_render)
++    def render(self, *args, **kwargs):
++        before = simulator_state(self)
++        result = original_render(self, *args, **kwargs)
++        after = simulator_state(self)
++        with LOCK:
++            record_render(before, after)
++        return result
+ 
+     @functools.wraps(original_init)
+     def initialize(self):
+@@ -172,6 +225,7 @@
+         return result
+ 
+     DirectSimulation.initialize, MuJoCo._key_callback, MuJoCo.simulate_at_each_physics_step = initialize, key, step
++    MuJoCo.render = render
+ 
+ 
+ def launch(role, original, expected_sha):
+--- /dev/null
++++ reset_checks.py
+@@ -0,0 +1,53 @@
++"""Pure-stdlib validation of observations; never writes native state."""
++from __future__ import annotations
++import math
++
++
++LOW = {'w': 1, 's': 11, 'a': 2, 'd': 4, 'q': 3, 'e': 5}
++HIGH = {'w': 6, 's': 11, 'a': 7, 'd': 9, 'q': 8, 'e': 10}
++MIN_LABEL_TICKS = 10
++
++
++def validate_state(state):
++    for key in ('time', 'physics_dt'):
++        if not isinstance(state[key], (int, float)) or not math.isfinite(state[key]):
++            raise ValueError('Nonfinite physical state: ' + key)
++    for key, size in (('qpos', state['nq']), ('qvel', state['nv']), ('ctrl', state['nu']), ('model_qpos0', state['nq'])):
++        if (not isinstance(size, int) or size <= 0 or len(state[key]) != size
++                or any(not isinstance(v, (int, float)) or not math.isfinite(v) for v in state[key])):
++            raise ValueError('Invalid complete physical state: ' + key)
++    if state['physics_dt'] <= 0 or state['time'] < 0:
++        raise ValueError('Invalid actual simulation clock')
++
++
++def onehot_matches(policy, code):
++    return (policy.get('active_velocity_command_idx') == code
++            and policy.get('velocity_command') == [[float(i == code) for i in range(15)]])
++
++
++def validate_reset(observation, request_unix, previous_reset_count, observed_reset_count):
++    before, after = observation['before'], observation['after']
++    validate_state(before); validate_state(after)
++    if observation['scope'] not in ('within_original_render', 'between_render_samples'):
++        raise ValueError('Unknown read-only reset observation scope')
++    if (observation['unix'] < request_unix or observed_reset_count != previous_reset_count + 1
++            or any(before[k] != after[k] for k in ('nq', 'nv', 'nu', 'nkey', 'model_qpos0', 'physics_dt'))
++            or before['time'] < 1.0 or after['time'] >= before['time']
++            or after['time'] > .1):
++        raise ValueError('No single new actual Backspace clock reset after genuine window input')
++    qpos_delta = max(abs(a-b) for a,b in zip(before['qpos'], after['qpos']))
++    if qpos_delta <= 1e-9:
++        raise ValueError('Backspace clock changed without an observed qpos change')
++    return {'actual_clock_drop': before['time'] - after['time'], 'qpos_max_abs_change': qpos_delta,
++            'qpos0_max_abs_error': max(abs(a-b) for a,b in zip(after['qpos'], after['model_qpos0'])),
++            'observed_time_after': after['time'], 'observation_scope': observation['scope'],
++            'scope': 'Observed MuJoCo physical data reset only; policy history/gantry/SDK are not claimed reset'}
++
++
++def validate_shutdown(events):
++    main = [i for i, event in enumerate(events) if event.get('kind') == 'original_main_returned']
++    exit_events = [i for i, event in enumerate(events) if event.get('kind') == 'python_atexit']
++    if (len(main) != 1 or len(exit_events) != 1 or main[0] >= exit_events[0]
++            or any(event.get('kind') == 'original_main_raised' for event in events)):
++        raise ValueError('Need one original main return followed by one Python atexit, without native main exception')
++    return {'original_main_return_index': main[0], 'python_atexit_index': exit_events[0]}
+--- /dev/null
++++ run_cpu_candidate.py
+@@ -0,0 +1,62 @@
++#!/usr/bin/env python3
++"""Only a new runc/network-none/GPU-hidden CPU unittest container. No native GUI."""
++from __future__ import annotations
++import argparse,json,os,secrets,subprocess,sys,time
++from pathlib import Path
++sys.dont_write_bytecode=True
++from common import fingerprint,write
++from host_runner import IMAGE,PROJECT,endpoint
++
++
++def call(argv):
++    r=subprocess.run(argv,capture_output=True,text=True,timeout=120)
++    if r.returncode:raise RuntimeError(f'{argv[:3]}: {r.returncode}: {r.stderr}')
++    return r.stdout
++
++
++def main():
++    parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--output',type=Path,required=True);args=parser.parse_args()
++    here=Path(__file__).resolve().parent;out=args.output.resolve();out.mkdir(exist_ok=False)
++    context=PROJECT/'outputs/research/sdk018-canonical-build-6cb2ae2/context'
++    before={p.name:fingerprint(p) for p in sorted(here.glob('*.py'))}
++    report={'scope':'CPU fixtures and an ordinary stdlib PTY child only; no Xserver/GUI/SDK objects/DDS/native/GPU',
++            'started_unix':time.time(),'endpoint':endpoint(),'source_before':before,'image_id':IMAGE,'status':'running'}
++    cid=None;name='php-reset-allkeys-cpu-'+secrets.token_hex(8)
++    def inspect_owned():
++        obj=json.loads(call(['docker','inspect',cid]))[0];host=obj['HostConfig']
++        if (obj['Id']!=cid or obj['Name']!='/'+name or obj['Image']!=IMAGE or host['Runtime']!='runc'
++                or host['NetworkMode']!='none' or host.get('DeviceRequests') or host.get('PidMode')
++                or host['IpcMode']!='private' or host['Privileged']):raise ValueError('CPU-only exact own container identity differs')
++        return obj
++    try:
++        argv=['docker','create','--name',name,'--runtime','runc','--network','none','--ipc','private','--init',
++            '--shm-size','1g','--workdir','/workspace/php_parkour','--entrypoint','/bin/bash',
++            '--env','CUDA_VISIBLE_DEVICES=','--env','NVIDIA_VISIBLE_DEVICES=void','--env','PYTHONDONTWRITEBYTECODE=1',
++            '--env','WANDB_MODE=disabled','--mount',f'type=bind,src={context},dst=/workspace/php_parkour,readonly',
++            '--mount',f'type=bind,src={here},dst=/controls,readonly','--mount',f'type=bind,src={out},dst=/evidence',
++            IMAGE,'-lc','exec sleep infinity']
++        report['create_argv']=argv;cid=call(argv).strip();report['container_id']=cid
++        write(out/'created-inspect.json',inspect_owned());call(['docker','start',cid]);write(out/'running-inspect.json',inspect_owned())
++        argv=['docker','exec',cid,'/opt/php/bin/inference-python','/controls/run_cpu_tests.py','--output','/evidence/tests']
++        report['test_argv']=argv;write(out/'launch.json',report)
++        r=subprocess.run(argv,capture_output=True,text=True,timeout=120)
++        (out/'stdout.txt').write_text(r.stdout);(out/'stderr.txt').write_text(r.stderr);report['returncode']=r.returncode
++        if r.returncode:raise RuntimeError('CPU tests returned nonzero')
++        report['status']='passed'
++    except BaseException as error:
++        report.update(status='failed',error=f'{type(error).__name__}: {error}')
++    finally:
++        if cid:
++            try:
++                inspect_owned();call(['docker','stop','--timeout','10',cid]);after=inspect_owned();write(out/'stopped-inspect.json',after)
++                report['running_after_stop']=after['State']['Running']
++                if report['running_after_stop']:raise RuntimeError('Own CPU container remains running')
++                call(['docker','rm',cid]);report['own_container_removed']=True
++            except BaseException as error:report.update(status='failed',cleanup_error=f'{type(error).__name__}: {error}')
++        report['source_after']={p.name:fingerprint(p) for p in sorted(here.glob('*.py'))}
++        if report['source_after']!=before:report.update(status='failed',source_changed=True)
++        report['finished_unix']=time.time();write(out/'launch.json',report)
++    print(json.dumps({'status':report['status'],'returncode':report.get('returncode'),'receipt':str(out/'launch.json')}))
++    return 0 if report['status']=='passed' else 1
++
++if __name__=='__main__':raise SystemExit(main())
+--- source-before/run_cpu_tests.py
++++ run_cpu_tests.py
+@@ -8,6 +8,7 @@
+ import unittest
+ import xml.etree.ElementTree as ET
+ import test_runner
++import test_reset_keys
+ from common import fingerprint, identity, write
+ 
+ 
+@@ -30,6 +31,7 @@
+     parser = argparse.ArgumentParser(); parser.add_argument('--output', type=Path, required=True); args = parser.parse_args()
+     args.output.mkdir(parents=True, exist_ok=False)
+     suite = unittest.defaultTestLoader.loadTestsFromModule(test_runner)
++    suite.addTests(unittest.defaultTestLoader.loadTestsFromModule(test_reset_keys))
+     with (args.output / 'tests.log').open('x') as log:
+         result = unittest.TextTestRunner(stream=log, verbosity=2, resultclass=Result).run(suite)
+     root = ET.Element('testsuite', name='isolated_gui_operator_CPU_only', tests=str(result.testsRun),
+--- /dev/null
++++ test_reset_keys.py
+@@ -0,0 +1,269 @@
++"""CPU fixtures for only the new GUI protocol. No display/robot/SDK construction."""
++from __future__ import annotations
++import copy
++import json
++import os
++from pathlib import Path
++import random
++import sys
++import tempfile
++import types
++import unittest
++from unittest.mock import patch
++import common
++import container_runner as runner
++import host_runner as host
++import observe_native as observer
++from reset_checks import LOW, HIGH, onehot_matches, validate_reset, validate_state, validate_shutdown
++
++
++def physical(time=4., pose=2.):
++    return {'time': time, 'qpos': [pose] + [0.]*35, 'qvel': [0.]*35,
++            'ctrl': [0.]*29, 'model_qpos0': [0.]*36, 'nq': 36, 'nv': 35, 'nu': 29, 'nkey': 0,
++            'physics_dt': .002, 'gantry_enabled': False, 'gantry_length': .6,
++            'camera_tracking': True, 'show_text_overlay': True}
++
++
++def policy(code):
++    return {'active_velocity_command_idx': code, 'velocity_command': [[float(i == code) for i in range(15)]]}
++
++
++def fake_modules(leaves):
++    modules = {}
++    for name, attrs in leaves.items():
++        for i in range(1, len(name.split('.'))+1):
++            prefix = '.'.join(name.split('.')[:i])
++            modules.setdefault(prefix, types.ModuleType(prefix)); modules[prefix].__path__ = []
++        modules[name].__dict__.update(attrs)
++    return modules
++
++
++class ResetContractTests(unittest.TestCase):
++    def test_native_main_then_atexit_required_without_duplicates_or_raised(self):
++        events=[{'kind':'original_main_returned'},{'kind':'python_atexit'}]
++        self.assertEqual(validate_shutdown(events)['python_atexit_index'],1)
++        for bad in (events[:1],events[::-1],events+events,[{'kind':'original_main_raised'}]+events):
++            with self.subTest(bad=bad),self.assertRaises(ValueError):validate_shutdown(bad)
++
++    def observation(self, scope='within_original_render'):
++        return {'scope': scope, 'unix': 11., 'before': physical(), 'after': physical(0., 0.),
++                'physics_ticks': 2500, 'render_index': 80}
++
++    def test_actual_clock_and_qpos_change_are_required(self):
++        item = self.observation(); result = validate_reset(item, 10., 0, 1)
++        self.assertEqual(result['actual_clock_drop'], 4.)
++        self.assertEqual(result['qpos_max_abs_change'], 2.)
++        self.assertEqual(result['qpos0_max_abs_error'], 0.)
++
++    def test_between_samples_is_explicitly_distinguished(self):
++        item = self.observation('between_render_samples'); item['after']['time'] = .016
++        self.assertEqual(validate_reset(item, 10., 2, 3)['observation_scope'], 'between_render_samples')
++
++    def test_key_request_without_clock_reset_is_rejected(self):
++        item = self.observation(); item['after']['time'] = 4.002
++        with self.assertRaises(ValueError): validate_reset(item, 10., 0, 1)
++
++    def test_clock_only_without_qpos_change_is_rejected(self):
++        item = self.observation(); item['after']['qpos'] = item['before']['qpos'][:]
++        with self.assertRaises(ValueError): validate_reset(item, 10., 0, 1)
++
++    def test_old_or_multiple_or_late_reset_is_rejected(self):
++        for request, before_count, after_count, after_time in [(12.,0,1,0.), (10.,0,2,0.), (10.,0,1,.2)]:
++            item = self.observation(); item['after']['time'] = after_time
++            with self.subTest(request=request, count=after_count), self.assertRaises(ValueError):
++                validate_reset(item, request, before_count, after_count)
++
++    def test_nonfinite_or_incomplete_state_is_rejected(self):
++        for field, value in [('qpos',[0.]*35), ('qvel',[float('nan')]*35), ('time',float('inf'))]:
++            state = physical(); state[field] = value
++            with self.subTest(field=field), self.assertRaises(ValueError): validate_state(state)
++
++    def test_model_changed_during_reset_is_rejected(self):
++        item = self.observation(); item['after']['model_qpos0'][0] = .3
++        with self.assertRaises(ValueError): validate_reset(item, 10., 0, 1)
++
++    def test_all_actual_low_high_codes_not_reserved(self):
++        self.assertEqual(LOW, {'w':1,'s':11,'a':2,'d':4,'q':3,'e':5})
++        self.assertEqual(HIGH, {'w':6,'s':11,'a':7,'d':9,'q':8,'e':10})
++        self.assertEqual(set(LOW.values()) | set(HIGH.values()) | {0}, set(range(12)))
++
++    def test_onehot_must_match_active_index(self):
++        self.assertTrue(onehot_matches(policy(11),11)); wrong = policy(11)
++        wrong['velocity_command'][0][12] = 1.
++        self.assertFalse(onehot_matches(wrong,11))
++
++
++class NewObserverTests(unittest.TestCase):
++    def setUp(self): observer.REPORT.clear()
++
++    def test_label_counter_observes_native_buffer_without_mutating_it(self):
++        value = policy(5)['velocity_command']; before = copy.deepcopy(value)
++        for _ in range(10): observer.record_control_label(value, 5)
++        self.assertEqual(observer.REPORT['velocity_command_tick_counts']['5'], 10)
++        self.assertEqual(value, before)
++
++    def test_label_counter_rejects_mismatch_multihot_and_reserved_shape(self):
++        for value, idx in [(policy(1)['velocity_command'],2), ([[1.]*15],0), ([[1.]+[0.]*13],0)]:
++            with self.subTest(idx=idx), self.assertRaises(ValueError): observer.record_control_label(value,idx)
++
++    def test_render_observer_calls_original_once_preserves_args_rng_and_native_state(self):
++        import numpy as np
++        calls = []
++        class Sim:
++            def render(self, *args, **kwargs):
++                calls.append((args,kwargs)); self.root_data.time = 0.; self.root_data.qpos[:] = 0.; return 'original-result'
++            def _key_callback(self, key): calls.append(('key',key)); return 4
++            def simulate_at_each_physics_step(self): self.root_data.time += .002; return 5
++        class Direct:
++            def initialize(self): return 6
++        value = Sim()
++        value.root_data = types.SimpleNamespace(time=4., qpos=np.full(36,2.), qvel=np.zeros(35), ctrl=np.ones(29))
++        value.root_model = types.SimpleNamespace(qpos0=np.zeros(36), nq=36,nv=35,nu=29,nkey=0,opt=types.SimpleNamespace(timestep=.002))
++        value.virtual_gantry = types.SimpleNamespace(enabled=False,length=.6)
++        value.simulator_config = types.SimpleNamespace(viewer=types.SimpleNamespace(enable_tracking=True))
++        value.show_text_overlay = True
++        modules = fake_modules({'holosoma.simulator.mujoco.mujoco':{'MuJoCo':Sim},'holosoma.utils.sim_utils':{'DirectSimulation':Direct}})
++        rng, np_rng = random.getstate(), copy.deepcopy(np.random.get_state())
++        with tempfile.TemporaryDirectory() as tmp, patch.dict(sys.modules,modules):
++            observer.OUT = Path(tmp); observer.install_simulator()
++            self.assertEqual(value.render(False, fixture='argument'), 'original-result')
++            self.assertEqual(calls, [((False,),{'fixture':'argument'})])
++            np.testing.assert_array_equal(value.root_data.qpos,np.zeros(36))
++            np.testing.assert_array_equal(value.root_data.ctrl,np.ones(29))
++            self.assertEqual(observer.REPORT['render_calls'],1)
++            self.assertEqual(observer.REPORT['physics_clock_drop_observations'][0]['scope'],'within_original_render')
++            self.assertEqual(value._key_callback(259),4)
++            self.assertEqual(calls[-1],('key',259))
++            self.assertEqual(value.simulate_at_each_physics_step(),5)
++            self.assertEqual(value.root_data.time,.002)
++        self.assertEqual(random.getstate(),rng)
++        current = np.random.get_state(); self.assertEqual(current[0],np_rng[0]); np.testing.assert_array_equal(current[1],np_rng[1]); self.assertEqual(current[2:],np_rng[2:])
++
++    def test_between_render_samples_clock_drop_is_retained(self):
++        with tempfile.TemporaryDirectory() as tmp:
++            observer.OUT = Path(tmp)
++            observer.record_render(physical(3.),physical(3.))
++            observer.record_render(physical(.016,0.),physical(.016,0.))
++            item = observer.REPORT['physics_clock_drop_observations'][0]
++            self.assertEqual(item['scope'],'between_render_samples')
++            self.assertEqual(item['before']['time'],3.)
++
++
++class ProtocolControlTests(unittest.TestCase):
++    def session(self, tmp, table=LOW):
++        session = runner.Session.__new__(runner.Session); session.output=Path(tmp)
++        (session.output/'inference').mkdir(); (session.output/'inference/observations.jsonl').write_text('')
++        state={'policy':policy(0),'velocity_command_tick_counts':{str(i):0 for i in range(15)}}
++        actions=[]; session.state=lambda role:state; session.guard_display=lambda:None
++        session.focus_terminal=lambda:actions.append('focus'); session.terminal_xid=7;session.allowed={7}
++        session.record=lambda kind,**values:actions.append((kind,values))
++        def key(xid,name,pressed,allowed):
++            actions.append(('XTEST',name,pressed)); state['policy']=policy(table[name] if pressed else 0)
++        session.display=types.SimpleNamespace(key=key)
++        def wait(predicate, description, *args, **kwargs):
++            if not predicate():
++                idx=state['policy']['active_velocity_command_idx'];state['velocity_command_tick_counts'][str(idx)]+=10
++            if not predicate(): raise RuntimeError('fixture predicate did not acknowledge: '+description)
++        session.wait=wait
++        def tap(name):
++            self.assertEqual(name,'z'); before=copy.deepcopy(state['policy']);state['policy']=policy(0)
++            with (session.output/'inference/observations.jsonl').open('a') as stream:
++                import time
++                stream.write(json.dumps({'kind':'native_dispatch','unix':time.time(),'command':'ZERO_VELOCITY',
++                    'before':before,'after':policy(0)})+'\n')
++            actions.append(('PTY',name))
++        session.tap=tap
++        return session,state,actions
++
++    def test_all_direction_holds_wait_ten_labels_and_release(self):
++        for table in (LOW,HIGH):
++            for name,code in table.items():
++                with tempfile.TemporaryDirectory() as tmp:
++                    session,state,actions=self.session(tmp,table);session.hold_direction(name,code)
++                    self.assertEqual(state['velocity_command_tick_counts'][str(code)],10)
++                    self.assertIn(('XTEST',name,False),actions)
++                    self.assertTrue(onehot_matches(state['policy'],0))
++
++    def test_zero_is_tested_while_nonzero_key_is_still_held(self):
++        with tempfile.TemporaryDirectory() as tmp:
++            session,state,actions=self.session(tmp);session.hold_direction('w',1,reset_with_z=True)
++            self.assertLess(actions.index(('PTY','z')),actions.index(('XTEST','w',False)))
++            self.assertGreaterEqual(state['velocity_command_tick_counts']['0'],10)
++
++    def test_direction_is_released_even_when_native_ack_fails(self):
++        with tempfile.TemporaryDirectory() as tmp:
++            session,state,actions=self.session(tmp);session.wait=lambda *args,**kwargs:(_ for _ in ()).throw(RuntimeError('ack'))
++            with self.assertRaises(RuntimeError):session.hold_direction('q',3)
++            self.assertIn(('XTEST','q',False),actions)
++
++    def test_no_operator_authorization_starts_no_docker(self):
++        with patch.object(host,'command') as command, self.assertRaises(ValueError):
++            host.run(types.SimpleNamespace(root_authorized_start=False))
++        command.assert_not_called()
++
++    def test_viewer7_y_g_restore_via_keys_only(self):
++        session=runner.Session.__new__(runner.Session);state={'simulation':physical()};actions=[]
++        session.state=lambda role:state;session.native_xid=99;session.capture=lambda label:actions.append(('capture',label))
++        def tap(key,xid):
++            self.assertEqual(xid,99);actions.append(key);s=state['simulation']
++            if key in ('7','8'):s['gantry_length']+= -.1 if key=='7' else .1
++            else:
++                name='camera_tracking' if key=='y' else 'show_text_overlay';s[name]=not s[name]
++        session.tap=tap;session.wait=lambda predicate,*args:self.assertTrue(predicate())
++        session.viewer_controls()
++        self.assertEqual([a for a in actions if isinstance(a,str)],['7','8','y','y','g','g'])
++        self.assertTrue(state['simulation']['camera_tracking']);self.assertTrue(state['simulation']['show_text_overlay'])
++
++
++class PriorCohortTests(unittest.TestCase):
++    def fixtures(self, root):
++        (root/'host/final-validation').mkdir(parents=True)
++        plan={'plan_sha256':host.PREVIOUS_PLAN_SHA,'image_id':host.IMAGE,'gpu_uuid':host.GPU}
++        post={'status':'passed','configurations':629,'scenarios':17,'worker_exit0_empty_group_count':1258,'full_decoded_mp4_count':629}
++        common.write(root/'host-plan.json',plan);common.write(root/'host/final-validation/full-validation.json',post)
++        receipt={'plan_sha256':host.PREVIOUS_PLAN_SHA,'status':'completed','driver_returncode':0,'driver_returncode_after_stop':0,
++                 'observer_returncode':0,'cpu_validation_returncode':0,'owned_gpu_container_stop':{'running_after_stop':False},
++                 'owned_cpu_container_stop':{'running_after_stop':False},'full_validation_sha256':common.sha(root/'host/final-validation/full-validation.json'),
++                 'container_id':'a'*64,'cpu_container_id':'b'*64}
++        common.write(root/'host/launch-receipt.json',receipt)
++        return receipt
++
++    def test_terminal629_cpu_and_both_owned_stops_required(self):
++        with tempfile.TemporaryDirectory() as tmp:
++            root=Path(tmp);self.fixtures(root)
++            def command(argv):return json.dumps([{'Id':argv[-1],'Image':host.IMAGE,'State':{'Running':False}}])
++            with patch.object(host,'PREVIOUS',root),patch.object(host,'command',side_effect=command):
++                self.assertTrue(host.previous_completed()['native629_terminal_cpu_passed'])
++
++    def test_running_or_failed_or_missing_cpu_receipt_starts_no_resource(self):
++        for bad in ('running','failed','cpu-running','missing'):
++            with tempfile.TemporaryDirectory() as tmp:
++                root=Path(tmp);receipt=self.fixtures(root)
++                if bad in ('running','failed'):receipt['status']=bad
++                if bad=='cpu-running':receipt['owned_cpu_container_stop']['running_after_stop']=True
++                common.write(root/'host/launch-receipt.json',receipt)
++                if bad=='missing':(root/'host/final-validation/full-validation.json').unlink()
++                with patch.object(host,'PREVIOUS',root),patch.object(host,'command') as command,self.assertRaises(ValueError):host.previous_completed()
++                command.assert_not_called()
++
++    def test_receipt_stopped_but_actual_container_running_rejected(self):
++        with tempfile.TemporaryDirectory() as tmp:
++            root=Path(tmp);self.fixtures(root)
++            with patch.object(host,'PREVIOUS',root),patch.object(host,'command',return_value=json.dumps([{'Id':'a'*64,'Image':host.IMAGE,'State':{'Running':True}}])), self.assertRaises(ValueError):host.previous_completed()
++
++
++class AllKeysRecordingTests(unittest.TestCase):
++    def test_actual_schema_all_twelve_labels_and_missing_reserved_rejection(self):
++        import numpy as np
++        from check_recordings import check_allkeys
++        with tempfile.TemporaryDirectory() as tmp:
++            path=Path(tmp)/'fixture-only.npz';commands=np.eye(15,dtype=np.float32)[np.repeat(np.arange(12),10)]
++            qpos=np.zeros((len(commands),36),dtype=np.float32);qpos[:,0]=1.
++            np.savez(path,qpos=qpos,vel_cmd=commands,fps=np.array(50))
++            self.assertEqual(check_allkeys(path)['all_deployed_labels_present'],list(range(12)))
++            commands[-1]=np.eye(15,dtype=np.float32)[12]
++            np.savez(path,qpos=qpos,vel_cmd=commands,fps=np.array(50))
++            with self.assertRaises(ValueError):check_allkeys(path)
++
++
++if __name__=='__main__':unittest.main(verbosity=2)
+--- source-before/test_runner.py
++++ test_runner.py
+@@ -46,6 +46,9 @@
+             plan = {'schema_version': 1, 'image_id': host.IMAGE, 'gpu_uuid': host.GPU, 'status': 'prepared_not_executed',
+                     'owner_uid': os.getuid(), 'cohort_root': str(root.resolve()), 'token': 'a'*32, 'private_display': ':91',
+                     'files': [], 'operator_helpers': {}, 'container_hostname': 'php-gui-'+'a'*32}
++            plan.update(project=str(host.PROJECT), previous_cohort=str(host.PREVIOUS),
++                        previous_host_plan_sha256=host.PREVIOUS_PLAN_SHA,
++                        gpu_lock=str(host.PROJECT / 'outputs/research' / ('.local-native-' + host.GPU + '.lock')))
+             plan['plan_sha256'] = common.identity(plan); common.write(file, plan)
+             self.assertEqual(host.checked_plan(file)['token'], 'a'*32)
+             plan['private_display'] = ':0'; common.write(file, plan)
+@@ -269,6 +272,7 @@
+         class Policy:
+             def __init__(self):
+                 self.initialized = 1; self.velocity_command = np.eye(15, dtype=np.float32)[:1]
++                self.active_velocity_command_idx = 0
+                 self._recording = False; self._record_toggle_request = False; self._record_qpos = []
+             def _dispatch_command(self, command): self.dispatched = command; return 12
+             def _service_recording(self, *args, **kwargs): self._recording = True; return 13
+@@ -311,8 +315,12 @@
+         import numpy as np
+         from observe_native import simulator_state
+         qpos = np.arange(36, dtype=float); qvel = np.arange(35, dtype=float)
+-        sim = types.SimpleNamespace(root_data=types.SimpleNamespace(qpos=qpos, qvel=qvel),
+-                                    virtual_gantry=types.SimpleNamespace(enabled=True, length=.5))
++        sim = types.SimpleNamespace(root_data=types.SimpleNamespace(qpos=qpos, qvel=qvel, ctrl=np.zeros(29), time=3.),
++                                    root_model=types.SimpleNamespace(qpos0=np.zeros(36), nq=36, nv=35, nu=29, nkey=0,
++                                                                    opt=types.SimpleNamespace(timestep=.002)),
++                                    virtual_gantry=types.SimpleNamespace(enabled=True, length=.5),
++                                    simulator_config=types.SimpleNamespace(viewer=types.SimpleNamespace(enable_tracking=True)),
++                                    show_text_overlay=True)
+         before = qpos.copy(); result = simulator_state(sim)
+         self.assertTrue(np.array_equal(qpos, before)); self.assertEqual(result['root_state'], list(qpos[:7])+list(qvel[:6]))
+ 

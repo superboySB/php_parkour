@@ -402,4 +402,8 @@ CPU 测试统一在 Docker 中运行，分别保留根目录/训练和 motion ma
 
 [29项要求与证据对应清单](usage_assets/reports/final-function-coverage-ledger/index.md)保留了`b5095ba`版本的六份声明文档，核对8个preset、17场景、29技能入口及五组有序数据。复查找到两组尚无实际验收的功能：`s/a/d/q/e/z`完整命名键派发与窗口Backspace重置，以及teacher/pure/finetune原生断点继续训练。此前真实w低/高速、12项API方向和45项恢复控制测试的范围保持原样，不能替代这两组实测。
 
-两个独立补验正在准备，实际执行须等待当前629正常CPU终态及GPU释放。续训需证明原PT/固定专家SHA不变、优化器步数被恢复、之后权重有限且确实更新，并产生新的TensorBoard样本；重置需真实窗口按键、仿真time/状态变化及后续推进、双方原生正常退出。当前这些均未记录为通过。完整官方训练、888逐源尝试、629全量后验、最终学生58项闭环和云端默认镜像接入仍分别等待原任务及真实产物；高层自主长程越障质量也尚未成立。
+两个独立补验已完成CPU准备，实际执行须等待当前629正常CPU终态及GPU释放。续训需证明原PT/固定专家SHA不变、优化器步数被恢复、之后权重有限且确实更新，并产生新的TensorBoard样本；重置需真实窗口按键、仿真time/状态变化及后续推进、双方原生正常退出。当前这些均未记录为通过。完整官方训练、888逐源尝试、629全量后验、最终学生58项闭环和云端默认镜像接入仍分别等待原任务及真实产物；高层自主长程越障质量也尚未成立。
+
+[全键盘/重置准备原件](usage_assets/reports/native-keyboard-reset-allkeys-preparation/index.md)含最终46项CPU fixture、独立只读审查、root真实prepare计划和真实Docker双角色import/config parse；3313项冻结前后相同，未构造原生对象。历史canonical3297项与预先存在的1个bytecode分别记录，没有改动原冻结清单。实际按键、Backspace、录制与退出验收仍未执行。
+
+[teacher/pure/finetune续训准备原件](usage_assets/reports/native-resume-acceptance-preparation/index.md)含最终33/33 CPU检查，旧27/29/30/31/32候选按原字节保留且不相加。真实CPU预处理解析三preset、100个locomotion clip及35文件独立RW机器人合同；既有PT确认teacher40、学生16的优化器计数，包括LR0的finetune std state。实际方案是各自baseline2→target4恢复到iter3，验证计数40→60→100或16→24→40及真实新权重/TensorBoard。HSSIM激活路径和原生INFO日志检查问题已在验收helper中修正，原生算法与加载实现未改；六次真实训练仍未运行。

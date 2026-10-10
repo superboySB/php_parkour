@@ -1,0 +1,95 @@
+{
+  "argv": [
+    "docker",
+    "run",
+    "--rm",
+    "--name",
+    "php-native-resume-cpu-verified-01",
+    "--runtime",
+    "runc",
+    "--network",
+    "none",
+    "-e",
+    "CUDA_VISIBLE_DEVICES=",
+    "-e",
+    "NVIDIA_VISIBLE_DEVICES=void",
+    "-e",
+    "PYTHONDONTWRITEBYTECODE=1",
+    "-e",
+    "WANDB_MODE=disabled",
+    "-e",
+    "LOGGER=tensorboard",
+    "-e",
+    "PHP_RESUME_CONTRACT_SHA=c2eae58ed60e2df291762260d51b104df017ff12f05bce1af4491b690280f31a",
+    "--mount",
+    "type=bind,src=/home/dzp/projects/php_parkour/outputs/research/native-resume-acceptance-preparation-01/source,dst=/workspace/php_parkour,readonly",
+    "--mount",
+    "type=bind,src=/home/dzp/projects/php_parkour/outputs/research/native-resume-acceptance-preparation-01/control,dst=/control,readonly",
+    "--mount",
+    "type=bind,src=/home/dzp/projects/php_parkour/outputs/research/native-resume-acceptance-preparation-01/tests,dst=/tests,readonly",
+    "--mount",
+    "type=bind,src=/home/dzp/projects/php_parkour/outputs/research/native-resume-acceptance-preparation-01/cpu-tests,dst=/test-output",
+    "--mount",
+    "type=bind,src=/home/dzp/projects/php_parkour/outputs/research/native-resume-acceptance-preparation-01/run-output-verified,dst=/outputs",
+    "--mount",
+    "type=bind,src=/home/dzp/projects/php_parkour/outputs/research/native-resume-acceptance-preparation-01/cache,dst=/data/cache",
+    "--mount",
+    "type=bind,src=/home/dzp/projects/php_parkour/outputs/research/assets,dst=/data/assets,readonly",
+    "-w",
+    "/workspace/php_parkour",
+    "--entrypoint",
+    "/bin/bash",
+    "sha256:2be18521015b2a84ef7a4442af9a94ef041a19feb9ce385ae15424b1dc158d8f",
+    "-c",
+    "/opt/php/bin/train-python -m pytest /tests/test_resume_preparation.py -q -p no:cacheprovider --junitxml=/test-output/tests-verified.xml && /opt/php/bin/train-python /control/resume_evidence.py preflight"
+  ],
+  "started_utc": "2026-10-10T12:45:33.369377+00:00",
+  "source_before": [
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/native-resume-acceptance-preparation-01/control/resume_evidence.py",
+      "bytes": 26183,
+      "sha256": "88f1b1588da009db90217387ba69ddf91d0f538b39c63fad87d518352526ac95"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/native-resume-acceptance-preparation-01/control/train-python-with-robot-assets",
+      "bytes": 2585,
+      "sha256": "1e062cbd585681fd28febf3d302370428c60b697cd861460c1edf8c6b8045f45"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/native-resume-acceptance-preparation-01/control/contract.json",
+      "bytes": 90763,
+      "sha256": "c2eae58ed60e2df291762260d51b104df017ff12f05bce1af4491b690280f31a"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/native-resume-acceptance-preparation-01/tests/test_resume_preparation.py",
+      "bytes": 8047,
+      "sha256": "406a7df219f45834d0be6b2744ba1c65ad4e7edd670be57be2c90d5688a9b570"
+    }
+  ],
+  "native_started": false,
+  "gpu_started": false,
+  "returncode": 0,
+  "finished_utc": "2026-10-10T12:45:44.421487+00:00",
+  "source_after": [
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/native-resume-acceptance-preparation-01/control/resume_evidence.py",
+      "bytes": 26183,
+      "sha256": "88f1b1588da009db90217387ba69ddf91d0f538b39c63fad87d518352526ac95"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/native-resume-acceptance-preparation-01/control/train-python-with-robot-assets",
+      "bytes": 2585,
+      "sha256": "1e062cbd585681fd28febf3d302370428c60b697cd861460c1edf8c6b8045f45"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/native-resume-acceptance-preparation-01/control/contract.json",
+      "bytes": 90763,
+      "sha256": "c2eae58ed60e2df291762260d51b104df017ff12f05bce1af4491b690280f31a"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/native-resume-acceptance-preparation-01/tests/test_resume_preparation.py",
+      "bytes": 8047,
+      "sha256": "406a7df219f45834d0be6b2744ba1c65ad4e7edd670be57be2c90d5688a9b570"
+    }
+  ]
+}

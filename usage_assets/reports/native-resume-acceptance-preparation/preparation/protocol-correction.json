@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "utc": "2026-10-10T12:45:56.243482+00:00",
+  "supersedes_only_this_design_scope": "native-resume-acceptance-plan-01 report.optimizer_acceptance.finetune optional/no-gradient std wording",
+  "correction": "The exact warmup0 mixed recipe includes std in the full loss graph and optimizer. Require std group3 state16\u219224\u219240, LR0 and byte-identical finite std weights. Missing std state is rejected. Pure std remains outside the optimizer. No native load/learning code is changed.",
+  "actual_cpu_schema": {
+    "path": "/home/dzp/projects/php_parkour/outputs/research/native-resume-acceptance-preparation-01/cpu-tests/actual-existing-optimizer-schema.json",
+    "bytes": 17829,
+    "sha256": "fce6741afb42c21d98d4482f557e164147a79c04ab86e46ee30c78ca25cc8520"
+  },
+  "native_resume_verified": false,
+  "old_readonly_plan_files_preserved": true,
+  "additional_exact_acceptance_requirements": [
+    "PT iteration/experiment_config fields are top-level; students num_teachers/readiness are PT fields",
+    "Require finite Loss/* and Train/num_samples at native update steps; reward/episode scalars are conditional",
+    "HSSIM parent pipeline selects adapter; actual activation sets native exported HSSIM to canonical train-python, while captured TRAIN_COMMAND retains adapter",
+    "Read/retain native train.log DEBUG sink for INFO load/shutdown; warning-level parent stdout is retained separately"
+  ]
+}
