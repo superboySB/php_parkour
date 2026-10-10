@@ -20,6 +20,10 @@
 
 15:38 UTC完整逐帧批次已实际启动，同容器的预启动计划与CPU计划逐字节一致；[15:40 UTC固定启动见证及首例原始产物](usage_assets/reports/reference629-native-start/index.md)记录4例完成、1例运行、0例执行失败。宿主父进程仍在等待，不存在整批完成或1258映射验收结论；视频全片解码将在物理运行结束后另做CPU后验。
 
+[两例真实CPU后验](usage_assets/reports/reference629-cpu-preview/index.md)已读取这次逐帧批次的920帧/18.4秒和300帧/6秒原生产物，共核对1220帧完整15维指令、4个正常退出worker及2个原始MP4全片解码。实际validator与独立宿主父进程均退出0，原始5184份源码、发布模型与冻结overlay未变。最终211项组合CPU检查也已通过。这个报告明确为`preview_validated`，不替代完整629终态；[原片与逐段指令](usage_assets/reports/reference629-cpu-preview/playback.html)保留真实高度/倾斜阈值结果。生产publisher真实预览及浏览器均退出0，完整发布入口则对尚未结束的批次真实拒绝并退出2；原计划103MB与运行中矩阵119MB的分块还原SHA一致。
+
+![逐帧批次首例的原始MuJoCo截图](usage_assets/reports/reference629-cpu-preview/native/case-0000/video/episode_0_1791646765.png)
+
 教师、纯DAgger和DAgger+PPO的[真实断点续训](usage_assets/reports/native-resume-acceptance/index.md)已完成：6次原生训练，历史3步加新15步完成原18步；优化器、权重更新、冻结专家、TensorBoard、最终ONNX与skip均通过。保存iter1后原生resume会重做index1，target4最终为iter3；这不是仅新增两轮或完整随机状态恢复。首次过严日志检查失败和一次GPU占用门卫拒绝均原样保留。
 
 后台交接已于14:37 UTC[替换为恢复生命周期版本](usage_assets/reports/final-student-delivery-waiter-recovered/index.md)，首次真实SSH仍为waiting，未fetch/prepare/native。官方五教师、两学生完整日程、888逐源尝试及最终自训学生58例仍待原任务完成，不能宣称全部复现结束。

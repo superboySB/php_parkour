@@ -446,6 +446,8 @@ DDS接口为G1/HG/PR路径。早期`far-unitree-sdk==0.1.6`只读wheel审计确�
 
 [实际341帧闭环](usage_assets/reports/reference-command-native-pilot/index.md)验证了0→6→7→6→0的完整标签、原生录制、两worker退出与视频；最小upright cosine约0.138，触发倾斜阈值0.18秒，技能成功仍未验证。原629个恒定前进rollout、全629参考动作数组生成、这一项逐帧策略试跑分别证明不同范围。该输入模式不改变训练状态维度、reward、loss或教师label；学生仍只靠本体状态、指令和深度latent产生29维动作。
 
+整批逐帧运行后的[CPU后验](scripts/research/validate_scene_matrix.py)重新读取封存结果，核对参考标签、原生录制、整数控制时钟、worker退出和原视频完整解码，不训练或更新策略。[两例真实后验](usage_assets/reports/reference629-cpu-preview/index.md)已核对920+300帧及两段完整录像；它的局部预览状态不能替代完整629终态、宿主映射或真实障碍成功验收。
+
 ## 7. Real2sim2real 的实现与验证边界
 
 这里的real2sim先从已经retarget到G1的发布数据开始。上游论文描述人类动作→OmniRetarget→G1技能与人工box/entry标注；本次没有采集真人动作，也没有从原始MoCap重跑retarget。Motion matching产出运动学reference；Isaac中的teacher/student才学习在接触与动力学下执行。真实来源及格式见第2节与 [动作数据审计](usage_assets/reports/technical-audit/motion-data.json)。

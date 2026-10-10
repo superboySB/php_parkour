@@ -337,3 +337,194 @@ def test_file_changed_after_seal_verification_is_rejected_at_copy(fixture, monke
     with pytest.raises(ValueError, match='changed before copy'):
         pub.publish(fixture.args)
     assert injected and not fixture.args.output.exists()
+
+
+@pytest.fixture
+def reference_fixture(fixture, monkeypatch):
+    """Two synthetic reference cases; only outer process guards are isolated.
+
+    No fixture array/video/receipt below is claimed to be a native execution.
+    Real CPU reports are produced separately by validate_scene_matrix.py.
+    """
+    f = fixture
+    f.plan.update(reference_commands=True, seconds_per_configuration=None, seconds_per_scenario=None)
+    for index, row in enumerate(f.plan['selections']):
+        frames = 3 + index * 2
+        codes = [0] + [6 + index] * (frames - 1)
+        motion = row['source_files'][0]
+        row.update(reference_clip_seconds=frames / 50, policy_seconds=frames / 50,
+                   reference_commands={**motion, 'fps': 50, 'frames': frames, 'codes': codes,
+                                       'commands': [[float(column == code) for column in range(15)] for code in codes],
+                                       'unique_codes': sorted(set(codes)), 'root_body': 'pelvis', 'root_body_index': 0,
+                                       'quaternion_order': 'wxyz', 'root_xy': [0., 0.], 'root_quat_wxyz': [1., 0., 0., 0.], 'root_yaw': 0.})
+        row['launch'] += ['--reference-motion', motion['path'], '--reference-spawn', '--record-policy']
+    f.plan['total_policy_seconds'] = sum(row['policy_seconds'] for row in f.plan['selections'])
+    f.plan.pop('plan_sha256'); f.plan['plan_sha256'] = pub.identity(f.plan)
+    f.args.expected_plan_sha256 = f.plan['plan_sha256']
+    for planned, row in zip(f.plan['selections'], f.matrix['selections']):
+        row.update(copy.deepcopy(planned))
+        frames = planned['reference_commands']['frames']
+        result = row['result']
+        result['config'].update(commands=planned['reference_commands']['codes'], duration=frames / 50,
+                                record_policy=True, reference_spawn=True,
+                                reference_motion={k:v for k,v in planned['reference_commands'].items() if k != 'commands'})
+        result['simulation']['policy_simulation_seconds'] = frames / 50 + .002
+        result['inference']['ticks'] = frames
+        recording = Path(row['output']) / 'policy-recording/fixture.npz'
+        recording.parent.mkdir(); recording.write_bytes(b'Synthetic recording, not native NPZ evidence')
+        result['inference']['lifecycle']['recording_toggle_and_stop_autosave'] = [
+            {'file':'policy-recording/fixture.npz', 'frames':frames, 'fps':50,
+             'qpos_shape':[frames,36], 'vel_cmd_shape':[frames,15]}]
+        seal_path = Path(row['attempts'][0]['evidence']['path'])
+        seal = json.loads(seal_path.read_text())
+        seal['case_input']['plan_sha256'] = f.plan['plan_sha256']
+        seal['case_input']['launch'] = planned['launch']
+        seal['execution']['launch'] = planned['launch']
+        seal['expected_policy_ticks'] = frames
+        row['attempts'][0]['launch'] = planned['launch']
+        write(seal_path, seal)
+    f.matrix.update({key: copy.deepcopy(value) for key,value in f.plan.items() if key not in ('status','selections')})
+    for index in range(len(f.matrix['selections'])):
+        reseal(f,index)
+    cases = []
+    for row in f.matrix['selections']:
+        seal=json.loads(Path(row['attempts'][0]['evidence']['path']).read_text())
+        video=Path(row['output'])/'video/fixture.mp4'
+        cases.append({'case_id':row['case_id'],'native_result_sha256':seal['result_sha256'], 'parent_returncode':0,
+                      'worker_receipts':seal['worker_receipts'],'worker_exit0_empty_groups':2,
+                      'policy_ticks':row['reference_commands']['frames'],'policy_seconds':row['policy_seconds'],
+                      'command_runs':pub.command_runs(row['reference_commands']['codes']),
+                      'reference_commands':True,'reference_motion':row['source_files'][0],
+                      'policy_recording':record(Path(row['output'])/'policy-recording/fixture.npz'),
+                      'videos':[{**record(video),'command':['ffmpeg','-xerror','-i',str(video),'-f','null','-'],
+                                 'returncode':0,'full_decode':True,'stderr':''}],
+                      'quality_verified':False,'obstacle_course_completion_verified':False})
+    records=[f.plan['source_matrix_record'],*f.plan['dependencies'],*f.plan['models'],
+             *(r for row in f.plan['selections'] for r in row['source_files'])]
+    cpu={'status':'preview_validated','preview':True,'completion_verified':False,'reference_commands':True,
+         'native_plan_sha256':f.plan['plan_sha256'],'native_plan_file_sha256':pub.digest(f.args.plan),
+         'matrix_sha256':pub.digest(f.args.matrix),'planned_configurations':2,'planned_scenarios':2,
+         'planned_total_policy_ticks':8,'total_policy_ticks':8,'configurations':2,'scenarios':2,
+         'worker_exit0_empty_group_count':4,'full_decoded_mp4_count':2,'cases':cases,
+         'selected_case_ids':[row['case_id'] for row in f.plan['selections']],
+         'inputs':[dict(r,bytes=r.get('bytes',r.get('size'))) for r in records],
+         'matrix_validator':f.plan['dependencies'][0], 'quality_verified':False,'obstacle_course_completion_verified':False}
+    f.context={'cpu_validation':cpu,'plan_file_sha256':pub.digest(f.args.plan),'parent_start':{},'parent_exit':None}
+    f.args.reference_cohort=f.args.output.parent/'synthetic-cohort'
+    f.args.preview_case_count=2;f.args.output=pub.ROOT/'outputs/research/reference-preview'
+    f.args.parent_start=pub.ROOT/'host/native-parent-start.json';write(f.args.parent_start,{})
+    f.args.parent_exit=None
+    f.args.cpu_validation=pub.ROOT/'host/cpu-validation.json';write(f.args.cpu_validation,cpu)
+    f.args.cpu_execution_receipt=pub.ROOT/'host/cpu-execution.json'
+    f.args.cpu_parent_start=pub.ROOT/'host/cpu-parent-start.json';write(f.args.cpu_parent_start,{})
+    f.args.cpu_parent_exit=pub.ROOT/'host/cpu-parent-exit.json';write(f.args.cpu_parent_exit,{})
+    execution={'helper':record(f.args.driver_wrapper),'validation_helper':record(f.args.driver_wrapper)}
+    write(f.args.cpu_execution_receipt,execution)
+    f.receipt.update(helper=record(f.args.driver_wrapper),source_before={'freeze_manifest':record(f.args.driver_wrapper),
+                     'observer':record(f.args.driver_wrapper)},overlay={})
+    f.save()
+    monkeypatch.setattr(pub,'reference_namespace',lambda base,receipt: [])
+    monkeypatch.setattr(pub,'validate_reference_driver',lambda *args,**kwargs:None)
+    monkeypatch.setattr(pub,'validate_cpu_execution',lambda *args,**kwargs:None)
+    return f
+
+
+def test_reference_preview_uses_variable_frames_and_exact_sequence(reference_fixture):
+    f=reference_fixture
+    summary=pub.publish(f.args)
+    assert summary['preview'] and not summary['configuration_coverage_complete']
+    assert summary['reference_frames']==8 and summary['reference_policy_seconds']==.16
+    assert summary['full_video_decode_verified'] and not summary['native_parent_exit_verified']
+    cases=json.loads((f.args.output/'cases.json').read_text())
+    assert [case['policy_ticks'] for case in cases]==[3,5]
+    assert all(case['command'] is None and case['reference_fps']==50 for case in cases)
+    assert cases[0]['command_runs']==[{'start_frame':0,'end_frame_exclusive':1,'code':0,'seconds':.02},
+                                      {'start_frame':1,'end_frame_exclusive':3,'code':6,'seconds':.04}]
+    page=(f.args.output/'playback.html').read_text()
+    assert '50Hz reference逐段代码序列' in page and 'r.reference_commands?' in page
+    assert 'reference_motion_sha256' in (f.args.output/'cases.csv').read_text()
+    manifest=json.loads((f.args.output/'evidence-manifest.json').read_text())
+    assert all(pub.digest(f.args.output/row['path'])==row['sha256'] for row in manifest['files'])
+
+
+@pytest.mark.parametrize('fault',['fps','onehot','code','duration','constant_launch'])
+def test_reference_plan_rejects_repaired_or_ambiguous_labels(reference_fixture,fault):
+    row=copy.deepcopy(reference_fixture.plan['selections'][0])
+    if fault=='fps':row['reference_commands']['fps']=49
+    elif fault=='onehot':row['reference_commands']['commands'][0][1]=1.
+    elif fault=='code':row['reference_commands']['codes'][0]=12
+    elif fault=='duration':row['policy_seconds']+=.02
+    else:row['launch']+=['--commands','6']
+    with pytest.raises(ValueError,match='Reference'):pub.reference_info(row)
+
+
+def test_reference_cpu_preview_never_certifies_full_publication(reference_fixture):
+    f=reference_fixture
+    with pytest.raises(ValueError,match='CPU validation'):
+        pub.validate_cpu_report(f.context['cpu_validation'],f.plan,pub.digest(f.args.matrix),pub.digest(f.args.plan),False,f.matrix['selections'])
+
+
+def test_reference_preview_binds_selected_bytes_when_live_matrix_progress_changes(reference_fixture):
+    f=reference_fixture
+    historical=copy.deepcopy(f.context['cpu_validation'])
+    historical['matrix_sha256']='0'*64
+    matched=pub.validate_cpu_report(historical,f.plan,pub.digest(f.args.matrix),pub.digest(f.args.plan),True,f.matrix['selections'])
+    assert set(matched)=={row['case_id'] for row in f.plan['selections']}
+    historical.update(status='passed',preview=False,completion_verified=True)
+    with pytest.raises(ValueError,match='CPU validation'):
+        pub.validate_cpu_report(historical,f.plan,pub.digest(f.args.matrix),pub.digest(f.args.plan),False,f.matrix['selections'])
+
+
+@pytest.mark.parametrize('fault',['decode','sequence','recording','worker_sha'])
+def test_reference_cpu_case_proof_is_bound_to_original_artifacts(reference_fixture,fault):
+    f=reference_fixture;row=f.matrix['selections'][0]
+    case=copy.deepcopy(f.context['cpu_validation']['cases'][0])
+    if fault=='decode':case['videos'][0]['returncode']=1
+    elif fault=='sequence':case['command_runs'][0]['code']=1
+    elif fault=='recording':case['policy_recording']['sha256']='0'*64
+    else:case['worker_receipts'][0]['sha256']='0'*64
+    directory=Path(row['output']);seal=json.loads((directory/'case-evidence.json').read_text())
+    with pytest.raises(ValueError,match='CPU|changed retained file'):
+        pub.validate_cpu_case(case,f.plan,row,row['result'],seal,directory)
+
+
+def test_reference_cannot_fall_back_to_legacy_driver_receipt(reference_fixture):
+    f=reference_fixture
+    with pytest.raises(ValueError,match='explicit actual controller/CPU context'):
+        pub.validate_all(f.plan,f.matrix,f.receipt,f.launch,f.args.driver_wrapper,pub.digest(f.args.matrix),
+                         expected_plan=f.plan['plan_sha256'],expected_harness=f.args.expected_harness_sha256)
+
+
+@pytest.mark.parametrize('fault',[None,'missing','nonzero','changed_identity','signal','helper'])
+def test_actual_parent_wait_and_source_identity_are_required(tmp_path,fault):
+    helper=tmp_path/'controller.py';helper.write_text('# Synthetic parent contract fixture only\n')
+    start={'argv':['/usr/bin/python3','-B',str(helper.resolve()),'--root-authorized-start'],
+           'helper_sha256':pub.digest(helper),'pid':101,'stat':'synthetic raw identity','boot_id':'fixture'}
+    end={**start,'actual_wait_returncode':0,'finished_utc':'fixture-terminal','pending_signals':[]}
+    if fault=='missing':end=None
+    elif fault=='nonzero':end['actual_wait_returncode']=143
+    elif fault=='changed_identity':end['pid']=102
+    elif fault=='signal':end['pending_signals']=[15]
+    elif fault=='helper':helper.write_text('# Changed controller source\n')
+    if fault:
+        with pytest.raises(ValueError,match='actual parent exit0'):pub.validate_parent_exit(start,end,helper)
+    else:pub.validate_parent_exit(start,end,helper)
+
+
+@pytest.mark.parametrize('fault',[None,'gap','tamper'])
+def test_chunk_restore_preserves_whole_bytes_or_refuses_bad_parts(tmp_path,fault):
+    package=tmp_path/'package';package.mkdir()
+    payload=b'Original\x00JSON\nbytes'
+    chunks=[]
+    for index,(offset,value) in enumerate(((0,payload[:5]),(5,payload[5:]))):
+        part=package/f'part{index}.bin';part.write_bytes(value)
+        chunks.append({'path':part.name,'offset':offset,'bytes':len(value),'sha256':pub.digest(part)})
+    if fault=='gap':chunks[1]['offset']+=1
+    if fault=='tamper':(package/'part1.bin').write_bytes(b'changed')
+    write(package/'raw.json.chunks.json',{'original_relative':'raw/raw.json','bytes':len(payload),
+          'sha256':hashlib.sha256(payload).hexdigest(),'chunks':chunks})
+    if fault:
+        with pytest.raises(ValueError,match='archive chunk'):pub.restore_chunks(package,tmp_path/'restored')
+    else:
+        result=pub.restore_chunks(package,tmp_path/'restored')
+        assert result['status']=='restored_original_bytes' and (tmp_path/'restored/raw/raw.json').read_bytes()==payload

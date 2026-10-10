@@ -436,7 +436,52 @@ docker exec php-parkour-research \
 
 完整逐帧批次已于15:38 UTC在独立容器实际启动，[15:40固定见证](usage_assets/reports/reference629-native-start/index.md)记录4例完成、1例运行、0例执行失败及原始controller。当前进度在`outputs/research/reference-native629-01/outputs/reference629/matrix.json`；真正的宿主父进程退出记录将写入`outputs/research/reference629-native-parent-01/process-exit.json`。它持有同一GPU互斥锁，旧最终学生交接会等待释放；当前尚无整批1258映射及视频全片解码结论。
 
-旧[完整发布工具](scripts/research/publish_full_scene_matrix.py)绑定旧driver路径和收据格式，不能直接发布当前隔离的fresh629批次；独立审查已定位命名空间、driver合同、冻结源码及完整后验绑定的缺口。[兼容性审查及固定依赖](usage_assets/reports/fresh629-publisher-compatibility-review/index.md)。初版24项CPU检查和两例浏览器预览通过，新版另有34项CPU回归，这些历史结果不代表新629完成。[首次失败原字节与时间线](usage_assets/reports/sim2sim-worker-failure/report.md)保留父进程exit1，不能只凭worker JSON补造成功。旧工具仍须显式指定独立冻结的`--expected-plan-sha256`与`--expected-harness-sha256`，schema3检查两worker退出与三份进程收据，schema2只允许历史预览。[旧工具命令与初版检查](usage_assets/reports/full-scene-publisher/summary.md)、[新版回归](usage_assets/reports/publisher-schema3-review/review.md)。
+物理矩阵完整结束后，[CPU后验工具](scripts/research/validate_scene_matrix.py)会重新检查封存文件、每段实际帧数、原生worker退出、逐帧指令与录制NPZ，并用`ffmpeg -xerror`完整解码每个原始MP4。下例使用同一镜像另起CPU容器，源码、输入与原始输出只读，只写独立报告目录；保留生成计划时的源码和文件路径：
+
+```bash
+mkdir -p outputs/research/validation-reference-all-new
+docker run --rm --runtime runc --network none \
+  --entrypoint /opt/php/bin/inference-python \
+  -e NVIDIA_VISIBLE_DEVICES=void -e CUDA_VISIBLE_DEVICES= \
+  -e PYTHONDONTWRITEBYTECODE=1 \
+  --mount "type=bind,src=$PWD,dst=/workspace/php_parkour,readonly" \
+  --mount "type=bind,src=$PWD/outputs/research,dst=/outputs,readonly" \
+  --mount "type=bind,src=$PWD/outputs/research/assets,dst=/data/assets,readonly" \
+  --mount "type=bind,src=$PWD/outputs/research/validation-reference-all-new,dst=/validation" \
+  "$(docker inspect --format '{{.Image}}' php-parkour-research)" \
+  -B /workspace/php_parkour/scripts/research/validate_scene_matrix.py \
+  --plan /outputs/sim2sim/reference-all-new/plan.json \
+  --matrix /outputs/sim2sim/reference-all-new/matrix.json \
+  --output /validation/validation.json
+```
+
+完整模式拒绝仍运行、过滤、resume或重试的矩阵。仅检查已完成项时可重复传`--preview-case-id`和精确case ID，报告固定为`preview_validated`、`completion_verified=false`，不能作为完整发布凭据。[两例真实CPU后验](usage_assets/reports/reference629-cpu-preview/index.md)已验证920帧与300帧、4个原生worker、2个原MP4完整解码；最终211项组合CPU检查另覆盖范围隔离、损坏文件拒绝与publisher门槛。CPU报告只证明其声明的文件与解码范围，整个native宿主父进程真实退出、1258宿主映射和容器停止仍需独立验收。
+
+[完整发布工具](scripts/research/publish_full_scene_matrix.py)新增显式`--reference-cohort`入口，原constant收据合同保留。reference完整发布需要原native controller及其独立parent真实终态、1258个正常worker及1258个宿主映射、CPU全片解码报告、CPU实际执行器与独立parent的退出0，以及原容器停止和冻结输入未变。旧收据不能被改写成新格式。两例真实预览和浏览器检查已经退出0，完整入口对当前局部报告实际拒绝并退出2。[原始预览、拒绝与浏览器记录](usage_assets/reports/reference629-cpu-preview/index.md)。
+
+本次批次的完整命令如下；**对应native和CPU终态文件尚未全部产生，现在不能执行为完整发布**。它们到齐并通过门槛后，使用全新输出目录运行，不加`--preview-case-count`：
+
+```bash
+python3 scripts/research/publish_full_scene_matrix.py \
+  --reference-cohort outputs/research/reference-native629-01 \
+  --plan outputs/research/reference629-cpu-plan-01/checks/reference629-plan.json \
+  --matrix outputs/research/reference-native629-01/outputs/reference629/matrix.json \
+  --driver-wrapper outputs/research/reference629-native-controller-01.py \
+  --driver-receipt outputs/research/reference-native629-01/host/launch-receipt.json \
+  --parent-start outputs/research/reference629-native-parent-01/process-start.json \
+  --parent-exit outputs/research/reference629-native-parent-01/process-exit.json \
+  --cpu-validation outputs/research/reference629-cpu-full-01/validation/validation.json \
+  --cpu-execution-receipt outputs/research/reference629-cpu-full-01/host/execution.json \
+  --cpu-parent-start outputs/research/reference629-cpu-full-parent-01/process-start.json \
+  --cpu-parent-exit outputs/research/reference629-cpu-full-parent-01/process-exit.json \
+  --expected-plan-sha256 9fad5096d831d5c83d26f126f36a6b30d1e8d3b57b802678c5cf6f4915b7455e \
+  --expected-harness-sha256 599c75df14c5ac902d57f88bfd3d752317e332abce5751153bef8d20d8d0bb70 \
+  --output usage_assets/reports/reference629-full
+```
+
+publisher及`restore-chunks`只使用宿主标准库复制、核验和生成页面，不安装包、不启动科学推理。大于25MB的原始JSON/观察流会保存为连续字节块；`python3 scripts/research/publish_full_scene_matrix.py restore-chunks --package 包路径 --output 全新恢复目录`可核验offset、每块SHA和whole SHA并恢复原字节。本次已实际恢复103MB计划与119MB运行中矩阵。预览允许其他配置进度变化，但核对同plan和所选产物，并同时保留CPU历史matrix SHA与当前预览SHA；完整模式要求两者相等。
+
+该publisher的原constant路径绑定旧driver路径和收据格式；此前不能直接发布隔离fresh629批次的历史审查仍保留，[兼容性审查及固定依赖](usage_assets/reports/fresh629-publisher-compatibility-review/index.md)。初版24项CPU检查和两例浏览器预览通过，新版另有34项CPU回归，这些历史结果不代表新629完成。[首次失败原字节与时间线](usage_assets/reports/sim2sim-worker-failure/report.md)保留父进程exit1，不能只凭worker JSON补造成功。工具仍须显式指定独立冻结的`--expected-plan-sha256`与`--expected-harness-sha256`，schema3检查两worker退出与三份进程收据，schema2只允许历史预览。[旧工具命令与初版检查](usage_assets/reports/full-scene-publisher/summary.md)、[新版回归](usage_assets/reports/publisher-schema3-review/review.md)。
 
 主Dockerfile与train/inference约束现已使用SDK0.1.8；Holosoma的unitree extra硬钉0.1.6，因此安装采用booster extra加显式SDK0.1.8，其他版本保持约束。新统一镜像`2be18521…`由干净提交`6cb2ae2`完整构建，实际断网、无宿主源码挂载的265版本核验、Isaac16环境两轮训练/权重更新、12组教师ONNX推理及TensorBoard均通过。[新统一镜像原始证据](usage_assets/reports/sdk018-canonical-offline/summary.md)。原0.1.6镜像及云端官方训练容器不替换；新镜像另行完整上传并核验，旧训练不因升级中断。
 
