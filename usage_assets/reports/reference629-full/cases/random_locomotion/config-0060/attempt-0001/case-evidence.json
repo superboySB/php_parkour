@@ -1,0 +1,206 @@
+{
+  "schema_version": 1,
+  "case_input": {
+    "plan_sha256": "9fad5096d831d5c83d26f126f36a6b30d1e8d3b57b802678c5cf6f4915b7455e",
+    "image_id": "sha256:2be18521015b2a84ef7a4442af9a94ef041a19feb9ce385ae15424b1dc158d8f",
+    "source_matrix_sha256": "ed413845f4b82156964e11ad6ee3faca30e3c0b10dbfdc295a8284f9ee3308ed",
+    "model_sha256": {
+      "depth_backbone.onnx": "5b22466a218944e3b0ab0f4f82a910e3eec35375ee03e7fb94eb65fa88431b56",
+      "student.onnx": "e426c4206181d511b838c76efc48e43636299b76cb5a15183977011589931628"
+    },
+    "case_id": "random_locomotion:0060:cfg0060_stand_2.0s_right_45_1.6s_stand_2.0s",
+    "source_files": [
+      {
+        "path": "/workspace/php_parkour/outputs/research/motion-matching/scenarios/random_locomotion/cfg0060_stand_2.0s_right_45_1.6s_stand_2.0s_motion.npz",
+        "size": 516896,
+        "sha256": "9e9e8afbc24987a932975b82a59e9e99ff840b06def62e677d1b0dd16eb77e71"
+      },
+      {
+        "path": "/workspace/php_parkour/outputs/research/motion-matching/scenarios/random_locomotion/cfg0060_stand_2.0s_right_45_1.6s_stand_2.0s_terrain.npy",
+        "size": 128,
+        "sha256": "786cfc497279cf8f9e6108a1c9162192d99c11482dd43d35c75f65f7427a4492"
+      },
+      {
+        "path": "/workspace/php_parkour/outputs/research/motion-matching/scenarios/random_locomotion/cfg0060_stand_2.0s_right_45_1.6s_stand_2.0s_terrain.obj",
+        "size": 457,
+        "sha256": "731ddbbd5c70a950ead22961ea4f2fd77cbd9eec6a4f5af314b051e6259775aa"
+      }
+    ],
+    "launch": [
+      "/opt/php/envs/inference/bin/python",
+      "/workspace/php_parkour/scripts/research/sim2sim.py",
+      "--models",
+      "/data/assets/student",
+      "--terrain",
+      "custom",
+      "--mesh",
+      "/workspace/php_parkour/outputs/research/motion-matching/scenarios/random_locomotion/cfg0060_stand_2.0s_right_45_1.6s_stand_2.0s_terrain.obj",
+      "--reference-motion",
+      "/workspace/php_parkour/outputs/research/motion-matching/scenarios/random_locomotion/cfg0060_stand_2.0s_right_45_1.6s_stand_2.0s_motion.npz",
+      "--reference-spawn",
+      "--record-policy",
+      "--seed",
+      "42",
+      "--gl",
+      "egl",
+      "--python-faulthandler",
+      "--sim-python",
+      "/opt/php/bin/train-python",
+      "--inference-python",
+      "/opt/php/bin/inference-python",
+      "--output",
+      "/outputs/reference629/random_locomotion/config-0060-cfg0060_stand_2.0s_right_45_1.6s_stand_2.0s-97d189fa05dd"
+    ]
+  },
+  "files": [
+    {
+      "path": "/outputs/reference629/random_locomotion/config-0060-cfg0060_stand_2.0s_right_45_1.6s_stand_2.0s-97d189fa05dd/control-ack.json",
+      "sha256": "e6dfd9c06ddca66c618e39af2816616c9f94c366b5571aefcf7d5dec7b85a905",
+      "bytes": 19
+    },
+    {
+      "path": "/outputs/reference629/random_locomotion/config-0060-cfg0060_stand_2.0s_right_45_1.6s_stand_2.0s-97d189fa05dd/inference-process-start.json",
+      "sha256": "582a673813cdc23785bb12de4aa2a0242123d318899767ea8081c88b241203e6",
+      "bytes": 960
+    },
+    {
+      "path": "/outputs/reference629/random_locomotion/config-0060-cfg0060_stand_2.0s_right_45_1.6s_stand_2.0s-97d189fa05dd/inference.json",
+      "sha256": "7801ac5e11f431b7135dc463dc1961dc6a7468a1f648429071272a6171ef0dbe",
+      "bytes": 211585
+    },
+    {
+      "path": "/outputs/reference629/random_locomotion/config-0060-cfg0060_stand_2.0s_right_45_1.6s_stand_2.0s-97d189fa05dd/inference.log",
+      "sha256": "3bbd3a3d863b29861db37b6b2d3d70f69780528e9ef41ac44c6f4720e4fde33e",
+      "bytes": 43574
+    },
+    {
+      "path": "/outputs/reference629/random_locomotion/config-0060-cfg0060_stand_2.0s_right_45_1.6s_stand_2.0s-97d189fa05dd/policy-ready.json",
+      "sha256": "b41dff7b49280ed37d3ee7614bc83fe393de5e515481bc39f9d4712b4edcd141",
+      "bytes": 55
+    },
+    {
+      "path": "/outputs/reference629/random_locomotion/config-0060-cfg0060_stand_2.0s_right_45_1.6s_stand_2.0s-97d189fa05dd/policy-recording/rollout_duration5.6s_motion.npz",
+      "sha256": "d37a4db7aafafc383072d6cea3c72590cfbc72788bc27909688f1e8a5910a945",
+      "bytes": 57466
+    },
+    {
+      "path": "/outputs/reference629/random_locomotion/config-0060-cfg0060_stand_2.0s_right_45_1.6s_stand_2.0s-97d189fa05dd/released.json",
+      "sha256": "101c40a7725c13cdb6bde8e83ee6babfd5333913b71c036c66a53187dac871ef",
+      "bytes": 2204
+    },
+    {
+      "path": "/outputs/reference629/random_locomotion/config-0060-cfg0060_stand_2.0s_right_45_1.6s_stand_2.0s-97d189fa05dd/result.json",
+      "sha256": "deade3a1749cb2dacde68b095d70b2afea4d16fb3a9570119abeae41aee95063",
+      "bytes": 56868
+    },
+    {
+      "path": "/outputs/reference629/random_locomotion/config-0060-cfg0060_stand_2.0s_right_45_1.6s_stand_2.0s-97d189fa05dd/run.json",
+      "sha256": "758646a7d2c9d0ec07bd0ce222efe97bd5762ed250dc1832520f45b1c04ec0bf",
+      "bytes": 6036
+    },
+    {
+      "path": "/outputs/reference629/random_locomotion/config-0060-cfg0060_stand_2.0s_right_45_1.6s_stand_2.0s-97d189fa05dd/sim-clock.json",
+      "sha256": "dc18cf65328a21365b5734ec4aaf8870b9b6562b68c0092f5bd56ce91b994805",
+      "bytes": 252
+    },
+    {
+      "path": "/outputs/reference629/random_locomotion/config-0060-cfg0060_stand_2.0s_right_45_1.6s_stand_2.0s-97d189fa05dd/sim-ready.json",
+      "sha256": "23dd1346a3c670e35587523bd5320b15ef51e2e9077db14cfa0b403ff543a97b",
+      "bytes": 2606
+    },
+    {
+      "path": "/outputs/reference629/random_locomotion/config-0060-cfg0060_stand_2.0s_right_45_1.6s_stand_2.0s-97d189fa05dd/simulation.json",
+      "sha256": "10bdbf00c57c6ef0f0c61bb1b58e70b3927e74c6020fc5317d4d1924b9e548a8",
+      "bytes": 906
+    },
+    {
+      "path": "/outputs/reference629/random_locomotion/config-0060-cfg0060_stand_2.0s_right_45_1.6s_stand_2.0s-97d189fa05dd/simulator-process-start.json",
+      "sha256": "5886b7d3448834350d50b702cebefa93cc7f4334a9c3e4e461951be4658ae7de",
+      "bytes": 960
+    },
+    {
+      "path": "/outputs/reference629/random_locomotion/config-0060-cfg0060_stand_2.0s_right_45_1.6s_stand_2.0s-97d189fa05dd/simulator.log",
+      "sha256": "ee367c216e78674c36b2dc1e935b602fb1eaca0a2e6da1005e2fe899fbd6d433",
+      "bytes": 30708
+    },
+    {
+      "path": "/outputs/reference629/random_locomotion/config-0060-cfg0060_stand_2.0s_right_45_1.6s_stand_2.0s-97d189fa05dd/stop",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/outputs/reference629/random_locomotion/config-0060-cfg0060_stand_2.0s_right_45_1.6s_stand_2.0s-97d189fa05dd/trajectory.csv",
+      "sha256": "a6d9e80460579ca834ac51ec3fde05454a30b50959158c608e006f4af632f076",
+      "bytes": 52745
+    },
+    {
+      "path": "/outputs/reference629/random_locomotion/config-0060-cfg0060_stand_2.0s_right_45_1.6s_stand_2.0s-97d189fa05dd/video/episode_0_1791648479.mp4",
+      "sha256": "84fabe535c7234316819b9ead4887e41f796b61ff3c4e195b84ceb383ea97286",
+      "bytes": 209077
+    },
+    {
+      "path": "/outputs/reference629/random_locomotion/config-0060-cfg0060_stand_2.0s_right_45_1.6s_stand_2.0s-97d189fa05dd/video/episode_0_1791648479.png",
+      "sha256": "6e3e66c3fd1a6186ab7a56b6c9868a4e5a9c2cb8ea1b0d9f764e45defaf3d560",
+      "bytes": 27359
+    },
+    {
+      "path": "/outputs/reference629/random_locomotion/config-0060-cfg0060_stand_2.0s_right_45_1.6s_stand_2.0s-97d189fa05dd/worker-processes.json",
+      "sha256": "7cb683fd62d5158d0024eec89518b43bbaacaa1f1862abd8a4c58a90e9193929",
+      "bytes": 35626
+    }
+  ],
+  "worker_receipts": [
+    {
+      "path": "/outputs/reference629/random_locomotion/config-0060-cfg0060_stand_2.0s_right_45_1.6s_stand_2.0s-97d189fa05dd/worker-processes.json",
+      "sha256": "7cb683fd62d5158d0024eec89518b43bbaacaa1f1862abd8a4c58a90e9193929",
+      "bytes": 35626
+    },
+    {
+      "path": "/outputs/reference629/random_locomotion/config-0060-cfg0060_stand_2.0s_right_45_1.6s_stand_2.0s-97d189fa05dd/simulator-process-start.json",
+      "sha256": "5886b7d3448834350d50b702cebefa93cc7f4334a9c3e4e461951be4658ae7de",
+      "bytes": 960
+    },
+    {
+      "path": "/outputs/reference629/random_locomotion/config-0060-cfg0060_stand_2.0s_right_45_1.6s_stand_2.0s-97d189fa05dd/inference-process-start.json",
+      "sha256": "582a673813cdc23785bb12de4aa2a0242123d318899767ea8081c88b241203e6",
+      "bytes": 960
+    }
+  ],
+  "execution": {
+    "output": "/outputs/reference629/random_locomotion/config-0060-cfg0060_stand_2.0s_right_45_1.6s_stand_2.0s-97d189fa05dd",
+    "launch": [
+      "/opt/php/envs/inference/bin/python",
+      "/workspace/php_parkour/scripts/research/sim2sim.py",
+      "--models",
+      "/data/assets/student",
+      "--terrain",
+      "custom",
+      "--mesh",
+      "/workspace/php_parkour/outputs/research/motion-matching/scenarios/random_locomotion/cfg0060_stand_2.0s_right_45_1.6s_stand_2.0s_terrain.obj",
+      "--reference-motion",
+      "/workspace/php_parkour/outputs/research/motion-matching/scenarios/random_locomotion/cfg0060_stand_2.0s_right_45_1.6s_stand_2.0s_motion.npz",
+      "--reference-spawn",
+      "--record-policy",
+      "--seed",
+      "42",
+      "--gl",
+      "egl",
+      "--python-faulthandler",
+      "--sim-python",
+      "/opt/php/bin/train-python",
+      "--inference-python",
+      "/opt/php/bin/inference-python",
+      "--output",
+      "/outputs/reference629/random_locomotion/config-0060-cfg0060_stand_2.0s_right_45_1.6s_stand_2.0s-97d189fa05dd"
+    ],
+    "log": {
+      "path": "/outputs/reference629/logs/random_locomotion/config-0060/attempt-0001.log",
+      "sha256": "deade3a1749cb2dacde68b095d70b2afea4d16fb3a9570119abeae41aee95063",
+      "bytes": 56868
+    },
+    "returncode": 0
+  },
+  "result_sha256": "deade3a1749cb2dacde68b095d70b2afea4d16fb3a9570119abeae41aee95063",
+  "expected_policy_ticks": 278,
+  "scope": "Native closed-loop execution evidence; survival is heuristic and course completion unverified"
+}

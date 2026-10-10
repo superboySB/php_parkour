@@ -1,0 +1,206 @@
+{
+  "schema_version": 1,
+  "case_input": {
+    "plan_sha256": "9fad5096d831d5c83d26f126f36a6b30d1e8d3b57b802678c5cf6f4915b7455e",
+    "image_id": "sha256:2be18521015b2a84ef7a4442af9a94ef041a19feb9ce385ae15424b1dc158d8f",
+    "source_matrix_sha256": "ed413845f4b82156964e11ad6ee3faca30e3c0b10dbfdc295a8284f9ee3308ed",
+    "model_sha256": {
+      "depth_backbone.onnx": "5b22466a218944e3b0ab0f4f82a910e3eec35375ee03e7fb94eb65fa88431b56",
+      "student.onnx": "e426c4206181d511b838c76efc48e43636299b76cb5a15183977011589931628"
+    },
+    "case_id": "random_locomotion:0009:cfg0009_stand_2.0s_right_90_0.6s_run_right_90_1.3s_run_forward_2.8s_run_right_90_1.5s_right_45_1.1s_stand_2.0s",
+    "source_files": [
+      {
+        "path": "/workspace/php_parkour/outputs/research/motion-matching/scenarios/random_locomotion/cfg0009_stand_2.0s_right_90_0.6s_run_right_90_1.3s_run_forward_2.8s_run_right_90_1.5s_right_45_1.1s_stand_2.0s_motion.npz",
+        "size": 1039160,
+        "sha256": "283c3a4ef1ad6a3bb2e8c914c6cf75ca3cebf983055675031da415d4b358e40b"
+      },
+      {
+        "path": "/workspace/php_parkour/outputs/research/motion-matching/scenarios/random_locomotion/cfg0009_stand_2.0s_right_90_0.6s_run_right_90_1.3s_run_forward_2.8s_run_right_90_1.5s_right_45_1.1s_stand_2.0s_terrain.npy",
+        "size": 12128,
+        "sha256": "04cda2e5882347938ad079e4d203e4e5d6d4258c32e8125ae54a088ae812355b"
+      },
+      {
+        "path": "/workspace/php_parkour/outputs/research/motion-matching/scenarios/random_locomotion/cfg0009_stand_2.0s_right_90_0.6s_run_right_90_1.3s_run_forward_2.8s_run_right_90_1.5s_right_45_1.1s_stand_2.0s_terrain.obj",
+        "size": 7003,
+        "sha256": "312b0e88a13f9c8f579b9d9baa6d83da8a02372e4139c5091e5508ea71084800"
+      }
+    ],
+    "launch": [
+      "/opt/php/envs/inference/bin/python",
+      "/workspace/php_parkour/scripts/research/sim2sim.py",
+      "--models",
+      "/data/assets/student",
+      "--terrain",
+      "custom",
+      "--mesh",
+      "/workspace/php_parkour/outputs/research/motion-matching/scenarios/random_locomotion/cfg0009_stand_2.0s_right_90_0.6s_run_right_90_1.3s_run_forward_2.8s_run_right_90_1.5s_right_45_1.1s_stand_2.0s_terrain.obj",
+      "--reference-motion",
+      "/workspace/php_parkour/outputs/research/motion-matching/scenarios/random_locomotion/cfg0009_stand_2.0s_right_90_0.6s_run_right_90_1.3s_run_forward_2.8s_run_right_90_1.5s_right_45_1.1s_stand_2.0s_motion.npz",
+      "--reference-spawn",
+      "--record-policy",
+      "--seed",
+      "42",
+      "--gl",
+      "egl",
+      "--python-faulthandler",
+      "--sim-python",
+      "/opt/php/bin/train-python",
+      "--inference-python",
+      "/opt/php/bin/inference-python",
+      "--output",
+      "/outputs/reference629/random_locomotion/config-0009-cfg0009_stand_2.0s_right_90_0.6s_run_right_90_1.3s_run_forward_2.8s_run_right_90-779232801c87"
+    ]
+  },
+  "files": [
+    {
+      "path": "/outputs/reference629/random_locomotion/config-0009-cfg0009_stand_2.0s_right_90_0.6s_run_right_90_1.3s_run_forward_2.8s_run_right_90-779232801c87/control-ack.json",
+      "sha256": "a484e3b58b2d957079e9ba8e282712a9e52ff0ecac9a6f335013d294edb228a0",
+      "bytes": 19
+    },
+    {
+      "path": "/outputs/reference629/random_locomotion/config-0009-cfg0009_stand_2.0s_right_90_0.6s_run_right_90_1.3s_run_forward_2.8s_run_right_90-779232801c87/inference-process-start.json",
+      "sha256": "cbc9ddf4bce6865e8ef3a676f1b87b76164fe659a993c630d72d8beb8b440dea",
+      "bytes": 1027
+    },
+    {
+      "path": "/outputs/reference629/random_locomotion/config-0009-cfg0009_stand_2.0s_right_90_0.6s_run_right_90_1.3s_run_forward_2.8s_run_right_90-779232801c87/inference.json",
+      "sha256": "3d9a8acfb70d7e3fd2419c6ebb298e96f1ddd03e6ae37d0f6a68610ac787249f",
+      "bytes": 424745
+    },
+    {
+      "path": "/outputs/reference629/random_locomotion/config-0009-cfg0009_stand_2.0s_right_90_0.6s_run_right_90_1.3s_run_forward_2.8s_run_right_90-779232801c87/inference.log",
+      "sha256": "75b868adbbded1a9540bb7dc4a339d807f02f0bcfa0e182feed61a9f09b5a33c",
+      "bytes": 85912
+    },
+    {
+      "path": "/outputs/reference629/random_locomotion/config-0009-cfg0009_stand_2.0s_right_90_0.6s_run_right_90_1.3s_run_forward_2.8s_run_right_90-779232801c87/policy-ready.json",
+      "sha256": "04416688ac74762d9bed51d70b05a6742b189806b442107fcc78360305952a0e",
+      "bytes": 54
+    },
+    {
+      "path": "/outputs/reference629/random_locomotion/config-0009-cfg0009_stand_2.0s_right_90_0.6s_run_right_90_1.3s_run_forward_2.8s_run_right_90-779232801c87/policy-recording/rollout_duration11.2s_motion.npz",
+      "sha256": "afe650f57ab6e27685419455bf1336e5b0c4d0cda99cafa0b940aa0fc37540d3",
+      "bytes": 114994
+    },
+    {
+      "path": "/outputs/reference629/random_locomotion/config-0009-cfg0009_stand_2.0s_right_90_0.6s_run_right_90_1.3s_run_forward_2.8s_run_right_90-779232801c87/released.json",
+      "sha256": "390ecb50c592df7a5918089c6a6ab5b7dd45b8722ad4ac216f5f5f9d3a2e6bec",
+      "bytes": 2199
+    },
+    {
+      "path": "/outputs/reference629/random_locomotion/config-0009-cfg0009_stand_2.0s_right_90_0.6s_run_right_90_1.3s_run_forward_2.8s_run_right_90-779232801c87/result.json",
+      "sha256": "145af1395f6bd43ad6b968b73a72777ae4fd4a05b6f35e2b2e8144c31687c149",
+      "bytes": 105706
+    },
+    {
+      "path": "/outputs/reference629/random_locomotion/config-0009-cfg0009_stand_2.0s_right_90_0.6s_run_right_90_1.3s_run_forward_2.8s_run_right_90-779232801c87/run.json",
+      "sha256": "741c10b610727df37bf4de1b0f13643ba1d3bc715b64452eb60c636393e5f490",
+      "bytes": 10991
+    },
+    {
+      "path": "/outputs/reference629/random_locomotion/config-0009-cfg0009_stand_2.0s_right_90_0.6s_run_right_90_1.3s_run_forward_2.8s_run_right_90-779232801c87/sim-clock.json",
+      "sha256": "2e61648d9ec1947e0e466cb32e2491b11b461d667c0459aa36acdd32a377d5be",
+      "bytes": 252
+    },
+    {
+      "path": "/outputs/reference629/random_locomotion/config-0009-cfg0009_stand_2.0s_right_90_0.6s_run_right_90_1.3s_run_forward_2.8s_run_right_90-779232801c87/sim-ready.json",
+      "sha256": "5fd78b206fce315fd4f047725c77c6ec67e3ecdf89ed7e2b427935ede2cc5711",
+      "bytes": 2709
+    },
+    {
+      "path": "/outputs/reference629/random_locomotion/config-0009-cfg0009_stand_2.0s_right_90_0.6s_run_right_90_1.3s_run_forward_2.8s_run_right_90-779232801c87/simulation.json",
+      "sha256": "b2c898944c8d52fe7b0b838db2dc2a4d5edb2d92bcb890bf982480722b533131",
+      "bytes": 907
+    },
+    {
+      "path": "/outputs/reference629/random_locomotion/config-0009-cfg0009_stand_2.0s_right_90_0.6s_run_right_90_1.3s_run_forward_2.8s_run_right_90-779232801c87/simulator-process-start.json",
+      "sha256": "693fd6637923f3a0d4b07d16cab96eb247ab5e1349dd74cc7cd4222000c70020",
+      "bytes": 1027
+    },
+    {
+      "path": "/outputs/reference629/random_locomotion/config-0009-cfg0009_stand_2.0s_right_90_0.6s_run_right_90_1.3s_run_forward_2.8s_run_right_90-779232801c87/simulator.log",
+      "sha256": "9b53fea5257b444b1d93db7cdb3e9d976cea8dc3611994b6c60fda4f515efeea",
+      "bytes": 31018
+    },
+    {
+      "path": "/outputs/reference629/random_locomotion/config-0009-cfg0009_stand_2.0s_right_90_0.6s_run_right_90_1.3s_run_forward_2.8s_run_right_90-779232801c87/stop",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/outputs/reference629/random_locomotion/config-0009-cfg0009_stand_2.0s_right_90_0.6s_run_right_90_1.3s_run_forward_2.8s_run_right_90-779232801c87/trajectory.csv",
+      "sha256": "ca0cf645ced7021149a7c41f8cb045ab02d5f2b555a80569a3b60f09219d0a82",
+      "bytes": 82054
+    },
+    {
+      "path": "/outputs/reference629/random_locomotion/config-0009-cfg0009_stand_2.0s_right_90_0.6s_run_right_90_1.3s_run_forward_2.8s_run_right_90-779232801c87/video/episode_0_1791647013.mp4",
+      "sha256": "df84ce95138381d090a74ffe235c0d49f4bbc6b44e058978a25758c0f89db6ae",
+      "bytes": 441095
+    },
+    {
+      "path": "/outputs/reference629/random_locomotion/config-0009-cfg0009_stand_2.0s_right_90_0.6s_run_right_90_1.3s_run_forward_2.8s_run_right_90-779232801c87/video/episode_0_1791647013.png",
+      "sha256": "f06fa31b76e7fc0e6d22c6f6c54974c3b90f2b4cddfa69f40092947c8dfed247",
+      "bytes": 27575
+    },
+    {
+      "path": "/outputs/reference629/random_locomotion/config-0009-cfg0009_stand_2.0s_right_90_0.6s_run_right_90_1.3s_run_forward_2.8s_run_right_90-779232801c87/worker-processes.json",
+      "sha256": "3f588302e05d17c3d035150d3c000051f0e12d4a2b22ca5bcec97953c013124e",
+      "bytes": 36536
+    }
+  ],
+  "worker_receipts": [
+    {
+      "path": "/outputs/reference629/random_locomotion/config-0009-cfg0009_stand_2.0s_right_90_0.6s_run_right_90_1.3s_run_forward_2.8s_run_right_90-779232801c87/worker-processes.json",
+      "sha256": "3f588302e05d17c3d035150d3c000051f0e12d4a2b22ca5bcec97953c013124e",
+      "bytes": 36536
+    },
+    {
+      "path": "/outputs/reference629/random_locomotion/config-0009-cfg0009_stand_2.0s_right_90_0.6s_run_right_90_1.3s_run_forward_2.8s_run_right_90-779232801c87/simulator-process-start.json",
+      "sha256": "693fd6637923f3a0d4b07d16cab96eb247ab5e1349dd74cc7cd4222000c70020",
+      "bytes": 1027
+    },
+    {
+      "path": "/outputs/reference629/random_locomotion/config-0009-cfg0009_stand_2.0s_right_90_0.6s_run_right_90_1.3s_run_forward_2.8s_run_right_90-779232801c87/inference-process-start.json",
+      "sha256": "cbc9ddf4bce6865e8ef3a676f1b87b76164fe659a993c630d72d8beb8b440dea",
+      "bytes": 1027
+    }
+  ],
+  "execution": {
+    "output": "/outputs/reference629/random_locomotion/config-0009-cfg0009_stand_2.0s_right_90_0.6s_run_right_90_1.3s_run_forward_2.8s_run_right_90-779232801c87",
+    "launch": [
+      "/opt/php/envs/inference/bin/python",
+      "/workspace/php_parkour/scripts/research/sim2sim.py",
+      "--models",
+      "/data/assets/student",
+      "--terrain",
+      "custom",
+      "--mesh",
+      "/workspace/php_parkour/outputs/research/motion-matching/scenarios/random_locomotion/cfg0009_stand_2.0s_right_90_0.6s_run_right_90_1.3s_run_forward_2.8s_run_right_90_1.5s_right_45_1.1s_stand_2.0s_terrain.obj",
+      "--reference-motion",
+      "/workspace/php_parkour/outputs/research/motion-matching/scenarios/random_locomotion/cfg0009_stand_2.0s_right_90_0.6s_run_right_90_1.3s_run_forward_2.8s_run_right_90_1.5s_right_45_1.1s_stand_2.0s_motion.npz",
+      "--reference-spawn",
+      "--record-policy",
+      "--seed",
+      "42",
+      "--gl",
+      "egl",
+      "--python-faulthandler",
+      "--sim-python",
+      "/opt/php/bin/train-python",
+      "--inference-python",
+      "/opt/php/bin/inference-python",
+      "--output",
+      "/outputs/reference629/random_locomotion/config-0009-cfg0009_stand_2.0s_right_90_0.6s_run_right_90_1.3s_run_forward_2.8s_run_right_90-779232801c87"
+    ],
+    "log": {
+      "path": "/outputs/reference629/logs/random_locomotion/config-0009/attempt-0001.log",
+      "sha256": "145af1395f6bd43ad6b968b73a72777ae4fd4a05b6f35e2b2e8144c31687c149",
+      "bytes": 105706
+    },
+    "returncode": 0
+  },
+  "result_sha256": "145af1395f6bd43ad6b968b73a72777ae4fd4a05b6f35e2b2e8144c31687c149",
+  "expected_policy_ticks": 560,
+  "scope": "Native closed-loop execution evidence; survival is heuristic and course completion unverified"
+}

@@ -4,7 +4,7 @@
 
 学习流程、输入输出、数据/label 来源与 real2sim2real 实现细节见独立的 [technical_pipeline.md](technical_pipeline.md)。
 
-**最新进度（2026-10-10 17:08 UTC）：首个官方 locomotion 教师已完成，整套复现尚未完成。** 原始顺序任务完成4096环境、64地形变体的20,000轮训练，最终checkpoint为`model_19999.pt`，并自动进入low-step教师；原容器、训练driver和后续验收等待进程保持原身份。最终PT、ONNX、配置和TensorBoard已按云端传输前后及本地SHA逐项核对，[首教师最终产物与可复现CPU验收](usage_assets/reports/official-locomotion-final/index.md)保存完整证据。五项CPU阶段均实际退出0，四条曲线各有完整20,000点；这还不证明最终策略的技能质量、收敛或PT/ONNX数值一致性。其余四教师、两学生、888逐源尝试、完整逐帧629批次和最终自训学生验收仍在后续日程中。
+**最新进度（2026-10-10 20:23 UTC）：首个官方 locomotion 教师已完成，公开ONNX的全629逐帧闭环已完成后验并出版，整套复现尚未完成。** 原始顺序任务完成4096环境、64地形变体的20,000轮训练，最终checkpoint为`model_19999.pt`，随后自动进入low-step教师。最终PT、ONNX、配置和TensorBoard已按云端传输前后及本地SHA逐项核对，[首教师最终产物与可复现CPU验收](usage_assets/reports/official-locomotion-final/index.md)保存完整证据。五项CPU阶段均实际退出0，四条曲线各有完整20,000点；这还不证明最终策略的技能质量、收敛或PT/ONNX数值一致性。其余四教师、两学生、888逐源尝试和最终自训学生验收仍在后续日程中。
 
 ![首个官方教师完整20000轮TensorBoard曲线](usage_assets/reports/official-locomotion-final/cpu-02/validation/plots/learning-curves.png)
 
@@ -12,19 +12,25 @@
 
 13:27 UTC历史记录：fresh629的原宿主监督会话实际返回143，容器内原始仿真继续执行；原launch receipt保持原字节。[监督中断与四例观察缺口](usage_assets/reports/fresh629-supervision-interruption/index.md)保留当时工具结果、Docker原exec身份及578例时的统计。
 
-14:21 UTC完成恢复验收与出版：原629配置覆盖17场景，每例500个策略tick，1258个worker正常退出，629段视频完整解码；原host观察有1250个唯一映射和8个历史缺口，另四例独立补验提供8个新映射、4段完整视频。实际共633次attempt，覆盖629个唯一配置，原退出143与旧缺口永久保留。[629配置画廊及全部原始证据](usage_assets/reports/sim2sim-full629-sdk018-recovered/index.md)记录139例高度/倾斜阈值事件与490例未触发结果，`quality_verified=false`。完整离线画廊已[实际浏览器检查](usage_assets/reports/sim2sim-full629-sdk018-recovered-browser/index.md)。
+14:21 UTC恒定指令扫描完成恢复验收与出版：原629配置覆盖17场景，每例500个策略tick，1258个worker正常退出，629段视频完整解码；原host观察有1250个唯一映射和8个历史缺口，另四例独立补验提供8个新映射、4段完整视频。实际共633次attempt，覆盖629个唯一配置，原退出143与旧缺口永久保留。[629配置画廊及全部原始证据](usage_assets/reports/sim2sim-full629-sdk018-recovered/index.md)记录139例高度/倾斜阈值事件与490例未触发结果，`quality_verified=false`。完整离线画廊已[实际浏览器检查](usage_assets/reports/sim2sim-full629-sdk018-recovered-browser/index.md)。
 
 [![629配置真实结果画廊](usage_assets/reports/sim2sim-full629-sdk018-recovered-browser/playback.png)](usage_assets/reports/sim2sim-full629-sdk018-recovered/playback.html)
 
 完整方向键与Backspace也已[实际通过](usage_assets/reports/native-keyboard-reset-allkeys/index.md)：一份424帧录制覆盖0–11全部部署指令，每个非零标签至少12帧；真实窗口重置使MuJoCo time从11.57秒归零，随后物理/控制/深度继续推进。双方原main/atexit与wrapper正常退出，全部原事件、录制、原视频和宿主进程映射已保存。
 
-新增[原始逐帧指令的真实闭环试跑](usage_assets/reports/reference-command-native-pilot/index.md)：`high_speed_speed_vault/run_left_45_0.3s`的341帧、6.82秒指令全部送入公开策略，原生录制的完整15维标签逐元素一致，两个worker正常退出，原MP4完整解码，最终147项CPU回归通过。原629扫描只使用恒定前进，不能证明这些时序。新试跑仍触发倾斜阈值0.18秒，`quality_verified=false`；它证明输入和物理执行通路，不证明翻越成功。全629逐帧验收尚未完成。
+新增[原始逐帧指令的真实闭环试跑](usage_assets/reports/reference-command-native-pilot/index.md)：`high_speed_speed_vault/run_left_45_0.3s`的341帧、6.82秒指令全部送入公开策略，原生录制的完整15维标签逐元素一致，两个worker正常退出，原MP4完整解码，最终147项CPU回归通过。原629扫描只使用恒定前进，不能证明这些时序。新试跑仍触发倾斜阈值0.18秒，`quality_verified=false`；它证明输入和物理执行通路，不证明翻越成功。后续完整629逐帧结果见下文。
 
-[真实629配置CPU预检](usage_assets/reports/reference629-plan/index.md)已通过，逐例读取全部NPZ，合计342,651帧、6,853.02秒，并绑定377份依赖及1887份输入；全计划无损压缩且解压whole SHA一致。这是原生批次的输入计划，不是物理运行结果。
+[真实629配置CPU预检](usage_assets/reports/reference629-plan/index.md)已通过，逐例读取全部NPZ，合计342,651帧、6,853.02秒参考指令时长，并绑定377份依赖及1887份输入；全计划无损压缩且解压whole SHA一致。这是原生批次的输入计划，不是物理运行结果。
 
-15:38 UTC完整逐帧批次已实际启动，同容器的预启动计划与CPU计划逐字节一致；[15:40 UTC固定启动见证及首例原始产物](usage_assets/reports/reference629-native-start/index.md)记录4例完成、1例运行、0例执行失败。宿主父进程仍在等待，不存在整批完成或1258映射验收结论；视频全片解码将在物理运行结束后另做CPU后验。
+15:38 UTC完整逐帧批次实际启动，同容器的预启动计划与CPU计划逐字节一致；[15:40 UTC固定启动见证及首例原始产物](usage_assets/reports/reference629-native-start/index.md)保留当时4例完成、1例运行、0例执行失败的历史快照，当时尚无整批终态。
 
-[两例真实CPU后验](usage_assets/reports/reference629-cpu-preview/index.md)已读取这次逐帧批次的920帧/18.4秒和300帧/6秒原生产物，共核对1220帧完整15维指令、4个正常退出worker及2个原始MP4全片解码。实际validator与独立宿主父进程均退出0，原始5184份源码、发布模型与冻结overlay未变。最终211项组合CPU检查也已通过。这个报告明确为`preview_validated`，不替代完整629终态；[原片与逐段指令](usage_assets/reports/reference629-cpu-preview/playback.html)保留真实高度/倾斜阈值结果。生产publisher真实预览及浏览器均退出0，完整发布入口则对尚未结束的批次真实拒绝并退出2；原计划103MB与运行中矩阵119MB的分块还原SHA一致。
+20:23 UTC全629逐帧结果已[完整出版](usage_assets/reports/reference629-full/playback.html)：17场景共342,651帧，按50Hz执行原始15维指令，参考指令时长6,853.02秒。原生宿主父进程于20:19:24 UTC真实退出0，独立CPU后验父进程于20:21:45 UTC退出0，publisher及其独立父进程也退出0；1258个worker正常退出、1258份宿主出生映射和629段原始MP4完整解码均通过，冻结源码与输入未变。321例触发高度/倾斜阈值，308例未触发，`quality_verified=false`、`obstacle_course_completion_verified=false`；未触发不能解释为课程成功。实测物理计时合计6,858.676秒，与6,853.02秒参考指令时长分别记录。[机器汇总](usage_assets/reports/reference629-full/summary.json)、[全部逐配置记录](usage_assets/reports/reference629-full/cases.json)和[完整SHA清单](usage_assets/reports/reference629-full/evidence-manifest.json)保存全部结果与原始证据。该批次使用公开ONNX，不代替仍在训练的正式自训学生验收。
+
+完整画廊的[真实浏览器验收](usage_assets/reports/reference629-full-browser/index.md)也已退出0：逐项检查629个视频的metadata与中点seek、1258张缩略图/世界XY图、全部27页，以及321/308/629筛选、搜索和实际播放推进。14,566个发布文件逐SHA核对通过；没有重跑策略或仿真。
+
+[![全629逐帧结果画廊的真实浏览器截图](usage_assets/reports/reference629-full-browser/gallery.png)](usage_assets/reports/reference629-full/playback.html)
+
+[两例真实CPU后验](usage_assets/reports/reference629-cpu-preview/index.md)保留整批结束前的局部证据：920帧/18.4秒和300帧/6秒原生产物，共核对1220帧完整15维指令、4个正常退出worker及2个原始MP4全片解码。实际validator与独立宿主父进程均退出0，原始5184份源码、发布模型与冻结overlay未变。最终211项组合CPU检查也已通过。这个报告仍为`preview_validated`，不改写成完整629终态；[原片与逐段指令](usage_assets/reports/reference629-cpu-preview/playback.html)保留真实高度/倾斜阈值结果。生产publisher当时的真实预览及浏览器均退出0，完整发布入口则对尚未结束的批次真实拒绝并退出2；原计划103MB与运行中矩阵119MB的分块还原SHA一致。这些历史记录与之后的完整出版分别保存。
 
 ![逐帧批次首例的原始MuJoCo截图](usage_assets/reports/reference629-cpu-preview/native/case-0000/video/episode_0_1791646765.png)
 

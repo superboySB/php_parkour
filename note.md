@@ -436,9 +436,11 @@ docker exec php-parkour-research \
 
 每例时长由其NPZ的实际帧数决定，`--seconds`在这个模式下不控制时长。单例也可给`sim2sim.py`传`--reference-motion /absolute/path/name_motion.npz --reference-spawn --record-policy`，配上原有models、custom mesh和output参数。输入必须含50Hz、`vel_cmd:[T,15]`的精确one-hot，以及配对body世界位姿；不修补标签或重采样。初始根位置只对齐XY与yaw，保留部署高度和启动关节；释放吊架后以每10个物理步一帧送入真实策略，检查完整指令、策略启用状态、录制和退出。参考关节姿态不会逐帧施加给机器人。[341帧实际试跑、原片与147项最终CPU检查](usage_assets/reports/reference-command-native-pilot/index.md)已通过输入与执行验收，但该例触发倾斜阈值，不证明speed-vault技能成功。全629逐帧批次另行记录，不能由原恒定前进扫描替代。
 
-[全部629配置的真实CPU计划](usage_assets/reports/reference629-plan/index.md)已读取并校验17场景的NPZ，共342,651帧、6,853.02秒；629个配置对应628个不同NPZ SHA。完整计划以无损gzip保存，页面提供标准库解压及whole SHA校验命令。这个计划验收不等于629次物理运行完成。
+[全部629配置的真实CPU计划](usage_assets/reports/reference629-plan/index.md)已读取并校验17场景的NPZ，共342,651帧、6,853.02秒参考指令时长；629个配置对应628个不同NPZ SHA。完整计划以无损gzip保存，页面提供标准库解压及whole SHA校验命令。这个计划验收本身不等于629次物理运行完成。
 
-完整逐帧批次已于15:38 UTC在独立容器实际启动，[15:40固定见证](usage_assets/reports/reference629-native-start/index.md)记录4例完成、1例运行、0例执行失败及原始controller。当前进度在`outputs/research/reference-native629-01/outputs/reference629/matrix.json`；真正的宿主父进程退出记录将写入`outputs/research/reference629-native-parent-01/process-exit.json`。它持有同一GPU互斥锁，旧最终学生交接会等待释放；当前尚无整批1258映射及视频全片解码结论。
+完整逐帧批次于15:38 UTC在独立容器实际启动，[15:40固定见证](usage_assets/reports/reference629-native-start/index.md)保留当时4例完成、1例运行、0例执行失败及原始controller。原生宿主父进程已于20:19:24 UTC真实退出0，独立CPU后验父进程于20:21:45 UTC退出0，完整发布于20:23 UTC完成。终态原矩阵和父进程收据分别在`outputs/research/reference-native629-01/outputs/reference629/matrix.json`与`outputs/research/reference629-native-parent-01/process-exit.json`。
+
+[完整逐帧画廊](usage_assets/reports/reference629-full/playback.html)覆盖17场景、629配置的342,651帧，参考指令时长6,853.02秒；1258个worker正常退出、1258份宿主出生映射及629段原始MP4完整解码均通过。321例触发高度/倾斜阈值，308例未触发，`quality_verified=false`、`obstacle_course_completion_verified=false`。这是公开ONNX的指令执行与物理配置覆盖，不是越障成功或仍在训练的自训学生验收。[机器汇总](usage_assets/reports/reference629-full/summary.json)、[逐配置记录](usage_assets/reports/reference629-full/cases.json)和[完整SHA清单](usage_assets/reports/reference629-full/evidence-manifest.json)保留原始证据；实测物理计时合计6,858.676秒，与参考指令时长分别记录。
 
 物理矩阵完整结束后，[CPU后验工具](scripts/research/validate_scene_matrix.py)会重新检查封存文件、每段实际帧数、原生worker退出、逐帧指令与录制NPZ，并用`ffmpeg -xerror`完整解码每个原始MP4。下例使用同一镜像另起CPU容器，源码、输入与原始输出只读，只写独立报告目录；保留生成计划时的源码和文件路径：
 
@@ -459,11 +461,11 @@ docker run --rm --runtime runc --network none \
   --output /validation/validation.json
 ```
 
-完整模式拒绝仍运行、过滤、resume或重试的矩阵。仅检查已完成项时可重复传`--preview-case-id`和精确case ID，报告固定为`preview_validated`、`completion_verified=false`，不能作为完整发布凭据。[两例真实CPU后验](usage_assets/reports/reference629-cpu-preview/index.md)已验证920帧与300帧、4个原生worker、2个原MP4完整解码；最终211项组合CPU检查另覆盖范围隔离、损坏文件拒绝与publisher门槛。CPU报告只证明其声明的文件与解码范围，整个native宿主父进程真实退出、1258宿主映射和容器停止仍需独立验收。
+完整模式拒绝仍运行、过滤、resume或重试的矩阵。仅检查已完成项时可重复传`--preview-case-id`和精确case ID，报告固定为`preview_validated`、`completion_verified=false`，不能作为完整发布凭据。[两例真实CPU后验](usage_assets/reports/reference629-cpu-preview/index.md)已验证920帧与300帧、4个原生worker、2个原MP4完整解码；最终211项组合CPU检查另覆盖范围隔离、损坏文件拒绝与publisher门槛。CPU报告只证明其声明的文件与解码范围；完整出版另外核验整个native宿主父进程真实退出、1258宿主映射和容器停止，本次均已通过。
 
-[完整发布工具](scripts/research/publish_full_scene_matrix.py)新增显式`--reference-cohort`入口，原constant收据合同保留。reference完整发布需要原native controller及其独立parent真实终态、1258个正常worker及1258个宿主映射、CPU全片解码报告、CPU实际执行器与独立parent的退出0，以及原容器停止和冻结输入未变。旧收据不能被改写成新格式。两例真实预览和浏览器检查已经退出0，完整入口对当前局部报告实际拒绝并退出2。[原始预览、拒绝与浏览器记录](usage_assets/reports/reference629-cpu-preview/index.md)。
+[完整发布工具](scripts/research/publish_full_scene_matrix.py)新增显式`--reference-cohort`入口，原constant收据合同保留。reference完整发布需要原native controller及其独立parent真实终态、1258个正常worker及1258个宿主映射、CPU全片解码报告、CPU实际执行器与独立parent的退出0，以及原容器停止和冻结输入未变。旧收据不能被改写成新格式。两例真实预览和浏览器检查已经退出0，完整入口曾对当时的局部报告实际拒绝并退出2；该历史记录与之后的完整出版分别保留。[原始预览、拒绝与浏览器记录](usage_assets/reports/reference629-cpu-preview/index.md)。
 
-本次批次的完整命令如下；**对应native和CPU终态文件尚未全部产生，现在不能执行为完整发布**。它们到齐并通过门槛后，使用全新输出目录运行，不加`--preview-case-count`：
+本次批次已用下列完整命令出版，publisher及其独立宿主父进程均真实退出0。复核时保留原冻结路径和终态收据；若再次生成页面，须将`--output`改为尚不存在的新目录，不加`--preview-case-count`，不覆盖已发布证据：
 
 ```bash
 python3 scripts/research/publish_full_scene_matrix.py \
@@ -483,7 +485,9 @@ python3 scripts/research/publish_full_scene_matrix.py \
   --output usage_assets/reports/reference629-full
 ```
 
-publisher及`restore-chunks`只使用宿主标准库复制、核验和生成页面，不安装包、不启动科学推理。大于25MB的原始JSON/观察流会保存为连续字节块；`python3 scripts/research/publish_full_scene_matrix.py restore-chunks --package 包路径 --output 全新恢复目录`可核验offset、每块SHA和whole SHA并恢复原字节。本次已实际恢复103MB计划与119MB运行中矩阵。预览允许其他配置进度变化，但核对同plan和所选产物，并同时保留CPU历史matrix SHA与当前预览SHA；完整模式要求两者相等。
+出版后的[真实浏览器验收](usage_assets/reports/reference629-full-browser/index.md)已检查629视频、1258张图和全部27页，以及筛选、搜索和实际播放；这项页面验收不改变策略质量结论。
+
+publisher及`restore-chunks`只使用宿主标准库复制、核验和生成页面，不安装包、不启动科学推理。大于25MB的原始JSON/观察流会保存为连续字节块；`python3 scripts/research/publish_full_scene_matrix.py restore-chunks --package 包路径 --output 全新恢复目录`可核验offset、每块SHA和whole SHA并恢复原字节。预览阶段已实际恢复103MB计划与119MB运行中矩阵。预览允许其他配置进度变化，但核对同plan和所选产物，并同时保留CPU历史matrix SHA与当前预览SHA；完整模式要求两者相等。
 
 该publisher的原constant路径绑定旧driver路径和收据格式；此前不能直接发布隔离fresh629批次的历史审查仍保留，[兼容性审查及固定依赖](usage_assets/reports/fresh629-publisher-compatibility-review/index.md)。初版24项CPU检查和两例浏览器预览通过，新版另有34项CPU回归，这些历史结果不代表新629完成。[首次失败原字节与时间线](usage_assets/reports/sim2sim-worker-failure/report.md)保留父进程exit1，不能只凭worker JSON补造成功。工具仍须显式指定独立冻结的`--expected-plan-sha256`与`--expected-harness-sha256`，schema3检查两worker退出与三份进程收据，schema2只允许历史预览。[旧工具命令与初版检查](usage_assets/reports/full-scene-publisher/summary.md)、[新版回归](usage_assets/reports/publisher-schema3-review/review.md)。
 

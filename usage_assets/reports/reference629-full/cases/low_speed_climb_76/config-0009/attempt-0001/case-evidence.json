@@ -1,0 +1,206 @@
+{
+  "schema_version": 1,
+  "case_input": {
+    "plan_sha256": "9fad5096d831d5c83d26f126f36a6b30d1e8d3b57b802678c5cf6f4915b7455e",
+    "image_id": "sha256:2be18521015b2a84ef7a4442af9a94ef041a19feb9ce385ae15424b1dc158d8f",
+    "source_matrix_sha256": "ed413845f4b82156964e11ad6ee3faca30e3c0b10dbfdc295a8284f9ee3308ed",
+    "model_sha256": {
+      "depth_backbone.onnx": "5b22466a218944e3b0ab0f4f82a910e3eec35375ee03e7fb94eb65fa88431b56",
+      "student.onnx": "e426c4206181d511b838c76efc48e43636299b76cb5a15183977011589931628"
+    },
+    "case_id": "low_speed_climb_76:0009:left_45_walk0.6s_step1.2s",
+    "source_files": [
+      {
+        "path": "/workspace/php_parkour/outputs/research/motion-matching/scenarios/low_speed_climb_76/left_45_walk0.6s_step1.2s_motion.npz",
+        "size": 1528088,
+        "sha256": "ef09671fd161e4397f1a89989c26e7b411e10dd006a5fa250785116b77138373"
+      },
+      {
+        "path": "/workspace/php_parkour/outputs/research/motion-matching/scenarios/low_speed_climb_76/left_45_walk0.6s_step1.2s_terrain.npy",
+        "size": 2528,
+        "sha256": "f10e18aadfbaef386e344a3731dc831ffd3a3dd5c7dfb5f96c9f14fb58815ab0"
+      },
+      {
+        "path": "/workspace/php_parkour/outputs/research/motion-matching/scenarios/low_speed_climb_76/left_45_walk0.6s_step1.2s_terrain.obj",
+        "size": 1691,
+        "sha256": "77f74d82a2e39f25dd9a7beaa40bbcbb18bcca602c33d5d6b84bfb38fcf26656"
+      }
+    ],
+    "launch": [
+      "/opt/php/envs/inference/bin/python",
+      "/workspace/php_parkour/scripts/research/sim2sim.py",
+      "--models",
+      "/data/assets/student",
+      "--terrain",
+      "custom",
+      "--mesh",
+      "/workspace/php_parkour/outputs/research/motion-matching/scenarios/low_speed_climb_76/left_45_walk0.6s_step1.2s_terrain.obj",
+      "--reference-motion",
+      "/workspace/php_parkour/outputs/research/motion-matching/scenarios/low_speed_climb_76/left_45_walk0.6s_step1.2s_motion.npz",
+      "--reference-spawn",
+      "--record-policy",
+      "--seed",
+      "42",
+      "--gl",
+      "egl",
+      "--python-faulthandler",
+      "--sim-python",
+      "/opt/php/bin/train-python",
+      "--inference-python",
+      "/opt/php/bin/inference-python",
+      "--output",
+      "/outputs/reference629/low_speed_climb_76/config-0009-left_45_walk0.6s_step1.2s-61c1fe951952"
+    ]
+  },
+  "files": [
+    {
+      "path": "/outputs/reference629/low_speed_climb_76/config-0009-left_45_walk0.6s_step1.2s-61c1fe951952/control-ack.json",
+      "sha256": "3d0a0bcfe982839a59249e33fd419a271f494a101ed99a083ec82d4f0177ead7",
+      "bytes": 20
+    },
+    {
+      "path": "/outputs/reference629/low_speed_climb_76/config-0009-left_45_walk0.6s_step1.2s-61c1fe951952/inference-process-start.json",
+      "sha256": "1a9ad33d09a12f223760a2d3645d1b6822f6c799294232dbeed9fa47aec95ec3",
+      "bytes": 926
+    },
+    {
+      "path": "/outputs/reference629/low_speed_climb_76/config-0009-left_45_walk0.6s_step1.2s-61c1fe951952/inference.json",
+      "sha256": "964cfcba4aa7178eaa6a146a3f02eea31f491deaa50bdf28ba5adba4c5f6d180",
+      "bytes": 626472
+    },
+    {
+      "path": "/outputs/reference629/low_speed_climb_76/config-0009-left_45_walk0.6s_step1.2s-61c1fe951952/inference.log",
+      "sha256": "88e6f26e40af8164dbed038aab19776928ae965089f3b5292a2238d8be053d0d",
+      "bytes": 124882
+    },
+    {
+      "path": "/outputs/reference629/low_speed_climb_76/config-0009-left_45_walk0.6s_step1.2s-61c1fe951952/policy-ready.json",
+      "sha256": "69a967cc62a7521b257b673056a85929b4af61976f61629d4bc449c26d7c4abe",
+      "bytes": 55
+    },
+    {
+      "path": "/outputs/reference629/low_speed_climb_76/config-0009-left_45_walk0.6s_step1.2s-61c1fe951952/policy-recording/rollout_duration16.5s_motion.npz",
+      "sha256": "937a1c94e5be0226a68aac3772ffd2fc47796e73ca165149c3ef27071a6dd6f1",
+      "bytes": 168850
+    },
+    {
+      "path": "/outputs/reference629/low_speed_climb_76/config-0009-left_45_walk0.6s_step1.2s-61c1fe951952/released.json",
+      "sha256": "09914700a4884c260fab93fba45cc6054a48bed44be9ee87a321224d19b6e7be",
+      "bytes": 2209
+    },
+    {
+      "path": "/outputs/reference629/low_speed_climb_76/config-0009-left_45_walk0.6s_step1.2s-61c1fe951952/result.json",
+      "sha256": "0cdf828ee66e943d16b90d434682edada1aae9c8a7fa4c0e49dc6f5b8e9e51ec",
+      "bytes": 150943
+    },
+    {
+      "path": "/outputs/reference629/low_speed_climb_76/config-0009-left_45_walk0.6s_step1.2s-61c1fe951952/run.json",
+      "sha256": "d91012cd5697d90d0dabab095006ebbf1d4e0edf3992e7214e186c9c4ce471cf",
+      "bytes": 14749
+    },
+    {
+      "path": "/outputs/reference629/low_speed_climb_76/config-0009-left_45_walk0.6s_step1.2s-61c1fe951952/sim-clock.json",
+      "sha256": "a20018854a96322cbfda234215007cdfb156f96b32350794464c0e982409b627",
+      "bytes": 250
+    },
+    {
+      "path": "/outputs/reference629/low_speed_climb_76/config-0009-left_45_walk0.6s_step1.2s-61c1fe951952/sim-ready.json",
+      "sha256": "a2a07b4a9333fee4470ebec0e65fb3190fdfed91eb90b68a5dc23bacc7b75a61",
+      "bytes": 2572
+    },
+    {
+      "path": "/outputs/reference629/low_speed_climb_76/config-0009-left_45_walk0.6s_step1.2s-61c1fe951952/simulation.json",
+      "sha256": "4cdac11bf78124bb8c27cd9eb95fc2c3fb598e0493701a6ef241289be0ca570e",
+      "bytes": 918
+    },
+    {
+      "path": "/outputs/reference629/low_speed_climb_76/config-0009-left_45_walk0.6s_step1.2s-61c1fe951952/simulator-process-start.json",
+      "sha256": "635b424800f893472b30fdfa39c426adf48d25d66f83d08898ff49ba812c4b9f",
+      "bytes": 926
+    },
+    {
+      "path": "/outputs/reference629/low_speed_climb_76/config-0009-left_45_walk0.6s_step1.2s-61c1fe951952/simulator.log",
+      "sha256": "18ba288e4b8a690ebb4f43ee8fff06540880b7353687c9d0a79edb6f46dfcba0",
+      "bytes": 30988
+    },
+    {
+      "path": "/outputs/reference629/low_speed_climb_76/config-0009-left_45_walk0.6s_step1.2s-61c1fe951952/stop",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/outputs/reference629/low_speed_climb_76/config-0009-left_45_walk0.6s_step1.2s-61c1fe951952/trajectory.csv",
+      "sha256": "7ce062a076e2b380ec37c1866c257f2f837314310fe6c59aa9e70431e512b233",
+      "bytes": 110084
+    },
+    {
+      "path": "/outputs/reference629/low_speed_climb_76/config-0009-left_45_walk0.6s_step1.2s-61c1fe951952/video/episode_0_1791655063.mp4",
+      "sha256": "59298b6ef86e8e128a465f52dae95ac7aec8d04853253540a695d434193065e8",
+      "bytes": 534314
+    },
+    {
+      "path": "/outputs/reference629/low_speed_climb_76/config-0009-left_45_walk0.6s_step1.2s-61c1fe951952/video/episode_0_1791655063.png",
+      "sha256": "c3e4f8bfac38f7c57ce62d6b7c9a016a725d7d850bf959bc792cdd4eeef32f93",
+      "bytes": 22009
+    },
+    {
+      "path": "/outputs/reference629/low_speed_climb_76/config-0009-left_45_walk0.6s_step1.2s-61c1fe951952/worker-processes.json",
+      "sha256": "cff5f70e6ee37b5e16751855a93fb50221a1d89516f8109dc471d87d8bc7cc57",
+      "bytes": 35111
+    }
+  ],
+  "worker_receipts": [
+    {
+      "path": "/outputs/reference629/low_speed_climb_76/config-0009-left_45_walk0.6s_step1.2s-61c1fe951952/worker-processes.json",
+      "sha256": "cff5f70e6ee37b5e16751855a93fb50221a1d89516f8109dc471d87d8bc7cc57",
+      "bytes": 35111
+    },
+    {
+      "path": "/outputs/reference629/low_speed_climb_76/config-0009-left_45_walk0.6s_step1.2s-61c1fe951952/simulator-process-start.json",
+      "sha256": "635b424800f893472b30fdfa39c426adf48d25d66f83d08898ff49ba812c4b9f",
+      "bytes": 926
+    },
+    {
+      "path": "/outputs/reference629/low_speed_climb_76/config-0009-left_45_walk0.6s_step1.2s-61c1fe951952/inference-process-start.json",
+      "sha256": "1a9ad33d09a12f223760a2d3645d1b6822f6c799294232dbeed9fa47aec95ec3",
+      "bytes": 926
+    }
+  ],
+  "execution": {
+    "output": "/outputs/reference629/low_speed_climb_76/config-0009-left_45_walk0.6s_step1.2s-61c1fe951952",
+    "launch": [
+      "/opt/php/envs/inference/bin/python",
+      "/workspace/php_parkour/scripts/research/sim2sim.py",
+      "--models",
+      "/data/assets/student",
+      "--terrain",
+      "custom",
+      "--mesh",
+      "/workspace/php_parkour/outputs/research/motion-matching/scenarios/low_speed_climb_76/left_45_walk0.6s_step1.2s_terrain.obj",
+      "--reference-motion",
+      "/workspace/php_parkour/outputs/research/motion-matching/scenarios/low_speed_climb_76/left_45_walk0.6s_step1.2s_motion.npz",
+      "--reference-spawn",
+      "--record-policy",
+      "--seed",
+      "42",
+      "--gl",
+      "egl",
+      "--python-faulthandler",
+      "--sim-python",
+      "/opt/php/bin/train-python",
+      "--inference-python",
+      "/opt/php/bin/inference-python",
+      "--output",
+      "/outputs/reference629/low_speed_climb_76/config-0009-left_45_walk0.6s_step1.2s-61c1fe951952"
+    ],
+    "log": {
+      "path": "/outputs/reference629/logs/low_speed_climb_76/config-0009/attempt-0001.log",
+      "sha256": "0cdf828ee66e943d16b90d434682edada1aae9c8a7fa4c0e49dc6f5b8e9e51ec",
+      "bytes": 150943
+    },
+    "returncode": 0
+  },
+  "result_sha256": "0cdf828ee66e943d16b90d434682edada1aae9c8a7fa4c0e49dc6f5b8e9e51ec",
+  "expected_policy_ticks": 824,
+  "scope": "Native closed-loop execution evidence; survival is heuristic and course completion unverified"
+}

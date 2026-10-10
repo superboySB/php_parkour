@@ -2,7 +2,7 @@
 
 本文解释当前 `research` 分支的实际实现：每个模块接收什么、产生什么、监督信号从哪里来，以及训练得到的动作如何进入机器人控制器。配置与命令见 [note.md](note.md)，真实运行结果、录像与失败记录见 [usage.md](usage.md)。本文件独立于 README。
 
-截至 2026-10-10 17:08 UTC，首个官方 locomotion 教师完成20,000轮，云端顺序日程正在训练low-step教师；其余四教师、两学生及后续验收尚未全部完成。本文的算法说明来自源码和实际实验，不表示完整日程或真机验收已经完成。
+截至 2026-10-10 20:23 UTC，首个官方 locomotion 教师完成20,000轮及最终CPU验收，公开ONNX的全629逐帧闭环也已完成CPU后验并出版；其余四教师、两学生及后续验收尚未全部完成。本文的算法说明来自源码和实际实验，不表示完整日程、策略技能质量或真机验收已经完成。
 
 北京时间15:48，旧629物理扫描已因SDK退出异常及父监督漏查最终worker退出码而有序中断，全部相关本地进程退出。原279项reported completed中也已发现崩溃日志，因此这些状态不能作为正常退出验收；修复监督和SDK后，原五个显式失败配置的新试跑已正常退出，新的fresh629已完成原629次rollout与四例独立观察补验，完整终态和历史观察缺口见[恢复后的结果包](usage_assets/reports/sim2sim-full629-sdk018-recovered/index.md)。[原状态及停止回执](usage_assets/reports/sim2sim-cohort-halt/summary.md)、[漏记崩溃实证](usage_assets/reports/worker-exit-completed-log-audit/report.md)、[新SDK五例闭环](usage_assets/reports/sdk018-native-pilot/summary.md)。下文带具体时间的运行快照均保留历史含义。
 
@@ -446,7 +446,11 @@ DDS接口为G1/HG/PR路径。早期`far-unitree-sdk==0.1.6`只读wheel审计确�
 
 [实际341帧闭环](usage_assets/reports/reference-command-native-pilot/index.md)验证了0→6→7→6→0的完整标签、原生录制、两worker退出与视频；最小upright cosine约0.138，触发倾斜阈值0.18秒，技能成功仍未验证。原629个恒定前进rollout、全629参考动作数组生成、这一项逐帧策略试跑分别证明不同范围。该输入模式不改变训练状态维度、reward、loss或教师label；学生仍只靠本体状态、指令和深度latent产生29维动作。
 
-整批逐帧运行后的[CPU后验](scripts/research/validate_scene_matrix.py)重新读取封存结果，核对参考标签、原生录制、整数控制时钟、worker退出和原视频完整解码，不训练或更新策略。[两例真实后验](usage_assets/reports/reference629-cpu-preview/index.md)已核对920+300帧及两段完整录像；它的局部预览状态不能替代完整629终态、宿主映射或真实障碍成功验收。
+整批逐帧运行后的[CPU后验](scripts/research/validate_scene_matrix.py)重新读取封存结果，核对参考标签、原生录制、整数控制时钟、worker退出和原视频完整解码，不训练或更新策略。[两例真实后验](usage_assets/reports/reference629-cpu-preview/index.md)保留920+300帧及两段完整录像的历史局部证明，不改写为整批终态。
+
+20:23 UTC出版的[完整逐帧结果](usage_assets/reports/reference629-full/playback.html)覆盖17场景、629配置的342,651帧，50Hz参考指令时长合计6,853.02秒。原生与独立CPU宿主父进程、publisher及其独立父进程均真实退出0；1258个worker正常退出、1258份宿主出生映射和629段原始MP4完整解码均通过。321例触发高度/倾斜阈值，308例未触发；两者都不等于课程成败，`quality_verified=false`、`obstacle_course_completion_verified=false`。实测物理计时合计6,858.676秒，和参考指令时长分别记录。[机器汇总](usage_assets/reports/reference629-full/summary.json)、[逐配置指令序列与录制](usage_assets/reports/reference629-full/cases.json)、[完整SHA清单](usage_assets/reports/reference629-full/evidence-manifest.json)绑定这些证据。该批次使用公开ONNX，不证明尚在训练的正式自训学生质量，也不回放参考关节姿态来驱动物理机器人。
+
+完整结果页另经[真实浏览器验收](usage_assets/reports/reference629-full-browser/index.md)，核对629视频加载/seek、1258张图、全部27页及筛选、搜索和播放推进；这是离线证据可浏览性的检查，不新增策略运行或技能成功结论。
 
 ## 7. Real2sim2real 的实现与验证边界
 
@@ -560,8 +564,9 @@ startup default pose bias同时修改qtarget中心与观测`q−default`基准�
 | 正式训练 | 五教师各 20000 轮、纯学生 10000、混合学生 30000 的原顺序 driver | 首个locomotion教师完成20000轮及最终CPU验收，low-step正在训练；整套日程未完成 |
 | 云端 PT 回传本地 | iteration 19 pilot 与正式 iteration 500 都真实加载，在 16GiB 卡运行 64env×250step | 模型传输与 Isaac 推理通路通过；两次均 `quality_verified=false` |
 | 逐原始源片段验收 | 296 对输入逐项校验、后续116项目标CPU回归；原3次Isaac尝试加新RO资产合同1次实测 | teacher500为158策略步，两种student smoke各21步后失败；0片段完成，尚未跑完296源×三策略 |
-| 发布学生的物理 sim2sim | 原生 ONNX、DDS、深度 SHM、PD；12个有效command、17场景全部629配置 | 新SDK12command的24worker/12视频通过；后续全629原始rollout、1258worker及629全片解码也通过，[完整结果](usage_assets/reports/sim2sim-full629-sdk018-recovered/index.md)保留全部阈值事件，未确认技能成功 |
-| 全部生成几何的物理扫描 | 原629全部完成，另四例独立补跑，共633次attempt／629唯一配置 | 原宿主会话143与8个观察缺口保留；1250原host映射加8个独立新映射分别保存；139例高度/倾斜事件，490例未触发，不解释为通关率 |
+| 发布学生的固定指令 sim2sim | 原生 ONNX、DDS、深度 SHM、PD；12个有效command及17场景全部629配置的恒定前进扫描 | 新SDK12command的24worker/12视频通过；恒定前进全629原始rollout、1258worker及629全片解码也通过，[完整结果](usage_assets/reports/sim2sim-full629-sdk018-recovered/index.md)保留全部阈值事件，未确认技能成功 |
+| 全部生成几何的恒定前进扫描 | 原629全部完成，另四例独立补跑，共633次attempt／629唯一配置 | 原宿主会话143与8个观察缺口保留；1250原host映射加8个独立新映射分别保存；139例高度/倾斜事件，490例未触发，不解释为通关率 |
+| 发布学生的参考指令逐帧扫描 | 17场景、629配置，342,651帧；50Hz参考指令时长6,853.02秒 | [完整结果](usage_assets/reports/reference629-full/playback.html)通过1258正常worker、1258宿主映射及629全片解码；321例高度/倾斜事件、308例未触发，quality/course均false，不是自训学生验收 |
 | 原生键盘与可见GUI | 完整低/高速w/s/a/d/q/e、z、模式/录制/窗口及Backspace | [真实全键补验](usage_assets/reports/native-keyboard-reset-allkeys/index.md)正常退出；424帧含0–11标签，物理time11.57→0且随后继续推进；重置范围限MuJoCo physical data |
 | 实体 G1 | 审计 SDK、映射与相机接口，没有本次真实机器人运行 | 未验证；论文作者的实机成绩不能记成本次结果 |
 
@@ -579,7 +584,7 @@ startup default pose bias同时修改qtarget中心与观测`q−default`基准�
 
 CPU 测试也保留实际边界：根目录/训练 289 项通过；motion matching 213 项通过、12 个历史 raw-hash 比较失败，未跳过或重写 golden。基线比较中 36 个语义数组逐字节一致，九项不变量通过；仍不能将该 legacy suite 写成全绿。详细原始测试与基线差异见 [usage 的测试记录](usage.md#8-全量测试同步与结果来源)。
 
-后续需要等七个正式模型实际训练结束，核验最终 PT/ONNX 与配置/专家来源，再检查长 rollout 和逐源 clip / 场景覆盖。当前顶层 `motion_id=0` 与学生的 expert ID 都不足以证明 296 源片或 629 场景配置已覆盖。真实硬件还需独立完成相机 producer、IMU/外参/默认角核对及实机验收，之后才能宣称此次 real2sim2real 的最后一段已经完成。
+后续需要等七个正式模型实际训练结束，核验最终 PT/ONNX 与配置/专家来源，再检查长 rollout 和逐源 clip / 场景覆盖。顶层 `motion_id=0` 与学生的 expert ID 都不足以证明 296 源片或正式自训策略的场景覆盖；公开ONNX的两批629扫描不能替代这项验收。真实硬件还需独立完成相机 producer、IMU/外参/默认角核对及实机验收，之后才能宣称此次 real2sim2real 的最后一段已经完成。
 
 旧629配置扫描使用发布学生ONNX和各配置的实际OBJ，原计划选定的340份依赖、模型和1887个输入文件绑定SHA。两例预检各500策略ticks，其中一例有高度/倾斜阈值事件，原片完整解码通过；旧扫描现已停止。[启动时逐例快照](usage_assets/reports/sim2sim-all-configs-start/summary.md)保留历史状态，不能将运动学生成629组或后台启动回执当作629例物理完成。
 

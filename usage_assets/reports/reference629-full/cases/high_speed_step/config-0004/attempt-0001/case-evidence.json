@@ -1,0 +1,206 @@
+{
+  "schema_version": 1,
+  "case_input": {
+    "plan_sha256": "9fad5096d831d5c83d26f126f36a6b30d1e8d3b57b802678c5cf6f4915b7455e",
+    "image_id": "sha256:2be18521015b2a84ef7a4442af9a94ef041a19feb9ce385ae15424b1dc158d8f",
+    "source_matrix_sha256": "ed413845f4b82156964e11ad6ee3faca30e3c0b10dbfdc295a8284f9ee3308ed",
+    "model_sha256": {
+      "depth_backbone.onnx": "5b22466a218944e3b0ab0f4f82a910e3eec35375ee03e7fb94eb65fa88431b56",
+      "student.onnx": "e426c4206181d511b838c76efc48e43636299b76cb5a15183977011589931628"
+    },
+    "case_id": "high_speed_step:0004:run_forward_0.9s_step0.5s",
+    "source_files": [
+      {
+        "path": "/workspace/php_parkour/outputs/research/motion-matching/scenarios/high_speed_step/run_forward_0.9s_step0.5s_motion.npz",
+        "size": 779880,
+        "sha256": "53138d757037e4ed9f24c9e5e66cde7be81cb3f6e3b09267b58ab8398a3ed28f"
+      },
+      {
+        "path": "/workspace/php_parkour/outputs/research/motion-matching/scenarios/high_speed_step/run_forward_0.9s_step0.5s_terrain.npy",
+        "size": 4128,
+        "sha256": "d12c00786d73cca2837a958bf4ecabfedfb6b4033d2438b637efc5b57271ac23"
+      },
+      {
+        "path": "/workspace/php_parkour/outputs/research/motion-matching/scenarios/high_speed_step/run_forward_0.9s_step0.5s_terrain.obj",
+        "size": 2513,
+        "sha256": "6e0227c93dc06f7e365aed00a51f81b169de6bbd8ace5c5597cca58d84ec71b9"
+      }
+    ],
+    "launch": [
+      "/opt/php/envs/inference/bin/python",
+      "/workspace/php_parkour/scripts/research/sim2sim.py",
+      "--models",
+      "/data/assets/student",
+      "--terrain",
+      "custom",
+      "--mesh",
+      "/workspace/php_parkour/outputs/research/motion-matching/scenarios/high_speed_step/run_forward_0.9s_step0.5s_terrain.obj",
+      "--reference-motion",
+      "/workspace/php_parkour/outputs/research/motion-matching/scenarios/high_speed_step/run_forward_0.9s_step0.5s_motion.npz",
+      "--reference-spawn",
+      "--record-policy",
+      "--seed",
+      "42",
+      "--gl",
+      "egl",
+      "--python-faulthandler",
+      "--sim-python",
+      "/opt/php/bin/train-python",
+      "--inference-python",
+      "/opt/php/bin/inference-python",
+      "--output",
+      "/outputs/reference629/high_speed_step/config-0004-run_forward_0.9s_step0.5s-f298019bbdbd"
+    ]
+  },
+  "files": [
+    {
+      "path": "/outputs/reference629/high_speed_step/config-0004-run_forward_0.9s_step0.5s-f298019bbdbd/control-ack.json",
+      "sha256": "4a81bb98ed64f50d1d15a0b1e79cd2e0a07dd0cc5992ae536793ea0bef7e4f07",
+      "bytes": 19
+    },
+    {
+      "path": "/outputs/reference629/high_speed_step/config-0004-run_forward_0.9s_step0.5s-f298019bbdbd/inference-process-start.json",
+      "sha256": "5f2d3a05e3c9299f734b513628f529e133a89fd2d3c06150d126d1043ece6d59",
+      "bytes": 920
+    },
+    {
+      "path": "/outputs/reference629/high_speed_step/config-0004-run_forward_0.9s_step0.5s-f298019bbdbd/inference.json",
+      "sha256": "3befb157bf5a42e9f4a91d8f88dd387b2760268216d7794060a40cf7b772cb33",
+      "bytes": 319150
+    },
+    {
+      "path": "/outputs/reference629/high_speed_step/config-0004-run_forward_0.9s_step0.5s-f298019bbdbd/inference.log",
+      "sha256": "da1abdd0098e30aa65b9d2c7238511cdadae42768fce12ed7de2738432a9071a",
+      "bytes": 64681
+    },
+    {
+      "path": "/outputs/reference629/high_speed_step/config-0004-run_forward_0.9s_step0.5s-f298019bbdbd/policy-ready.json",
+      "sha256": "dfecfe5f16339614abf019d905849d95c425b966f93cbfb8e16058887e97bc0f",
+      "bytes": 55
+    },
+    {
+      "path": "/outputs/reference629/high_speed_step/config-0004-run_forward_0.9s_step0.5s-f298019bbdbd/policy-recording/rollout_duration8.4s_motion.npz",
+      "sha256": "1f3e64e57f015f34858e94b11eeb95f14b2afeda603e4e0e79701a360be7cd50",
+      "bytes": 86434
+    },
+    {
+      "path": "/outputs/reference629/high_speed_step/config-0004-run_forward_0.9s_step0.5s-f298019bbdbd/released.json",
+      "sha256": "05695b9937c9a0a74946d9d81d4263148b31390a3438c0f13819b5344a4bf5b5",
+      "bytes": 2210
+    },
+    {
+      "path": "/outputs/reference629/high_speed_step/config-0004-run_forward_0.9s_step0.5s-f298019bbdbd/result.json",
+      "sha256": "04f20a6e662ef6ea38821c3a83782e9951f030ce30022743e3a99b044fc3d640",
+      "bytes": 81175
+    },
+    {
+      "path": "/outputs/reference629/high_speed_step/config-0004-run_forward_0.9s_step0.5s-f298019bbdbd/run.json",
+      "sha256": "046c9d560d4b72a2a2c015d241942d0b855440dc9b4cb40bec417d3435732eee",
+      "bytes": 8267
+    },
+    {
+      "path": "/outputs/reference629/high_speed_step/config-0004-run_forward_0.9s_step0.5s-f298019bbdbd/sim-clock.json",
+      "sha256": "307fd47165ccafb14a3a7e74f63029876a97eb9ec81d34170787d989e928ea25",
+      "bytes": 252
+    },
+    {
+      "path": "/outputs/reference629/high_speed_step/config-0004-run_forward_0.9s_step0.5s-f298019bbdbd/sim-ready.json",
+      "sha256": "395a8c59eb316dcb642fb92adc01fca1e04fbf23534dcdddb7ed32d87d12620f",
+      "bytes": 2566
+    },
+    {
+      "path": "/outputs/reference629/high_speed_step/config-0004-run_forward_0.9s_step0.5s-f298019bbdbd/simulation.json",
+      "sha256": "5669820f376b4f5ac191371f3e3177f5c0ed75c178f6b048c5a04e511e411587",
+      "bytes": 917
+    },
+    {
+      "path": "/outputs/reference629/high_speed_step/config-0004-run_forward_0.9s_step0.5s-f298019bbdbd/simulator-process-start.json",
+      "sha256": "cdb0b68c3114a85e3498eb3f9467d27d75192496f592c8719ba23b5b2338da04",
+      "bytes": 919
+    },
+    {
+      "path": "/outputs/reference629/high_speed_step/config-0004-run_forward_0.9s_step0.5s-f298019bbdbd/simulator.log",
+      "sha256": "cb33212457022700f405c61e49cc9021ee979d1de479ab1e9e54c53a338a2dad",
+      "bytes": 30759
+    },
+    {
+      "path": "/outputs/reference629/high_speed_step/config-0004-run_forward_0.9s_step0.5s-f298019bbdbd/stop",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/outputs/reference629/high_speed_step/config-0004-run_forward_0.9s_step0.5s-f298019bbdbd/trajectory.csv",
+      "sha256": "62f093b49ac9f9f8a20bb3a9236c4eb87d7b7625708cd98dc3710647b8bb344f",
+      "bytes": 67462
+    },
+    {
+      "path": "/outputs/reference629/high_speed_step/config-0004-run_forward_0.9s_step0.5s-f298019bbdbd/video/episode_0_1791651162.mp4",
+      "sha256": "e798934892710942c31f52f5e95b6fd1c436e3d4c26c160ce9eaff502c0d43d0",
+      "bytes": 313744
+    },
+    {
+      "path": "/outputs/reference629/high_speed_step/config-0004-run_forward_0.9s_step0.5s-f298019bbdbd/video/episode_0_1791651162.png",
+      "sha256": "a21c023af34e7e1f6f8cd2c049841965da81607fd02cfd19ef0b3ab3cb2b5c55",
+      "bytes": 22477
+    },
+    {
+      "path": "/outputs/reference629/high_speed_step/config-0004-run_forward_0.9s_step0.5s-f298019bbdbd/worker-processes.json",
+      "sha256": "c8b8d0cca8f773a17101eb70e24367d1de56a0dd980904622211fea7d73a355e",
+      "bytes": 35043
+    }
+  ],
+  "worker_receipts": [
+    {
+      "path": "/outputs/reference629/high_speed_step/config-0004-run_forward_0.9s_step0.5s-f298019bbdbd/worker-processes.json",
+      "sha256": "c8b8d0cca8f773a17101eb70e24367d1de56a0dd980904622211fea7d73a355e",
+      "bytes": 35043
+    },
+    {
+      "path": "/outputs/reference629/high_speed_step/config-0004-run_forward_0.9s_step0.5s-f298019bbdbd/simulator-process-start.json",
+      "sha256": "cdb0b68c3114a85e3498eb3f9467d27d75192496f592c8719ba23b5b2338da04",
+      "bytes": 919
+    },
+    {
+      "path": "/outputs/reference629/high_speed_step/config-0004-run_forward_0.9s_step0.5s-f298019bbdbd/inference-process-start.json",
+      "sha256": "5f2d3a05e3c9299f734b513628f529e133a89fd2d3c06150d126d1043ece6d59",
+      "bytes": 920
+    }
+  ],
+  "execution": {
+    "output": "/outputs/reference629/high_speed_step/config-0004-run_forward_0.9s_step0.5s-f298019bbdbd",
+    "launch": [
+      "/opt/php/envs/inference/bin/python",
+      "/workspace/php_parkour/scripts/research/sim2sim.py",
+      "--models",
+      "/data/assets/student",
+      "--terrain",
+      "custom",
+      "--mesh",
+      "/workspace/php_parkour/outputs/research/motion-matching/scenarios/high_speed_step/run_forward_0.9s_step0.5s_terrain.obj",
+      "--reference-motion",
+      "/workspace/php_parkour/outputs/research/motion-matching/scenarios/high_speed_step/run_forward_0.9s_step0.5s_motion.npz",
+      "--reference-spawn",
+      "--record-policy",
+      "--seed",
+      "42",
+      "--gl",
+      "egl",
+      "--python-faulthandler",
+      "--sim-python",
+      "/opt/php/bin/train-python",
+      "--inference-python",
+      "/opt/php/bin/inference-python",
+      "--output",
+      "/outputs/reference629/high_speed_step/config-0004-run_forward_0.9s_step0.5s-f298019bbdbd"
+    ],
+    "log": {
+      "path": "/outputs/reference629/logs/high_speed_step/config-0004/attempt-0001.log",
+      "sha256": "04f20a6e662ef6ea38821c3a83782e9951f030ce30022743e3a99b044fc3d640",
+      "bytes": 81175
+    },
+    "returncode": 0
+  },
+  "result_sha256": "04f20a6e662ef6ea38821c3a83782e9951f030ce30022743e3a99b044fc3d640",
+  "expected_policy_ticks": 420,
+  "scope": "Native closed-loop execution evidence; survival is heuristic and course completion unverified"
+}
