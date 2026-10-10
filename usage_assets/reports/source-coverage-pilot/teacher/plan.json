@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "status": "prepared_gpu_not_run",
+  "created_at_utc": "2026-10-10T05:40:51.472923+00:00",
+  "policy": "teacher",
+  "scope": "Each selected original source is attempted independently on one generated terrain variant, seed42. Execution and skill quality are separate. No GPU run by plan/preflight.",
+  "source_inventory": {
+    "path": "/outputs/source-coverage-repaired/teacher/inventory.json",
+    "sha256": "30e2cd47e44914af82b8f7ef37865aa2a7d9b94536edc9abde998589a7adf57d",
+    "bytes": 984706
+  },
+  "inventory_sha256": "77017c028ffcc428f9361cf93c66ade581e2c5ed6f5db42c601f2b659f07dba9",
+  "inventory_total_sources": 296,
+  "selected_sources": 1,
+  "stop_rules": [
+    "first native failed",
+    "first native timeout",
+    "first native motion boundary",
+    "max policy steps"
+  ],
+  "native_warmup_semantics": "reset_all A initializes; reset_all B is first attempt zero-action warmup at frame0; first policy frame1, last potential frameT-2; boundaryT-1 is sentinel",
+  "harness_sources": [
+    {
+      "path": "/workspace/php_parkour/scripts/research/eval_source_coverage.py",
+      "sha256": "45c2901bc90e89853f6d4df160ea69b886fe19db31f9e0402d71cca85aa717f5",
+      "bytes": 19750
+    },
+    {
+      "path": "/workspace/php_parkour/scripts/research/source_coverage_probe.py",
+      "sha256": "dfbac31911f155e79ef98b22a8ff74b87773d3d660b251dbcd67af9279a40cfe",
+      "bytes": 33308
+    },
+    {
+      "path": "/workspace/php_parkour/scripts/research/motion_coverage.py",
+      "sha256": "01d9648d52618df6d6bc861bb6c58cd8bd2a70ad2da0fbbbd43e90bfea1470bc",
+      "bytes": 23332
+    },
+    {
+      "path": "/workspace/php_parkour/scripts/research/eval_quality.py",
+      "sha256": "87a6bb555cf2260b74f878d98c9eb743b8484dff3686478508d01e61a9869d80",
+      "bytes": 11302
+    }
+  ],
+  "cases": [
+    {
+      "case_id": "teacher-e0-000-fef9f7ce29d0",
+      "case": {
+        "path": "/outputs/source-coverage-repaired/teacher/cases/teacher-e0-000-fef9f7ce29d0/case.json",
+        "sha256": "514af08a0630abe6e7a495e28d1429fa0a4f1e4acb612451aa0b26e771048e92",
+        "bytes": 6788
+      },
+      "source_clip_id": "motions-locomotion/cfg0000_stand_2.0s_left_45_1.4s_forward_2.3s_right_90_0.9s_right_45_0.6s_right_45_2.0s_left_90_0.6s_left_45_2.6s_run_right_45_1.2s_left_45_1.3s_run_right_90_1.6s_stand_2.0s_motion.npz",
+      "original_expert_ordinal": 0,
+      "checkpoint": {
+        "path": "/outputs/cloud/results/official-full/official/teacher-locomotion/PHP-research/20261010_042104-teacher-locomotion-locomotion/model_00500.pt",
+        "sha256": "d38d7c626fab4750e40eacfc05bc8178a56141055a569f9abca9f71c7584e87a",
+        "bytes": 10345023
+      }
+    }
+  ],
+  "quality_verified": false,
+  "simulation_started": false
+}

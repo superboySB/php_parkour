@@ -1,0 +1,221 @@
+{
+  "status": "cpu_preflight_passed_gpu_not_run",
+  "simulation_started": false,
+  "scope": "Real saved PT config, native PHP preprocessing, CPU MotionLoader and student balancing predicate; no native reset, policy, physics or video.",
+  "case_id": "finetune-e1-000-12d526429c71",
+  "policy": "finetune",
+  "singleton_provenance_sha256": "7624806a6cc842a6063eb24366155fa13df63c052acf03e9bc3a6175188dd9f0",
+  "checkpoint": {
+    "path": "/outputs/final-cloud-acceptance/results/smoke/student-finetune/PHP-research/20261010_041630-student-finetune-locomotion/model_00001.pt",
+    "sha256": "8b7afb88adb5c6cf4ab599bd89a6d8e673695d74d7f9f10fc14fc7aa7e22422a",
+    "bytes": 50849709
+  },
+  "source": {
+    "source_clip_id": "motions-low-step/forward_walk0.5s_step0.5s_motion.npz",
+    "global_ordinal": 100,
+    "expert_ordinal": 1,
+    "skill": "low-step",
+    "registry_component": "motions-low-step",
+    "source_ordinal": 0,
+    "source_registry_uri": "file:///data/assets/motions-low-step",
+    "relative_motion": "forward_walk0.5s_step0.5s_motion.npz",
+    "source_motion": "/data/assets/motions-low-step/forward_walk0.5s_step0.5s_motion.npz",
+    "source_motion_sha256": "12d526429c718a581779ab833406db018e89f7d1977ef86cb56dad895b4c4154",
+    "source_terrain": "/data/assets/motions-low-step/forward_walk0.5s_step0.5s_terrain.npy",
+    "source_terrain_sha256": "39ff22e79f8a2a83408b8bad52fa542189d85cee2ee11065aea1b45c3e521471",
+    "relative_terrain": "forward_walk0.5s_step0.5s_terrain.npy",
+    "source_obj": null,
+    "source_obj_sha256": null,
+    "relative_obj": null,
+    "frames": 455,
+    "fps": 50.0,
+    "duration_seconds": 9.1,
+    "last_frame_time_seconds": 9.08,
+    "end_indices_inclusive": [
+      454
+    ],
+    "source_bounds": [
+      {
+        "start_inclusive": 0,
+        "end_inclusive": 454
+      }
+    ],
+    "source_motion_ends_present": false,
+    "source_motion_idxs": {
+      "present": false,
+      "unique_values": null
+    },
+    "boundary_interpretation": "entire source file; final boundary supplied by native concatenation",
+    "arrays": {
+      "joint_pos": {
+        "shape": [
+          455,
+          36
+        ],
+        "dtype": "float64"
+      },
+      "joint_vel": {
+        "shape": [
+          455,
+          35
+        ],
+        "dtype": "float64"
+      },
+      "body_pos_w": {
+        "shape": [
+          455,
+          32,
+          3
+        ],
+        "dtype": "float64"
+      },
+      "body_quat_w": {
+        "shape": [
+          455,
+          32,
+          4
+        ],
+        "dtype": "float64"
+      },
+      "body_lin_vel_w": {
+        "shape": [
+          455,
+          32,
+          3
+        ],
+        "dtype": "float64"
+      },
+      "body_ang_vel_w": {
+        "shape": [
+          455,
+          32,
+          3
+        ],
+        "dtype": "float64"
+      },
+      "vel_cmd": {
+        "shape": [
+          455,
+          15
+        ],
+        "dtype": "float32"
+      }
+    },
+    "extra_keys": [],
+    "command_active_indices": [
+      0,
+      1
+    ],
+    "body_quaternion_max_norm_error": 4.3064449339880184e-08,
+    "root_quaternion_max_norm_error": 2.9626678554883767e-08,
+    "joint_order": "G1_29DOF_JOINT_NAMES (MuJoCo)",
+    "body_order": "G1_32BODY_NAMES",
+    "quaternion_order": "wxyz",
+    "terrain": {
+      "shape": [
+        2,
+        10,
+        10
+      ],
+      "dtype": "float64",
+      "box_count": 2,
+      "variant_count": 10,
+      "quaternion_max_norm_error": 7.775530308506973e-08,
+      "layout": "world XYZ, wxyz quaternion, full XYZ size"
+    },
+    "release_checksum_verified": true
+  },
+  "registry_uri": "file:///outputs/source-coverage-repaired/finetune/cases/finetune-e1-000-12d526429c71/singleton/bundle",
+  "inventory_identity_sha256": "77017c028ffcc428f9361cf93c66ade581e2c5ed6f5db42c601f2b659f07dba9",
+  "harness_sources": [
+    {
+      "path": "/workspace/php_parkour/scripts/research/eval_source_coverage.py",
+      "sha256": "45c2901bc90e89853f6d4df160ea69b886fe19db31f9e0402d71cca85aa717f5",
+      "bytes": 19750
+    },
+    {
+      "path": "/workspace/php_parkour/scripts/research/source_coverage_probe.py",
+      "sha256": "dfbac31911f155e79ef98b22a8ff74b87773d3d660b251dbcd67af9279a40cfe",
+      "bytes": 33308
+    },
+    {
+      "path": "/workspace/php_parkour/scripts/research/motion_coverage.py",
+      "sha256": "01d9648d52618df6d6bc861bb6c58cd8bd2a70ad2da0fbbbd43e90bfea1470bc",
+      "bytes": 23332
+    },
+    {
+      "path": "/workspace/php_parkour/scripts/research/eval_quality.py",
+      "sha256": "87a6bb555cf2260b74f878d98c9eb743b8484dff3686478508d01e61a9869d80",
+      "bytes": 11302
+    }
+  ],
+  "planned_eval_only_warmup_cache_repair": {
+    "enabled": true,
+    "scope": "isolated evaluation warmups only; current-frame cache refresh, no command.step",
+    "native_source": {
+      "path": "/workspace/php_parkour/thirdparty/holosoma/src/holosoma/holosoma/managers/command/terms/wbt.py",
+      "sha256": "4acfdb0d14e2877a1503bfb4508c6751db97d064ff270e99bdf74f489fe45d0a",
+      "bytes": 82749
+    },
+    "native_formula_lines": [
+      1063,
+      1088
+    ],
+    "formula_ast_sha256": "155892b6ef1326d34b9bed8adcee2320681efc38df55dcb03b955088cca864ea",
+    "native_cache_bug": "WholeBodyTrackingManager.reset_all init_buffers clears targets; termination/logging precede command.step target refresh"
+  },
+  "saved_algorithm_target": "wbt_training.utils.student_teacher.PhpDistillationPPO",
+  "num_envs": 1,
+  "actual_frames": 455,
+  "actual_boundary_indices_inclusive": [
+    454
+  ],
+  "actual_native_expert_ids": [
+    0
+  ],
+  "expert_balancing_active": false,
+  "original_expert_ordinal": 1,
+  "singleton_native_expert_ordinal": 0,
+  "preprocess_hook_kwargs": {
+    "add_onpath_obstacle": true,
+    "num_variants": 1,
+    "obstacle_seed": 42
+  },
+  "source_table_verification": {
+    "status": "matched_selected_source",
+    "unchanged_fields": [
+      "fps",
+      "joint_pos",
+      "joint_vel",
+      "body_quat_w",
+      "body_lin_vel_w",
+      "body_ang_vel_w",
+      "vel_cmd",
+      "joint_names",
+      "body_names"
+    ],
+    "body_position_translation_xyz_m": [
+      0.015458988025784492,
+      0.39031010187136417,
+      0.0
+    ],
+    "translation_tolerance_m": 1e-05
+  },
+  "artifacts": [
+    {
+      "path": "/outputs/source-coverage-repaired/finetune/cases/finetune-e1-000-12d526429c71/cpu-preflight/holosoma_config.yaml",
+      "sha256": "96952c5faaec76bf85934e7fcf3e3c303fef57c8324116ba01e5f6fe3e1838cf",
+      "bytes": 33053
+    },
+    {
+      "path": "/outputs/source-coverage-repaired/finetune/cases/finetune-e1-000-12d526429c71/cpu-preflight/motion.npz",
+      "sha256": "721747fd593024ce923feabbb56b4066e4e45800cba71f5d0074b97de229e2b4",
+      "bytes": 1638625
+    },
+    {
+      "path": "/outputs/source-coverage-repaired/finetune/cases/finetune-e1-000-12d526429c71/cpu-preflight/terrain.obj",
+      "sha256": "61dec2841e27ea588d335c7240b61f02ce18ccbf7a2e02ac824f7f679e38386c",
+      "bytes": 1255
+    }
+  ]
+}

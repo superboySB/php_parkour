@@ -530,10 +530,15 @@ startup default pose bias同时修改qtarget中心与观测`q−default`基准�
 | 原生训练接口 | 最终冻结源码下 22/22 个有界训练、评估、导出阶段；13 次真实权重更新检查 | 通路通过，smoke 不代表官方日程或收敛完成 |
 | 正式训练 | 五教师各 20000 轮、纯学生 10000、混合学生 30000 的顺序 driver 已启动 | 截至本文快照，仍在第一教师；不能确认全部完成 |
 | 云端 PT 回传本地 | iteration 19 pilot 与正式 iteration 500 都真实加载，在 16GiB 卡运行 64env×250step | 模型传输与 Isaac 推理通路通过；两次均 `quality_verified=false` |
+| 逐原始源片段验收 | 296 对输入逐项校验、48 项 CPU 回归、3 次真实独立 Isaac 片段尝试 | teacher500为158策略步，两种student smoke各21步后失败；0片段完成，尚未跑完296源×三策略 |
 | 发布学生的物理 sim2sim | 原生 ONNX、DDS、深度 SHM、PD；平地 12 个有效 command 与 17 场景各一个 OBJ | 17 场景执行完成，但 14 场景出现高度/倾斜阈值事件，不能宣称全场景技能成功 |
 | 实体 G1 | 审计 SDK、映射与相机接口，没有本次真实机器人运行 | 未验证；论文作者的实机成绩不能记成本次结果 |
 
 正式 iteration 500 的同设置短评估记录 **75 次失败重置**，iteration 19 pilot 为 **3971 次**；这是 64 个环境反复终止的累计回合数，不是机器人数量。500 轮模型的四项跟踪误差各有 16000 个有限样本，最长 env0 原片为 3.22s，仍有失败且没有完成整个 course。两个 checkpoint 来自不同训练运行，不能视为同一条逐轮配对实验。详见 [本地 pilot](usage_assets/reports/official-pilot-local-quality/summary.md) 与 [500 轮中间检查点](usage_assets/reports/official-progress-0500-local/summary.md)。
+
+独立的 [逐源片段工具](scripts/research/eval_source_coverage.py) 将原始 `source_clip_id`、原训练 expert 和 singleton native expert 分开记录：每个源复制为一个本地 bundle，生成一份地形变体，保留实际 native NPZ/OBJ/YAML、逐步参考帧、失败标志、动作、误差、录像和 TensorBoard。原始296个NPZ都没有存储 `motion_idxs` / `motion_ends`；合并时才补上本地 expert0 和最后一帧边界。`plan/preflight` 只做 CPU 检查，`run` 逐片段运行，首次失败/超时/边界即停。原生两次零动作 warmup 与策略控制分列，真正策略参考帧为 `1..T-2`，frame0与最后的边界标记不伪称被策略控制。
+
+首次真实尝试发现 WBT 的 `reset_all → init_buffers` 清零 relative body target，下一步却先 termination/reward/log、后 `command.step` 刷新目标；这使三个片段在策略开始前误终止。独立工具仅在 warmup 前提取原生 `MotionCommand.step` 的同一对齐公式，刷新两个缓存，保留公式/文件 SHA 和缓存前后值，并核对时间、采样 ID、边界及 RNG 不变。没有推进后回写时钟或放宽失败条件，也没有更换云端训练源码。修复后相同PT和完整源进入158/21/21个实际策略步，随后真正跟踪失败，尚无片段完成。[前后真实结果与原生公式推导](usage_assets/reports/source-coverage-pilot/summary.md)。旧64env报告统计的是策略阶段，不含这些warmup误终止；其原始数值保留。
 
 CPU 测试也保留实际边界：根目录/训练 289 项通过；motion matching 213 项通过、12 个历史 raw-hash 比较失败，未跳过或重写 golden。基线比较中 36 个语义数组逐字节一致，九项不变量通过；仍不能将该 legacy suite 写成全绿。详细原始测试与基线差异见 [usage 的测试记录](usage.md#8-全量测试同步与结果来源)。
 

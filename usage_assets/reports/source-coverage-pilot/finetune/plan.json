@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "status": "prepared_gpu_not_run",
+  "created_at_utc": "2026-10-10T05:41:04.435360+00:00",
+  "policy": "finetune",
+  "scope": "Each selected original source is attempted independently on one generated terrain variant, seed42. Execution and skill quality are separate. No GPU run by plan/preflight.",
+  "source_inventory": {
+    "path": "/outputs/source-coverage-repaired/finetune/inventory.json",
+    "sha256": "15393344a429d85c6337b9eb9ec994c1d42614f97c167bfef877b8075eef85b2",
+    "bytes": 984706
+  },
+  "inventory_sha256": "77017c028ffcc428f9361cf93c66ade581e2c5ed6f5db42c601f2b659f07dba9",
+  "inventory_total_sources": 296,
+  "selected_sources": 1,
+  "stop_rules": [
+    "first native failed",
+    "first native timeout",
+    "first native motion boundary",
+    "max policy steps"
+  ],
+  "native_warmup_semantics": "reset_all A initializes; reset_all B is first attempt zero-action warmup at frame0; first policy frame1, last potential frameT-2; boundaryT-1 is sentinel",
+  "harness_sources": [
+    {
+      "path": "/workspace/php_parkour/scripts/research/eval_source_coverage.py",
+      "sha256": "45c2901bc90e89853f6d4df160ea69b886fe19db31f9e0402d71cca85aa717f5",
+      "bytes": 19750
+    },
+    {
+      "path": "/workspace/php_parkour/scripts/research/source_coverage_probe.py",
+      "sha256": "dfbac31911f155e79ef98b22a8ff74b87773d3d660b251dbcd67af9279a40cfe",
+      "bytes": 33308
+    },
+    {
+      "path": "/workspace/php_parkour/scripts/research/motion_coverage.py",
+      "sha256": "01d9648d52618df6d6bc861bb6c58cd8bd2a70ad2da0fbbbd43e90bfea1470bc",
+      "bytes": 23332
+    },
+    {
+      "path": "/workspace/php_parkour/scripts/research/eval_quality.py",
+      "sha256": "87a6bb555cf2260b74f878d98c9eb743b8484dff3686478508d01e61a9869d80",
+      "bytes": 11302
+    }
+  ],
+  "cases": [
+    {
+      "case_id": "finetune-e1-000-12d526429c71",
+      "case": {
+        "path": "/outputs/source-coverage-repaired/finetune/cases/finetune-e1-000-12d526429c71/case.json",
+        "sha256": "e0a6ef7f68600aaae5c7b687c3a15d6f5206331351ccd09148efd2c848c6f816",
+        "bytes": 6195
+      },
+      "source_clip_id": "motions-low-step/forward_walk0.5s_step0.5s_motion.npz",
+      "original_expert_ordinal": 1,
+      "checkpoint": {
+        "path": "/outputs/final-cloud-acceptance/results/smoke/student-finetune/PHP-research/20261010_041630-student-finetune-locomotion/model_00001.pt",
+        "sha256": "8b7afb88adb5c6cf4ab599bd89a6d8e673695d74d7f9f10fc14fc7aa7e22422a",
+        "bytes": 50849709
+      }
+    }
+  ],
+  "quality_verified": false,
+  "simulation_started": false
+}

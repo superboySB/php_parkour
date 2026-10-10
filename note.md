@@ -244,6 +244,29 @@ ssh -p 22 -N -L 6007:127.0.0.1:6006 tencent-231
 
 评估入口 `eval-teachers` / `eval-student` 会生成 `quality.json`：checkpoint SHA、实际仿真时间、失败/超时 reset、跟踪误差、观察到的 motion IDs、录像 SHA 和本地 TensorBoard `Evaluation/*`。`--eval-steps` 控制本次有界 rollout 的步数。当前 MotionLoader 把源动作合并为一个 NPZ，顶层 ID 0 和 `available_clip_count=1` 不能直接统计原始片段覆盖；需要结合 `motion_ends` 和参考时间索引。不能从步数或录像数量推断遍历了整套动作。
 
+逐原始片段检查使用独立工具 [eval_source_coverage.py](scripts/research/eval_source_coverage.py)。它先校验全部 296 对公开数据，再为每个选中的源文件复制独立 `file://` bundle；不改运行中的训练。下面以纯学生和第一个 low-step 片段为例：先把 `PHP_STUDENT_CHECKPOINT` 设为容器内已经存在的学生 `.pt` 绝对路径，使用未占用的输出目录。
+
+```bash
+: "${PHP_STUDENT_CHECKPOINT:?请先设为容器内实际学生PT的绝对路径}"
+docker exec -e CUDA_VISIBLE_DEVICES= -w /workspace/php_parkour \
+  php-parkour-research /opt/php/bin/train-python \
+  scripts/research/eval_source_coverage.py plan --policy pure \
+  --checkpoint "$PHP_STUDENT_CHECKPOINT" --output /outputs/source-coverage-pure-new \
+  --source-clip-id motions-low-step/forward_walk0.5s_step0.5s_motion.npz
+docker exec -e CUDA_VISIBLE_DEVICES= -w /workspace/php_parkour \
+  php-parkour-research /opt/php/bin/train-python \
+  scripts/research/eval_source_coverage.py preflight \
+  --plan /outputs/source-coverage-pure-new/plan.json
+bash scripts/research/docker.sh train scripts/research/eval_source_coverage.py run \
+  --plan /outputs/source-coverage-pure-new/plan.json
+```
+
+`plan` 和 `preflight` 只做 CPU 检查；`run` 才启动 Isaac，使用空闲 GPU，逐片段独立进程、1 环境、1 个地形变体、seed 42。去掉 `--source-clip-id` 可选择全部 296 个源；混合学生用 `--policy finetune` 和自己的 PT。教师用 `--policy teacher`，按五类技能分别提供 `--teacher-checkpoint locomotion=实际PT路径` 等五个参数，工具核对保存配置所属注册表。三个策略范围合计 888 次尝试，不等于已经完成这些测试，也不覆盖训练中的全部 64/3 个地形变体。
+
+原始训练 expert 编号保留在外部来源记录，独立 bundle 预处理后的 native expert 为 0。原生评估会执行两次 `reset_all` 的零动作步：第一次初始化单列，第二次属于首次尝试；之后策略参考帧为 `1..T-2`，最后一帧是结束标记。工具在首次失败、超时、片段边界或步数上限停止，保留逐步 JSONL、真实预处理文件/配置、视频和离线 TensorBoard；失败与边界同一步时按失败记录。命令执行成功与片段完成、技能质量分别统计，`quality_verified` 不自动置真。实际验证范围见 [usage.md](usage.md)。
+
+此独立工具还修复了原生 warmup 缓存问题：`reset_all` 清零身体目标，而下一步先检测终止、后刷新目标。工具只在两次 warmup 前提取并执行当前固定版原生对齐公式，刷新两个缓存，记录公式 SHA、参考时间和 RNG 不变的证据；没有改变终止条件或运行中的云训练。修复前后三个真实 Isaac 片段与全部结果文件见 [验收报告](usage_assets/reports/source-coverage-pilot/summary.md)。
+
 六种教师 preset（含默认 noscale、no-heightscan、pelvis）及两种学生 preset 见 [验收定义](scripts/research/acceptance_matrix.json)。用 `teacher-presets --profile smoke --skills locomotion` 检查六个教师配置；直接 CLI 用 `train-python -m wbt_training.train_agent exp:... simulator:isaacsim ...`。其中 no-heightscan 教师默认 60000 迭代，不能把标准教师的 20000 误当该配置的默认训练量。`--skip-completed` 仅在成功记录、配置与经校验的 checkpoint 都满足目标时跳过阶段。
 
 完整日程也可交给单个可续跑 driver：

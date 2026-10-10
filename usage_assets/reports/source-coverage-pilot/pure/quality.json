@@ -1,0 +1,1842 @@
+{
+  "schema_version": 1,
+  "status": "completed",
+  "execution_error": null,
+  "quality_verified": false,
+  "scope": "One source pair, singleton native registry, one terrain variant, seed42, first attempt only; not all training variants or convergence.",
+  "case_id": "pure-e1-000-12d526429c71",
+  "policy": "pure",
+  "source": {
+    "source_clip_id": "motions-low-step/forward_walk0.5s_step0.5s_motion.npz",
+    "global_ordinal": 100,
+    "expert_ordinal": 1,
+    "skill": "low-step",
+    "registry_component": "motions-low-step",
+    "source_ordinal": 0,
+    "source_registry_uri": "file:///data/assets/motions-low-step",
+    "relative_motion": "forward_walk0.5s_step0.5s_motion.npz",
+    "source_motion": "/data/assets/motions-low-step/forward_walk0.5s_step0.5s_motion.npz",
+    "source_motion_sha256": "12d526429c718a581779ab833406db018e89f7d1977ef86cb56dad895b4c4154",
+    "source_terrain": "/data/assets/motions-low-step/forward_walk0.5s_step0.5s_terrain.npy",
+    "source_terrain_sha256": "39ff22e79f8a2a83408b8bad52fa542189d85cee2ee11065aea1b45c3e521471",
+    "relative_terrain": "forward_walk0.5s_step0.5s_terrain.npy",
+    "source_obj": null,
+    "source_obj_sha256": null,
+    "relative_obj": null,
+    "frames": 455,
+    "fps": 50.0,
+    "duration_seconds": 9.1,
+    "last_frame_time_seconds": 9.08,
+    "end_indices_inclusive": [
+      454
+    ],
+    "source_bounds": [
+      {
+        "start_inclusive": 0,
+        "end_inclusive": 454
+      }
+    ],
+    "source_motion_ends_present": false,
+    "source_motion_idxs": {
+      "present": false,
+      "unique_values": null
+    },
+    "boundary_interpretation": "entire source file; final boundary supplied by native concatenation",
+    "arrays": {
+      "joint_pos": {
+        "shape": [
+          455,
+          36
+        ],
+        "dtype": "float64"
+      },
+      "joint_vel": {
+        "shape": [
+          455,
+          35
+        ],
+        "dtype": "float64"
+      },
+      "body_pos_w": {
+        "shape": [
+          455,
+          32,
+          3
+        ],
+        "dtype": "float64"
+      },
+      "body_quat_w": {
+        "shape": [
+          455,
+          32,
+          4
+        ],
+        "dtype": "float64"
+      },
+      "body_lin_vel_w": {
+        "shape": [
+          455,
+          32,
+          3
+        ],
+        "dtype": "float64"
+      },
+      "body_ang_vel_w": {
+        "shape": [
+          455,
+          32,
+          3
+        ],
+        "dtype": "float64"
+      },
+      "vel_cmd": {
+        "shape": [
+          455,
+          15
+        ],
+        "dtype": "float32"
+      }
+    },
+    "extra_keys": [],
+    "command_active_indices": [
+      0,
+      1
+    ],
+    "body_quaternion_max_norm_error": 4.3064449339880184e-08,
+    "root_quaternion_max_norm_error": 2.9626678554883767e-08,
+    "joint_order": "G1_29DOF_JOINT_NAMES (MuJoCo)",
+    "body_order": "G1_32BODY_NAMES",
+    "quaternion_order": "wxyz",
+    "terrain": {
+      "shape": [
+        2,
+        10,
+        10
+      ],
+      "dtype": "float64",
+      "box_count": 2,
+      "variant_count": 10,
+      "quaternion_max_norm_error": 7.775530308506973e-08,
+      "layout": "world XYZ, wxyz quaternion, full XYZ size"
+    },
+    "release_checksum_verified": true
+  },
+  "singleton_provenance_sha256": "a5d692b761b3814be24b64cccad6675af490bb0a78c3af811a5fad91ced76002",
+  "inventory_identity_sha256": "77017c028ffcc428f9361cf93c66ade581e2c5ed6f5db42c601f2b659f07dba9",
+  "source_inventory": {
+    "path": "/outputs/source-coverage-repaired/pure/inventory.json",
+    "sha256": "daa82deb3c1aed953ea8da0955803525e9c0795c415e129bed1ccff201b6221b",
+    "bytes": 984706
+  },
+  "harness_sources": [
+    {
+      "path": "/workspace/php_parkour/scripts/research/eval_source_coverage.py",
+      "sha256": "45c2901bc90e89853f6d4df160ea69b886fe19db31f9e0402d71cca85aa717f5",
+      "bytes": 19750
+    },
+    {
+      "path": "/workspace/php_parkour/scripts/research/source_coverage_probe.py",
+      "sha256": "dfbac31911f155e79ef98b22a8ff74b87773d3d660b251dbcd67af9279a40cfe",
+      "bytes": 33308
+    },
+    {
+      "path": "/workspace/php_parkour/scripts/research/motion_coverage.py",
+      "sha256": "01d9648d52618df6d6bc861bb6c58cd8bd2a70ad2da0fbbbd43e90bfea1470bc",
+      "bytes": 23332
+    },
+    {
+      "path": "/workspace/php_parkour/scripts/research/eval_quality.py",
+      "sha256": "87a6bb555cf2260b74f878d98c9eb743b8484dff3686478508d01e61a9869d80",
+      "bytes": 11302
+    }
+  ],
+  "callback_target": "scripts.research.source_coverage_probe.SourceCoverageProbe",
+  "checkpoint": {
+    "path": "/outputs/final-cloud-acceptance/results/smoke/student-pure/PHP-research/20261010_041432-student-pure-locomotion/model_00001.pt",
+    "sha256": "959b668595ef7b8339eff616135d8011c0ad5ad887b00eae6f7ae8cc0769c77c",
+    "bytes": 11247879
+  },
+  "checkpoint_iteration": 1,
+  "actual_native": {
+    "num_envs": 1,
+    "loader_num_motions": 1,
+    "frames": 455,
+    "boundary_indices_inclusive": [
+      454
+    ],
+    "native_expert_ids": [
+      0
+    ],
+    "expert_balancing_active": false,
+    "freeze_at_timestep_zero_prob": 0.0,
+    "resample_on_motion_end": true,
+    "control_dt_seconds": 0.02,
+    "source_fps": 50.0,
+    "phase_zero_source": "native eval reset; no time_steps assignment by harness",
+    "source_table_verification": {
+      "status": "matched_selected_source",
+      "unchanged_fields": [
+        "fps",
+        "joint_pos",
+        "joint_vel",
+        "body_quat_w",
+        "body_lin_vel_w",
+        "body_ang_vel_w",
+        "vel_cmd",
+        "joint_names",
+        "body_names"
+      ],
+      "body_position_translation_xyz_m": [
+        0.015458988025784492,
+        0.39031010187136417,
+        0.0
+      ],
+      "translation_tolerance_m": 1e-05
+    },
+    "motion": {
+      "native_path": "/tmp/holosoma_motions_re8afntu/2fc3814212c9ebc5_motions_42.npz",
+      "retained": {
+        "path": "/outputs/source-coverage-repaired/pure/cases/pure-e1-000-12d526429c71/runtime-assets/motion.npz",
+        "sha256": "721747fd593024ce923feabbb56b4066e4e45800cba71f5d0074b97de229e2b4",
+        "bytes": 1638625
+      }
+    },
+    "terrain_obj": {
+      "native_path": "/tmp/tmp5wo0cpj6.obj",
+      "retained": {
+        "path": "/outputs/source-coverage-repaired/pure/cases/pure-e1-000-12d526429c71/runtime-assets/terrain.obj",
+        "sha256": "61dec2841e27ea588d335c7240b61f02ce18ccbf7a2e02ac824f7f679e38386c",
+        "bytes": 1255
+      }
+    },
+    "saved_eval_config": {
+      "native_path": "/outputs/source-coverage-repaired/pure/cases/pure-e1-000-12d526429c71/native/PHP-research/20261010_054222-student-pure-eval/holosoma_config.yaml",
+      "retained": {
+        "path": "/outputs/source-coverage-repaired/pure/cases/pure-e1-000-12d526429c71/runtime-assets/holosoma_config.yaml",
+        "sha256": "dcc8cb36e853aaf64f786add98ff871f2dd68bda99b685eaa17f07ffcb2ea446",
+        "bytes": 32733
+      }
+    },
+    "actual_preprocess_hook_kwargs": {
+      "add_onpath_obstacle": true,
+      "num_variants": 1,
+      "obstacle_seed": 42
+    }
+  },
+  "native_argv": [
+    "--checkpoint",
+    "/outputs/final-cloud-acceptance/results/smoke/student-pure/PHP-research/20261010_041432-student-pure-locomotion/model_00001.pt",
+    "--training.num-envs",
+    "1",
+    "--training.headless",
+    "True",
+    "--training.seed",
+    "42",
+    "--training.max-eval-steps",
+    "455",
+    "--training.export-onnx",
+    "False",
+    "--training.registry-name",
+    "file:///outputs/source-coverage-repaired/pure/cases/pure-e1-000-12d526429c71/singleton/bundle",
+    "--training.preprocess-hook-kwargs",
+    "{\"add_onpath_obstacle\": true, \"num_variants\": 1, \"obstacle_seed\": 42}",
+    "--terrain.terrain-term.spawn.randomize-tiles",
+    "True",
+    "logger:disabled",
+    "--logger.base-dir",
+    "/outputs/source-coverage-repaired/pure/cases/pure-e1-000-12d526429c71/native",
+    "--logger.video.enabled",
+    "True",
+    "--logger.video.interval",
+    "1",
+    "--logger.video.upload-to-wandb",
+    "False"
+  ],
+  "seed": 42,
+  "warmup_cache_repair": {
+    "enabled": true,
+    "events": [
+      {
+        "formula": {
+          "enabled": true,
+          "scope": "isolated evaluation warmups only; current-frame cache refresh, no command.step",
+          "native_source": {
+            "path": "/workspace/php_parkour/thirdparty/holosoma/src/holosoma/holosoma/managers/command/terms/wbt.py",
+            "sha256": "4acfdb0d14e2877a1503bfb4508c6751db97d064ff270e99bdf74f489fe45d0a",
+            "bytes": 82749
+          },
+          "native_formula_lines": [
+            1063,
+            1088
+          ],
+          "formula_ast_sha256": "155892b6ef1326d34b9bed8adcee2320681efc38df55dcb03b955088cca864ea",
+          "native_cache_bug": "WholeBodyTrackingManager.reset_all init_buffers clears targets; termination/logging precede command.step target refresh"
+        },
+        "clock_before": {
+          "time_steps": [
+            0
+          ],
+          "motion_ids": [
+            0
+          ],
+          "motion_end_reset": [
+            false
+          ],
+          "episode_length_buf": [
+            0
+          ]
+        },
+        "clock_after": {
+          "time_steps": [
+            0
+          ],
+          "motion_ids": [
+            0
+          ],
+          "motion_end_reset": [
+            false
+          ],
+          "episode_length_buf": [
+            0
+          ]
+        },
+        "rng_sha256_before": {
+          "python": "52c62154335d7563551a0ff1b220e96d835e0a8dd3aae3d8cc6d024dd8db0b83",
+          "numpy": "a8cfe8077a095f5c0b50117848a0462c59002af0131f2a160b5a538e96d55630",
+          "torch_cpu": "21b58338840911c1a27eddd2711736c3c5e259e228f75a4cccad08ba3f2d73ca",
+          "torch_cuda_0": "4fd1fc032be739513570da868d403d7aae3c922beaa655d550c71907f64cbfec"
+        },
+        "rng_sha256_after": {
+          "python": "52c62154335d7563551a0ff1b220e96d835e0a8dd3aae3d8cc6d024dd8db0b83",
+          "numpy": "a8cfe8077a095f5c0b50117848a0462c59002af0131f2a160b5a538e96d55630",
+          "torch_cpu": "21b58338840911c1a27eddd2711736c3c5e259e228f75a4cccad08ba3f2d73ca",
+          "torch_cuda_0": "4fd1fc032be739513570da868d403d7aae3c922beaa655d550c71907f64cbfec"
+        },
+        "clock_unchanged": true,
+        "rng_unchanged": true,
+        "cache_before": {
+          "body_pos_relative_w": [
+            [
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ]
+            ]
+          ],
+          "body_quat_relative_w": [
+            [
+              [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ]
+            ]
+          ]
+        },
+        "cache_after": {
+          "body_pos_relative_w": [
+            [
+              [
+                0.010432631708681583,
+                0.3692609369754791,
+                0.7889465689659119
+              ],
+              [
+                -0.005787923000752926,
+                0.48458272218704224,
+                0.6560967564582825
+              ],
+              [
+                0.030463751405477524,
+                0.4840298891067505,
+                0.3521142899990082
+              ],
+              [
+                -0.020499907433986664,
+                0.4695720374584198,
+                0.039177894592285156
+              ],
+              [
+                0.024531956762075424,
+                0.2536607086658478,
+                0.6560967564582825
+              ],
+              [
+                0.05941218137741089,
+                0.26355308294296265,
+                0.3521142899990082
+              ],
+              [
+                0.006443649530410767,
+                0.26436471939086914,
+                0.039177894592285156
+              ],
+              [
+                0.00847894512116909,
+                0.36900442838668823,
+                0.8330807685852051
+              ],
+              [
+                0.003202547784894705,
+                0.5099552869796753,
+                1.0781201124191284
+              ],
+              [
+                -0.04366026073694229,
+                0.5604201555252075,
+                0.9070054292678833
+              ],
+              [
+                0.022625816985964775,
+                0.6078746914863586,
+                0.7417211532592773
+              ],
+              [
+                0.03976627439260483,
+                0.23147888481616974,
+                1.0781201124191284
+              ],
+              [
+                0.007519280072301626,
+                0.17062696814537048,
+                0.9070054292678833
+              ],
+              [
+                0.08380890637636185,
+                0.14189250767230988,
+                0.7417211532592773
+              ]
+            ]
+          ],
+          "body_quat_relative_w": [
+            [
+              [
+                0.0014747302047908306,
+                -0.022559821605682373,
+                -0.0652131736278534,
+                -0.9976152181625366
+              ],
+              [
+                0.0014758330071344972,
+                0.14610052108764648,
+                -0.06291278451681137,
+                -0.9872661232948303
+              ],
+              [
+                0.01765543408691883,
+                -0.0859343409538269,
+                -0.06507722288370132,
+                -0.9940164089202881
+              ],
+              [
+                0.0005084228469058871,
+                -0.01342096459120512,
+                -0.06603872030973434,
+                -0.9977266788482666
+              ],
+              [
+                -0.020482858642935753,
+                0.14466509222984314,
+                -0.06614674627780914,
+                -0.9870548248291016
+              ],
+              [
+                -0.006318184547126293,
+                -0.08750151097774506,
+                -0.06487951427698135,
+                -0.9940292835235596
+              ],
+              [
+                0.0012432698858901858,
+                -0.013372956775128841,
+                -0.06440920382738113,
+                -0.9978331923484802
+              ],
+              [
+                0.001680144458077848,
+                -0.02570238895714283,
+                -0.06520822644233704,
+                -0.997539222240448
+              ],
+              [
+                -0.13212305307388306,
+                -0.15996699035167694,
+                -0.0771990567445755,
+                -0.9751893877983093
+              ],
+              [
+                -0.10143253207206726,
+                -0.5364867448806763,
+                -0.0806698128581047,
+                -0.8338979482650757
+              ],
+              [
+                -0.10277024656534195,
+                -0.5391152501106262,
+                -0.07940416783094406,
+                -0.8321587443351746
+              ],
+              [
+                0.15182355046272278,
+                -0.14140570163726807,
+                -0.05040990188717842,
+                -0.9769405126571655
+              ],
+              [
+                0.1704101860523224,
+                -0.5187166333198547,
+                -0.02857501432299614,
+                -0.8373032808303833
+              ],
+              [
+                0.1720787137746811,
+                -0.5211486220359802,
+                -0.029603594914078712,
+                -0.8354141116142273
+              ]
+            ]
+          ]
+        },
+        "phase": "initialization_warmup"
+      },
+      {
+        "formula": {
+          "enabled": true,
+          "scope": "isolated evaluation warmups only; current-frame cache refresh, no command.step",
+          "native_source": {
+            "path": "/workspace/php_parkour/thirdparty/holosoma/src/holosoma/holosoma/managers/command/terms/wbt.py",
+            "sha256": "4acfdb0d14e2877a1503bfb4508c6751db97d064ff270e99bdf74f489fe45d0a",
+            "bytes": 82749
+          },
+          "native_formula_lines": [
+            1063,
+            1088
+          ],
+          "formula_ast_sha256": "155892b6ef1326d34b9bed8adcee2320681efc38df55dcb03b955088cca864ea",
+          "native_cache_bug": "WholeBodyTrackingManager.reset_all init_buffers clears targets; termination/logging precede command.step target refresh"
+        },
+        "clock_before": {
+          "time_steps": [
+            0
+          ],
+          "motion_ids": [
+            0
+          ],
+          "motion_end_reset": [
+            false
+          ],
+          "episode_length_buf": [
+            0
+          ]
+        },
+        "clock_after": {
+          "time_steps": [
+            0
+          ],
+          "motion_ids": [
+            0
+          ],
+          "motion_end_reset": [
+            false
+          ],
+          "episode_length_buf": [
+            0
+          ]
+        },
+        "rng_sha256_before": {
+          "python": "52c62154335d7563551a0ff1b220e96d835e0a8dd3aae3d8cc6d024dd8db0b83",
+          "numpy": "a8cfe8077a095f5c0b50117848a0462c59002af0131f2a160b5a538e96d55630",
+          "torch_cpu": "21b58338840911c1a27eddd2711736c3c5e259e228f75a4cccad08ba3f2d73ca",
+          "torch_cuda_0": "3be3239d513aabcadd815f99b18480d0a8b888a9c65789046d08fb06c8448183"
+        },
+        "rng_sha256_after": {
+          "python": "52c62154335d7563551a0ff1b220e96d835e0a8dd3aae3d8cc6d024dd8db0b83",
+          "numpy": "a8cfe8077a095f5c0b50117848a0462c59002af0131f2a160b5a538e96d55630",
+          "torch_cpu": "21b58338840911c1a27eddd2711736c3c5e259e228f75a4cccad08ba3f2d73ca",
+          "torch_cuda_0": "3be3239d513aabcadd815f99b18480d0a8b888a9c65789046d08fb06c8448183"
+        },
+        "clock_unchanged": true,
+        "rng_unchanged": true,
+        "cache_before": {
+          "body_pos_relative_w": [
+            [
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ]
+            ]
+          ],
+          "body_quat_relative_w": [
+            [
+              [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ]
+            ]
+          ]
+        },
+        "cache_after": {
+          "body_pos_relative_w": [
+            [
+              [
+                0.009910796768963337,
+                0.34758007526397705,
+                0.7889465689659119
+              ],
+              [
+                0.02556084468960762,
+                0.4629806876182556,
+                0.6560967564582825
+              ],
+              [
+                0.06030511483550072,
+                0.45262089371681213,
+                0.3521142899990082
+              ],
+              [
+                0.007330458145588636,
+                0.4525204300880432,
+                0.039177894592285156
+              ],
+              [
+                -0.007856537587940693,
+                0.2324865162372589,
+                0.6560967564582825
+              ],
+              [
+                0.028399288654327393,
+                0.23255257308483124,
+                0.3521142899990082
+              ],
+              [
+                -0.022365670651197433,
+                0.24769335985183716,
+                0.039177894592285156
+              ],
+              [
+                0.007960730232298374,
+                0.3478628098964691,
+                0.8330807685852051
+              ],
+              [
+                0.041093021631240845,
+                0.48496580123901367,
+                1.0781201124191284
+              ],
+              [
+                0.00966589991003275,
+                0.5462452173233032,
+                0.9070054292678833
+              ],
+              [
+                0.08633442223072052,
+                0.573952853679657,
+                0.7417211532592773
+              ],
+              [
+                0.000793912447988987,
+                0.20700541138648987,
+                1.0781201124191284
+              ],
+              [
+                -0.04674217849969864,
+                0.1571742445230484,
+                0.9070054292678833
+              ],
+              [
+                0.01890081912279129,
+                0.10883407294750214,
+                0.7417211532592773
+              ]
+            ]
+          ],
+          "body_quat_relative_w": [
+            [
+              [
+                -0.0016261402051895857,
+                -0.02254941314458847,
+                0.07190859317779541,
+                -0.997154951095581
+              ],
+              [
+                0.02145358733832836,
+                0.14452441036701202,
+                0.07277127355337143,
+                -0.9865884184837341
+              ],
+              [
+                0.005730596370995045,
+                -0.08754187822341919,
+                0.07155086100101471,
+                -0.9935713410377502
+              ],
+              [
+                -0.0013328156201168895,
+                -0.013364279642701149,
+                0.07110608369112015,
+                -0.9973782896995544
+              ],
+              [
+                -0.000495032174512744,
+                0.14610710740089417,
+                0.06953878700733185,
+                -0.9868215918540955
+              ],
+              [
+                -0.01823202148079872,
+                -0.08581389486789703,
+                0.07174844294786453,
+                -0.9935571551322937
+              ],
+              [
+                -0.0005983672454021871,
+                -0.013417279347777367,
+                0.07273482531309128,
+                -0.9972609281539917
+              ],
+              [
+                -0.0018526563653722405,
+                -0.025690531358122826,
+                0.07190313935279846,
+                -0.9970789551734924
+              ],
+              [
+                -0.15276938676834106,
+                -0.14038322865962982,
+                0.056966912001371384,
+                -0.9765800833702087
+              ],
+              [
+                -0.1738884150981903,
+                -0.5175610184669495,
+                0.034195177257061005,
+                -0.8370925784111023
+              ],
+              [
+                -0.1755732297897339,
+                -0.5199816823005676,
+                0.035210978239774704,
+                -0.8351964950561523
+              ],
+              [
+                0.13104622066020966,
+                -0.16085030138492584,
+                0.0837436318397522,
+                -0.9746491312980652
+              ],
+              [
+                0.09782889485359192,
+                -0.5371555089950562,
+                0.08626588433980942,
+                -0.8333376049995422
+              ],
+              [
+                0.09914892911911011,
+                -0.5397928953170776,
+                0.084988534450531,
+                -0.8316068649291992
+              ]
+            ]
+          ]
+        },
+        "phase": "attempt_warmup"
+      }
+    ],
+    "native_formula": {
+      "enabled": true,
+      "scope": "isolated evaluation warmups only; current-frame cache refresh, no command.step",
+      "native_source": {
+        "path": "/workspace/php_parkour/thirdparty/holosoma/src/holosoma/holosoma/managers/command/terms/wbt.py",
+        "sha256": "4acfdb0d14e2877a1503bfb4508c6751db97d064ff270e99bdf74f489fe45d0a",
+        "bytes": 82749
+      },
+      "native_formula_lines": [
+        1063,
+        1088
+      ],
+      "formula_ast_sha256": "155892b6ef1326d34b9bed8adcee2320681efc38df55dcb03b955088cca864ea",
+      "native_cache_bug": "WholeBodyTrackingManager.reset_all init_buffers clears targets; termination/logging precede command.step target refresh"
+    }
+  },
+  "stop_reason": "failed",
+  "stop_mechanism": "dedicated StopAttempt caught around unchanged native evaluate_policy; native post callbacks flushed once",
+  "first_attempt_reference_boundary_reached": false,
+  "policy_reference_frames_contiguous_from_one": true,
+  "policy_reference_frames": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21
+  ],
+  "expected_policy_interval_inclusive": [
+    1,
+    453
+  ],
+  "missing_policy_reference_frames": [
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    33,
+    34,
+    35,
+    36,
+    37,
+    38,
+    39,
+    40,
+    41,
+    42,
+    43,
+    44,
+    45,
+    46,
+    47,
+    48,
+    49,
+    50,
+    51,
+    52,
+    53,
+    54,
+    55,
+    56,
+    57,
+    58,
+    59,
+    60,
+    61,
+    62,
+    63,
+    64,
+    65,
+    66,
+    67,
+    68,
+    69,
+    70,
+    71,
+    72,
+    73,
+    74,
+    75,
+    76,
+    77,
+    78,
+    79,
+    80,
+    81,
+    82,
+    83,
+    84,
+    85,
+    86,
+    87,
+    88,
+    89,
+    90,
+    91,
+    92,
+    93,
+    94,
+    95,
+    96,
+    97,
+    98,
+    99,
+    100,
+    101,
+    102,
+    103,
+    104,
+    105,
+    106,
+    107,
+    108,
+    109,
+    110,
+    111,
+    112,
+    113,
+    114,
+    115,
+    116,
+    117,
+    118,
+    119,
+    120,
+    121,
+    122,
+    123,
+    124,
+    125,
+    126,
+    127,
+    128,
+    129,
+    130,
+    131,
+    132,
+    133,
+    134,
+    135,
+    136,
+    137,
+    138,
+    139,
+    140,
+    141,
+    142,
+    143,
+    144,
+    145,
+    146,
+    147,
+    148,
+    149,
+    150,
+    151,
+    152,
+    153,
+    154,
+    155,
+    156,
+    157,
+    158,
+    159,
+    160,
+    161,
+    162,
+    163,
+    164,
+    165,
+    166,
+    167,
+    168,
+    169,
+    170,
+    171,
+    172,
+    173,
+    174,
+    175,
+    176,
+    177,
+    178,
+    179,
+    180,
+    181,
+    182,
+    183,
+    184,
+    185,
+    186,
+    187,
+    188,
+    189,
+    190,
+    191,
+    192,
+    193,
+    194,
+    195,
+    196,
+    197,
+    198,
+    199,
+    200,
+    201,
+    202,
+    203,
+    204,
+    205,
+    206,
+    207,
+    208,
+    209,
+    210,
+    211,
+    212,
+    213,
+    214,
+    215,
+    216,
+    217,
+    218,
+    219,
+    220,
+    221,
+    222,
+    223,
+    224,
+    225,
+    226,
+    227,
+    228,
+    229,
+    230,
+    231,
+    232,
+    233,
+    234,
+    235,
+    236,
+    237,
+    238,
+    239,
+    240,
+    241,
+    242,
+    243,
+    244,
+    245,
+    246,
+    247,
+    248,
+    249,
+    250,
+    251,
+    252,
+    253,
+    254,
+    255,
+    256,
+    257,
+    258,
+    259,
+    260,
+    261,
+    262,
+    263,
+    264,
+    265,
+    266,
+    267,
+    268,
+    269,
+    270,
+    271,
+    272,
+    273,
+    274,
+    275,
+    276,
+    277,
+    278,
+    279,
+    280,
+    281,
+    282,
+    283,
+    284,
+    285,
+    286,
+    287,
+    288,
+    289,
+    290,
+    291,
+    292,
+    293,
+    294,
+    295,
+    296,
+    297,
+    298,
+    299,
+    300,
+    301,
+    302,
+    303,
+    304,
+    305,
+    306,
+    307,
+    308,
+    309,
+    310,
+    311,
+    312,
+    313,
+    314,
+    315,
+    316,
+    317,
+    318,
+    319,
+    320,
+    321,
+    322,
+    323,
+    324,
+    325,
+    326,
+    327,
+    328,
+    329,
+    330,
+    331,
+    332,
+    333,
+    334,
+    335,
+    336,
+    337,
+    338,
+    339,
+    340,
+    341,
+    342,
+    343,
+    344,
+    345,
+    346,
+    347,
+    348,
+    349,
+    350,
+    351,
+    352,
+    353,
+    354,
+    355,
+    356,
+    357,
+    358,
+    359,
+    360,
+    361,
+    362,
+    363,
+    364,
+    365,
+    366,
+    367,
+    368,
+    369,
+    370,
+    371,
+    372,
+    373,
+    374,
+    375,
+    376,
+    377,
+    378,
+    379,
+    380,
+    381,
+    382,
+    383,
+    384,
+    385,
+    386,
+    387,
+    388,
+    389,
+    390,
+    391,
+    392,
+    393,
+    394,
+    395,
+    396,
+    397,
+    398,
+    399,
+    400,
+    401,
+    402,
+    403,
+    404,
+    405,
+    406,
+    407,
+    408,
+    409,
+    410,
+    411,
+    412,
+    413,
+    414,
+    415,
+    416,
+    417,
+    418,
+    419,
+    420,
+    421,
+    422,
+    423,
+    424,
+    425,
+    426,
+    427,
+    428,
+    429,
+    430,
+    431,
+    432,
+    433,
+    434,
+    435,
+    436,
+    437,
+    438,
+    439,
+    440,
+    441,
+    442,
+    443,
+    444,
+    445,
+    446,
+    447,
+    448,
+    449,
+    450,
+    451,
+    452,
+    453
+  ],
+  "source_frame_zero": "native initialization at phase0, then zero-action attempt warmup; not controlled by policy",
+  "source_last_frame": "boundary sentinel triggering command reset; no independent policy action",
+  "control_steps": 21,
+  "attempt_warmup_steps": 1,
+  "initialization_steps": 1,
+  "policy_sim_seconds": 0.42,
+  "attempt_including_warmup_sim_seconds": 0.44,
+  "wall_seconds": 1.2116576129337773,
+  "failed_resets": 1,
+  "timeout_resets": 0,
+  "metrics": {
+    "motion/error_ref_pos": {
+      "samples": 21,
+      "finite": true,
+      "unit": "m",
+      "mean": 0.2238939684771356,
+      "max": 0.5169203877449036,
+      "p95": 0.47090792655944824
+    },
+    "motion/error_ref_rot": {
+      "samples": 21,
+      "finite": true,
+      "unit": "rad",
+      "mean": 0.32370261528662275,
+      "max": 0.6039559841156006,
+      "p95": 0.5529422163963318
+    },
+    "motion/error_body_pos": {
+      "samples": 21,
+      "finite": true,
+      "unit": "m",
+      "mean": 0.12831563041323707,
+      "max": 0.25834789872169495,
+      "p95": 0.23641645908355713
+    },
+    "motion/error_joint_pos": {
+      "samples": 21,
+      "finite": true,
+      "unit": "rad (joint-vector L2)",
+      "mean": 1.1681274076302846,
+      "max": 1.44551420211792,
+      "p95": 1.434728980064392
+    }
+  },
+  "attempt_warmup_metrics": {
+    "motion/error_ref_pos": {
+      "samples": 1,
+      "finite": true,
+      "unit": "m",
+      "mean": 0.04734313115477562,
+      "max": 0.04734313115477562,
+      "p95": 0.04734313115477562
+    },
+    "motion/error_ref_rot": {
+      "samples": 1,
+      "finite": true,
+      "unit": "rad",
+      "mean": 0.22448626160621643,
+      "max": 0.22448626160621643,
+      "p95": 0.22448626160621643
+    },
+    "motion/error_body_pos": {
+      "samples": 1,
+      "finite": true,
+      "unit": "m",
+      "mean": 0.03397804871201515,
+      "max": 0.03397804871201515,
+      "p95": 0.03397804871201515
+    },
+    "motion/error_joint_pos": {
+      "samples": 1,
+      "finite": true,
+      "unit": "rad (joint-vector L2)",
+      "mean": 0.3190094828605652,
+      "max": 0.3190094828605652,
+      "p95": 0.3190094828605652
+    }
+  },
+  "initialization_metrics": {
+    "motion/error_ref_pos": {
+      "samples": 1,
+      "finite": true,
+      "unit": "m",
+      "mean": 0.022018149495124817,
+      "max": 0.022018149495124817,
+      "p95": 0.022018149495124817
+    },
+    "motion/error_ref_rot": {
+      "samples": 1,
+      "finite": true,
+      "unit": "rad",
+      "mean": 0.10981704294681549,
+      "max": 0.10981704294681549,
+      "p95": 0.10981704294681549
+    },
+    "motion/error_body_pos": {
+      "samples": 1,
+      "finite": true,
+      "unit": "m",
+      "mean": 0.025943927466869354,
+      "max": 0.025943927466869354,
+      "p95": 0.025943927466869354
+    },
+    "motion/error_joint_pos": {
+      "samples": 1,
+      "finite": true,
+      "unit": "rad (joint-vector L2)",
+      "mean": 0.35033196210861206,
+      "max": 0.35033196210861206,
+      "p95": 0.35033196210861206
+    }
+  },
+  "finite_actions": true,
+  "finite_root_states": true,
+  "initialization_events": [
+    {
+      "sequence": 0,
+      "phase": "initialization_warmup",
+      "policy_step": null,
+      "reference_frame": 0,
+      "loader_id": 0,
+      "native_expert_id": 0,
+      "reference_is_boundary": false,
+      "failed": false,
+      "timeout": false,
+      "episode_length_steps_pre_reset": 1,
+      "metrics": {
+        "motion/error_ref_pos": 0.022018149495124817,
+        "motion/error_ref_rot": 0.10981704294681549,
+        "motion/error_body_pos": 0.025943927466869354,
+        "motion/error_joint_pos": 0.35033196210861206
+      },
+      "finite_metrics": true,
+      "finite_root_state": true,
+      "root_height_m_pre_reset": 0.779178261756897,
+      "post_reference_frame": 1,
+      "motion_end_reset": false,
+      "finite_action": true,
+      "max_abs_action": 0.0,
+      "actions": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    }
+  ],
+  "attempt_warmup_events": [
+    {
+      "sequence": 1,
+      "phase": "attempt_warmup",
+      "policy_step": null,
+      "reference_frame": 0,
+      "loader_id": 0,
+      "native_expert_id": 0,
+      "reference_is_boundary": false,
+      "failed": false,
+      "timeout": false,
+      "episode_length_steps_pre_reset": 1,
+      "metrics": {
+        "motion/error_ref_pos": 0.04734313115477562,
+        "motion/error_ref_rot": 0.22448626160621643,
+        "motion/error_body_pos": 0.03397804871201515,
+        "motion/error_joint_pos": 0.3190094828605652
+      },
+      "finite_metrics": true,
+      "finite_root_state": true,
+      "root_height_m_pre_reset": 0.7906027436256409,
+      "post_reference_frame": 1,
+      "motion_end_reset": false,
+      "finite_action": true,
+      "max_abs_action": 0.0,
+      "actions": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    }
+  ],
+  "first_event": {
+    "sequence": 22,
+    "phase": "policy",
+    "policy_step": 20,
+    "reference_frame": 21,
+    "loader_id": 0,
+    "native_expert_id": 0,
+    "reference_is_boundary": false,
+    "failed": true,
+    "timeout": false,
+    "episode_length_steps_pre_reset": 22,
+    "metrics": {
+      "motion/error_ref_pos": 0.5169203877449036,
+      "motion/error_ref_rot": 0.6039559841156006,
+      "motion/error_body_pos": 0.25834789872169495,
+      "motion/error_joint_pos": 1.3046960830688477
+    },
+    "finite_metrics": true,
+    "finite_root_state": true,
+    "root_height_m_pre_reset": 0.5961628556251526,
+    "post_reference_frame": 1,
+    "motion_end_reset": false,
+    "finite_action": true,
+    "max_abs_action": 0.07529231160879135,
+    "actions": [
+      -0.07529231160879135,
+      -0.0359056331217289,
+      -0.0053937435150146484,
+      -0.011567048728466034,
+      -0.042070984840393066,
+      0.02989935129880905,
+      0.06898835301399231,
+      -0.039335981011390686,
+      -0.03181244805455208,
+      0.05615830793976784,
+      -0.0029408419504761696,
+      0.018188651651144028,
+      0.007864932529628277,
+      -0.04651676490902901,
+      -0.026668179780244827,
+      0.029331784695386887,
+      0.05815325304865837,
+      -0.021630972623825073,
+      0.04177640751004219,
+      -0.037109144032001495,
+      -0.026624049991369247,
+      -0.0015284735709428787,
+      -0.06072600185871124,
+      -0.02526315301656723,
+      -0.0559532567858696,
+      0.028320997953414917,
+      0.0012552719563245773,
+      0.009597871452569962,
+      0.07348540425300598
+    ]
+  },
+  "trajectory": {
+    "path": "/outputs/source-coverage-repaired/pure/cases/pure-e1-000-12d526429c71/trajectory.jsonl",
+    "sha256": "380e811067e17f8239b788e1d2751b37472735dad2ec7974f0a138392387e0c6",
+    "bytes": 28435
+  },
+  "videos": [
+    {
+      "path": "/outputs/source-coverage-repaired/pure/cases/pure-e1-000-12d526429c71/native/PHP-research/20261010_054219-student-pure-wholebodytrackingmanager/renderings_training/episode_1_1791610943.mp4",
+      "sha256": "39cf962a0cfeba1da4f85b6e8f534ad99ff7b6cc49e4615f495fb7ba8838d494",
+      "bytes": 2820,
+      "duration_seconds": 0.02,
+      "ffprobe_exit_code": 0,
+      "association": "native env0 episode recording; may include initialization/zero-action warmup, not a policy-only cut"
+    },
+    {
+      "path": "/outputs/source-coverage-repaired/pure/cases/pure-e1-000-12d526429c71/native/PHP-research/20261010_054219-student-pure-wholebodytrackingmanager/renderings_training/episode_3_1791610943.mp4",
+      "sha256": "107b86abb54f4fa5ad6340d7ee6332aa123ed7d723bde548763b6c73ed4e3248",
+      "bytes": 21375,
+      "duration_seconds": 0.02,
+      "ffprobe_exit_code": 0,
+      "association": "native env0 episode recording; may include initialization/zero-action warmup, not a policy-only cut"
+    },
+    {
+      "path": "/outputs/source-coverage-repaired/pure/cases/pure-e1-000-12d526429c71/native/PHP-research/20261010_054219-student-pure-wholebodytrackingmanager/renderings_training/episode_4_1791610944.mp4",
+      "sha256": "f69502381d13d7b3f89ee66ca357ee943a03205d3e1de20402f8b296fed8021b",
+      "bytes": 47342,
+      "duration_seconds": 0.44,
+      "ffprobe_exit_code": 0,
+      "association": "native env0 episode recording; may include initialization/zero-action warmup, not a policy-only cut"
+    }
+  ],
+  "capture_phase": "pre-action reference; after native _update_log_dict before reset flags/errors; motion_end_reset after complete native env.step",
+  "tensorboard_events": [
+    {
+      "path": "/outputs/source-coverage-repaired/pure/cases/pure-e1-000-12d526429c71/tensorboard/events.out.tfevents.1791610945.dzp-MS-7E30.14883.1",
+      "sha256": "ff8293fcee5aaea6014ac441a96070d04240fb12008ef54ffb71cc9dbf607606",
+      "bytes": 1077
+    }
+  ]
+}

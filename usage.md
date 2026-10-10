@@ -153,6 +153,10 @@ smoke 采用显式缩小的并行环境、布局和迭代数，检查实际梯�
 
 正式长训的 **iteration 500 中间 PT** 已单独回传、校验远端/本地 SHA，并在同样 64 环境 × 250 步设置下实际评估：退出码 0、全程 wall 28.405 秒，累计 **75 次失败 reset、0 次超时**，四项误差各有 16000 个有限样本。3 段原片来自环境 0，最长 3.22 秒；相较 iteration 19 pilot 的失败次数减少，但两个 checkpoint 来自不同运行，且仍未完成课程，`quality_verified=false`。PT 从 iteration 0 到 500 的 actor/critic 权重均有真实非零更新。[检查点来源、权重差异与本地录像](usage_assets/reports/official-progress-0500-local/summary.md)。云端 20000 轮首教师及后续完整日程继续运行。
 
+为避免合并库 ID 掩盖覆盖范围，另实现了 [逐源片段工具](scripts/research/eval_source_coverage.py)：全部 **296 对、181236 帧、50 FPS** 的数据格式、来源 SHA 和顺序校验通过，**48/48 项独立 CPU 回归通过**。实际本地 Isaac 分别尝试完整 920 帧 locomotion 源和两次完整 455 帧 low-step 源：teacher 第500轮运行 **158 策略步**后失败，纯/混合 student 的第1轮 smoke PT 均运行 **21 步**后失败。三次执行与证据保存通过，片段完成数为0，未声称跑完296源或888次尝试。[完整记录、复跑命令与原视频](usage_assets/reports/source-coverage-pilot/summary.md)。
+
+这次还定位并修复了独立评估的 warmup 目标缓存问题：原生 `reset_all` 清零缓存后先检测终止，造成策略开始前的误终止。保留的三次修复前真实记录均为0策略步；按原公式刷新当前帧缓存后才得到上述158/21/21步。参考时间、RNG和终止条件均未修改，当前云训练也未改变。[修复推导与原生逐位对照](usage_assets/reports/source-coverage-pilot/cache-diagnosis/warmup-relative-cache-review.md)、[源码/数据/逐步记录的 SHA 清单](usage_assets/reports/source-coverage-pilot/evidence-manifest.json)。新旧共18个MP4均完整解码通过，启动/预热原片计入此数，不能用录像数推断片段完成数。
+
 ![本地未收敛教师的实际评估帧](usage_assets/isaac/local-teacher-quality.png)
 
 所有实验数据均为本地 `file://` 注册表，曲线使用离线 TensorBoard。在统一容器中运行以下命令，浏览器打开 `http://127.0.0.1:6006/`，即可查看入库的原始训练与评估 events：
