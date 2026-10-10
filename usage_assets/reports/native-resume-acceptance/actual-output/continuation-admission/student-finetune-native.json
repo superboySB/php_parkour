@@ -1,0 +1,371 @@
+{
+  "schema_version": 1,
+  "status": "native_completed_zero_and_container_idle",
+  "label": "student-finetune",
+  "stage": "student-finetune-resume-target4",
+  "container_id": "25b00648e832ceff0f6ca928a71a66e2857ef5c7813c7c9852367c6cbd8e43ff",
+  "native_stage": {
+    "stage": "student-finetune-resume-target4",
+    "kind": "actual_native_training_future_only",
+    "argv": [
+      "docker",
+      "exec",
+      "-w",
+      "/workspace/php_parkour",
+      "-e",
+      "PHP_RESUME_STAGE_ID=student-finetune-resume-target4",
+      "-e",
+      "PHP_RESUME_LOGICAL_COMMAND_JSON=[\"/opt/php/bin/train-python\",\"/workspace/php_parkour/scripts/research/train_pipeline.py\",\"distill-finetune\",\"--profile\",\"smoke\",\"--assets\",\"/data/assets\",\"--output\",\"/outputs/resume-smoke\",\"--skills\",\"locomotion\",\"--num-envs\",\"16\",\"--iterations\",\"4\",\"--resume\"]",
+      "25b00648e832ceff0f6ca928a71a66e2857ef5c7813c7c9852367c6cbd8e43ff",
+      "/opt/php/bin/train-python",
+      "/workspace/php_parkour/scripts/research/train_pipeline.py",
+      "distill-finetune",
+      "--profile",
+      "smoke",
+      "--assets",
+      "/data/assets",
+      "--output",
+      "/outputs/resume-smoke",
+      "--skills",
+      "locomotion",
+      "--num-envs",
+      "16",
+      "--iterations",
+      "4",
+      "--resume"
+    ],
+    "started_utc": "2026-10-10T14:30:34.306959+00:00",
+    "started_monotonic": 1070628.763148925,
+    "gpu_before_native": {
+      "uuid": "GPU-1803972d-e774-ee96-e6f6-1ee1ce47bb25",
+      "compute_processes": []
+    },
+    "docker_exec_host_pid": 2133029,
+    "native_exec_receipt": {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/native-resume-acceptance-preparation-01/run-output-final-frozen/exec-receipts/student-finetune-resume-target4-1791642635308650936.json",
+      "bytes": 93774,
+      "sha256": "09807d8f4301cadc8c398f497b77c240a7f3c3c65c05998eb2aab607cdd0da27"
+    },
+    "wrapper_mapping": {
+      "host_pid": 2133190,
+      "container_pid": 1082,
+      "nspid": [
+        2133190,
+        1082
+      ],
+      "nstgid": [
+        2133190,
+        1082
+      ],
+      "state": "S",
+      "ppid": 2133146,
+      "pgid": 2133070,
+      "sid": 2133070,
+      "start_time_clock_ticks": "107062966",
+      "argv": [
+        "/bin/bash",
+        "/isaac-sim/python.sh",
+        "-m",
+        "wbt_training.train_agent",
+        "exp:g1-wbt-terrain-warp-distill-finetune",
+        "simulator:isaacsim",
+        "--training.registry-name",
+        "file:///data/assets/motions-locomotion",
+        "--training.teacher-checkpoint",
+        "/outputs/resume-smoke/smoke/teacher-locomotion/PHP-research/20261010_141647-teacher-locomotion-locomotion/model_00003.pt",
+        "--algo.config.distillation-warmup-steps",
+        "0",
+        "logger:disabled",
+        "--logger.video.enabled",
+        "False",
+        "--training.headless",
+        "True",
+        "--training.num-envs",
+        "16",
+        "--training.name",
+        "student-finetune",
+        "--training.project",
+        "PHP-research",
+        "--logger.base-dir",
+        "/outputs/resume-smoke/smoke/student-finetune",
+        "--training.seed",
+        "42",
+        "--algo.config.num-learning-iterations",
+        "3",
+        "--algo.config.save-interval",
+        "1",
+        "--algo.config.num-mini-batches",
+        "4",
+        "--training.preprocess-hook-kwargs",
+        "{\"add_onpath_obstacle\": true, \"num_variants\": 1, \"obstacle_seed\": 42}",
+        "--training.checkpoint",
+        "/outputs/resume-smoke/smoke/student-finetune/PHP-research/20261010_143025-student-finetune-locomotion/model_00001.pt",
+        "--robot.asset.asset-root",
+        "/outputs/runtime-robot-assets/robots"
+      ],
+      "cgroup": "0::/system.slice/docker-25b00648e832ceff0f6ca928a71a66e2857ef5c7813c7c9852367c6cbd8e43ff.scope\n",
+      "boot_id": "a4856e87-ac1b-4883-8b4e-d8cd48861796"
+    },
+    "kit_mapping": {
+      "host_pid": 2133195,
+      "container_pid": 1087,
+      "nspid": [
+        2133195,
+        1087
+      ],
+      "nstgid": [
+        2133195,
+        1087
+      ],
+      "state": "R",
+      "ppid": 2133190,
+      "pgid": 2133070,
+      "sid": 2133070,
+      "start_time_clock_ticks": "107062977",
+      "argv": [
+        "/isaac-sim/kit/python/bin/python3",
+        "-m",
+        "wbt_training.train_agent",
+        "exp:g1-wbt-terrain-warp-distill-finetune",
+        "simulator:isaacsim",
+        "--training.registry-name",
+        "file:///data/assets/motions-locomotion",
+        "--training.teacher-checkpoint",
+        "/outputs/resume-smoke/smoke/teacher-locomotion/PHP-research/20261010_141647-teacher-locomotion-locomotion/model_00003.pt",
+        "--algo.config.distillation-warmup-steps",
+        "0",
+        "logger:disabled",
+        "--logger.video.enabled",
+        "False",
+        "--training.headless",
+        "True",
+        "--training.num-envs",
+        "16",
+        "--training.name",
+        "student-finetune",
+        "--training.project",
+        "PHP-research",
+        "--logger.base-dir",
+        "/outputs/resume-smoke/smoke/student-finetune",
+        "--training.seed",
+        "42",
+        "--algo.config.num-learning-iterations",
+        "3",
+        "--algo.config.save-interval",
+        "1",
+        "--algo.config.num-mini-batches",
+        "4",
+        "--training.preprocess-hook-kwargs",
+        "{\"add_onpath_obstacle\": true, \"num_variants\": 1, \"obstacle_seed\": 42}",
+        "--training.checkpoint",
+        "/outputs/resume-smoke/smoke/student-finetune/PHP-research/20261010_143025-student-finetune-locomotion/model_00001.pt",
+        "--robot.asset.asset-root",
+        "/outputs/runtime-robot-assets/robots"
+      ],
+      "cgroup": "0::/system.slice/docker-25b00648e832ceff0f6ca928a71a66e2857ef5c7813c7c9852367c6cbd8e43ff.scope\n",
+      "boot_id": "a4856e87-ac1b-4883-8b4e-d8cd48861796"
+    },
+    "ancestry": [
+      {
+        "host_pid": 2133195,
+        "container_pid": 1087,
+        "nspid": [
+          2133195,
+          1087
+        ],
+        "nstgid": [
+          2133195,
+          1087
+        ],
+        "state": "R",
+        "ppid": 2133190,
+        "pgid": 2133070,
+        "sid": 2133070,
+        "start_time_clock_ticks": "107062977",
+        "argv": [
+          "/isaac-sim/kit/python/bin/python3",
+          "-m",
+          "wbt_training.train_agent",
+          "exp:g1-wbt-terrain-warp-distill-finetune",
+          "simulator:isaacsim",
+          "--training.registry-name",
+          "file:///data/assets/motions-locomotion",
+          "--training.teacher-checkpoint",
+          "/outputs/resume-smoke/smoke/teacher-locomotion/PHP-research/20261010_141647-teacher-locomotion-locomotion/model_00003.pt",
+          "--algo.config.distillation-warmup-steps",
+          "0",
+          "logger:disabled",
+          "--logger.video.enabled",
+          "False",
+          "--training.headless",
+          "True",
+          "--training.num-envs",
+          "16",
+          "--training.name",
+          "student-finetune",
+          "--training.project",
+          "PHP-research",
+          "--logger.base-dir",
+          "/outputs/resume-smoke/smoke/student-finetune",
+          "--training.seed",
+          "42",
+          "--algo.config.num-learning-iterations",
+          "3",
+          "--algo.config.save-interval",
+          "1",
+          "--algo.config.num-mini-batches",
+          "4",
+          "--training.preprocess-hook-kwargs",
+          "{\"add_onpath_obstacle\": true, \"num_variants\": 1, \"obstacle_seed\": 42}",
+          "--training.checkpoint",
+          "/outputs/resume-smoke/smoke/student-finetune/PHP-research/20261010_143025-student-finetune-locomotion/model_00001.pt",
+          "--robot.asset.asset-root",
+          "/outputs/runtime-robot-assets/robots"
+        ],
+        "cgroup": "0::/system.slice/docker-25b00648e832ceff0f6ca928a71a66e2857ef5c7813c7c9852367c6cbd8e43ff.scope\n",
+        "boot_id": "a4856e87-ac1b-4883-8b4e-d8cd48861796"
+      },
+      {
+        "host_pid": 2133190,
+        "container_pid": 1082,
+        "nspid": [
+          2133190,
+          1082
+        ],
+        "nstgid": [
+          2133190,
+          1082
+        ],
+        "state": "S",
+        "ppid": 2133146,
+        "pgid": 2133070,
+        "sid": 2133070,
+        "start_time_clock_ticks": "107062966",
+        "argv": [
+          "/bin/bash",
+          "/isaac-sim/python.sh",
+          "-m",
+          "wbt_training.train_agent",
+          "exp:g1-wbt-terrain-warp-distill-finetune",
+          "simulator:isaacsim",
+          "--training.registry-name",
+          "file:///data/assets/motions-locomotion",
+          "--training.teacher-checkpoint",
+          "/outputs/resume-smoke/smoke/teacher-locomotion/PHP-research/20261010_141647-teacher-locomotion-locomotion/model_00003.pt",
+          "--algo.config.distillation-warmup-steps",
+          "0",
+          "logger:disabled",
+          "--logger.video.enabled",
+          "False",
+          "--training.headless",
+          "True",
+          "--training.num-envs",
+          "16",
+          "--training.name",
+          "student-finetune",
+          "--training.project",
+          "PHP-research",
+          "--logger.base-dir",
+          "/outputs/resume-smoke/smoke/student-finetune",
+          "--training.seed",
+          "42",
+          "--algo.config.num-learning-iterations",
+          "3",
+          "--algo.config.save-interval",
+          "1",
+          "--algo.config.num-mini-batches",
+          "4",
+          "--training.preprocess-hook-kwargs",
+          "{\"add_onpath_obstacle\": true, \"num_variants\": 1, \"obstacle_seed\": 42}",
+          "--training.checkpoint",
+          "/outputs/resume-smoke/smoke/student-finetune/PHP-research/20261010_143025-student-finetune-locomotion/model_00001.pt",
+          "--robot.asset.asset-root",
+          "/outputs/runtime-robot-assets/robots"
+        ],
+        "cgroup": "0::/system.slice/docker-25b00648e832ceff0f6ca928a71a66e2857ef5c7813c7c9852367c6cbd8e43ff.scope\n",
+        "boot_id": "a4856e87-ac1b-4883-8b4e-d8cd48861796"
+      }
+    ],
+    "returncode": 0,
+    "finished_utc": "2026-10-10T14:30:52.593324+00:00",
+    "duration_seconds": 18.286354542942718,
+    "stdout": {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/native-resume-root-transaction-continuation-01/actual/15-student-finetune-resume-target4/stdout.raw",
+      "bytes": 94508,
+      "sha256": "9306fffe86bbacf6d23511af7691d4159686a9ecad3d4ef78f04ebf4ed526974"
+    },
+    "stderr": {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/native-resume-root-transaction-continuation-01/actual/15-student-finetune-resume-target4/stderr.raw",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "process_samples": {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/native-resume-root-transaction-continuation-01/actual/15-student-finetune-resume-target4/process-samples.jsonl",
+      "bytes": 714972,
+      "sha256": "958a6c334258736547811cc6db1c904eaf6396082a7dc8eab5c46b4a29185b15"
+    },
+    "idle_after": {
+      "utc": "2026-10-10T14:30:52.612181+00:00",
+      "monotonic": 1070647.068364119,
+      "docker_top": "PID                 PPID                STAT                COMMAND\n2123975             2123951             Ss                  /sbin/docker-init -- /bin/bash -lc exec sleep infinity\n2124008             2123975             S                   sleep infinity\n",
+      "processes": [
+        {
+          "host_pid": 2123975,
+          "container_pid": 1,
+          "nspid": [
+            2123975,
+            1
+          ],
+          "nstgid": [
+            2123975,
+            1
+          ],
+          "state": "S",
+          "ppid": 2123951,
+          "pgid": 2123975,
+          "sid": 2123975,
+          "start_time_clock_ticks": "107056046",
+          "argv": [
+            "/sbin/docker-init",
+            "--",
+            "/bin/bash",
+            "-lc",
+            "exec sleep infinity"
+          ],
+          "cgroup": "0::/system.slice/docker-25b00648e832ceff0f6ca928a71a66e2857ef5c7813c7c9852367c6cbd8e43ff.scope\n",
+          "boot_id": "a4856e87-ac1b-4883-8b4e-d8cd48861796"
+        },
+        {
+          "host_pid": 2124008,
+          "container_pid": 7,
+          "nspid": [
+            2124008,
+            7
+          ],
+          "nstgid": [
+            2124008,
+            7
+          ],
+          "state": "S",
+          "ppid": 2123975,
+          "pgid": 2124008,
+          "sid": 2123975,
+          "start_time_clock_ticks": "107056072",
+          "argv": [
+            "sleep",
+            "infinity"
+          ],
+          "cgroup": "0::/system.slice/docker-25b00648e832ceff0f6ca928a71a66e2857ef5c7813c7c9852367c6cbd8e43ff.scope\n",
+          "boot_id": "a4856e87-ac1b-4883-8b4e-d8cd48861796"
+        }
+      ]
+    }
+  },
+  "expected_resume_checkpoint": "/outputs/resume-smoke/smoke/student-finetune/PHP-research/20261010_143025-student-finetune-locomotion/model_00001.pt",
+  "historical_teacher_from_failed_attempt": false,
+  "host_helper": {
+    "path": "/home/dzp/projects/php_parkour/outputs/research/native-resume-root-transaction-continuation-01/run.py",
+    "bytes": 46648,
+    "sha256": "fe2b1822e7bda774f09fca856d76e8fbe993a0cb854ef513356d3151c3410095"
+  }
+}

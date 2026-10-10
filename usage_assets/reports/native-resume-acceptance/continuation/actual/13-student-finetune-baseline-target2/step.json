@@ -1,0 +1,348 @@
+{
+  "stage": "student-finetune-baseline-target2",
+  "kind": "actual_native_training_future_only",
+  "argv": [
+    "docker",
+    "exec",
+    "-w",
+    "/workspace/php_parkour",
+    "-e",
+    "PHP_RESUME_STAGE_ID=student-finetune-baseline-target2",
+    "-e",
+    "PHP_RESUME_LOGICAL_COMMAND_JSON=[\"/opt/php/bin/train-python\",\"/workspace/php_parkour/scripts/research/train_pipeline.py\",\"distill-finetune\",\"--profile\",\"smoke\",\"--assets\",\"/data/assets\",\"--output\",\"/outputs/resume-smoke\",\"--skills\",\"locomotion\",\"--num-envs\",\"16\",\"--iterations\",\"2\"]",
+    "25b00648e832ceff0f6ca928a71a66e2857ef5c7813c7c9852367c6cbd8e43ff",
+    "/opt/php/bin/train-python",
+    "/workspace/php_parkour/scripts/research/train_pipeline.py",
+    "distill-finetune",
+    "--profile",
+    "smoke",
+    "--assets",
+    "/data/assets",
+    "--output",
+    "/outputs/resume-smoke",
+    "--skills",
+    "locomotion",
+    "--num-envs",
+    "16",
+    "--iterations",
+    "2"
+  ],
+  "started_utc": "2026-10-10T14:30:16.598420+00:00",
+  "started_monotonic": 1070611.054607286,
+  "gpu_before_native": {
+    "uuid": "GPU-1803972d-e774-ee96-e6f6-1ee1ce47bb25",
+    "compute_processes": []
+  },
+  "docker_exec_host_pid": 2130900,
+  "native_exec_receipt": {
+    "path": "/home/dzp/projects/php_parkour/outputs/research/native-resume-acceptance-preparation-01/run-output-final-frozen/exec-receipts/student-finetune-baseline-target2-1791642617571385618.json",
+    "bytes": 93453,
+    "sha256": "19390230556c38da0b988067b1f9a51adb1da0cad40de3c0724a8eefae1c761b"
+  },
+  "wrapper_mapping": {
+    "host_pid": 2131099,
+    "container_pid": 783,
+    "nspid": [
+      2131099,
+      783
+    ],
+    "nstgid": [
+      2131099,
+      783
+    ],
+    "state": "S",
+    "ppid": 2131043,
+    "pgid": 2130943,
+    "sid": 2130943,
+    "start_time_clock_ticks": "107061193",
+    "argv": [
+      "/bin/bash",
+      "/isaac-sim/python.sh",
+      "-m",
+      "wbt_training.train_agent",
+      "exp:g1-wbt-terrain-warp-distill-finetune",
+      "simulator:isaacsim",
+      "--training.registry-name",
+      "file:///data/assets/motions-locomotion",
+      "--training.teacher-checkpoint",
+      "/outputs/resume-smoke/smoke/teacher-locomotion/PHP-research/20261010_141647-teacher-locomotion-locomotion/model_00003.pt",
+      "--algo.config.distillation-warmup-steps",
+      "0",
+      "logger:disabled",
+      "--logger.video.enabled",
+      "False",
+      "--training.headless",
+      "True",
+      "--training.num-envs",
+      "16",
+      "--training.name",
+      "student-finetune",
+      "--training.project",
+      "PHP-research",
+      "--logger.base-dir",
+      "/outputs/resume-smoke/smoke/student-finetune",
+      "--training.seed",
+      "42",
+      "--algo.config.num-learning-iterations",
+      "2",
+      "--algo.config.save-interval",
+      "1",
+      "--algo.config.num-mini-batches",
+      "4",
+      "--training.preprocess-hook-kwargs",
+      "{\"add_onpath_obstacle\": true, \"num_variants\": 1, \"obstacle_seed\": 42}",
+      "--robot.asset.asset-root",
+      "/outputs/runtime-robot-assets/robots"
+    ],
+    "cgroup": "0::/system.slice/docker-25b00648e832ceff0f6ca928a71a66e2857ef5c7813c7c9852367c6cbd8e43ff.scope\n",
+    "boot_id": "a4856e87-ac1b-4883-8b4e-d8cd48861796"
+  },
+  "kit_mapping": {
+    "host_pid": 2131105,
+    "container_pid": 788,
+    "nspid": [
+      2131105,
+      788
+    ],
+    "nstgid": [
+      2131105,
+      788
+    ],
+    "state": "D",
+    "ppid": 2131099,
+    "pgid": 2130943,
+    "sid": 2130943,
+    "start_time_clock_ticks": "107061203",
+    "argv": [
+      "/isaac-sim/kit/python/bin/python3",
+      "-m",
+      "wbt_training.train_agent",
+      "exp:g1-wbt-terrain-warp-distill-finetune",
+      "simulator:isaacsim",
+      "--training.registry-name",
+      "file:///data/assets/motions-locomotion",
+      "--training.teacher-checkpoint",
+      "/outputs/resume-smoke/smoke/teacher-locomotion/PHP-research/20261010_141647-teacher-locomotion-locomotion/model_00003.pt",
+      "--algo.config.distillation-warmup-steps",
+      "0",
+      "logger:disabled",
+      "--logger.video.enabled",
+      "False",
+      "--training.headless",
+      "True",
+      "--training.num-envs",
+      "16",
+      "--training.name",
+      "student-finetune",
+      "--training.project",
+      "PHP-research",
+      "--logger.base-dir",
+      "/outputs/resume-smoke/smoke/student-finetune",
+      "--training.seed",
+      "42",
+      "--algo.config.num-learning-iterations",
+      "2",
+      "--algo.config.save-interval",
+      "1",
+      "--algo.config.num-mini-batches",
+      "4",
+      "--training.preprocess-hook-kwargs",
+      "{\"add_onpath_obstacle\": true, \"num_variants\": 1, \"obstacle_seed\": 42}",
+      "--robot.asset.asset-root",
+      "/outputs/runtime-robot-assets/robots"
+    ],
+    "cgroup": "0::/system.slice/docker-25b00648e832ceff0f6ca928a71a66e2857ef5c7813c7c9852367c6cbd8e43ff.scope\n",
+    "boot_id": "a4856e87-ac1b-4883-8b4e-d8cd48861796"
+  },
+  "ancestry": [
+    {
+      "host_pid": 2131105,
+      "container_pid": 788,
+      "nspid": [
+        2131105,
+        788
+      ],
+      "nstgid": [
+        2131105,
+        788
+      ],
+      "state": "D",
+      "ppid": 2131099,
+      "pgid": 2130943,
+      "sid": 2130943,
+      "start_time_clock_ticks": "107061203",
+      "argv": [
+        "/isaac-sim/kit/python/bin/python3",
+        "-m",
+        "wbt_training.train_agent",
+        "exp:g1-wbt-terrain-warp-distill-finetune",
+        "simulator:isaacsim",
+        "--training.registry-name",
+        "file:///data/assets/motions-locomotion",
+        "--training.teacher-checkpoint",
+        "/outputs/resume-smoke/smoke/teacher-locomotion/PHP-research/20261010_141647-teacher-locomotion-locomotion/model_00003.pt",
+        "--algo.config.distillation-warmup-steps",
+        "0",
+        "logger:disabled",
+        "--logger.video.enabled",
+        "False",
+        "--training.headless",
+        "True",
+        "--training.num-envs",
+        "16",
+        "--training.name",
+        "student-finetune",
+        "--training.project",
+        "PHP-research",
+        "--logger.base-dir",
+        "/outputs/resume-smoke/smoke/student-finetune",
+        "--training.seed",
+        "42",
+        "--algo.config.num-learning-iterations",
+        "2",
+        "--algo.config.save-interval",
+        "1",
+        "--algo.config.num-mini-batches",
+        "4",
+        "--training.preprocess-hook-kwargs",
+        "{\"add_onpath_obstacle\": true, \"num_variants\": 1, \"obstacle_seed\": 42}",
+        "--robot.asset.asset-root",
+        "/outputs/runtime-robot-assets/robots"
+      ],
+      "cgroup": "0::/system.slice/docker-25b00648e832ceff0f6ca928a71a66e2857ef5c7813c7c9852367c6cbd8e43ff.scope\n",
+      "boot_id": "a4856e87-ac1b-4883-8b4e-d8cd48861796"
+    },
+    {
+      "host_pid": 2131099,
+      "container_pid": 783,
+      "nspid": [
+        2131099,
+        783
+      ],
+      "nstgid": [
+        2131099,
+        783
+      ],
+      "state": "S",
+      "ppid": 2131043,
+      "pgid": 2130943,
+      "sid": 2130943,
+      "start_time_clock_ticks": "107061193",
+      "argv": [
+        "/bin/bash",
+        "/isaac-sim/python.sh",
+        "-m",
+        "wbt_training.train_agent",
+        "exp:g1-wbt-terrain-warp-distill-finetune",
+        "simulator:isaacsim",
+        "--training.registry-name",
+        "file:///data/assets/motions-locomotion",
+        "--training.teacher-checkpoint",
+        "/outputs/resume-smoke/smoke/teacher-locomotion/PHP-research/20261010_141647-teacher-locomotion-locomotion/model_00003.pt",
+        "--algo.config.distillation-warmup-steps",
+        "0",
+        "logger:disabled",
+        "--logger.video.enabled",
+        "False",
+        "--training.headless",
+        "True",
+        "--training.num-envs",
+        "16",
+        "--training.name",
+        "student-finetune",
+        "--training.project",
+        "PHP-research",
+        "--logger.base-dir",
+        "/outputs/resume-smoke/smoke/student-finetune",
+        "--training.seed",
+        "42",
+        "--algo.config.num-learning-iterations",
+        "2",
+        "--algo.config.save-interval",
+        "1",
+        "--algo.config.num-mini-batches",
+        "4",
+        "--training.preprocess-hook-kwargs",
+        "{\"add_onpath_obstacle\": true, \"num_variants\": 1, \"obstacle_seed\": 42}",
+        "--robot.asset.asset-root",
+        "/outputs/runtime-robot-assets/robots"
+      ],
+      "cgroup": "0::/system.slice/docker-25b00648e832ceff0f6ca928a71a66e2857ef5c7813c7c9852367c6cbd8e43ff.scope\n",
+      "boot_id": "a4856e87-ac1b-4883-8b4e-d8cd48861796"
+    }
+  ],
+  "returncode": 0,
+  "finished_utc": "2026-10-10T14:30:33.533724+00:00",
+  "duration_seconds": 16.9352969750762,
+  "stdout": {
+    "path": "/home/dzp/projects/php_parkour/outputs/research/native-resume-root-transaction-continuation-01/actual/13-student-finetune-baseline-target2/stdout.raw",
+    "bytes": 87834,
+    "sha256": "3d3391fcb10ac906ff6a9d7403b397301cdeb9d9f274aa77bb37dee6f17d4c73"
+  },
+  "stderr": {
+    "path": "/home/dzp/projects/php_parkour/outputs/research/native-resume-root-transaction-continuation-01/actual/13-student-finetune-baseline-target2/stderr.raw",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "process_samples": {
+    "path": "/home/dzp/projects/php_parkour/outputs/research/native-resume-root-transaction-continuation-01/actual/13-student-finetune-baseline-target2/process-samples.jsonl",
+    "bytes": 608059,
+    "sha256": "bfd8a4b5af19fac04e9bbecb7445fb94d00d9ff0dc09c44a9cd90523bec7335e"
+  },
+  "idle_after": {
+    "utc": "2026-10-10T14:30:33.544476+00:00",
+    "monotonic": 1070628.000657934,
+    "docker_top": "PID                 PPID                STAT                COMMAND\n2123975             2123951             Ss                  /sbin/docker-init -- /bin/bash -lc exec sleep infinity\n2124008             2123975             S                   sleep infinity\n",
+    "processes": [
+      {
+        "host_pid": 2123975,
+        "container_pid": 1,
+        "nspid": [
+          2123975,
+          1
+        ],
+        "nstgid": [
+          2123975,
+          1
+        ],
+        "state": "S",
+        "ppid": 2123951,
+        "pgid": 2123975,
+        "sid": 2123975,
+        "start_time_clock_ticks": "107056046",
+        "argv": [
+          "/sbin/docker-init",
+          "--",
+          "/bin/bash",
+          "-lc",
+          "exec sleep infinity"
+        ],
+        "cgroup": "0::/system.slice/docker-25b00648e832ceff0f6ca928a71a66e2857ef5c7813c7c9852367c6cbd8e43ff.scope\n",
+        "boot_id": "a4856e87-ac1b-4883-8b4e-d8cd48861796"
+      },
+      {
+        "host_pid": 2124008,
+        "container_pid": 7,
+        "nspid": [
+          2124008,
+          7
+        ],
+        "nstgid": [
+          2124008,
+          7
+        ],
+        "state": "S",
+        "ppid": 2123975,
+        "pgid": 2124008,
+        "sid": 2123975,
+        "start_time_clock_ticks": "107056072",
+        "argv": [
+          "sleep",
+          "infinity"
+        ],
+        "cgroup": "0::/system.slice/docker-25b00648e832ceff0f6ca928a71a66e2857ef5c7813c7c9852367c6cbd8e43ff.scope\n",
+        "boot_id": "a4856e87-ac1b-4883-8b4e-d8cd48861796"
+      }
+    ]
+  }
+}

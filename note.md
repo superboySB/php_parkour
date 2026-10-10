@@ -447,7 +447,7 @@ Isaac评估将URDF转换缓存写在`robot.asset.asset_root`下。源码只读�
 
 当前四模块联合CPU回归172项测试加19个子用例全部通过，精确源码和原始JUnit见[本轮联合记录](usage_assets/reports/worker-exit-integrated/review.json)。
 
-新的SDK0.1.8完整629批次已单独冻结3297份源码及1887份场景输入，合计5206文件SHA通过独立核验；同镜像runc/noGPU/network-none容器的all-configs计划、17场景CLI与两角色实际imports都通过，外层19项CPU检查通过。它使用独立目录和全容器残留进程门卫，保留原生默认单例wall413秒，不能resume旧批次。该[准备记录和计划SHA](usage_assets/reports/fresh629-sdk018-preparation/summary.md)只验准备阶段。后续已于10:02 UTC实际启动新版批次；10:10 UTC固定快照21 completed/1 running/607 planned，首两例完整退出和视频后验通过，其中第二例真实跌倒。[实际启动、固定快照与原片](usage_assets/reports/fresh629-start-first-two/summary.md)。整批629终态仍待验收。
+新的SDK0.1.8完整629批次已单独冻结3297份源码及1887份场景输入，合计5206文件SHA通过独立核验；同镜像runc/noGPU/network-none容器的all-configs计划、17场景CLI与两角色实际imports都通过，外层19项CPU检查通过。它使用独立目录和全容器残留进程门卫，保留原生默认单例wall413秒，不能resume旧批次。该[准备记录和计划SHA](usage_assets/reports/fresh629-sdk018-preparation/summary.md)只验准备阶段。后续已于10:02 UTC实际启动新版批次；10:10 UTC固定快照21 completed/1 running/607 planned，首两例完整退出和视频后验通过，其中第二例真实跌倒。[实际启动、固定快照与原片](usage_assets/reports/fresh629-start-first-two/summary.md)。该10:10历史快照当时尚未验收整批，最终恢复结果见本文末段。
 
 新统一镜像已完整传输并在远端加载，10.90GB归档两端SHA和层内容一致；原训练容器及research tag保留。[实际上传回执](usage_assets/reports/sdk018-canonical-upload/summary.md)。
 
@@ -469,13 +469,13 @@ Isaac评估将URDF转换缓存写在`robot.asset.asset_root`下。源码只读�
 
 最终两学生的独立验收入口已冻结，47/47 Docker CPU控制面测试与真实缺fetch的waiting分支通过；真正completed fetch之后才准备模型、执行60项CPU ORT，再按pure12方向/pure17代表场景/finetune12方向/finetune17代表场景串行运行，共58例。要求116个worker正常退出且组为空、116份精确hostwriter出生映射和58原视频全片解码；正常退出仍不代表技能或课程成功。[源码、CLI、原失败与独立审查](usage_assets/reports/final-student-native58-preparation/summary.md)。这项自训模型验收与发布模型的全629扫描分别保留，不能互相替代。
 
-本机已于2026-10-10 11:03 UTC启动单实例交接程序PID1121672，55/55 Docker CPU测试及独立预启动审查通过。首次真实SSH status为waiting，16阶段阻塞，未fetch、未执行真实模型prepare或native。此后每600秒等待真正ready，仅回传4ONNX+28JSON；待现fresh629成功/停止、固定GPU mutex释放且GPU空闲，才由冻结入口串行执行上述步骤。[准确合同、启动argv/PID出生身份及首次原日志](usage_assets/reports/final-student-delivery-waiter/summary.md)。查看当前状态使用：
+历史记录：本机于2026-10-10 11:03 UTC启动单实例交接程序PID1121672，55/55 Docker CPU测试及独立预启动审查通过。首次真实SSH status为waiting，16阶段阻塞，未fetch、未执行真实模型prepare或native。此后每600秒等待真正ready，仅回传4ONNX+28JSON；待现fresh629成功/停止、固定GPU mutex释放且GPU空闲，才由冻结入口串行执行上述步骤。[准确合同、启动argv/PID出生身份及首次原日志](usage_assets/reports/final-student-delivery-waiter/summary.md)。查看当前状态使用：
 
 ```bash
-python3 -m json.tool outputs/research/final-student-delivery-waiter-preparation/execution/state.json
+python3 -m json.tool outputs/research/final-student-delivery-waiter-recovered-preparation-01/execution/state.json
 ```
 
-当前已有waiter，不要再次watch、手动fetch或同时另起final58。任何已开始步骤的失败/partial都保留并停止，不自动重试；需要取消时先核对启动收据的PID出生身份，再用SIGTERM等待自身清理。准备源码可从上述发布副本恢复，但不能覆盖活控制文件；final58还依赖原canonical context/source-manifest、1887生成输入、baseline/helper准确路径、指定镜像、真实completed fetch和现fresh629成功/释放收据，详见包内restore-map。这些控制面测试与waiting回执不计作正式训练或最终模型验收完成。
+旧PID1121672已受控取消，当前已arm的恢复版等待器见本文末段；不要再次watch、手动fetch或同时另起final58。任何已开始步骤的失败/partial都保留并停止，不自动重试；需要取消时先核对启动收据的PID出生身份，再用SIGTERM等待自身清理。准备源码可从上述发布副本恢复，但不能覆盖活控制文件；final58还依赖原canonical context/source-manifest、1887生成输入、baseline/helper准确路径、指定镜像、真实completed fetch和现fresh629成功/释放收据，详见包内restore-map。这些控制面测试与waiting回执不计作正式训练或最终模型验收完成。
 
 ### 当前隔离629批次的专用发布入口
 
@@ -486,10 +486,24 @@ python3 -B usage_assets/reports/fresh629-publication-preparation/adapter/publish
 python3 -B usage_assets/reports/fresh629-publication-preparation/adapter/publish_fresh629.py prepare
 ```
 
-完整publish命令与固定输出路径见[原计划](usage_assets/reports/fresh629-publication-preparation/adapter/plan.json)，只在真实host和CPU终态、1258正常worker/host映射、629原视频完整解码及冻结SHA全部通过后执行；目前没有完整629结果页。它不重跑仿真或ffmpeg，也不补造旧driver收据。完整原观察日志将以≤25,000,000字节连续块保留offset/各SHA/wholeSHA，失败stage保留；所有跌倒/阈值照实发布，不能据正常退出声称技能成功。
+完整publish命令与固定输出路径见[原计划](usage_assets/reports/fresh629-publication-preparation/adapter/plan.json)，只在真实host和CPU终态、1258正常worker/host映射、629原视频完整解码及冻结SHA全部通过后执行；该旧正常退出门卫后来因原宿主会话143而无法满足；实际恢复及完整结果页见本文末段。它不重跑仿真或ffmpeg，也不补造旧driver收据。完整原观察日志将以≤25,000,000字节连续块保留offset/各SHA/wholeSHA，失败stage保留；所有跌倒/阈值照实发布，不能据正常退出声称技能成功。
 
 上述三个准备/方案包在出版前另经[94文件Git字节独立核对](usage_assets/reports/fresh629-publication-package-independent-review/summary.md)，原始清单、两次waiting和汇总失败均吻合。该审查绑定追加本链接之前的版本，不代表训练、完整629或云端接入完成。
 
-[完整功能覆盖清单](usage_assets/reports/final-function-coverage-ledger/index.md)逐项对应29项要求及已有证据，列出8个preset、17场景、29技能入口和五组有序训练数据。它封存了`b5095ba`版本的六份声明文档，仅为只读范围核对。复查新增两组实际验收缺口：完整命名方向键及MuJoCo窗口Backspace重置；teacher、pure student、finetune student从原生PT恢复优化器后继续学习。既有w键GUI、API方向扫描、模拟训练子进程的恢复检查及eval/export加载PT都不能关闭这两组缺口。补验将使用独立输出，等待当前629完整CPU终态、原容器停止及同一GPU锁释放后执行；现在尚无补验通过结论。
+[完整功能覆盖清单](usage_assets/reports/final-function-coverage-ledger/index.md)逐项对应29项要求及已有证据，列出8个preset、17场景、29技能入口和五组有序训练数据。它封存了`b5095ba`版本的六份声明文档，仅为只读范围核对。该历史复查新增两组实际验收缺口：完整命名方向键及MuJoCo窗口Backspace重置；teacher、pure student、finetune student从原生PT恢复优化器后继续学习。既有w键GUI、API方向扫描、模拟训练子进程的恢复检查及eval/export加载PT都不能关闭这两组缺口。补验将使用独立输出，等待当前629完整CPU终态、原容器停止及同一GPU锁释放后执行；当时尚无补验通过结论；实际补验现已完成，见本文末段。
 
-[全键盘与Backspace补验准备包](usage_assets/reports/native-keyboard-reset-allkeys-preparation/index.md)已封存46项CPU控制检查、新cohort计划及真实Docker导入/配置解析收据；[原生续训补验准备包](usage_assets/reports/native-resume-acceptance-preparation/index.md)封存33项最终CPU检查、真实100段locomotion预处理、既有PT优化器结构核对和18步执行argv。两包都只证明准备状态；恢复外部源码/模型须遵守包内映射与SHA，不能直接启动缺少依赖的归档副本。真实补验仍等待现629正常退出和GPU释放，不需要在线账户。
+[全键盘与Backspace补验准备包](usage_assets/reports/native-keyboard-reset-allkeys-preparation/index.md)已封存46项CPU控制检查、新cohort计划及真实Docker导入/配置解析收据；[原生续训补验准备包](usage_assets/reports/native-resume-acceptance-preparation/index.md)封存33项最终CPU检查、真实100段locomotion预处理、既有PT优化器结构核对和18步执行argv。两包都只证明准备状态；恢复外部源码/模型须遵守包内映射与SHA，不能直接启动缺少依赖的归档副本。上述只描述准备时点；实际补验现已完成，不需要在线账户。
+
+### 629结果与完整键盘的实际终态
+
+2026-10-10 14:21 UTC，[629配置结果](usage_assets/reports/sim2sim-full629-sdk018-recovered/index.md)已完整出版：原629次原生rollout、1258正常worker和629原视频全片解码完成；监督会话143留下的四例host观察缺口以四次独立新attempt补验，原1250映射与8个旧缺口单独保存。实际633次attempt覆盖629唯一配置，所有容器均已停止。该恢复流程使用独立控制器，前面的旧严格publisher及其waiting回执保留历史含义，不能把原host receipt改写为正常0。原始证据、连续观察流分块和全部SHA均可从结果包复核；大型源码/生成输入的恢复前提单列在包内清单。
+
+可在上面的8088标准库服务中访问 `/reports/sim2sim-full629-sdk018-recovered/playback.html`，按场景、配置或阈值筛选全部结果。139例高度/倾斜事件都保留，490例未触发也不等于课程成功。
+
+[完整命名按键和Backspace结果](usage_assets/reports/native-keyboard-reset-allkeys/index.md)也已完成：424帧原生录制包含全部12个部署标签，物理重置前后完整状态、正常退出和原视频均保存。该记录的qpos仍包含零XYZ占位；按原plan恢复依赖后才能重跑原生GUI，不能直接将录制当作配对地形训练数据。
+
+### 真实断点续训与当前后台交接
+
+[教师及两类学生的续训实测](usage_assets/reports/native-resume-acceptance/index.md)已完成6次原生训练和全部18步证据检查。baseline target2保存iter1后，原生resume从index1再次更新，到target4保存iter3；教师optimizer40→60→100，学生16→24→40。结果包括PT/归档、真实TensorBoard事件、ONNX及skip验证；大文件按原字节分块，恢复方法和输入依赖在包内。它证明有界恢复通路，不等于正式七模型完成或随机/环境状态精确续接。
+
+14:37 UTC旧waiter1121672核对出生身份后仅对leader发送SIGTERM，自行保留受控取消的failed状态；此前没有fetch/prepare/run。共用锁inode未变，旧进程退出后才启动[恢复版交接](usage_assets/reports/final-student-delivery-waiter-recovered/index.md)。新PID2146113首次真实SSH为waiting，每600秒等待官方产物；不会因旧629宿主143而永久卡在原正常退出门卫。当前状态使用上面的新execution路径查看。控制源码和合同已冻结，不能覆盖活文件或同时启动第二份；最终58例仍未执行。

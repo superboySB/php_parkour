@@ -1,0 +1,245 @@
+{
+  "status": "completed",
+  "elapsed_seconds": 21.86839455901645,
+  "config": {
+    "models": "/data/assets/student",
+    "terrain": "custom",
+    "mesh": "/workspace/php_parkour/outputs/research/motion-matching/scenarios/random_locomotion/cfg0035_stand_2.0s_run_forward_1.2s_stand_2.0s_terrain.obj",
+    "model_sha256": {
+      "depth_backbone.onnx": "5b22466a218944e3b0ab0f4f82a910e3eec35375ee03e7fb94eb65fa88431b56",
+      "student.onnx": "e426c4206181d511b838c76efc48e43636299b76cb5a15183977011589931628"
+    },
+    "mesh_sha256": "354c04a1740902aa401aac2b8227b71a8c88afce5d3821ffb6c318de77d10ba7",
+    "commands": [
+      6
+    ],
+    "duration": 10.0,
+    "seconds_per_command": 10.0,
+    "record_policy": false,
+    "python_faulthandler": true,
+    "course_guide": false,
+    "settle_seconds": 3,
+    "startup_timeout": 180,
+    "seed": 42,
+    "gl": "egl",
+    "ort_threads": 1,
+    "egl_device_id": "0",
+    "wall_timeout": 413.0,
+    "scope": "native closed-loop rollout, not an assertion of skill success"
+  },
+  "worker_status_report": "worker-processes.json",
+  "worker_status_at_completion": {
+    "event": "workers_loop_complete",
+    "observed_unix": 1791627338.1820595,
+    "elapsed_seconds": 21.867889520945027,
+    "workers": [
+      {
+        "role": "simulator",
+        "launch": [
+          "/opt/php/bin/train-python",
+          "/workspace/php_parkour/scripts/research/sim2sim.py",
+          "--worker",
+          "simulator",
+          "--output",
+          "/outputs/all-configs/random_locomotion/config-0035-cfg0035_stand_2.0s_run_forward_1.2s_stand_2.0s-747d574d7872"
+        ],
+        "identity_at_spawn": {
+          "pid": 6492,
+          "pid_namespace": "current container",
+          "observed_unix": 1791627316.314596,
+          "proc_status": {
+            "Name": "train-python",
+            "Tgid": "6492",
+            "Pid": "6492",
+            "PPid": "6491",
+            "NSpid": "6492",
+            "Threads": "1"
+          },
+          "state": "R",
+          "process_group_id": 6492,
+          "session_id": 6492,
+          "start_time_clock_ticks": 105531077,
+          "cmdline": "/usr/bin/env bash /opt/php/bin/train-python /workspace/php_parkour/scripts/research/sim2sim.py --worker simulator --output /outputs/all-configs/random_locomotion/config-0035-cfg0035_stand_2.0s_run_forward_1.2s_stand_2.0s-747d574d7872 "
+        },
+        "process_group": {
+          "process_group_id": 6492,
+          "session_id": 6492,
+          "source": "Popen start_new_session=True; private session/group leader PID",
+          "leader_identity": {
+            "pid": 6492,
+            "start_time_clock_ticks": 105531077
+          },
+          "known_members": [
+            {
+              "pid": 6492,
+              "start_time_clock_ticks": 105531077
+            },
+            {
+              "pid": 6497,
+              "start_time_clock_ticks": 105531077
+            },
+            {
+              "pid": 6502,
+              "start_time_clock_ticks": 105531497
+            },
+            {
+              "pid": 6526,
+              "start_time_clock_ticks": 105531627
+            },
+            {
+              "pid": 6562,
+              "start_time_clock_ticks": 105533116
+            }
+          ],
+          "retired": true,
+          "ownership_lost": false,
+          "ownership_state": "retired_empty",
+          "ownership_reason": null,
+          "live_members": [],
+          "ownership_verified": true
+        },
+        "returncode": 0,
+        "signal_number": null,
+        "signal_name": null,
+        "exit_code": 0,
+        "status": "exited",
+        "scope": "direct Popen process; wrappers may mask a native child signal"
+      },
+      {
+        "role": "inference",
+        "launch": [
+          "/opt/php/bin/inference-python",
+          "/workspace/php_parkour/scripts/research/sim2sim.py",
+          "--worker",
+          "inference",
+          "--output",
+          "/outputs/all-configs/random_locomotion/config-0035-cfg0035_stand_2.0s_run_forward_1.2s_stand_2.0s-747d574d7872"
+        ],
+        "identity_at_spawn": {
+          "pid": 6530,
+          "pid_namespace": "current container",
+          "observed_unix": 1791627322.1296835,
+          "proc_status": {
+            "Name": "inference-pytho",
+            "Tgid": "6530",
+            "Pid": "6530",
+            "PPid": "6491",
+            "NSpid": "6530",
+            "Threads": "1"
+          },
+          "state": "R",
+          "process_group_id": 6530,
+          "session_id": 6530,
+          "start_time_clock_ticks": 105531658,
+          "cmdline": "/usr/bin/env bash /opt/php/bin/inference-python /workspace/php_parkour/scripts/research/sim2sim.py --worker inference --output /outputs/all-configs/random_locomotion/config-0035-cfg0035_stand_2.0s_run_forward_1.2s_stand_2.0s-747d574d7872 "
+        },
+        "process_group": {
+          "process_group_id": 6530,
+          "session_id": 6530,
+          "source": "Popen start_new_session=True; private session/group leader PID",
+          "leader_identity": {
+            "pid": 6530,
+            "start_time_clock_ticks": 105531658
+          },
+          "known_members": [
+            {
+              "pid": 6530,
+              "start_time_clock_ticks": 105531658
+            },
+            {
+              "pid": 6545,
+              "start_time_clock_ticks": 105531758
+            }
+          ],
+          "retired": true,
+          "ownership_lost": false,
+          "ownership_state": "retired_empty",
+          "ownership_reason": null,
+          "live_members": [],
+          "ownership_verified": true
+        },
+        "returncode": 0,
+        "signal_number": null,
+        "signal_name": null,
+        "exit_code": 0,
+        "status": "exited",
+        "scope": "direct Popen process; wrappers may mask a native child signal"
+      }
+    ]
+  },
+  "simulation": {
+    "status": "completed",
+    "physics_steps": 7061,
+    "active_samples": 501,
+    "policy_simulation_seconds": 10.01,
+    "simulation_seconds": 14.122,
+    "wall_seconds": 16.036691155983135,
+    "physics_fps_measured": 440.3027735758931,
+    "displacement_xy_m": [
+      19.992028042674065,
+      2.7349519392009825
+    ],
+    "path_length_xy_m": 20.54405969933905,
+    "heading_change_deg": 21.050235733780088,
+    "minimum_pelvis_height_m": 0.6208146810531616,
+    "minimum_base_up_z": 0.8527730405330658,
+    "final_position_xyz_m": [
+      19.782421112060547,
+      2.7376699447631836,
+      0.7022718787193298
+    ],
+    "final_base_up_z": 0.9842351842671633,
+    "low_pelvis_detected": false,
+    "tilt_threshold_sample_seconds": 0.0,
+    "fall_detected": false,
+    "fall_criterion": "pelvis height < 0.4 m OR base upright cosine < 0.35 after gantry release",
+    "fall_detection_is_heuristic": true,
+    "gantry_disabled_during_policy": true
+  },
+  "inference": {
+    "status": "completed",
+    "ticks": 500,
+    "commands": [
+      {
+        "seconds": 0.01,
+        "code": 6,
+        "name": "forward"
+      }
+    ],
+    "control_period_simulation_seconds": 0.02,
+    "onnxruntime_intra_op_threads": 1,
+    "lifecycle": {
+      "damping_mode_active": true,
+      "policy_action_disabled": true
+    },
+    "transport": "official Unitree SDK DDS on lo; official depth shared memory",
+    "input": "automated injected commands"
+  },
+  "videos": [
+    "video/episode_0_1791627336.mp4"
+  ],
+  "quality_verified": false,
+  "obstacle_course_completion_verified": false,
+  "video_checks": [
+    {
+      "video": "video/episode_0_1791627336.mp4",
+      "probe": {
+        "programs": [],
+        "streams": [
+          {
+            "codec_name": "h264",
+            "width": 640,
+            "height": 360,
+            "avg_frame_rate": "50/1",
+            "nb_frames": "707"
+          }
+        ],
+        "format": {
+          "duration": "14.140000"
+        }
+      },
+      "thumbnail": "video/episode_0_1791627336.png"
+    }
+  ],
+  "survival_passed": true
+}

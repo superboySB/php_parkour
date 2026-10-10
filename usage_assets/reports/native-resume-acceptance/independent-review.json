@@ -1,0 +1,162 @@
+{
+  "schema_version": 1,
+  "status": "actual_native_three_algorithm_resume_verified",
+  "quality_verified": false,
+  "bitwise_continuation_verified": false,
+  "actual_parent_wait_returncode": 0,
+  "historical_failed_teacher_attempt_returncode": 1,
+  "first_continuation_preflight_returncode": 1,
+  "first_continuation_gpu_occupancy_cause": "unknown; no contemporaneous compute PID snapshot retained",
+  "new_command_exit0_count": 15,
+  "historical_command_exit0_count": 3,
+  "aggregate_command_exit0_count": 18,
+  "new_native_call_count": 4,
+  "historical_native_call_count": 2,
+  "real_wrapper_birth_count": 6,
+  "real_kit_birth_count": 6,
+  "strict_cpu_scientific_report_count": 12,
+  "old_and_new_owned_containers_stopped": true,
+  "input_before_after_equal": true,
+  "cpu_preparation_33tests_not_counted_as_native_execution": true,
+  "labels": {
+    "teacher-locomotion": {
+      "optimizer_expected_steps": [
+        40,
+        60,
+        100
+      ],
+      "actual_update_schedule": {
+        "algo": "holosoma.agents.ppo.ppo.PPO",
+        "num_envs": 16,
+        "steps": 24,
+        "mini_batches": 4,
+        "epochs": 5,
+        "num_learning_iterations": 3,
+        "seed": 42,
+        "variants": 1,
+        "asset_root": "/outputs/runtime-robot-assets/robots"
+      },
+      "trained_weight_deltas": [
+        {
+          "prefix": "actor_module.",
+          "changed_elements": 398365,
+          "l2": 0.3915899238800246
+        },
+        {
+          "prefix": "",
+          "changed_elements": 457728,
+          "l2": 0.7739952427293812
+        }
+      ],
+      "baseline_tb_steps": [
+        0,
+        1
+      ],
+      "resumed_tb_steps": [
+        1,
+        2,
+        3
+      ],
+      "resume_report": "actual-output/resume-evidence/teacher-locomotion.json",
+      "onnx_report": "actual-output/resume-evidence/teacher-locomotion-onnx.json",
+      "skip_report": "actual-output/resume-evidence/teacher-locomotion-skip.json",
+      "shutdown_log_sidecar": "actual-output/continuation-admission/teacher-locomotion-shutdown-log-validation.json"
+    },
+    "student-pure": {
+      "optimizer_expected_steps": [
+        16,
+        24,
+        40
+      ],
+      "actual_update_schedule": {
+        "algo": "wbt_training.utils.student_teacher.PhpDistillation",
+        "num_envs": 16,
+        "steps": 24,
+        "mini_batches": 4,
+        "epochs": 2,
+        "num_learning_iterations": 3,
+        "seed": 42,
+        "variants": 1,
+        "asset_root": "/outputs/runtime-robot-assets/robots"
+      },
+      "trained_weight_deltas": [
+        {
+          "prefix": "student.",
+          "changed_elements": 238109,
+          "l2": 0.6730419360063716
+        },
+        {
+          "prefix": "depth_backbone.",
+          "changed_elements": 25632,
+          "l2": 0.2199876462114327
+        }
+      ],
+      "baseline_tb_steps": [
+        0,
+        1
+      ],
+      "resumed_tb_steps": [
+        1,
+        2,
+        3
+      ],
+      "resume_report": "actual-output/resume-evidence/student-pure.json",
+      "onnx_report": "actual-output/resume-evidence/student-pure-onnx.json",
+      "skip_report": "actual-output/resume-evidence/student-pure-skip.json",
+      "shutdown_log_sidecar": "actual-output/continuation-admission/student-pure-shutdown-log-validation.json"
+    },
+    "student-finetune": {
+      "optimizer_expected_steps": [
+        16,
+        24,
+        40
+      ],
+      "actual_update_schedule": {
+        "algo": "wbt_training.utils.student_teacher.PhpDistillationPPO",
+        "num_envs": 16,
+        "steps": 24,
+        "mini_batches": 4,
+        "epochs": 2,
+        "num_learning_iterations": 3,
+        "seed": 42,
+        "variants": 1,
+        "asset_root": "/outputs/runtime-robot-assets/robots"
+      },
+      "trained_weight_deltas": [
+        {
+          "prefix": "student.",
+          "changed_elements": 3071510,
+          "l2": 1.4046301086167983
+        },
+        {
+          "prefix": "depth_backbone.",
+          "changed_elements": 25632,
+          "l2": 0.16145131170774463
+        },
+        {
+          "prefix": "critic.",
+          "changed_elements": 457728,
+          "l2": 1.141065767830697
+        }
+      ],
+      "baseline_tb_steps": [
+        0,
+        1
+      ],
+      "resumed_tb_steps": [
+        1,
+        2,
+        3
+      ],
+      "resume_report": "actual-output/resume-evidence/student-finetune.json",
+      "onnx_report": "actual-output/resume-evidence/student-finetune-onnx.json",
+      "skip_report": "actual-output/resume-evidence/student-finetune-skip.json",
+      "shutdown_log_sidecar": "actual-output/continuation-admission/student-finetune-shutdown-log-validation.json"
+    }
+  },
+  "large_original_files": 4,
+  "unique_chunked_blobs": 3,
+  "tensorboard_event_files": 6,
+  "tensorboard_actual_scalar_points": 765,
+  "log_admission": "Original close() may terminate Python before post-close INFO. Only exact load+shutdown-begin+actual native0 and observed Kit gone are admitted; no complete close-return claim."
+}

@@ -1,0 +1,201 @@
+{
+  "schema_version": 1,
+  "case_input": {
+    "plan_sha256": "1e3483f7b35dd7592d9e5e0b02c13143a44e4f17a5cd0ba24def25c0229a6e6f",
+    "image_id": "sha256:2be18521015b2a84ef7a4442af9a94ef041a19feb9ce385ae15424b1dc158d8f",
+    "source_matrix_sha256": "ed413845f4b82156964e11ad6ee3faca30e3c0b10dbfdc295a8284f9ee3308ed",
+    "model_sha256": {
+      "depth_backbone.onnx": "5b22466a218944e3b0ab0f4f82a910e3eec35375ee03e7fb94eb65fa88431b56",
+      "student.onnx": "e426c4206181d511b838c76efc48e43636299b76cb5a15183977011589931628"
+    },
+    "case_id": "high_speed_hurdle:0002:run_forward_0.5s",
+    "source_files": [
+      {
+        "path": "/workspace/php_parkour/outputs/research/motion-matching/scenarios/high_speed_hurdle/run_forward_0.5s_motion.npz",
+        "size": 626164,
+        "sha256": "37b2f97dfd8309018ae73965fef854b1d1362bc1eaba7e9c55b700230020a3c5"
+      },
+      {
+        "path": "/workspace/php_parkour/outputs/research/motion-matching/scenarios/high_speed_hurdle/run_forward_0.5s_terrain.npy",
+        "size": 928,
+        "sha256": "b3ed9863d105d2ff6e2d021d6af084ea03c1e3be298368dc66a3421fe418e060"
+      },
+      {
+        "path": "/workspace/php_parkour/outputs/research/motion-matching/scenarios/high_speed_hurdle/run_forward_0.5s_terrain.obj",
+        "size": 865,
+        "sha256": "7144be708b3ebb47a3197837fe289e0a742911dcf8ae6d366ee4161b5d052d0b"
+      }
+    ],
+    "launch": [
+      "/opt/php/envs/inference/bin/python",
+      "/workspace/php_parkour/scripts/research/sim2sim.py",
+      "--models",
+      "/data/assets/student",
+      "--terrain",
+      "custom",
+      "--mesh",
+      "/workspace/php_parkour/outputs/research/motion-matching/scenarios/high_speed_hurdle/run_forward_0.5s_terrain.obj",
+      "--commands",
+      "6",
+      "--seconds-per-command",
+      "10.0",
+      "--seed",
+      "42",
+      "--gl",
+      "egl",
+      "--python-faulthandler",
+      "--sim-python",
+      "/opt/php/bin/train-python",
+      "--inference-python",
+      "/opt/php/bin/inference-python",
+      "--output",
+      "/outputs/all-configs/high_speed_hurdle/config-0002-run_forward_0.5s-af4c14c74f11"
+    ]
+  },
+  "files": [
+    {
+      "path": "/outputs/all-configs/high_speed_hurdle/config-0002-run_forward_0.5s-af4c14c74f11/control-ack.json",
+      "sha256": "ce0209444cc4539abfe40ee1ecb485ad43097309aa7b9f7f74bc809c215db582",
+      "bytes": 19
+    },
+    {
+      "path": "/outputs/all-configs/high_speed_hurdle/config-0002-run_forward_0.5s-af4c14c74f11/inference-process-start.json",
+      "sha256": "97a56facd08739eaf32663e60df1cbd661a27f70719b383847be01e76843c14f",
+      "bytes": 904
+    },
+    {
+      "path": "/outputs/all-configs/high_speed_hurdle/config-0002-run_forward_0.5s-af4c14c74f11/inference.json",
+      "sha256": "67f9fffaeb7f91496f71424c2b0fca75ff08be0b073475ac8065c3fa304214ec",
+      "bytes": 115091
+    },
+    {
+      "path": "/outputs/all-configs/high_speed_hurdle/config-0002-run_forward_0.5s-af4c14c74f11/inference.log",
+      "sha256": "ab8256fadf10f42b8c84bd67c1fa3ccb0502f6bb917f05c1b654e362b3c590be",
+      "bytes": 2027
+    },
+    {
+      "path": "/outputs/all-configs/high_speed_hurdle/config-0002-run_forward_0.5s-af4c14c74f11/policy-ready.json",
+      "sha256": "4631dde788eade2b173724bd78fed5ea0133ad903e4eba7ebbd171d440f64914",
+      "bytes": 55
+    },
+    {
+      "path": "/outputs/all-configs/high_speed_hurdle/config-0002-run_forward_0.5s-af4c14c74f11/released.json",
+      "sha256": "730c49e9ac73ce8890e2adb94d40f74e5a726b626bec957614e70f1d5203e91f",
+      "bytes": 98
+    },
+    {
+      "path": "/outputs/all-configs/high_speed_hurdle/config-0002-run_forward_0.5s-af4c14c74f11/result.json",
+      "sha256": "3f7ea399c5f8905690e179dbe46aebf7dbfd47bf7c4f07f4d2191e3b2d9626e9",
+      "bytes": 7705
+    },
+    {
+      "path": "/outputs/all-configs/high_speed_hurdle/config-0002-run_forward_0.5s-af4c14c74f11/run.json",
+      "sha256": "1cff1c6a0ace74576d5c5acbc60c7196190435529441d385855659d5650d0cda",
+      "bytes": 863
+    },
+    {
+      "path": "/outputs/all-configs/high_speed_hurdle/config-0002-run_forward_0.5s-af4c14c74f11/sim-clock.json",
+      "sha256": "109bb8f3062984bc247997c97e21295e2bb592eee0f271b49cbe89f9178cc06d",
+      "bytes": 252
+    },
+    {
+      "path": "/outputs/all-configs/high_speed_hurdle/config-0002-run_forward_0.5s-af4c14c74f11/sim-ready.json",
+      "sha256": "3e7541ddd91da4a2027433c2af122eb9f1e25ddac144fda7d1c8963405c7fb95",
+      "bytes": 1197
+    },
+    {
+      "path": "/outputs/all-configs/high_speed_hurdle/config-0002-run_forward_0.5s-af4c14c74f11/simulation.json",
+      "sha256": "2e26859ea8ee23e32b005cac87cb677ce2a96a27b31a782d125ae563b25e2245",
+      "bytes": 906
+    },
+    {
+      "path": "/outputs/all-configs/high_speed_hurdle/config-0002-run_forward_0.5s-af4c14c74f11/simulator-process-start.json",
+      "sha256": "6f30fdbd75352b70eace8a5821f89686c926cee259b67d27e4357deb8e8299a1",
+      "bytes": 904
+    },
+    {
+      "path": "/outputs/all-configs/high_speed_hurdle/config-0002-run_forward_0.5s-af4c14c74f11/simulator.log",
+      "sha256": "3a5b62ed28db280cdce925c64d6511545dc39b469fb731a5e8f6542ff36a6b13",
+      "bytes": 30689
+    },
+    {
+      "path": "/outputs/all-configs/high_speed_hurdle/config-0002-run_forward_0.5s-af4c14c74f11/stop",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/outputs/all-configs/high_speed_hurdle/config-0002-run_forward_0.5s-af4c14c74f11/trajectory.csv",
+      "sha256": "dff094521d3b85829daf291d519cd13212bf5749550f276fb1b5d5271c587b49",
+      "bytes": 75614
+    },
+    {
+      "path": "/outputs/all-configs/high_speed_hurdle/config-0002-run_forward_0.5s-af4c14c74f11/video/episode_0_1791636607.mp4",
+      "sha256": "0ae540313b6cb40a80879d4273332d3957a42f8cd10decbd52e6f6d456cd59e1",
+      "bytes": 368612
+    },
+    {
+      "path": "/outputs/all-configs/high_speed_hurdle/config-0002-run_forward_0.5s-af4c14c74f11/video/episode_0_1791636607.png",
+      "sha256": "381fc20dbcb57a755602286aeed0921de7ad63ec4030f94ce2c716e411f51194",
+      "bytes": 24205
+    },
+    {
+      "path": "/outputs/all-configs/high_speed_hurdle/config-0002-run_forward_0.5s-af4c14c74f11/worker-processes.json",
+      "sha256": "62d88445798ff124f95b873acf1086db9a22c0a2b166e9111e2e46bf450ad6e2",
+      "bytes": 34113
+    }
+  ],
+  "worker_receipts": [
+    {
+      "path": "/outputs/all-configs/high_speed_hurdle/config-0002-run_forward_0.5s-af4c14c74f11/worker-processes.json",
+      "sha256": "62d88445798ff124f95b873acf1086db9a22c0a2b166e9111e2e46bf450ad6e2",
+      "bytes": 34113
+    },
+    {
+      "path": "/outputs/all-configs/high_speed_hurdle/config-0002-run_forward_0.5s-af4c14c74f11/simulator-process-start.json",
+      "sha256": "6f30fdbd75352b70eace8a5821f89686c926cee259b67d27e4357deb8e8299a1",
+      "bytes": 904
+    },
+    {
+      "path": "/outputs/all-configs/high_speed_hurdle/config-0002-run_forward_0.5s-af4c14c74f11/inference-process-start.json",
+      "sha256": "97a56facd08739eaf32663e60df1cbd661a27f70719b383847be01e76843c14f",
+      "bytes": 904
+    }
+  ],
+  "execution": {
+    "output": "/outputs/all-configs/high_speed_hurdle/config-0002-run_forward_0.5s-af4c14c74f11",
+    "launch": [
+      "/opt/php/envs/inference/bin/python",
+      "/workspace/php_parkour/scripts/research/sim2sim.py",
+      "--models",
+      "/data/assets/student",
+      "--terrain",
+      "custom",
+      "--mesh",
+      "/workspace/php_parkour/outputs/research/motion-matching/scenarios/high_speed_hurdle/run_forward_0.5s_terrain.obj",
+      "--commands",
+      "6",
+      "--seconds-per-command",
+      "10.0",
+      "--seed",
+      "42",
+      "--gl",
+      "egl",
+      "--python-faulthandler",
+      "--sim-python",
+      "/opt/php/bin/train-python",
+      "--inference-python",
+      "/opt/php/bin/inference-python",
+      "--output",
+      "/outputs/all-configs/high_speed_hurdle/config-0002-run_forward_0.5s-af4c14c74f11"
+    ],
+    "log": {
+      "path": "/outputs/all-configs/logs/high_speed_hurdle/config-0002/attempt-0001.log",
+      "sha256": "3f7ea399c5f8905690e179dbe46aebf7dbfd47bf7c4f07f4d2191e3b2d9626e9",
+      "bytes": 7705
+    },
+    "returncode": 0
+  },
+  "result_sha256": "3f7ea399c5f8905690e179dbe46aebf7dbfd47bf7c4f07f4d2191e3b2d9626e9",
+  "expected_policy_ticks": 500,
+  "scope": "Native closed-loop execution evidence; survival is heuristic and course completion unverified"
+}

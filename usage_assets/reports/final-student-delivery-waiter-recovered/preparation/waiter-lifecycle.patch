@@ -1,0 +1,121 @@
+--- outputs/research/final-student-delivery-waiter-preparation/wait_final_students.py	2026-10-10 18:57:52.581748261 +0800
++++ outputs/research/final-student-delivery-waiter-recovered-preparation-01/wait_final_students.py	2026-10-10 22:27:47.978064460 +0800
+@@ -18,14 +18,18 @@
+ import subprocess
+ import sys
+ import time
++sys.dont_write_bytecode=True
+ 
+ WORKSPACE=Path('/home/dzp/projects/php_parkour')
+-PREPARATION=WORKSPACE/'outputs/research/final-student-delivery-waiter-preparation'
++PREPARATION=WORKSPACE/'outputs/research/final-student-delivery-waiter-recovered-preparation-01'
+ PULL=WORKSPACE/'scripts/research/pull_final_students.py'
+-NATIVE=WORKSPACE/'outputs/research/final-student-native58-preparation'
+-PREVIOUS=WORKSPACE/'outputs/research/fresh629-sdk018-6cb2ae2-prepared02/host/launch-receipt.json'
+-TRANSFER_ROOT=WORKSPACE/'outputs/research/final-student-transfer/waiter-delivery-01'
+-NATIVE_OUTPUT=WORKSPACE/'outputs/research/final-student-native58-delivery-01'
++NATIVE=WORKSPACE/'outputs/research/final-student-native58-recovered-preparation-01'
++PREVIOUS=WORKSPACE/'outputs/research/fresh629-recovery-01/missing-four-run-01/host/launch-receipt.json'
++TRANSFER_ROOT=WORKSPACE/'outputs/research/final-student-transfer/waiter-delivery-recovered-01'
++NATIVE_OUTPUT=WORKSPACE/'outputs/research/final-student-native58-delivery-recovered-01'
++WAITER_LOCK=WORKSPACE/'outputs/research/final-student-delivery-waiter-preparation/waiter.lock'
++RECOVERED_GATE_SHA='dbc64d32e4da4e1d3791e4b34ab38c3a4035e70c59402183985dd0bc03ce6525'
++LIFECYCLE='recovered_original629_and_separate_four_preserving_root143'
+ UUID='GPU-1803972d-e774-ee96-e6f6-1ee1ce47bb25'
+ MUTEX=WORKSPACE/'outputs/research'/('.local-native-'+UUID+'.lock')
+ REMOTE_TREE='02bc110026d8402cd6046afecb039ee40fbd918c760554ad86f7effa678f9f3c'
+@@ -70,11 +74,13 @@
+     if CONTRACT_GUARD is not None:
+         path,expected=CONTRACT_GUARD
+         require(sha(safe(path,exists=True,file=True))==expected,'Armed contract file SHA changed')
+-    require(contract.get('schema_version')==1 and contract.get('status')=='approved_frozen','Native58 freeze/approval contract not ready')
++    require(contract.get('schema_version')==1 and contract.get('status')=='frozen_recovered_lifecycle_requires_root_review',
++            'Recovered lifecycle freeze contract not ready')
+     fixed={'workspace':str(WORKSPACE),'preparation':str(PREPARATION),'pull':str(PULL),'native58':str(NATIVE/'native58.py'),
+            'previous_cohort_receipt':str(PREVIOUS),'transfer_output_root':str(TRANSFER_ROOT),'native_output':str(NATIVE_OUTPUT),
+            'gpu_uuid':UUID,'gpu_mutex':str(MUTEX),'poll_seconds':600,'remote_source_tree':REMOTE_TREE,
+-           'coverage_output':COVERAGE,'native_image':IMAGE}
++           'coverage_output':COVERAGE,'native_image':IMAGE,'waiter_singleton_lock':str(WAITER_LOCK),
++           'previous_lifecycle':LIFECYCLE,'previous_gate_sha256':RECOVERED_GATE_SHA}
+     require(all(contract.get(k)==v for k,v in fixed.items()),'Reviewed fixed path/UUID/poll contract differs')
+     require(contract.get('expected_counts')==EXPECTED_COUNTS,'Final58 count contract differs')
+     waiter=safe(PREPARATION/'wait_final_students.py',exists=True,file=True)
+@@ -83,7 +89,7 @@
+     require(path==NATIVE/'code-freeze.json' and sha(path)==freeze['sha256'] and path.stat().st_size==freeze['bytes'],
+             'Native58 reviewed code-freeze receipt changed')
+     frozen=read(path)
+-    require(frozen['status']=='code_frozen_cpu_control_plane_only','Native58 freeze status differs')
++    require(frozen['status']=='code_frozen_recovered_lifecycle_no_new_execution','Native58 recovered freeze status differs')
+     for record in frozen['files']:
+         member=safe(NATIVE/record['path'],exists=True,file=True,root=NATIVE)
+         require(member.parent==NATIVE and sha(member)==record['sha256'] and member.stat().st_size==record['bytes'],
+@@ -114,7 +120,9 @@
+         if previous is None:sys.modules.pop('common',None)
+         else:sys.modules['common']=previous
+     required={str(NATIVE/name) for name in native.CONTROL}|{str(PULL),str(NATIVE/'reused-sources.json')}
+-    require(set(sources)==required,'Contract must cover all nine native58 controls and reused provenance')
++    require(set(sources)==required,'Contract must cover all ten native58 controls and reused provenance')
++    require(native.RECOVERED_GATE_SHA==RECOVERED_GATE_SHA and native.RECOVERED_PREVIOUS==PREVIOUS
++            and native.LIFECYCLE==LIFECYCLE,'Waiter/native58 recovered lifecycle contract differs')
+     return pull,common,native
+ 
+ def process_identity(pid):
+@@ -190,32 +198,27 @@
+     return read(base.with_suffix('.stdout.log'))
+ 
+ def local_ready(contract,native):
+-    """Read-only state gate, reusing native58 inspect/gpu_idle; no GPU starts."""
++    """Recovery proof is distinct from the original143; no GPU starts."""
+     verify_sources(contract)
+-    if not PREVIOUS.exists():return {'ready':False,'reason':'Existing fresh629 terminal receipt absent'}
+-    previous=read(safe(PREVIOUS,exists=True,file=True))
+-    if previous.get('status')!='completed':
+-        require(previous.get('status') not in ('failed','execution_failed'),'Existing fresh629 failed; manual review required')
+-        return {'ready':False,'reason':'Existing fresh629 still running/not completed'}
+-    require(previous.get('driver_returncode')==previous.get('cpu_validation_returncode')==0
+-            and previous.get('owned_gpu_container_stop',{}).get('running_after_stop') is False,'Existing fresh629 exit/stop receipt invalid')
+-    stopped=previous['owned_gpu_container_stop'];info=native.inspect(previous['container_id'])
+-    require(info['Id']==previous['container_id']==stopped['container_id'] and info['Image']==native.IMAGE
+-            and info['State']['Running'] is False and info['State']['StartedAt']==stopped['state']['StartedAt'],
+-            'Existing fresh629 exact CID/birth is not stopped')
+     safe(MUTEX)
+     safe(MUTEX,exists=True,file=True)
+     with MUTEX.open('r+') as lock:
+         try:fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
+         except BlockingIOError:return {'ready':False,'reason':'Shared fixed UUID native mutex occupied'}
+         try:
+-            idle=native.gpu_idle()
+-        except ValueError as error:
+-            require(str(error)=='Selected GPU has existing compute; never stop other work','GPU identity/readback failed: '+str(error))
+-            return {'ready':False,'reason':str(error)}
++            previous=native.recovered_previous()
++            if previous.get('ready') is not True:
++                return {'ready':False,'reason':'Recovered original629 and separate four not ready',
++                        'previous_recovered_proof':previous}
++            require(previous['status']=='recovered_previous_ready','Unknown recovered lifecycle state')
++            try:idle=native.gpu_idle()
++            except ValueError as error:
++                require(str(error)=='Selected GPU has existing compute; never stop other work','GPU identity/readback failed: '+str(error))
++                return {'ready':False,'reason':str(error)}
+         finally:fcntl.flock(lock,fcntl.LOCK_UN)
+     verify_sources(contract)
+-    return {'ready':True,'previous_receipt_sha256':sha(PREVIOUS),'gpu':idle,'mutex':str(MUTEX)}
++    return {'ready':True,'previous_lifecycle':LIFECYCLE,'previous_recovered_proof':previous,
++            'original_session54334_exit_code':143,'previous_receipt_sha256':sha(PREVIOUS),'gpu':idle,'mutex':str(MUTEX)}
+ 
+ def validate_completion(base,plan,native):
+     native.verify_snapshot(base,plan)
+@@ -306,9 +309,10 @@
+     require(a.root_authorized_watch,'Explicit root authorization required to arm waiting/fetch/native58 actions')
+     def interrupted(signum,_frame):raise KeyboardInterrupt('Owned waiter received signal '+str(signum))
+     signal.signal(signal.SIGTERM,interrupted)
+-    lockpath=PREPARATION/'waiter.lock';safe(lockpath)
+-    if lockpath.exists():safe(lockpath,exists=True,file=True)
+-    with lockpath.open('a') as lock:
++    # Same existing singleton as the old waiter: Root must first end its exact
++    # birth. An accidental overlapping arm fails before any status/fetch action.
++    lockpath=WAITER_LOCK;safe(lockpath,exists=True,file=True)
++    with lockpath.open('r+') as lock:
+         fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
+         directory=PREPARATION/'execution';safe(directory)
+         require(not directory.exists(),'Existing execution/partial retained; root review required before any new cohort')

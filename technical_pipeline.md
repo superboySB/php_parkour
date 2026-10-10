@@ -4,7 +4,7 @@
 
 截至 2026-10-10，完整官方五教师、两学生训练仍在云端运行；本文中的算法说明来自源码和已执行的有界实验，不表示完整日程或真机验收已经完成。
 
-北京时间15:48，旧629物理扫描已因SDK退出异常及父监督漏查最终worker退出码而有序中断，全部相关本地进程退出。原279项reported completed中也已发现崩溃日志，因此这些状态不能作为正常退出验收；修复监督和SDK后，原五个显式失败配置的新试跑已正常退出，fresh629已按新的独立冻结计划启动，完整终态仍待验收。[原状态及停止回执](usage_assets/reports/sim2sim-cohort-halt/summary.md)、[漏记崩溃实证](usage_assets/reports/worker-exit-completed-log-audit/report.md)、[新SDK五例闭环](usage_assets/reports/sdk018-native-pilot/summary.md)。下文带具体时间的运行快照均保留历史含义。
+北京时间15:48，旧629物理扫描已因SDK退出异常及父监督漏查最终worker退出码而有序中断，全部相关本地进程退出。原279项reported completed中也已发现崩溃日志，因此这些状态不能作为正常退出验收；修复监督和SDK后，原五个显式失败配置的新试跑已正常退出，新的fresh629已完成原629次rollout与四例独立观察补验，完整终态和历史观察缺口见[恢复后的结果包](usage_assets/reports/sim2sim-full629-sdk018-recovered/index.md)。[原状态及停止回执](usage_assets/reports/sim2sim-cohort-halt/summary.md)、[漏记崩溃实证](usage_assets/reports/worker-exit-completed-log-audit/report.md)、[新SDK五例闭环](usage_assets/reports/sdk018-native-pilot/summary.md)。下文带具体时间的运行快照均保留历史含义。
 
 ## 1. 先把整个系统连起来
 
@@ -536,6 +536,10 @@ startup default pose bias同时修改qtarget中心与观测`q−default`基准�
 
 实际 PT 字段也已在 Docker 内读取核对：教师分别存 `actor/critic_model_state_dict` 与两套 optimizer；纯学生存 `model_state_dict`、optimizer、`learning_rate`、`num_teachers`、`teacher_loaded`；混合学生另存 `ppo_coef`。学生 state dict 包含 CNN、学生网络及冻结教师，混合模式再有 critic。三者都存 `experiment_config`、`iter` 和 `iteration`；当前检查的样本没有 `env_state`。所以一个 PT 并非只有部署 actor 参数，也不代表完整环境快照。[实际 checkpoint schema](usage_assets/reports/technical-audit/checkpoint-schema.json)。
 
+真实续训也已分别验收教师、纯DAgger和DAgger+PPO：[6次原生训练及原始产物](usage_assets/reports/native-resume-acceptance/index.md)。每类先运行target2，保存iter0/1，再从iter1恢复到target4，最终保存iter3。原生循环会再次执行已保存的index1，所以这次是baseline两轮加resume三轮，不能理解成总共仅四次rollout。教师Adam步数40→60→100，两个学生16→24→40；恢复后的权重产生有限非零变化，冻结教师张量保持一致，新的TensorBoard样本、最终ONNX和已达目标skip均实测通过。混合学生早期std学习率为零，验收要求其参数保持原值而优化器计数继续推进。
+
+这证明模型/优化器/迭代接口可以继续执行，不保证同连续训练逐位一致：随机数、环境状态、curriculum common step及gate统计的恢复边界见第5节。Isaac关闭原生进程时可能无法返回Python，因此缺失close之后的INFO不作为失败的唯一条件；原失败记录保留，新检查同时核对精确checkpoint加载、shutdown开始、真实native退出0及Kit进程已消失，不声称`close()`已经返回。
+
 在训练图中，梯度更新 CNN、学生/教师 actor 或 critic；FK、最近邻搜索、参考 motion、环境物理、冻结教师标签及 residual gate 都不参与端到端可微学习。当前也没有训练深度估计网络、人体识别器、路径规划器或独立技能分类器。
 
 ### 8.2 已有证据与仍在继续的工作
@@ -544,13 +548,13 @@ startup default pose bias同时修改qtarget中心与观测`q−default`基准�
 | --- | --- | --- |
 | 统一容器与云端同步 | 一个镜像、本地/云端相同 Config/RootFS 指纹、完整镜像离线传输、内容校验源码快照、SSH 密钥登录 | 环境与传输已验证；主机和服务器未安装项目依赖 |
 | 动作生成 | 17 场景、629 配置，28 个独立 traversal executor；公开资产 296 对 native 数据 | 运动学生成与格式通路通过，不等于策略学会全部技能 |
-| 原生训练接口 | 最终冻结源码下 22/22 个有界训练、评估、导出阶段；13 次真实权重更新检查 | 通路通过，smoke 不代表官方日程或收敛完成 |
+| 原生训练接口 | 既有22/22有界阶段、13次权重检查；另6次真实teacher/pure/finetune baseline与resume | 加载、优化器连续更新、TensorBoard、ONNX、skip通过；smoke不代表官方日程或收敛完成 |
 | 正式训练 | 五教师各 20000 轮、纯学生 10000、混合学生 30000 的顺序 driver 已启动 | 截至本文快照，仍在第一教师；不能确认全部完成 |
 | 云端 PT 回传本地 | iteration 19 pilot 与正式 iteration 500 都真实加载，在 16GiB 卡运行 64env×250step | 模型传输与 Isaac 推理通路通过；两次均 `quality_verified=false` |
 | 逐原始源片段验收 | 296 对输入逐项校验、后续116项目标CPU回归；原3次Isaac尝试加新RO资产合同1次实测 | teacher500为158策略步，两种student smoke各21步后失败；0片段完成，尚未跑完296源×三策略 |
-| 发布学生的物理 sim2sim | 原生 ONNX、DDS、深度 SHM、PD；平地 12 个有效 command 与 17 场景各一个 OBJ | 新SDK12command已复测24worker正常退出/12视频全解码；旧17代表场景有真实轨迹但未证明所有worker正常终态，fresh629已用独立冻结计划启动，完整终态仍待验收 |
-| 全部生成几何的物理扫描 | 旧629计划已于15:48停止；原状态279 reported completed、5执行失败、1中断、344未运行 | 已发现10份reported completed日志带SIGSEGV；旧状态不能用于完整验收，新SDK0.1.8/fresh计划已启动；629完整终态仍待验收 |
-| 原生键盘与可见GUI | 平地窗口8/9、终端 ]/c/=/o/i、按住/松开w与低/高速录制 | 第五次真实通过，两NPZ169/196帧、两worker实际0且组空；四次原失败保留，不证明障碍技能 |
+| 发布学生的物理 sim2sim | 原生 ONNX、DDS、深度 SHM、PD；12个有效command、17场景全部629配置 | 新SDK12command的24worker/12视频通过；后续全629原始rollout、1258worker及629全片解码也通过，[完整结果](usage_assets/reports/sim2sim-full629-sdk018-recovered/index.md)保留全部阈值事件，未确认技能成功 |
+| 全部生成几何的物理扫描 | 原629全部完成，另四例独立补跑，共633次attempt／629唯一配置 | 原宿主会话143与8个观察缺口保留；1250原host映射加8个独立新映射分别保存；139例高度/倾斜事件，490例未触发，不解释为通关率 |
+| 原生键盘与可见GUI | 完整低/高速w/s/a/d/q/e、z、模式/录制/窗口及Backspace | [真实全键补验](usage_assets/reports/native-keyboard-reset-allkeys/index.md)正常退出；424帧含0–11标签，物理time11.57→0且随后继续推进；重置范围限MuJoCo physical data |
 | 实体 G1 | 审计 SDK、映射与相机接口，没有本次真实机器人运行 | 未验证；论文作者的实机成绩不能记成本次结果 |
 
 正式 iteration 500 的同设置短评估记录 **75 次失败重置**，iteration 19 pilot 为 **3971 次**；这是 64 个环境反复终止的累计回合数，不是机器人数量。500 轮模型的四项跟踪误差各有 16000 个有限样本，最长 env0 原片为 3.22s，仍有失败且没有完成整个 course。两个 checkpoint 来自不同训练运行，不能视为同一条逐轮配对实验。详见 [本地 pilot](usage_assets/reports/official-pilot-local-quality/summary.md) 与 [500 轮中间检查点](usage_assets/reports/official-progress-0500-local/summary.md)。
@@ -612,4 +616,4 @@ IsaacLab的URDF converter会在asset_root下生成USD缓存。五个非默认教
 
 原生GUI与终端也已实际验收：低速command1和高速command6的label由原policy.velocity_command按帧写入，两NPZ分别169/196帧，manual c与STOP/o autosave均执行；双方原main/atexit及真实wrapper退出0、出生身份绑定的进程组为空。qpos仍是wxyz＋零XYZ占位＋29关节，不能据此恢复世界路径。离屏depth/video从GLFW切EGL，可见viewer仍GLFW；第四次析构abort原字节保留，第五次只改变该环境设置通过。该对照不证明所有heap竞态根除。[键盘/录制数据与真实退出证据](usage_assets/reports/native-keyboard-gui/summary.md)。
 
-新版629批次已于10:02 UTC实际启动，使用统一2be镜像与独立冻结目录。10:10 UTC固定快照为21 completed/1 running/607 planned；首两例的5206输入SHA、4 worker正常退出/空组、4 host出生身份映射和两MP4全片解码已独立验收，第二例真实跌倒。这里只证明首两例执行完整性，629全量终态、课程成功和自训学生验收仍待完成。[原生启动、首两例与失败原片](usage_assets/reports/fresh629-start-first-two/summary.md)。
+新版629批次已于10:02 UTC实际启动，使用统一2be镜像与独立冻结目录。10:10 UTC固定快照为21 completed/1 running/607 planned；首两例的5206输入SHA、4 worker正常退出/空组、4 host出生身份映射和两MP4全片解码已独立验收，第二例真实跌倒。这里只证明首两例执行完整性，该10:10快照只证明首两例；之后629终态已完成并出版，课程成功和自训学生验收仍未完成。[原生启动、首两例与失败原片](usage_assets/reports/fresh629-start-first-two/summary.md)。

@@ -1,0 +1,605 @@
+{"label": "student-finetune", "command": ["bash", "/workspace/php_parkour/wbt_training/training_runs/run_terrain_warp_distill.sh", "--training.headless", "True", "--training.num-envs", "16", "--training.name", "student-finetune", "--training.project", "PHP-research", "--logger.base-dir", "/outputs/resume-smoke/smoke/student-finetune", "--training.seed", "42", "--algo.config.num-learning-iterations", "2", "--algo.config.save-interval", "1", "--algo.config.num-mini-batches", "4", "--training.preprocess-hook-kwargs", "{\"add_onpath_obstacle\": true, \"num_variants\": 1, \"obstacle_seed\": 42}"], "environment": {"LOGGER": "tensorboard", "NGPUS": "1", "CUDA_VISIBLE_DEVICES": "0", "REGISTRY": "file:///data/assets/motions-locomotion", "TEACHER_CHECKPOINT": "/outputs/resume-smoke/smoke/teacher-locomotion/PHP-research/20261010_141647-teacher-locomotion-locomotion/model_00003.pt", "FINETUNE": "1"}}
+==> REGISTRY=file:///data/assets/motions-locomotion
+==> [0] teacher=/outputs/resume-smoke/smoke/teacher-locomotion/PHP-research/20261010_141647-teacher-locomotion-locomotion/model_00003.pt registry=file:///data/assets/motions-locomotion
+[INFO][AppLauncher]: Using device: cuda:0
+[INFO][AppLauncher]: Loading experience file: /workspace/isaaclab/apps/isaaclab.python.headless.kit
+Loading user config located at: '/isaac-sim/kit/data/Kit/Isaac-Sim/5.1/user.config.json'
+[Info] [carb] Logging to file: /isaac-sim/kit/logs/Kit/Isaac-Sim/5.1/kit_20261010_143021.log
+2026-10-10T14:30:22Z [232ms] [Warning] [omni.usd_config.extension] Enable omni.materialx.libs extension to use MaterialX
+2026-10-10T14:30:22Z [483ms] [Warning] [omni.platforminfo.plugin] failed to open the default display.  Can't verify X Server version.
+2026-10-10T14:30:22Z [862ms] [Warning] [carb] Acquiring non optional plugin interface which is not listed as dependency: [omni::physx::IPhysxBenchmarks v1.0] (plugin: <default plugin>), by client: omni.physics.physx.plugin. Add it to CARB_PLUGIN_IMPL_DEPS() macro of a client.
+2026-10-10T14:30:22Z [878ms] [Warning] [omni.isaac.dynamic_control] omni.isaac.dynamic_control is deprecated as of Isaac Sim 4.5. No action is needed from end-users.
+2026-10-10T14:30:24Z [2,474ms] [Warning] [carb.cudainterop.plugin] CUDA_VISIBLE_DEVICES environment variable is set.
+2026-10-10T14:30:24Z [2,474ms] [Warning] [carb.cudainterop.plugin] Note CUDA device enumeration and Omniverse device enumeration are different.
+2026-10-10T14:30:24Z [2,474ms] [Warning] [carb.cudainterop.plugin] Setting CUDA_VISIBLE_DEVICES can lead to undesired behavior or crashes.
+
+|---------------------------------------------------------------------------------------------|
+| Driver Version: 580.126.09    | Graphics API: Vulkan
+|=============================================================================================|
+| GPU | Name                             | Active | LDA | GPU Memory | Vendor-ID | LUID       |
+|     |                                  |        |     |            | Device-ID | UUID       |
+|     |                                  |        |     |            | Bus-ID    |            |
+|---------------------------------------------------------------------------------------------|
+| 0   | NVIDIA GeForce RTX 4070 Ti SUPER | Yes: 0 |     | 16376   MB | 10de      | 0          |
+|     |                                  |        |     |            | 2705      | 1803972d.. |
+|     |                                  |        |     |            | 1         |            |
+|=============================================================================================|
+| OS: 24.04.2 LTS (Noble Numbat) ubuntu, Version: 24.04.2, Kernel: 6.17.0-14-generic
+| Processor: AMD Ryzen 7 9700X 8-Core Processor
+| Cores: 8 | Logical Cores: 16
+|---------------------------------------------------------------------------------------------|
+| Total Memory (MB): 31185 | Free Memory: 21213
+| Total Page/Swap (MB): 30517 | Free Page/Swap: 0
+|---------------------------------------------------------------------------------------------|
+2026-10-10T14:30:24Z [2,747ms] [Warning] [gpu.foundation.plugin] IOMMU is enabled.
+2026-10-10 14:30:24.655 | INFO     | holosoma.utils.sim_utils:setup_isaaclab_launcher:116 - IsaacSim args_cli: Namespace(num_envs=16, seed=42, env_spacing=0.0, output_dir='/outputs/resume-smoke/smoke/student-finetune', enable_cameras=False, xr=False, device='cuda:0', cpu=False, verbose=False, info=False, rendering_mode=None, kit_args='', anim_recording_enabled=False, anim_recording_start_time=0, anim_recording_stop_time=10, headless=True, hide_ui=True, create_new_stage=False, physics_gpu=0, active_gpu=0)
+2026-10-10 14:30:24.656 | INFO     | holosoma.utils.sim_utils:setup_isaaclab_launcher:117 - IsaacSim unknown_args: ['exp:g1-wbt-terrain-warp-distill-finetune', 'simulator:isaacsim', '--training.registry-name', 'file:///data/assets/motions-locomotion', '--training.teacher-checkpoint', '/outputs/resume-smoke/smoke/teacher-locomotion/PHP-research/20261010_141647-teacher-locomotion-locomotion/model_00003.pt', '--algo.config.distillation-warmup-steps', '0', 'logger:disabled', '--logger.video.enabled', 'False', '--training.headless', 'True', '--training.num-envs', '16', '--training.name', 'student-finetune', '--training.project', 'PHP-research', '--logger.base-dir', '/outputs/resume-smoke/smoke/student-finetune', '--training.seed', '42', '--algo.config.num-learning-iterations', '2', '--algo.config.save-interval', '1', '--algo.config.num-mini-batches', '4', '--training.preprocess-hook-kwargs', '{"add_onpath_obstacle": true, "num_variants": 1, "obstacle_seed": 42}', '--robot.asset.asset-root', '/outputs/runtime-robot-assets/robots']
+/isaac-sim/exts/omni.pip.cloud/pip_prebundle/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.5.0) or chardet (7.6.0)/charset_normalizer (3.3.2) doesn't match a supported version!
+  warnings.warn(
+[INFO] Loading custom terrain from: /tmp/tmpijyybn2g.obj
+[INFO] Loaded terrain mesh from obj file with 4088 vertices and 6132 faces
+key: hip_pitch, kp: 40.179238471, kd: 2.557889765
+key: hip_roll, kp: 99.098427777, kd: 6.308801854
+key: hip_yaw, kp: 40.179238471, kd: 2.557889765
+key: knee, kp: 99.098427777, kd: 6.308801854
+key: ankle_pitch, kp: 28.501246196, kd: 1.814445687
+key: ankle_roll, kp: 28.501246196, kd: 1.814445687
+key: hip_pitch, kp: 40.179238471, kd: 2.557889765
+key: hip_roll, kp: 99.098427777, kd: 6.308801854
+key: hip_yaw, kp: 40.179238471, kd: 2.557889765
+key: knee, kp: 99.098427777, kd: 6.308801854
+key: ankle_pitch, kp: 28.501246196, kd: 1.814445687
+key: ankle_roll, kp: 28.501246196, kd: 1.814445687
+key: waist_yaw, kp: 40.179238471, kd: 2.557889765
+key: waist_roll, kp: 28.501246196, kd: 1.814445687
+key: waist_pitch, kp: 28.501246196, kd: 1.814445687
+key: shoulder_pitch, kp: 14.250623098, kd: 0.907222843
+key: shoulder_roll, kp: 14.250623098, kd: 0.907222843
+key: shoulder_yaw, kp: 14.250623098, kd: 0.907222843
+key: elbow, kp: 14.250623098, kd: 0.907222843
+key: wrist_roll, kp: 14.250623098, kd: 0.907222843
+key: wrist_pitch, kp: 16.778327481, kd: 1.068141502
+key: wrist_yaw, kp: 16.778327481, kd: 1.068141502
+key: shoulder_pitch, kp: 14.250623098, kd: 0.907222843
+key: shoulder_roll, kp: 14.250623098, kd: 0.907222843
+key: shoulder_yaw, kp: 14.250623098, kd: 0.907222843
+key: elbow, kp: 14.250623098, kd: 0.907222843
+key: wrist_roll, kp: 14.250623098, kd: 0.907222843
+key: wrist_pitch, kp: 16.778327481, kd: 1.068141502
+key: wrist_yaw, kp: 16.778327481, kd: 1.068141502
+2026-10-10T14:30:27Z [5,332ms] [Warning] [rtx.neuraylib.plugin] [LINK:PLUGIN]   0.0   LINK   plug warn : Loading /isaac-sim/extscache/omni.iray.libs-0.0.0+69cbf6ad.lx64.r/bin/iray/nvcuvid_video_decoder.so: libnvcuvid.so.1: cannot open shared object file: No such file or directory
+2026-10-10T14:30:27Z [5,332ms] [Warning] [rtx.neuraylib.plugin] [LINK:PLUGIN]   0.0   LINK   plug warn : Loading .\nt-x86-64\lib\nvcuvid_video_decoder.so: .\nt-x86-64\lib\nvcuvid_video_decoder.so: cannot open shared object file: No such file or directory
+2026-10-10T14:30:27Z [5,332ms] [Warning] [rtx.neuraylib.plugin] Failed to load nvcuvid h264 decoder plugin. Iray Bridge h264 support will not be available.
+[INFO] Successfully created custom terrain mesh
+2026-10-10T14:30:27Z [5,427ms] [Warning] [carb.windowing-glfw.plugin] GLFW initialization failed.
+2026-10-10T14:30:27Z [5,427ms] [Warning] [carb] Failed to startup plugin carb.windowing-glfw.plugin (interfaces: [carb::windowing::IGLContext v1.0],[carb::windowing::IWindowing v1.5]) (impl: carb.windowing-glfw.plugin)
+
+|---------------------------------------------------------------------------------------------|
+| Driver Version: 580.126.09    | Graphics API: Vulkan
+|=============================================================================================|
+| GPU | Name                             | Active | LDA | GPU Memory | Vendor-ID | LUID       |
+|     |                                  |        |     |            | Device-ID | UUID       |
+|     |                                  |        |     |            | Bus-ID    |            |
+|---------------------------------------------------------------------------------------------|
+| 0   | NVIDIA GeForce RTX 4070 Ti SUPER | Yes: 0 |     | 16376   MB | 10de      | 0          |
+|     |                                  |        |     |            | 2705      | 1803972d.. |
+|     |                                  |        |     |            | 1         |            |
+|=============================================================================================|
+| OS: 24.04.2 LTS (Noble Numbat) ubuntu, Version: 24.04.2, Kernel: 6.17.0-14-generic
+| Processor: AMD Ryzen 7 9700X 8-Core Processor
+| Cores: 8 | Logical Cores: 16
+|---------------------------------------------------------------------------------------------|
+| Total Memory (MB): 31185 | Free Memory: 20769
+| Total Page/Swap (MB): 30517 | Free Page/Swap: 0
+|---------------------------------------------------------------------------------------------|
+2026-10-10T14:30:27Z [5,656ms] [Warning] [gpu.foundation.plugin] IOMMU is enabled.
+2026-10-10T14:30:27Z [5,829ms] [Warning] [carb.windowing-glfw.plugin] GLFW initialization failed.
+2026-10-10T14:30:27Z [5,829ms] [Warning] [carb] Failed to startup plugin carb.windowing-glfw.plugin (interfaces: [carb::windowing::IGLContext v1.0],[carb::windowing::IWindowing v1.5]) (impl: carb.windowing-glfw.plugin)
+2026-10-10T14:30:27Z [5,840ms] [Warning] [carb.windowing-glfw.plugin] GLFW initialization failed.
+2026-10-10T14:30:27Z [5,840ms] [Warning] [carb] Failed to startup plugin carb.windowing-glfw.plugin (interfaces: [carb::windowing::IGLContext v1.0],[carb::windowing::IWindowing v1.5]) (impl: carb.windowing-glfw.plugin)
+2026-10-10T14:30:27Z [5,844ms] [Warning] [carb.windowing-glfw.plugin] GLFW initialization failed.
+2026-10-10T14:30:27Z [5,845ms] [Warning] [carb] Failed to startup plugin carb.windowing-glfw.plugin (interfaces: [carb::windowing::IGLContext v1.0],[carb::windowing::IWindowing v1.5]) (impl: carb.windowing-glfw.plugin)
+2026-10-10T14:30:27Z [5,850ms] [Warning] [carb.windowing-glfw.plugin] GLFW initialization failed.
+2026-10-10T14:30:27Z [5,850ms] [Warning] [carb] Failed to startup plugin carb.windowing-glfw.plugin (interfaces: [carb::windowing::IGLContext v1.0],[carb::windowing::IWindowing v1.5]) (impl: carb.windowing-glfw.plugin)
+2026-10-10T14:30:27Z [5,850ms] [Warning] [carb.windowing-glfw.plugin] GLFW initialization failed.
+2026-10-10T14:30:27Z [5,850ms] [Warning] [carb] Failed to startup plugin carb.windowing-glfw.plugin (interfaces: [carb::windowing::IGLContext v1.0],[carb::windowing::IWindowing v1.5]) (impl: carb.windowing-glfw.plugin)
+2026-10-10T14:30:27Z [5,851ms] [Warning] [carb.windowing-glfw.plugin] GLFW initialization failed.
+2026-10-10T14:30:27Z [5,851ms] [Warning] [carb] Failed to startup plugin carb.windowing-glfw.plugin (interfaces: [carb::windowing::IGLContext v1.0],[carb::windowing::IWindowing v1.5]) (impl: carb.windowing-glfw.plugin)
+2026-10-10T14:30:28Z [6,272ms] [Warning] [omni.graph.visualization.nodes._impl.extension] No Viewport Window to add omni.graph.visualization.nodes-2.1.3 scene to
+2026-10-10T14:30:28Z [6,456ms] [Warning] [isaacsim.asset.importer.urdf] link imu_in_pelvis has no body properties (mass, inertia, or collisions) and is being merged into pelvis
+2026-10-10T14:30:28Z [6,456ms] [Warning] [isaacsim.asset.importer.urdf] link imu_in_torso has no body properties (mass, inertia, or collisions) and is being merged into torso_link
+2026-10-10T14:30:28Z [6,456ms] [Warning] [isaacsim.asset.importer.urdf] link mid360_link has no body properties (mass, inertia, or collisions) and is being merged into torso_link
+2026-10-10T14:30:28Z [6,545ms] [Warning] [omni.usd] Warning: in _ReportErrors at line 3172 of /builds/omniverse/usd-ci/USD/pxr/usd/usd/stage.cpp -- In </g1/LL_FOOT/visuals>: Unresolved reference prim path @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_physics.usd@</visuals/LL_FOOT> introduced by @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</g1/LL_FOOT/visuals> (recomposing stage on stage @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_physics.usd@ <0x3cfeddd0>)
+
+2026-10-10T14:30:28Z [6,545ms] [Warning] [omni.usd] Warning: in _ReportErrors at line 3172 of /builds/omniverse/usd-ci/USD/pxr/usd/usd/stage.cpp -- In </g1/LL_FOOT/visuals>: Unresolved reference prim path @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/main_mesh_arm_collision_halfspherehand.usd@</visuals/LL_FOOT> introduced by @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</g1/LL_FOOT/visuals> (recomposing stage on stage @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/main_mesh_arm_collision_halfspherehand.usd@ <0x3cfdaa20>)
+
+2026-10-10T14:30:28Z [6,545ms] [Warning] [omni.usd] Warning: in _ReportErrors at line 3172 of /builds/omniverse/usd-ci/USD/pxr/usd/usd/stage.cpp -- In </g1/LL_FOOT/visuals>: Unresolved reference prim path @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/main_mesh_arm_collision_halfspherehand.usd@</visuals/LL_FOOT> introduced by @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</g1/LL_FOOT/visuals> (recomposing stage on stage @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/main_mesh_arm_collision_halfspherehand.usd@ <0x3cfcfe80>)
+
+2026-10-10T14:30:28Z [6,545ms] [Warning] [omni.usd] Warning: in _ReportErrors at line 3172 of /builds/omniverse/usd-ci/USD/pxr/usd/usd/stage.cpp -- In </g1/LL_FOOT/visuals>: Unresolved reference prim path @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</visuals/LL_FOOT> introduced by @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</g1/LL_FOOT/visuals> (recomposing stage on stage @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@ <0x3cff6680>)
+
+2026-10-10T14:30:28Z [6,545ms] [Warning] [omni.usd] Warning: in _ReportErrors at line 3172 of /builds/omniverse/usd-ci/USD/pxr/usd/usd/stage.cpp -- In </g1/LL_FOOT/visuals>: Unresolved reference prim path @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_physics.usd@</visuals/LL_FOOT> introduced by @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</g1/LL_FOOT/visuals> (recomposing stage on stage @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_physics.usd@ <0x3cfeddd0>)
+
+2026-10-10T14:30:28Z [6,545ms] [Warning] [omni.usd] Warning: in _ReportErrors at line 3172 of /builds/omniverse/usd-ci/USD/pxr/usd/usd/stage.cpp -- In </g1/LL_FOOT/visuals>: Unresolved reference prim path @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/main_mesh_arm_collision_halfspherehand.usd@</visuals/LL_FOOT> introduced by @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</g1/LL_FOOT/visuals> (recomposing stage on stage @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/main_mesh_arm_collision_halfspherehand.usd@ <0x3cfdaa20>)
+
+2026-10-10T14:30:28Z [6,545ms] [Warning] [omni.usd] Warning: in _ReportErrors at line 3172 of /builds/omniverse/usd-ci/USD/pxr/usd/usd/stage.cpp -- In </g1/LL_FOOT/visuals>: Unresolved reference prim path @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/main_mesh_arm_collision_halfspherehand.usd@</visuals/LL_FOOT> introduced by @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</g1/LL_FOOT/visuals> (recomposing stage on stage @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/main_mesh_arm_collision_halfspherehand.usd@ <0x3cfcfe80>)
+
+2026-10-10T14:30:28Z [6,545ms] [Warning] [omni.usd] Warning: in _ReportErrors at line 3172 of /builds/omniverse/usd-ci/USD/pxr/usd/usd/stage.cpp -- In </g1/LL_FOOT/visuals>: Unresolved reference prim path @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</visuals/LL_FOOT> introduced by @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</g1/LL_FOOT/visuals> (recomposing stage on stage @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@ <0x3cff6680>)
+
+2026-10-10T14:30:28Z [6,625ms] [Warning] [omni.usd] Warning: in _ReportErrors at line 3172 of /builds/omniverse/usd-ci/USD/pxr/usd/usd/stage.cpp -- In </g1/LR_FOOT/visuals>: Unresolved reference prim path @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_physics.usd@</visuals/LR_FOOT> introduced by @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</g1/LR_FOOT/visuals> (recomposing stage on stage @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_physics.usd@ <0x3cfeddd0>)
+
+2026-10-10T14:30:28Z [6,626ms] [Warning] [omni.usd] Warning: in _ReportErrors at line 3172 of /builds/omniverse/usd-ci/USD/pxr/usd/usd/stage.cpp -- In </g1/LR_FOOT/visuals>: Unresolved reference prim path @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/main_mesh_arm_collision_halfspherehand.usd@</visuals/LR_FOOT> introduced by @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</g1/LR_FOOT/visuals> (recomposing stage on stage @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/main_mesh_arm_collision_halfspherehand.usd@ <0x3cfdaa20>)
+
+2026-10-10T14:30:28Z [6,626ms] [Warning] [omni.usd] Warning: in _ReportErrors at line 3172 of /builds/omniverse/usd-ci/USD/pxr/usd/usd/stage.cpp -- In </g1/LR_FOOT/visuals>: Unresolved reference prim path @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/main_mesh_arm_collision_halfspherehand.usd@</visuals/LR_FOOT> introduced by @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</g1/LR_FOOT/visuals> (recomposing stage on stage @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/main_mesh_arm_collision_halfspherehand.usd@ <0x3cfcfe80>)
+
+2026-10-10T14:30:28Z [6,626ms] [Warning] [omni.usd] Warning: in _ReportErrors at line 3172 of /builds/omniverse/usd-ci/USD/pxr/usd/usd/stage.cpp -- In </g1/LR_FOOT/visuals>: Unresolved reference prim path @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</visuals/LR_FOOT> introduced by @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</g1/LR_FOOT/visuals> (recomposing stage on stage @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@ <0x3cff6680>)
+
+2026-10-10T14:30:28Z [6,626ms] [Warning] [omni.usd] Warning: in _ReportErrors at line 3172 of /builds/omniverse/usd-ci/USD/pxr/usd/usd/stage.cpp -- In </g1/LR_FOOT/visuals>: Unresolved reference prim path @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_physics.usd@</visuals/LR_FOOT> introduced by @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</g1/LR_FOOT/visuals> (recomposing stage on stage @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_physics.usd@ <0x3cfeddd0>)
+
+2026-10-10T14:30:28Z [6,626ms] [Warning] [omni.usd] Warning: in _ReportErrors at line 3172 of /builds/omniverse/usd-ci/USD/pxr/usd/usd/stage.cpp -- In </g1/LR_FOOT/visuals>: Unresolved reference prim path @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/main_mesh_arm_collision_halfspherehand.usd@</visuals/LR_FOOT> introduced by @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</g1/LR_FOOT/visuals> (recomposing stage on stage @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/main_mesh_arm_collision_halfspherehand.usd@ <0x3cfdaa20>)
+
+2026-10-10T14:30:28Z [6,626ms] [Warning] [omni.usd] Warning: in _ReportErrors at line 3172 of /builds/omniverse/usd-ci/USD/pxr/usd/usd/stage.cpp -- In </g1/LR_FOOT/visuals>: Unresolved reference prim path @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/main_mesh_arm_collision_halfspherehand.usd@</visuals/LR_FOOT> introduced by @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</g1/LR_FOOT/visuals> (recomposing stage on stage @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/main_mesh_arm_collision_halfspherehand.usd@ <0x3cfcfe80>)
+
+2026-10-10T14:30:28Z [6,626ms] [Warning] [omni.usd] Warning: in _ReportErrors at line 3172 of /builds/omniverse/usd-ci/USD/pxr/usd/usd/stage.cpp -- In </g1/LR_FOOT/visuals>: Unresolved reference prim path @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</visuals/LR_FOOT> introduced by @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</g1/LR_FOOT/visuals> (recomposing stage on stage @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@ <0x3cff6680>)
+
+2026-10-10T14:30:28Z [6,858ms] [Warning] [omni.usd] Warning: in _ReportErrors at line 3172 of /builds/omniverse/usd-ci/USD/pxr/usd/usd/stage.cpp -- In </g1/LL_FOOT/visuals>: Unresolved reference prim path @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</visuals/LL_FOOT> introduced by @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</g1/LL_FOOT/visuals> (recomposing stage on stage @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/main_mesh_arm_collision_halfspherehand.usd@ <0x3cfdaa20>)
+
+2026-10-10T14:30:28Z [6,858ms] [Warning] [omni.usd] Warning: in _ReportErrors at line 3172 of /builds/omniverse/usd-ci/USD/pxr/usd/usd/stage.cpp -- In </g1/LR_FOOT/visuals>: Unresolved reference prim path @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</visuals/LR_FOOT> introduced by @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</g1/LR_FOOT/visuals> (recomposing stage on stage @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/main_mesh_arm_collision_halfspherehand.usd@ <0x3cfdaa20>)
+
+2026-10-10T14:30:28Z [6,858ms] [Warning] [omni.usd] Warning: in _ReportErrors at line 3172 of /builds/omniverse/usd-ci/USD/pxr/usd/usd/stage.cpp -- In </g1/LL_FOOT/visuals>: Unresolved reference prim path @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</visuals/LL_FOOT> introduced by @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</g1/LL_FOOT/visuals> (recomposing stage on stage @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/main_mesh_arm_collision_halfspherehand.usd@ <0x3cfcfe80>)
+
+2026-10-10T14:30:28Z [6,858ms] [Warning] [omni.usd] Warning: in _ReportErrors at line 3172 of /builds/omniverse/usd-ci/USD/pxr/usd/usd/stage.cpp -- In </g1/LR_FOOT/visuals>: Unresolved reference prim path @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</visuals/LR_FOOT> introduced by @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</g1/LR_FOOT/visuals> (recomposing stage on stage @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/main_mesh_arm_collision_halfspherehand.usd@ <0x3cfcfe80>)
+
+2026-10-10T14:30:28Z [6,859ms] [Warning] [omni.usd] Warning: in _ReportErrors at line 3172 of /builds/omniverse/usd-ci/USD/pxr/usd/usd/stage.cpp -- In </g1/LL_FOOT/visuals>: Unresolved reference prim path @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_physics.usd@</visuals/LL_FOOT> introduced by @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</g1/LL_FOOT/visuals> (recomposing stage on stage @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/main_mesh_arm_collision_halfspherehand.usd@ <0x3cfdaa20>)
+
+2026-10-10T14:30:28Z [6,859ms] [Warning] [omni.usd] Warning: in _ReportErrors at line 3172 of /builds/omniverse/usd-ci/USD/pxr/usd/usd/stage.cpp -- In </g1/LR_FOOT/visuals>: Unresolved reference prim path @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_physics.usd@</visuals/LR_FOOT> introduced by @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</g1/LR_FOOT/visuals> (recomposing stage on stage @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/main_mesh_arm_collision_halfspherehand.usd@ <0x3cfdaa20>)
+
+2026-10-10T14:30:28Z [6,860ms] [Warning] [omni.usd] Warning: in _ReportErrors at line 3172 of /builds/omniverse/usd-ci/USD/pxr/usd/usd/stage.cpp -- In </g1/LL_FOOT/visuals>: Unresolved reference prim path @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_physics.usd@</visuals/LL_FOOT> introduced by @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</g1/LL_FOOT/visuals> (recomposing stage on stage @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/main_mesh_arm_collision_halfspherehand.usd@ <0x3cfcfe80>)
+
+2026-10-10T14:30:28Z [6,860ms] [Warning] [omni.usd] Warning: in _ReportErrors at line 3172 of /builds/omniverse/usd-ci/USD/pxr/usd/usd/stage.cpp -- In </g1/LR_FOOT/visuals>: Unresolved reference prim path @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_physics.usd@</visuals/LR_FOOT> introduced by @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</g1/LR_FOOT/visuals> (recomposing stage on stage @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/main_mesh_arm_collision_halfspherehand.usd@ <0x3cfcfe80>)
+
+2026-10-10T14:30:28Z [6,861ms] [Warning] [omni.usd] Warning: in _ReportErrors at line 3172 of /builds/omniverse/usd-ci/USD/pxr/usd/usd/stage.cpp -- In </g1/LL_FOOT/visuals>: Unresolved reference prim path @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_physics.usd@</visuals/LL_FOOT> introduced by @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</g1/LL_FOOT/visuals> (recomposing stage on stage @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/main_mesh_arm_collision_halfspherehand.usd@ <0x3cfdaa20>)
+
+2026-10-10T14:30:28Z [6,861ms] [Warning] [omni.usd] Warning: in _ReportErrors at line 3172 of /builds/omniverse/usd-ci/USD/pxr/usd/usd/stage.cpp -- In </g1/LR_FOOT/visuals>: Unresolved reference prim path @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_physics.usd@</visuals/LR_FOOT> introduced by @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</g1/LR_FOOT/visuals> (recomposing stage on stage @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/main_mesh_arm_collision_halfspherehand.usd@ <0x3cfdaa20>)
+
+2026-10-10T14:30:28Z [6,862ms] [Warning] [omni.usd] Warning: in _ReportErrors at line 3172 of /builds/omniverse/usd-ci/USD/pxr/usd/usd/stage.cpp -- In </g1/LL_FOOT/visuals>: Unresolved reference prim path @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_physics.usd@</visuals/LL_FOOT> introduced by @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</g1/LL_FOOT/visuals> (recomposing stage on stage @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/main_mesh_arm_collision_halfspherehand.usd@ <0x3cfcfe80>)
+
+2026-10-10T14:30:28Z [6,862ms] [Warning] [omni.usd] Warning: in _ReportErrors at line 3172 of /builds/omniverse/usd-ci/USD/pxr/usd/usd/stage.cpp -- In </g1/LR_FOOT/visuals>: Unresolved reference prim path @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_physics.usd@</visuals/LR_FOOT> introduced by @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</g1/LR_FOOT/visuals> (recomposing stage on stage @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/main_mesh_arm_collision_halfspherehand.usd@ <0x3cfcfe80>)
+
+2026-10-10T14:30:28Z [6,863ms] [Warning] [omni.usd] Warning: in _ReportErrors at line 3172 of /builds/omniverse/usd-ci/USD/pxr/usd/usd/stage.cpp -- In </g1/LL_FOOT/visuals>: Unresolved reference prim path @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_physics.usd@</visuals/LL_FOOT> introduced by @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</g1/LL_FOOT/visuals> (recomposing stage on stage @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/main_mesh_arm_collision_halfspherehand.usd@ <0x3cfdaa20>)
+
+2026-10-10T14:30:28Z [6,863ms] [Warning] [omni.usd] Warning: in _ReportErrors at line 3172 of /builds/omniverse/usd-ci/USD/pxr/usd/usd/stage.cpp -- In </g1/LR_FOOT/visuals>: Unresolved reference prim path @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_physics.usd@</visuals/LR_FOOT> introduced by @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</g1/LR_FOOT/visuals> (recomposing stage on stage @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/main_mesh_arm_collision_halfspherehand.usd@ <0x3cfdaa20>)
+
+2026-10-10T14:30:28Z [6,863ms] [Warning] [omni.usd] Warning: in _ReportErrors at line 3172 of /builds/omniverse/usd-ci/USD/pxr/usd/usd/stage.cpp -- In </g1/LL_FOOT/visuals>: Unresolved reference prim path @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_physics.usd@</visuals/LL_FOOT> introduced by @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</g1/LL_FOOT/visuals> (recomposing stage on stage @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/main_mesh_arm_collision_halfspherehand.usd@ <0x3cfcfe80>)
+
+2026-10-10T14:30:28Z [6,863ms] [Warning] [omni.usd] Warning: in _ReportErrors at line 3172 of /builds/omniverse/usd-ci/USD/pxr/usd/usd/stage.cpp -- In </g1/LR_FOOT/visuals>: Unresolved reference prim path @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_physics.usd@</visuals/LR_FOOT> introduced by @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</g1/LR_FOOT/visuals> (recomposing stage on stage @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/main_mesh_arm_collision_halfspherehand.usd@ <0x3cfcfe80>)
+
+2026-10-10T14:30:28Z [6,864ms] [Warning] [omni.usd] Warning: in _ReportErrors at line 3172 of /builds/omniverse/usd-ci/USD/pxr/usd/usd/stage.cpp -- In </g1/LL_FOOT/visuals>: Unresolved reference prim path @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_physics.usd@</visuals/LL_FOOT> introduced by @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</g1/LL_FOOT/visuals> (recomposing stage on stage @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/main_mesh_arm_collision_halfspherehand.usd@ <0x3cfdaa20>)
+
+2026-10-10T14:30:28Z [6,864ms] [Warning] [omni.usd] Warning: in _ReportErrors at line 3172 of /builds/omniverse/usd-ci/USD/pxr/usd/usd/stage.cpp -- In </g1/LR_FOOT/visuals>: Unresolved reference prim path @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_physics.usd@</visuals/LR_FOOT> introduced by @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</g1/LR_FOOT/visuals> (recomposing stage on stage @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/main_mesh_arm_collision_halfspherehand.usd@ <0x3cfdaa20>)
+
+2026-10-10T14:30:28Z [6,865ms] [Warning] [omni.usd] Warning: in _ReportErrors at line 3172 of /builds/omniverse/usd-ci/USD/pxr/usd/usd/stage.cpp -- In </g1/LL_FOOT/visuals>: Unresolved reference prim path @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_physics.usd@</visuals/LL_FOOT> introduced by @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</g1/LL_FOOT/visuals> (recomposing stage on stage @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/main_mesh_arm_collision_halfspherehand.usd@ <0x3cfcfe80>)
+
+2026-10-10T14:30:28Z [6,865ms] [Warning] [omni.usd] Warning: in _ReportErrors at line 3172 of /builds/omniverse/usd-ci/USD/pxr/usd/usd/stage.cpp -- In </g1/LR_FOOT/visuals>: Unresolved reference prim path @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_physics.usd@</visuals/LR_FOOT> introduced by @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</g1/LR_FOOT/visuals> (recomposing stage on stage @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/main_mesh_arm_collision_halfspherehand.usd@ <0x3cfcfe80>)
+
+2026-10-10T14:30:28Z [6,866ms] [Warning] [omni.usd] Warning: in _ReportErrors at line 3172 of /builds/omniverse/usd-ci/USD/pxr/usd/usd/stage.cpp -- In </g1/LL_FOOT/visuals>: Unresolved reference prim path @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_physics.usd@</visuals/LL_FOOT> introduced by @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</g1/LL_FOOT/visuals> (recomposing stage on stage @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/main_mesh_arm_collision_halfspherehand.usd@ <0x3cfdaa20>)
+
+2026-10-10T14:30:28Z [6,866ms] [Warning] [omni.usd] Warning: in _ReportErrors at line 3172 of /builds/omniverse/usd-ci/USD/pxr/usd/usd/stage.cpp -- In </g1/LR_FOOT/visuals>: Unresolved reference prim path @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_physics.usd@</visuals/LR_FOOT> introduced by @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</g1/LR_FOOT/visuals> (recomposing stage on stage @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/main_mesh_arm_collision_halfspherehand.usd@ <0x3cfdaa20>)
+
+2026-10-10T14:30:28Z [6,867ms] [Warning] [omni.usd] Warning: in _ReportErrors at line 3172 of /builds/omniverse/usd-ci/USD/pxr/usd/usd/stage.cpp -- In </g1/LL_FOOT/visuals>: Unresolved reference prim path @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_physics.usd@</visuals/LL_FOOT> introduced by @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</g1/LL_FOOT/visuals> (recomposing stage on stage @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/main_mesh_arm_collision_halfspherehand.usd@ <0x3cfcfe80>)
+
+2026-10-10T14:30:28Z [6,867ms] [Warning] [omni.usd] Warning: in _ReportErrors at line 3172 of /builds/omniverse/usd-ci/USD/pxr/usd/usd/stage.cpp -- In </g1/LR_FOOT/visuals>: Unresolved reference prim path @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_physics.usd@</visuals/LR_FOOT> introduced by @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</g1/LR_FOOT/visuals> (recomposing stage on stage @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/main_mesh_arm_collision_halfspherehand.usd@ <0x3cfcfe80>)
+
+2026-10-10T14:30:28Z [6,868ms] [Warning] [omni.usd] Warning: in _ReportErrors at line 3172 of /builds/omniverse/usd-ci/USD/pxr/usd/usd/stage.cpp -- In </g1/LL_FOOT/visuals>: Unresolved reference prim path @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_physics.usd@</visuals/LL_FOOT> introduced by @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</g1/LL_FOOT/visuals> (recomposing stage on stage @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/main_mesh_arm_collision_halfspherehand.usd@ <0x3cfdaa20>)
+
+2026-10-10T14:30:28Z [6,868ms] [Warning] [omni.usd] Warning: in _ReportErrors at line 3172 of /builds/omniverse/usd-ci/USD/pxr/usd/usd/stage.cpp -- In </g1/LR_FOOT/visuals>: Unresolved reference prim path @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_physics.usd@</visuals/LR_FOOT> introduced by @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</g1/LR_FOOT/visuals> (recomposing stage on stage @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/main_mesh_arm_collision_halfspherehand.usd@ <0x3cfdaa20>)
+
+2026-10-10T14:30:28Z [6,868ms] [Warning] [omni.usd] Warning: in _ReportErrors at line 3172 of /builds/omniverse/usd-ci/USD/pxr/usd/usd/stage.cpp -- In </g1/LL_FOOT/visuals>: Unresolved reference prim path @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_physics.usd@</visuals/LL_FOOT> introduced by @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</g1/LL_FOOT/visuals> (recomposing stage on stage @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/main_mesh_arm_collision_halfspherehand.usd@ <0x3cfcfe80>)
+
+2026-10-10T14:30:28Z [6,868ms] [Warning] [omni.usd] Warning: in _ReportErrors at line 3172 of /builds/omniverse/usd-ci/USD/pxr/usd/usd/stage.cpp -- In </g1/LR_FOOT/visuals>: Unresolved reference prim path @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_physics.usd@</visuals/LR_FOOT> introduced by @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</g1/LR_FOOT/visuals> (recomposing stage on stage @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/main_mesh_arm_collision_halfspherehand.usd@ <0x3cfcfe80>)
+
+2026-10-10T14:30:28Z [6,870ms] [Warning] [omni.usd] Warning: in _ReportErrors at line 3172 of /builds/omniverse/usd-ci/USD/pxr/usd/usd/stage.cpp -- In </g1/LL_FOOT/visuals>: Unresolved reference prim path @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_physics.usd@</visuals/LL_FOOT> introduced by @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</g1/LL_FOOT/visuals> (recomposing stage on stage @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/main_mesh_arm_collision_halfspherehand.usd@ <0x3cfdaa20>)
+
+2026-10-10T14:30:28Z [6,870ms] [Warning] [omni.usd] Warning: in _ReportErrors at line 3172 of /builds/omniverse/usd-ci/USD/pxr/usd/usd/stage.cpp -- In </g1/LR_FOOT/visuals>: Unresolved reference prim path @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_physics.usd@</visuals/LR_FOOT> introduced by @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</g1/LR_FOOT/visuals> (recomposing stage on stage @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/main_mesh_arm_collision_halfspherehand.usd@ <0x3cfdaa20>)
+
+2026-10-10T14:30:28Z [6,871ms] [Warning] [omni.usd] Warning: in _ReportErrors at line 3172 of /builds/omniverse/usd-ci/USD/pxr/usd/usd/stage.cpp -- In </g1/LL_FOOT/visuals>: Unresolved reference prim path @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_physics.usd@</visuals/LL_FOOT> introduced by @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</g1/LL_FOOT/visuals> (recomposing stage on stage @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/main_mesh_arm_collision_halfspherehand.usd@ <0x3cfcfe80>)
+
+2026-10-10T14:30:28Z [6,871ms] [Warning] [omni.usd] Warning: in _ReportErrors at line 3172 of /builds/omniverse/usd-ci/USD/pxr/usd/usd/stage.cpp -- In </g1/LR_FOOT/visuals>: Unresolved reference prim path @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_physics.usd@</visuals/LR_FOOT> introduced by @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</g1/LR_FOOT/visuals> (recomposing stage on stage @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/main_mesh_arm_collision_halfspherehand.usd@ <0x3cfcfe80>)
+
+2026-10-10T14:30:28Z [6,978ms] [Warning] [omni.usd] Warning: in _ReportErrors at line 3172 of /builds/omniverse/usd-ci/USD/pxr/usd/usd/stage.cpp -- In </World/envs/env_0/Robot/LL_FOOT/visuals>: Unresolved reference prim path @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_physics.usd@</visuals/LL_FOOT> introduced by @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</g1/LL_FOOT/visuals> (recomposing stage on stage @anon:0x32e835a0:World0.usd@ <0x32e88870>)
+
+2026-10-10T14:30:28Z [6,978ms] [Warning] [omni.usd] Warning: in _ReportErrors at line 3172 of /builds/omniverse/usd-ci/USD/pxr/usd/usd/stage.cpp -- In </World/envs/env_0/Robot/LR_FOOT/visuals>: Unresolved reference prim path @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_physics.usd@</visuals/LR_FOOT> introduced by @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</g1/LR_FOOT/visuals> (recomposing stage on stage @anon:0x32e835a0:World0.usd@ <0x32e88870>)
+
+/World/envs/env_0/Robot
+├── /World/envs/env_0/Robot/pelvis
+│   ├── /World/envs/env_0/Robot/pelvis/imu_in_pelvis
+│   ├── /World/envs/env_0/Robot/pelvis/visuals
+└── /World/envs/env_0/Robot/pelvis/collisions
+├── /World/envs/env_0/Robot/left_hip_pitch_link
+│   ├── /World/envs/env_0/Robot/left_hip_pitch_link/visuals
+└── /World/envs/env_0/Robot/left_hip_pitch_link/collisions
+├── /World/envs/env_0/Robot/joints
+│   ├── /World/envs/env_0/Robot/joints/left_hip_pitch_joint
+│   ├── /World/envs/env_0/Robot/joints/left_hip_roll_joint
+│   ├── /World/envs/env_0/Robot/joints/left_hip_yaw_joint
+│   ├── /World/envs/env_0/Robot/joints/left_knee_joint
+│   ├── /World/envs/env_0/Robot/joints/left_ankle_pitch_joint
+│   ├── /World/envs/env_0/Robot/joints/left_ankle_roll_joint
+│   ├── /World/envs/env_0/Robot/joints/LL_FOOT_frame
+│   ├── /World/envs/env_0/Robot/joints/pelvis_contour_joint
+│   ├── /World/envs/env_0/Robot/joints/right_hip_pitch_joint
+│   ├── /World/envs/env_0/Robot/joints/right_hip_roll_joint
+│   ├── /World/envs/env_0/Robot/joints/right_hip_yaw_joint
+│   ├── /World/envs/env_0/Robot/joints/right_knee_joint
+│   ├── /World/envs/env_0/Robot/joints/right_ankle_pitch_joint
+│   ├── /World/envs/env_0/Robot/joints/right_ankle_roll_joint
+│   ├── /World/envs/env_0/Robot/joints/LR_FOOT_frame
+│   ├── /World/envs/env_0/Robot/joints/waist_yaw_joint
+│   ├── /World/envs/env_0/Robot/joints/waist_roll_joint
+│   ├── /World/envs/env_0/Robot/joints/waist_pitch_joint
+│   ├── /World/envs/env_0/Robot/joints/head_joint
+│   ├── /World/envs/env_0/Robot/joints/left_shoulder_pitch_joint
+│   ├── /World/envs/env_0/Robot/joints/left_shoulder_roll_joint
+│   ├── /World/envs/env_0/Robot/joints/left_shoulder_yaw_joint
+│   ├── /World/envs/env_0/Robot/joints/left_elbow_joint
+│   ├── /World/envs/env_0/Robot/joints/left_wrist_roll_joint
+│   ├── /World/envs/env_0/Robot/joints/left_wrist_pitch_joint
+│   ├── /World/envs/env_0/Robot/joints/left_wrist_yaw_joint
+│   ├── /World/envs/env_0/Robot/joints/left_hand_palm_joint
+│   ├── /World/envs/env_0/Robot/joints/logo_joint
+│   ├── /World/envs/env_0/Robot/joints/right_shoulder_pitch_joint
+│   ├── /World/envs/env_0/Robot/joints/right_shoulder_roll_joint
+│   ├── /World/envs/env_0/Robot/joints/right_shoulder_yaw_joint
+│   ├── /World/envs/env_0/Robot/joints/right_elbow_joint
+│   ├── /World/envs/env_0/Robot/joints/right_wrist_roll_joint
+│   ├── /World/envs/env_0/Robot/joints/right_wrist_pitch_joint
+│   ├── /World/envs/env_0/Robot/joints/right_wrist_yaw_joint
+└── /World/envs/env_0/Robot/joints/right_hand_palm_joint
+├── /World/envs/env_0/Robot/left_hip_roll_link
+│   ├── /World/envs/env_0/Robot/left_hip_roll_link/visuals
+└── /World/envs/env_0/Robot/left_hip_roll_link/collisions
+├── /World/envs/env_0/Robot/left_hip_yaw_link
+│   ├── /World/envs/env_0/Robot/left_hip_yaw_link/visuals
+└── /World/envs/env_0/Robot/left_hip_yaw_link/collisions
+├── /World/envs/env_0/Robot/left_knee_link
+│   ├── /World/envs/env_0/Robot/left_knee_link/visuals
+└── /World/envs/env_0/Robot/left_knee_link/collisions
+├── /World/envs/env_0/Robot/left_ankle_pitch_link
+│   ├── /World/envs/env_0/Robot/left_ankle_pitch_link/visuals
+└── /World/envs/env_0/Robot/left_ankle_pitch_link/collisions
+├── /World/envs/env_0/Robot/left_ankle_roll_link
+│   ├── /World/envs/env_0/Robot/left_ankle_roll_link/visuals
+└── /World/envs/env_0/Robot/left_ankle_roll_link/collisions
+├── /World/envs/env_0/Robot/LL_FOOT
+│   ├── /World/envs/env_0/Robot/LL_FOOT/visuals
+└── /World/envs/env_0/Robot/LL_FOOT/collisions
+├── /World/envs/env_0/Robot/pelvis_contour_link
+│   ├── /World/envs/env_0/Robot/pelvis_contour_link/visuals
+└── /World/envs/env_0/Robot/pelvis_contour_link/collisions
+├── /World/envs/env_0/Robot/right_hip_pitch_link
+│   ├── /World/envs/env_0/Robot/right_hip_pitch_link/visuals
+└── /World/envs/env_0/Robot/right_hip_pitch_link/collisions
+├── /World/envs/env_0/Robot/right_hip_roll_link
+│   ├── /World/envs/env_0/Robot/right_hip_roll_link/visuals
+└── /World/envs/env_0/Robot/right_hip_roll_link/collisions
+├── /World/envs/env_0/Robot/right_hip_yaw_link
+│   ├── /World/envs/env_0/Robot/right_hip_yaw_link/visuals
+└── /World/envs/env_0/Robot/right_hip_yaw_link/collisions
+├── /World/envs/env_0/Robot/right_knee_link
+│   ├── /World/envs/env_0/Robot/right_knee_link/visuals
+└── /World/envs/env_0/Robot/right_knee_link/collisions
+├── /World/envs/env_0/Robot/right_ankle_pitch_link
+│   ├── /World/envs/env_0/Robot/right_ankle_pitch_link/visuals
+└── /World/envs/env_0/Robot/right_ankle_pitch_link/collisions
+├── /World/envs/env_0/Robot/right_ankle_roll_link
+│   ├── /World/envs/env_0/Robot/right_ankle_roll_link/visuals
+└── /World/envs/env_0/Robot/right_ankle_roll_link/collisions
+├── /World/envs/env_0/Robot/LR_FOOT
+│   ├── /World/envs/env_0/Robot/LR_FOOT/visuals
+└── /World/envs/env_0/Robot/LR_FOOT/collisions
+├── /World/envs/env_0/Robot/waist_yaw_link
+│   ├── /World/envs/env_0/Robot/waist_yaw_link/visuals
+└── /World/envs/env_0/Robot/waist_yaw_link/collisions
+├── /World/envs/env_0/Robot/waist_roll_link
+│   ├── /World/envs/env_0/Robot/waist_roll_link/visuals
+└── /World/envs/env_0/Robot/waist_roll_link/collisions
+├── /World/envs/env_0/Robot/torso_link
+│   ├── /World/envs/env_0/Robot/torso_link/imu_in_torso
+│   ├── /World/envs/env_0/Robot/torso_link/mid360_link
+│   ├── /World/envs/env_0/Robot/torso_link/visuals
+└── /World/envs/env_0/Robot/torso_link/collisions
+├── /World/envs/env_0/Robot/head_link
+│   ├── /World/envs/env_0/Robot/head_link/visuals
+└── /World/envs/env_0/Robot/head_link/collisions
+├── /World/envs/env_0/Robot/left_shoulder_pitch_link
+│   ├── /World/envs/env_0/Robot/left_shoulder_pitch_link/visuals
+└── /World/envs/env_0/Robot/left_shoulder_pitch_link/collisions
+├── /World/envs/env_0/Robot/left_shoulder_roll_link
+│   ├── /World/envs/env_0/Robot/left_shoulder_roll_link/visuals
+└── /World/envs/env_0/Robot/left_shoulder_roll_link/collisions
+├── /World/envs/env_0/Robot/left_shoulder_yaw_link
+│   ├── /World/envs/env_0/Robot/left_shoulder_yaw_link/visuals
+└── /World/envs/env_0/Robot/left_shoulder_yaw_link/collisions
+├── /World/envs/env_0/Robot/left_elbow_link
+│   ├── /World/envs/env_0/Robot/left_elbow_link/visuals
+└── /World/envs/env_0/Robot/left_elbow_link/collisions
+├── /World/envs/env_0/Robot/left_wrist_roll_link
+│   ├── /World/envs/env_0/Robot/left_wrist_roll_link/visuals
+└── /World/envs/env_0/Robot/left_wrist_roll_link/collisions
+├── /World/envs/env_0/Robot/left_wrist_pitch_link
+│   ├── /World/envs/env_0/Robot/left_wrist_pitch_link/visuals
+└── /World/envs/env_0/Robot/left_wrist_pitch_link/collisions
+├── /World/envs/env_0/Robot/left_wrist_yaw_link
+│   ├── /World/envs/env_0/Robot/left_wrist_yaw_link/visuals
+└── /World/envs/env_0/Robot/left_wrist_yaw_link/collisions
+├── /World/envs/env_0/Robot/left_sphere_hand_link
+│   ├── /World/envs/env_0/Robot/left_sphere_hand_link/visuals
+└── /World/envs/env_0/Robot/left_sphere_hand_link/collisions
+├── /World/envs/env_0/Robot/logo_link
+│   ├── /World/envs/env_0/Robot/logo_link/visuals
+└── /World/envs/env_0/Robot/logo_link/collisions
+├── /World/envs/env_0/Robot/right_shoulder_pitch_link
+│   ├── /World/envs/env_0/Robot/right_shoulder_pitch_link/visuals
+└── /World/envs/env_0/Robot/right_shoulder_pitch_link/collisions
+├── /World/envs/env_0/Robot/right_shoulder_roll_link
+│   ├── /World/envs/env_0/Robot/right_shoulder_roll_link/visuals
+└── /World/envs/env_0/Robot/right_shoulder_roll_link/collisions
+├── /World/envs/env_0/Robot/right_shoulder_yaw_link
+│   ├── /World/envs/env_0/Robot/right_shoulder_yaw_link/visuals
+└── /World/envs/env_0/Robot/right_shoulder_yaw_link/collisions
+├── /World/envs/env_0/Robot/right_elbow_link
+│   ├── /World/envs/env_0/Robot/right_elbow_link/visuals
+└── /World/envs/env_0/Robot/right_elbow_link/collisions
+├── /World/envs/env_0/Robot/right_wrist_roll_link
+│   ├── /World/envs/env_0/Robot/right_wrist_roll_link/visuals
+└── /World/envs/env_0/Robot/right_wrist_roll_link/collisions
+├── /World/envs/env_0/Robot/right_wrist_pitch_link
+│   ├── /World/envs/env_0/Robot/right_wrist_pitch_link/visuals
+└── /World/envs/env_0/Robot/right_wrist_pitch_link/collisions
+├── /World/envs/env_0/Robot/right_wrist_yaw_link
+│   ├── /World/envs/env_0/Robot/right_wrist_yaw_link/visuals
+└── /World/envs/env_0/Robot/right_wrist_yaw_link/collisions
+├── /World/envs/env_0/Robot/right_sphere_hand_link
+│   ├── /World/envs/env_0/Robot/right_sphere_hand_link/visuals
+└── /World/envs/env_0/Robot/right_sphere_hand_link/collisions
+├── /World/envs/env_0/Robot/Looks
+2026-10-10T14:30:28Z [7,024ms] [Warning] [omni.usd] Warning: in _ReportErrors at line 3172 of /builds/omniverse/usd-ci/USD/pxr/usd/usd/stage.cpp -- In </World/envs/env_4/Robot/LR_FOOT/visuals>: Unresolved reference prim path @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_physics.usd@</visuals/LR_FOOT> introduced by @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</g1/LR_FOOT/visuals> (recomposing stage on stage @anon:0x32e835a0:World0.usd@ <0x32e88870>)
+
+2026-10-10T14:30:28Z [7,024ms] [Warning] [omni.usd] Warning: in _ReportErrors at line 3172 of /builds/omniverse/usd-ci/USD/pxr/usd/usd/stage.cpp -- In </World/envs/env_8/Robot/LR_FOOT/visuals>: Unresolved reference prim path @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_physics.usd@</visuals/LR_FOOT> introduced by @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</g1/LR_FOOT/visuals> (recomposing stage on stage @anon:0x32e835a0:World0.usd@ <0x32e88870>)
+
+2026-10-10T14:30:28Z [7,024ms] [Warning] [omni.usd] Warning: in _ReportErrors at line 3172 of /builds/omniverse/usd-ci/USD/pxr/usd/usd/stage.cpp -- In </World/envs/env_14/Robot/LR_FOOT/visuals>: Unresolved reference prim path @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_physics.usd@</visuals/LR_FOOT> introduced by @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</g1/LR_FOOT/visuals> (recomposing stage on stage @anon:0x32e835a0:World0.usd@ <0x32e88870>)
+
+2026-10-10T14:30:28Z [7,024ms] [Warning] [omni.usd] Warning: in _ReportErrors at line 3172 of /builds/omniverse/usd-ci/USD/pxr/usd/usd/stage.cpp -- In </World/envs/env_1/Robot/LR_FOOT/visuals>: Unresolved reference prim path @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_physics.usd@</visuals/LR_FOOT> introduced by @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</g1/LR_FOOT/visuals> (recomposing stage on stage @anon:0x32e835a0:World0.usd@ <0x32e88870>)
+
+2026-10-10T14:30:28Z [7,024ms] [Warning] [omni.usd] Warning: in _ReportErrors at line 3172 of /builds/omniverse/usd-ci/USD/pxr/usd/usd/stage.cpp -- In </World/envs/env_6/Robot/LR_FOOT/visuals>: Unresolved reference prim path @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_physics.usd@</visuals/LR_FOOT> introduced by @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</g1/LR_FOOT/visuals> (recomposing stage on stage @anon:0x32e835a0:World0.usd@ <0x32e88870>)
+
+2026-10-10T14:30:28Z [7,024ms] [Warning] [omni.usd] Warning: in _ReportErrors at line 3172 of /builds/omniverse/usd-ci/USD/pxr/usd/usd/stage.cpp -- In </World/envs/env_14/Robot/LL_FOOT/visuals>: Unresolved reference prim path @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_physics.usd@</visuals/LL_FOOT> introduced by @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</g1/LL_FOOT/visuals> (recomposing stage on stage @anon:0x32e835a0:World0.usd@ <0x32e88870>)
+
+2026-10-10T14:30:28Z [7,024ms] [Warning] [omni.usd] Warning: in _ReportErrors at line 3172 of /builds/omniverse/usd-ci/USD/pxr/usd/usd/stage.cpp -- In </World/envs/env_1/Robot/LL_FOOT/visuals>: Unresolved reference prim path @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_physics.usd@</visuals/LL_FOOT> introduced by @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</g1/LL_FOOT/visuals> (recomposing stage on stage @anon:0x32e835a0:World0.usd@ <0x32e88870>)
+
+2026-10-10T14:30:28Z [7,024ms] [Warning] [omni.usd] Warning: in _ReportErrors at line 3172 of /builds/omniverse/usd-ci/USD/pxr/usd/usd/stage.cpp -- In </World/envs/env_8/Robot/LL_FOOT/visuals>: Unresolved reference prim path @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_physics.usd@</visuals/LL_FOOT> introduced by @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</g1/LL_FOOT/visuals> (recomposing stage on stage @anon:0x32e835a0:World0.usd@ <0x32e88870>)
+
+2026-10-10T14:30:28Z [7,024ms] [Warning] [omni.usd] Warning: in _ReportErrors at line 3172 of /builds/omniverse/usd-ci/USD/pxr/usd/usd/stage.cpp -- In </World/envs/env_4/Robot/LL_FOOT/visuals>: Unresolved reference prim path @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_physics.usd@</visuals/LL_FOOT> introduced by @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</g1/LL_FOOT/visuals> (recomposing stage on stage @anon:0x32e835a0:World0.usd@ <0x32e88870>)
+
+2026-10-10T14:30:28Z [7,024ms] [Warning] [omni.usd] Warning: in _ReportErrors at line 3172 of /builds/omniverse/usd-ci/USD/pxr/usd/usd/stage.cpp -- In </World/envs/env_6/Robot/LL_FOOT/visuals>: Unresolved reference prim path @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_physics.usd@</visuals/LL_FOOT> introduced by @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</g1/LL_FOOT/visuals> (recomposing stage on stage @anon:0x32e835a0:World0.usd@ <0x32e88870>)
+
+2026-10-10T14:30:28Z [7,024ms] [Warning] [omni.usd] Warning: in _ReportErrors at line 3172 of /builds/omniverse/usd-ci/USD/pxr/usd/usd/stage.cpp -- In </World/envs/env_9/Robot/LR_FOOT/visuals>: Unresolved reference prim path @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_physics.usd@</visuals/LR_FOOT> introduced by @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</g1/LR_FOOT/visuals> (recomposing stage on stage @anon:0x32e835a0:World0.usd@ <0x32e88870>)
+
+2026-10-10T14:30:28Z [7,024ms] [Warning] [omni.usd] Warning: in _ReportErrors at line 3172 of /builds/omniverse/usd-ci/USD/pxr/usd/usd/stage.cpp -- In </World/envs/env_11/Robot/LR_FOOT/visuals>: Unresolved reference prim path @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_physics.usd@</visuals/LR_FOOT> introduced by @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</g1/LR_FOOT/visuals> (recomposing stage on stage @anon:0x32e835a0:World0.usd@ <0x32e88870>)
+
+2026-10-10T14:30:28Z [7,024ms] [Warning] [omni.usd] Warning: in _ReportErrors at line 3172 of /builds/omniverse/usd-ci/USD/pxr/usd/usd/stage.cpp -- In </World/envs/env_3/Robot/LR_FOOT/visuals>: Unresolved reference prim path @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_physics.usd@</visuals/LR_FOOT> introduced by @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</g1/LR_FOOT/visuals> (recomposing stage on stage @anon:0x32e835a0:World0.usd@ <0x32e88870>)
+
+2026-10-10T14:30:28Z [7,024ms] [Warning] [omni.usd] Warning: in _ReportErrors at line 3172 of /builds/omniverse/usd-ci/USD/pxr/usd/usd/stage.cpp -- In </World/envs/env_2/Robot/LR_FOOT/visuals>: Unresolved reference prim path @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_physics.usd@</visuals/LR_FOOT> introduced by @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</g1/LR_FOOT/visuals> (recomposing stage on stage @anon:0x32e835a0:World0.usd@ <0x32e88870>)
+
+2026-10-10T14:30:28Z [7,024ms] [Warning] [omni.usd] Warning: in _ReportErrors at line 3172 of /builds/omniverse/usd-ci/USD/pxr/usd/usd/stage.cpp -- In </World/envs/env_15/Robot/LR_FOOT/visuals>: Unresolved reference prim path @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_physics.usd@</visuals/LR_FOOT> introduced by @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</g1/LR_FOOT/visuals> (recomposing stage on stage @anon:0x32e835a0:World0.usd@ <0x32e88870>)
+
+2026-10-10T14:30:28Z [7,024ms] [Warning] [omni.usd] Warning: in _ReportErrors at line 3172 of /builds/omniverse/usd-ci/USD/pxr/usd/usd/stage.cpp -- In </World/envs/env_9/Robot/LL_FOOT/visuals>: Unresolved reference prim path @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_physics.usd@</visuals/LL_FOOT> introduced by @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</g1/LL_FOOT/visuals> (recomposing stage on stage @anon:0x32e835a0:World0.usd@ <0x32e88870>)
+
+2026-10-10T14:30:28Z [7,024ms] [Warning] [omni.usd] Warning: in _ReportErrors at line 3172 of /builds/omniverse/usd-ci/USD/pxr/usd/usd/stage.cpp -- In </World/envs/env_11/Robot/LL_FOOT/visuals>: Unresolved reference prim path @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_physics.usd@</visuals/LL_FOOT> introduced by @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</g1/LL_FOOT/visuals> (recomposing stage on stage @anon:0x32e835a0:World0.usd@ <0x32e88870>)
+
+2026-10-10T14:30:28Z [7,024ms] [Warning] [omni.usd] Warning: in _ReportErrors at line 3172 of /builds/omniverse/usd-ci/USD/pxr/usd/usd/stage.cpp -- In </World/envs/env_7/Robot/LR_FOOT/visuals>: Unresolved reference prim path @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_physics.usd@</visuals/LR_FOOT> introduced by @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</g1/LR_FOOT/visuals> (recomposing stage on stage @anon:0x32e835a0:World0.usd@ <0x32e88870>)
+
+2026-10-10T14:30:28Z [7,024ms] [Warning] [omni.usd] Warning: in _ReportErrors at line 3172 of /builds/omniverse/usd-ci/USD/pxr/usd/usd/stage.cpp -- In </World/envs/env_2/Robot/LL_FOOT/visuals>: Unresolved reference prim path @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_physics.usd@</visuals/LL_FOOT> introduced by @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</g1/LL_FOOT/visuals> (recomposing stage on stage @anon:0x32e835a0:World0.usd@ <0x32e88870>)
+
+2026-10-10T14:30:28Z [7,024ms] [Warning] [omni.usd] Warning: in _ReportErrors at line 3172 of /builds/omniverse/usd-ci/USD/pxr/usd/usd/stage.cpp -- In </World/envs/env_5/Robot/LL_FOOT/visuals>: Unresolved reference prim path @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_physics.usd@</visuals/LL_FOOT> introduced by @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</g1/LL_FOOT/visuals> (recomposing stage on stage @anon:0x32e835a0:World0.usd@ <0x32e88870>)
+
+2026-10-10T14:30:28Z [7,024ms] [Warning] [omni.usd] Warning: in _ReportErrors at line 3172 of /builds/omniverse/usd-ci/USD/pxr/usd/usd/stage.cpp -- In </World/envs/env_12/Robot/LR_FOOT/visuals>: Unresolved reference prim path @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_physics.usd@</visuals/LR_FOOT> introduced by @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</g1/LR_FOOT/visuals> (recomposing stage on stage @anon:0x32e835a0:World0.usd@ <0x32e88870>)
+
+2026-10-10T14:30:28Z [7,024ms] [Warning] [omni.usd] Warning: in _ReportErrors at line 3172 of /builds/omniverse/usd-ci/USD/pxr/usd/usd/stage.cpp -- In </World/envs/env_3/Robot/LL_FOOT/visuals>: Unresolved reference prim path @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_physics.usd@</visuals/LL_FOOT> introduced by @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</g1/LL_FOOT/visuals> (recomposing stage on stage @anon:0x32e835a0:World0.usd@ <0x32e88870>)
+
+2026-10-10T14:30:28Z [7,024ms] [Warning] [omni.usd] Warning: in _ReportErrors at line 3172 of /builds/omniverse/usd-ci/USD/pxr/usd/usd/stage.cpp -- In </World/envs/env_12/Robot/LL_FOOT/visuals>: Unresolved reference prim path @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_physics.usd@</visuals/LL_FOOT> introduced by @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</g1/LL_FOOT/visuals> (recomposing stage on stage @anon:0x32e835a0:World0.usd@ <0x32e88870>)
+
+2026-10-10T14:30:28Z [7,024ms] [Warning] [omni.usd] Warning: in _ReportErrors at line 3172 of /builds/omniverse/usd-ci/USD/pxr/usd/usd/stage.cpp -- In </World/envs/env_15/Robot/LL_FOOT/visuals>: Unresolved reference prim path @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_physics.usd@</visuals/LL_FOOT> introduced by @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</g1/LL_FOOT/visuals> (recomposing stage on stage @anon:0x32e835a0:World0.usd@ <0x32e88870>)
+
+2026-10-10T14:30:28Z [7,024ms] [Warning] [omni.usd] Warning: in _ReportErrors at line 3172 of /builds/omniverse/usd-ci/USD/pxr/usd/usd/stage.cpp -- In </World/envs/env_13/Robot/LL_FOOT/visuals>: Unresolved reference prim path @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_physics.usd@</visuals/LL_FOOT> introduced by @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</g1/LL_FOOT/visuals> (recomposing stage on stage @anon:0x32e835a0:World0.usd@ <0x32e88870>)
+
+2026-10-10T14:30:28Z [7,024ms] [Warning] [omni.usd] Warning: in _ReportErrors at line 3172 of /builds/omniverse/usd-ci/USD/pxr/usd/usd/stage.cpp -- In </World/envs/env_5/Robot/LR_FOOT/visuals>: Unresolved reference prim path @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_physics.usd@</visuals/LR_FOOT> introduced by @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</g1/LR_FOOT/visuals> (recomposing stage on stage @anon:0x32e835a0:World0.usd@ <0x32e88870>)
+
+2026-10-10T14:30:28Z [7,024ms] [Warning] [omni.usd] Warning: in _ReportErrors at line 3172 of /builds/omniverse/usd-ci/USD/pxr/usd/usd/stage.cpp -- In </World/envs/env_10/Robot/LL_FOOT/visuals>: Unresolved reference prim path @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_physics.usd@</visuals/LL_FOOT> introduced by @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</g1/LL_FOOT/visuals> (recomposing stage on stage @anon:0x32e835a0:World0.usd@ <0x32e88870>)
+
+2026-10-10T14:30:28Z [7,024ms] [Warning] [omni.usd] Warning: in _ReportErrors at line 3172 of /builds/omniverse/usd-ci/USD/pxr/usd/usd/stage.cpp -- In </World/envs/env_13/Robot/LR_FOOT/visuals>: Unresolved reference prim path @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_physics.usd@</visuals/LR_FOOT> introduced by @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</g1/LR_FOOT/visuals> (recomposing stage on stage @anon:0x32e835a0:World0.usd@ <0x32e88870>)
+
+2026-10-10T14:30:28Z [7,024ms] [Warning] [omni.usd] Warning: in _ReportErrors at line 3172 of /builds/omniverse/usd-ci/USD/pxr/usd/usd/stage.cpp -- In </World/envs/env_10/Robot/LR_FOOT/visuals>: Unresolved reference prim path @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_physics.usd@</visuals/LR_FOOT> introduced by @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</g1/LR_FOOT/visuals> (recomposing stage on stage @anon:0x32e835a0:World0.usd@ <0x32e88870>)
+
+2026-10-10T14:30:28Z [7,024ms] [Warning] [omni.usd] Warning: in _ReportErrors at line 3172 of /builds/omniverse/usd-ci/USD/pxr/usd/usd/stage.cpp -- In </World/envs/env_7/Robot/LL_FOOT/visuals>: Unresolved reference prim path @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_physics.usd@</visuals/LL_FOOT> introduced by @/outputs/runtime-robot-assets/robots/converted_rank0_pid788/configuration/main_mesh_arm_collision_halfspherehand_base.usd@</g1/LL_FOOT/visuals> (recomposing stage on stage @anon:0x32e835a0:World0.usd@ <0x32e88870>)
+
+[INFO]: Time taken for scene creation : 1.746959 seconds
+[INFO]: Scene manager:  <class InteractiveScene>
+	Number of environments: 16
+	Environment spacing   : 0.0
+	Source prim name      : /World/envs/env_0
+	Global prim paths     : ['/World/ground']
+	Replicate physics     : True
+2026-10-10T14:30:29Z [7,364ms] [Warning] [omni.physx.fabric.plugin] FabricManager::initializePointInstancer mismatched prototypes on point instancer: /Visuals/ContactSensor.
+[INFO]: Time taken for simulation start : 0.335749 seconds
+[INFO] Event Manager:  <EventManager> contains 0 active terms.
+
+[32m2026-10-10 14:30:29.162[0m | [33m[1mWARNING [0m | [36mholosoma.simulator.isaacsim.isaacsim[0m:[36mload_assets[0m:[36m850[0m - [33m[1mThe order of the joint_names in the robot_config does not match the order of the joint_ids in IsaacSim.[0m
+[32m2026-10-10 14:30:29.168[0m | [33m[1mWARNING [0m | [36mholosoma.simulator.shared.virtual_gantry[0m:[36m_setup_force_application[0m:[36m144[0m - [33m[1mVirtual Gantry untested in IsaacSim[0m
+/workspace/php_parkour/wbt_training/config_values/motion_command.py:67: RuntimeWarning: MotionCommand.reset is 225 lines; PhpMotionCommand.reset was written against 189. Upstream likely changed — re-diff PhpMotionCommand.reset against it, then update _UPSTREAM_RESET_LINES.
+  self._assert_upstream_reset_unchanged()
+Student MLP: Sequential(
+  (0): Linear(in_features=140, out_features=2048, bias=True)
+  (1): ELU(alpha=1.0)
+  (2): Linear(in_features=2048, out_features=1024, bias=True)
+  (3): ELU(alpha=1.0)
+  (4): Linear(in_features=1024, out_features=512, bias=True)
+  (5): ELU(alpha=1.0)
+  (6): Linear(in_features=512, out_features=256, bias=True)
+  (7): ELU(alpha=1.0)
+  (8): Linear(in_features=256, out_features=128, bias=True)
+  (9): ELU(alpha=1.0)
+  (10): Linear(in_features=128, out_features=29, bias=True)
+)
+Teachers (1x): Sequential(
+  (0): Linear(in_features=449, out_features=512, bias=True)
+  (1): ELU(alpha=1.0)
+  (2): Linear(in_features=512, out_features=256, bias=True)
+  (3): ELU(alpha=1.0)
+  (4): Linear(in_features=256, out_features=128, bias=True)
+  (5): ELU(alpha=1.0)
+  (6): Linear(in_features=128, out_features=29, bias=True)
+)
+Critic MLP: Sequential(
+  (0): Linear(in_features=575, out_features=512, bias=True)
+  (1): ELU(alpha=1.0)
+  (2): Linear(in_features=512, out_features=256, bias=True)
+  (3): ELU(alpha=1.0)
+  (4): Linear(in_features=256, out_features=128, bias=True)
+  (5): ELU(alpha=1.0)
+  (6): Linear(in_features=128, out_features=1, bias=True)
+)
+╭──────────────────────────────── Training Log ────────────────────────────────╮
+│                         [1m Learning iteration 0/2 [0m                       │
+│                                                                              │
+│                        Computation: 498 steps/s (Collection: 0.639s,         │
+│ Learning 0.131s)                                                             │
+│                        Mean reward: 0.86                                     │
+│                Mean episode length: 14.46                                    │
+│                           ppo_coef: 0.0000                                   │
+│                      warmup_active: 0.0000                                   │
+│                      learning_rate: 0.0003                                   │
+│                         total_loss: 0.2179                                   │
+│                     surrogate_loss: 0.2894                                   │
+│                         value_loss: 0.1481                                   │
+│                           behavior: 0.0070                                   │
+│                       entropy_mean: -92.4007                                 │
+│                            mean_kl: 0.0000                                   │
+│                      ppo_gate_mean: 1.0000                                   │
+│               Env/action_clip_frac: 0.0000                                   │
+│         Env/average_episode_length: 0.0883                                   │
+│           Env/motion/error_ref_pos: 0.0884                                   │
+│           Env/motion/error_ref_rot: 0.2778                                   │
+│       Env/motion/error_ref_lin_vel: 0.6638                                   │
+│       Env/motion/error_ref_ang_vel: 1.8820                                   │
+│          Env/motion/error_body_pos: 0.0978                                   │
+│          Env/motion/error_body_rot: 0.4053                                   │
+│      Env/motion/error_body_lin_vel: 0.7575                                   │
+│      Env/motion/error_body_ang_vel: 3.2013                                   │
+│         Env/motion/error_joint_pos: 1.5800                                   │
+│         Env/motion/error_joint_vel: 10.9791                                  │
+│ Env/termination_curriculum_progress: 0.0000                                  │
+│               Env/ppo_gate_engaged: 0.0000                                   │
+│           Env/ppo_gate_warmup_frac: 0.0004                                   │
+│             Env/ppo_gate_bins_seen: 0.0154                                   │
+│                Env/ppo_gate_spread: 0.0000                                   │
+│            Env/ppo_gate_table_mean: 0.0000                                   │
+│              Policy/mean_noise_std: 0.0100                                   │
+│                    Policy/ppo_coef: 0.0000                                   │
+│               LR/student_critic_lr: 0.0003                                   │
+│                          LR/std_lr: 0.0000                                   │
+│ Mean episode rew_motion_global_ref_position_error_exp: 0.0262                │
+│ Mean episode rew_motion_global_ref_orientation_error_exp: 0.0189             │
+│ Mean episode rew_motion_relative_body_position_error_exp: 0.0238             │
+│ Mean episode rew_motion_relative_body_orientation_error_exp: 0.0070          │
+│ Mean episode rew_motion_global_body_lin_vel: 0.0106                          │
+│ Mean episode rew_motion_global_body_ang_vel: 0.0061                          │
+│    Mean episode rew_action_rate_l2: -0.0001                                  │
+│    Mean episode rew_limits_dof_pos: -0.0048                                  │
+│ Mean episode rew_undesired_contacts: -0.0017                                 │
+│ Mean raw episode raw_rew_motion_global_ref_position_error_exp: 1.3105        │
+│ Mean raw episode raw_rew_motion_global_ref_orientation_error_exp: 0.9451     │
+│ Mean raw episode raw_rew_motion_relative_body_position_error_exp: 1.1888     │
+│ Mean raw episode raw_rew_motion_relative_body_orientation_error_exp: 0.3509  │
+│ Mean raw episode raw_rew_motion_global_body_lin_vel: 0.5276                  │
+│ Mean raw episode raw_rew_motion_global_body_ang_vel: 0.3036                  │
+│ Mean raw episode raw_rew_action_rate_l2: 0.0264                              │
+│ Mean raw episode raw_rew_limits_dof_pos: 0.0242                              │
+│ Mean raw episode raw_rew_undesired_contacts: 0.1692                          │
+│ ---------------------------------------------------------------------------- │
+│ ----                                                                         │
+│                    Total timesteps: 384                                      │
+│                     Iteration time: 0.77s                                    │
+│                         Total time: 0.77s                                    │
+│                                ETA: 1.5s                                     │
+│ Logging Directory:                                                           │
+│ /outputs/resume-smoke/smoke/student-finetune/PHP-research/20261010_143025-st │
+│ udent-finetune-locomotion                                                    │
+╰──────────────────────────────────────────────────────────────────────────────╯/workspace/php_parkour/thirdparty/holosoma/src/holosoma/holosoma/agents/modules/depth_backbone.py:14: TracerWarning: Converting a tensor to a Python boolean might cause the trace to be incorrect. We can't record the data flow of Python values, so this value will be treated as a constant in the future. This means that the trace might not generalize to other inputs!
+  if images.ndim != 4 or images.shape[1] != num_frames:
+╭──────────────────────────────── Training Log ────────────────────────────────╮
+│                         [1m Learning iteration 1/2 [0m                       │
+│                                                                              │
+│                        Computation: 551 steps/s (Collection: 0.664s,         │
+│ Learning 0.032s)                                                             │
+│                        Mean reward: 1.07                                     │
+│                Mean episode length: 18.77                                    │
+│                           ppo_coef: 0.0001                                   │
+│                      warmup_active: 0.0000                                   │
+│                      learning_rate: 0.0003                                   │
+│                         total_loss: 0.1478                                   │
+│                     surrogate_loss: 0.2802                                   │
+│                         value_loss: 0.1164                                   │
+│                           behavior: 0.0031                                   │
+│                       entropy_mean: -92.4007                                 │
+│                            mean_kl: 0.0000                                   │
+│                      ppo_gate_mean: 1.0000                                   │
+│               Env/action_clip_frac: 0.0000                                   │
+│         Env/average_episode_length: 0.3675                                   │
+│           Env/motion/error_ref_pos: 0.1358                                   │
+│           Env/motion/error_ref_rot: 0.4126                                   │
+│       Env/motion/error_ref_lin_vel: 0.6898                                   │
+│       Env/motion/error_ref_ang_vel: 2.2602                                   │
+│          Env/motion/error_body_pos: 0.1177                                   │
+│          Env/motion/error_body_rot: 0.4749                                   │
+│      Env/motion/error_body_lin_vel: 0.7500                                   │
+│      Env/motion/error_body_ang_vel: 3.3572                                   │
+│         Env/motion/error_joint_pos: 1.6076                                   │
+│         Env/motion/error_joint_vel: 10.2722                                  │
+│ Env/termination_curriculum_progress: 0.0000                                  │
+│               Env/ppo_gate_engaged: 0.0000                                   │
+│           Env/ppo_gate_warmup_frac: 0.0011                                   │
+│             Env/ppo_gate_bins_seen: 0.0329                                   │
+│                Env/ppo_gate_spread: 0.0000                                   │
+│            Env/ppo_gate_table_mean: 0.0000                                   │
+│              Policy/mean_noise_std: 0.0100                                   │
+│                    Policy/ppo_coef: 0.0001                                   │
+│               LR/student_critic_lr: 0.0003                                   │
+│                          LR/std_lr: 0.0000                                   │
+│ Mean episode rew_motion_global_ref_position_error_exp: 0.0354                │
+│ Mean episode rew_motion_global_ref_orientation_error_exp: 0.0197             │
+│ Mean episode rew_motion_relative_body_position_error_exp: 0.0346             │
+│ Mean episode rew_motion_relative_body_orientation_error_exp: 0.0097          │
+│ Mean episode rew_motion_global_body_lin_vel: 0.0192                          │
+│ Mean episode rew_motion_global_body_ang_vel: 0.0129                          │
+│    Mean episode rew_action_rate_l2: -0.0003                                  │
+│    Mean episode rew_limits_dof_pos: -0.0060                                  │
+│ Mean episode rew_undesired_contacts: -0.0027                                 │
+│ Mean raw episode raw_rew_motion_global_ref_position_error_exp: 1.7687        │
+│ Mean raw episode raw_rew_motion_global_ref_orientation_error_exp: 0.9863     │
+│ Mean raw episode raw_rew_motion_relative_body_position_error_exp: 1.7318     │
+│ Mean raw episode raw_rew_motion_relative_body_orientation_error_exp: 0.4873  │
+│ Mean raw episode raw_rew_motion_global_body_lin_vel: 0.9585                  │
+│ Mean raw episode raw_rew_motion_global_body_ang_vel: 0.6446                  │
+│ Mean raw episode raw_rew_action_rate_l2: 0.1420                              │
+│ Mean raw episode raw_rew_limits_dof_pos: 0.0300                              │
+│ Mean raw episode raw_rew_undesired_contacts: 0.2706                          │
+│ ---------------------------------------------------------------------------- │
+│ ----                                                                         │
+│                    Total timesteps: 768                                      │
+│                     Iteration time: 0.70s                                    │
+│                         Total time: 1.47s                                    │
+│                                ETA: 0.7s                                     │
+│ Logging Directory:                                                           │
+│ /outputs/resume-smoke/smoke/student-finetune/PHP-research/20261010_143025-st │
+│ udent-finetune-locomotion                                                    │
+╰──────────────────────────────────────────────────────────────────────────────╯

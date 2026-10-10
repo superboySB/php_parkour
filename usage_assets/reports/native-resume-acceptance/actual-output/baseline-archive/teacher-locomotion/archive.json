@@ -1,0 +1,174 @@
+{
+  "schema_version": 1,
+  "status": "archived",
+  "label": "teacher-locomotion",
+  "baseline_manifest": {
+    "label": "teacher-locomotion",
+    "profile": "smoke",
+    "started_utc": "2026-10-10T14:16:20.968430+00:00",
+    "command": [
+      "bash",
+      "/workspace/php_parkour/wbt_training/training_runs/run_terrain_teacher.sh",
+      "--training.headless",
+      "True",
+      "--training.num-envs",
+      "16",
+      "--training.name",
+      "teacher-locomotion",
+      "--training.project",
+      "PHP-research",
+      "--logger.base-dir",
+      "/outputs/resume-smoke/smoke/teacher-locomotion",
+      "--training.seed",
+      "42",
+      "--algo.config.num-learning-iterations",
+      "2",
+      "--algo.config.save-interval",
+      "1",
+      "--algo.config.num-mini-batches",
+      "4",
+      "--training.preprocess-hook-kwargs",
+      "{\"add_onpath_obstacle\": true, \"num_variants\": 1, \"obstacle_seed\": 42}"
+    ],
+    "environment": {
+      "LOGGER": "tensorboard",
+      "NGPUS": "1",
+      "CUDA_VISIBLE_DEVICES": "0",
+      "HSSIM_PYTHON": "/control/train-python-with-robot-assets",
+      "REGISTRY": "file:///data/assets/motions-locomotion"
+    },
+    "settings": {
+      "profile": "smoke",
+      "skills": [
+        "locomotion"
+      ],
+      "assets": "/data/assets",
+      "num_envs": 16,
+      "iterations_target": 2,
+      "registries": "file:///data/assets/motions-locomotion",
+      "finetune": null,
+      "source_checkpoints": [],
+      "eval_steps": null,
+      "eval_quality_schema": null
+    },
+    "overrides": {
+      "num_envs": 16,
+      "iterations_target": 2
+    },
+    "quality_verified": false,
+    "scope": "execution smoke only",
+    "status": "passed",
+    "returncode": 0,
+    "finished_utc": "2026-10-10T14:16:37.363161+00:00",
+    "elapsed_seconds": 16.394751875894144,
+    "log": "/outputs/resume-smoke/smoke/teacher-locomotion-1791641780968533861.log",
+    "performance": {
+      "iteration_samples": 2,
+      "median_collection_plus_learning_seconds": 0.6699999999999999,
+      "measured_num_envs": 16,
+      "estimate_scope": "Measured collection+learning only; excludes simulator initialization, exports/checkpoint writes and evaluation. No scaling to another environment count."
+    },
+    "checkpoint": "/outputs/resume-smoke/smoke/teacher-locomotion/PHP-research/20261010_141630-teacher-locomotion-locomotion/model_00001.pt",
+    "checkpoint_iteration": 1,
+    "checkpoint_sha256": "a46c9c48b97a50e4319187559c8ef5351844db5c15f9efd9f4874807c90f1b94"
+  },
+  "checkpoint_copy": {
+    "path": "/outputs/baseline-archive/teacher-locomotion/files/001-model_00001.pt",
+    "bytes": 10345023,
+    "sha256": "a46c9c48b97a50e4319187559c8ef5351844db5c15f9efd9f4874807c90f1b94"
+  },
+  "files": [
+    {
+      "original": {
+        "path": "/outputs/resume-smoke/smoke/manifests/teacher-locomotion.json",
+        "bytes": 2268,
+        "sha256": "1b3887dfb224710d8b53f1ea7c94d950ba743d32eb5313ade0445919b4111de0"
+      },
+      "retained": {
+        "path": "/outputs/baseline-archive/teacher-locomotion/files/000-teacher-locomotion.json",
+        "bytes": 2268,
+        "sha256": "1b3887dfb224710d8b53f1ea7c94d950ba743d32eb5313ade0445919b4111de0"
+      },
+      "fixed_manifest_may_change": true
+    },
+    {
+      "original": {
+        "path": "/outputs/resume-smoke/smoke/teacher-locomotion/PHP-research/20261010_141630-teacher-locomotion-locomotion/model_00001.pt",
+        "bytes": 10345023,
+        "sha256": "a46c9c48b97a50e4319187559c8ef5351844db5c15f9efd9f4874807c90f1b94"
+      },
+      "retained": {
+        "path": "/outputs/baseline-archive/teacher-locomotion/files/001-model_00001.pt",
+        "bytes": 10345023,
+        "sha256": "a46c9c48b97a50e4319187559c8ef5351844db5c15f9efd9f4874807c90f1b94"
+      },
+      "fixed_manifest_may_change": false
+    },
+    {
+      "original": {
+        "path": "/outputs/resume-smoke/smoke/teacher-locomotion/PHP-research/20261010_141630-teacher-locomotion-locomotion/holosoma_config.yaml",
+        "bytes": 30950,
+        "sha256": "2bf7b7808136b92a7add5969d8270b0d3784af1ef47514eb3e50824ecd829bf6"
+      },
+      "retained": {
+        "path": "/outputs/baseline-archive/teacher-locomotion/files/002-holosoma_config.yaml",
+        "bytes": 30950,
+        "sha256": "2bf7b7808136b92a7add5969d8270b0d3784af1ef47514eb3e50824ecd829bf6"
+      },
+      "fixed_manifest_may_change": false
+    },
+    {
+      "original": {
+        "path": "/outputs/resume-smoke/smoke/teacher-locomotion-1791641780968533861.log",
+        "bytes": 84072,
+        "sha256": "8cfa935e0ab716ab20648e66987745813f2e2f100070963b63642e19953283f2"
+      },
+      "retained": {
+        "path": "/outputs/baseline-archive/teacher-locomotion/files/003-teacher-locomotion-1791641780968533861.log",
+        "bytes": 84072,
+        "sha256": "8cfa935e0ab716ab20648e66987745813f2e2f100070963b63642e19953283f2"
+      },
+      "fixed_manifest_may_change": false
+    },
+    {
+      "original": {
+        "path": "/outputs/resume-smoke/smoke/teacher-locomotion/PHP-research/20261010_141630-teacher-locomotion-locomotion/train.log",
+        "bytes": 13576,
+        "sha256": "40c1c5209af0d67c6ae95f092f6b8032a27ea602e5b2efaa43d618a08a59562d"
+      },
+      "retained": {
+        "path": "/outputs/baseline-archive/teacher-locomotion/files/004-train.log",
+        "bytes": 13576,
+        "sha256": "40c1c5209af0d67c6ae95f092f6b8032a27ea602e5b2efaa43d618a08a59562d"
+      },
+      "fixed_manifest_may_change": false
+    },
+    {
+      "original": {
+        "path": "/outputs/resume-smoke/smoke/teacher-locomotion/PHP-research/20261010_141630-teacher-locomotion-locomotion/events.out.tfevents.1791641794.08cc4ae903a0.57.0",
+        "bytes": 7118,
+        "sha256": "67204ab3071baea757b4b03d026c5e7385baabe63e494f6dcd859a46bab026b9"
+      },
+      "retained": {
+        "path": "/outputs/baseline-archive/teacher-locomotion/files/005-events.out.tfevents.1791641794.08cc4ae903a0.57.0",
+        "bytes": 7118,
+        "sha256": "67204ab3071baea757b4b03d026c5e7385baabe63e494f6dcd859a46bab026b9"
+      },
+      "fixed_manifest_may_change": false
+    },
+    {
+      "original": {
+        "path": "/outputs/resume-smoke/smoke/teacher-locomotion/PHP-research/20261010_141630-teacher-locomotion-locomotion/model_00001.onnx",
+        "bytes": 20142576,
+        "sha256": "17f6398ace547e6a66a33aed1b8d0653a5aaf4988307bff349dfb505b17c6b07"
+      },
+      "retained": {
+        "path": "/outputs/baseline-archive/teacher-locomotion/files/006-model_00001.onnx",
+        "bytes": 20142576,
+        "sha256": "17f6398ace547e6a66a33aed1b8d0653a5aaf4988307bff349dfb505b17c6b07"
+      },
+      "fixed_manifest_may_change": false
+    }
+  ],
+  "scope": "Original bytes copied without rewriting. Not a resumed training claim."
+}

@@ -1,0 +1,198 @@
+{
+  "schema_version": 1,
+  "status": "archived",
+  "label": "student-pure",
+  "baseline_manifest": {
+    "label": "student-pure",
+    "profile": "smoke",
+    "started_utc": "2026-10-10T14:29:31.594451+00:00",
+    "command": [
+      "bash",
+      "/workspace/php_parkour/wbt_training/training_runs/run_terrain_warp_distill.sh",
+      "--training.headless",
+      "True",
+      "--training.num-envs",
+      "16",
+      "--training.name",
+      "student-pure",
+      "--training.project",
+      "PHP-research",
+      "--logger.base-dir",
+      "/outputs/resume-smoke/smoke/student-pure",
+      "--training.seed",
+      "42",
+      "--algo.config.num-learning-iterations",
+      "2",
+      "--algo.config.save-interval",
+      "1",
+      "--algo.config.num-mini-batches",
+      "4",
+      "--training.preprocess-hook-kwargs",
+      "{\"add_onpath_obstacle\": true, \"num_variants\": 1, \"obstacle_seed\": 42}"
+    ],
+    "environment": {
+      "LOGGER": "tensorboard",
+      "NGPUS": "1",
+      "CUDA_VISIBLE_DEVICES": "0",
+      "HSSIM_PYTHON": "/control/train-python-with-robot-assets",
+      "REGISTRY": "file:///data/assets/motions-locomotion",
+      "TEACHER_CHECKPOINT": "/outputs/resume-smoke/smoke/teacher-locomotion/PHP-research/20261010_141647-teacher-locomotion-locomotion/model_00003.pt",
+      "FINETUNE": "0"
+    },
+    "settings": {
+      "profile": "smoke",
+      "skills": [
+        "locomotion"
+      ],
+      "assets": "/data/assets",
+      "num_envs": 16,
+      "iterations_target": 2,
+      "registries": "file:///data/assets/motions-locomotion",
+      "finetune": "0",
+      "source_checkpoints": [
+        {
+          "path": "/outputs/resume-smoke/smoke/teacher-locomotion/PHP-research/20261010_141647-teacher-locomotion-locomotion/model_00003.pt",
+          "sha256": "938dbf8a0a902bfb24330ad04b955a8473c5fe658255bff695e33532e433ef67"
+        }
+      ],
+      "eval_steps": null,
+      "eval_quality_schema": null
+    },
+    "overrides": {
+      "num_envs": 16,
+      "iterations_target": 2
+    },
+    "quality_verified": false,
+    "scope": "execution smoke only",
+    "status": "passed",
+    "returncode": 0,
+    "finished_utc": "2026-10-10T14:29:51.898240+00:00",
+    "elapsed_seconds": 20.303817784879357,
+    "log": "/outputs/resume-smoke/smoke/student-pure-1791642571594633897.log",
+    "performance": {
+      "iteration_samples": 2,
+      "median_collection_plus_learning_seconds": 0.714,
+      "measured_num_envs": 16,
+      "estimate_scope": "Measured collection+learning only; excludes simulator initialization, exports/checkpoint writes and evaluation. No scaling to another environment count."
+    },
+    "checkpoint": "/outputs/resume-smoke/smoke/student-pure/PHP-research/20261010_142941-student-pure-locomotion/model_00001.pt",
+    "checkpoint_iteration": 1,
+    "checkpoint_sha256": "13d83601fc76eb28e04ad3456ad5f0e6e27cb9a2053d3f27fe6072cd6042ff29",
+    "onnx_bundle_directories": [
+      "/outputs/resume-smoke/smoke/student-pure/PHP-research/20261010_142941-student-pure-locomotion/model_00000",
+      "/outputs/resume-smoke/smoke/student-pure/PHP-research/20261010_142941-student-pure-locomotion/model_00001"
+    ]
+  },
+  "checkpoint_copy": {
+    "path": "/outputs/baseline-archive/student-pure/files/001-model_00001.pt",
+    "bytes": 4844039,
+    "sha256": "13d83601fc76eb28e04ad3456ad5f0e6e27cb9a2053d3f27fe6072cd6042ff29"
+  },
+  "files": [
+    {
+      "original": {
+        "path": "/outputs/resume-smoke/smoke/manifests/student-pure.json",
+        "bytes": 2901,
+        "sha256": "562ef6afb11fc425e27f124e86c1f2c2090e183e10e0d4639b00bbd822593c68"
+      },
+      "retained": {
+        "path": "/outputs/baseline-archive/student-pure/files/000-student-pure.json",
+        "bytes": 2901,
+        "sha256": "562ef6afb11fc425e27f124e86c1f2c2090e183e10e0d4639b00bbd822593c68"
+      },
+      "fixed_manifest_may_change": true
+    },
+    {
+      "original": {
+        "path": "/outputs/resume-smoke/smoke/student-pure/PHP-research/20261010_142941-student-pure-locomotion/model_00001.pt",
+        "bytes": 4844039,
+        "sha256": "13d83601fc76eb28e04ad3456ad5f0e6e27cb9a2053d3f27fe6072cd6042ff29"
+      },
+      "retained": {
+        "path": "/outputs/baseline-archive/student-pure/files/001-model_00001.pt",
+        "bytes": 4844039,
+        "sha256": "13d83601fc76eb28e04ad3456ad5f0e6e27cb9a2053d3f27fe6072cd6042ff29"
+      },
+      "fixed_manifest_may_change": false
+    },
+    {
+      "original": {
+        "path": "/outputs/resume-smoke/smoke/student-pure/PHP-research/20261010_142941-student-pure-locomotion/holosoma_config.yaml",
+        "bytes": 32082,
+        "sha256": "8b0c9ef040e26a2136ee2c23611adc539553fa3d0174452eb8ee239c76ade3ef"
+      },
+      "retained": {
+        "path": "/outputs/baseline-archive/student-pure/files/002-holosoma_config.yaml",
+        "bytes": 32082,
+        "sha256": "8b0c9ef040e26a2136ee2c23611adc539553fa3d0174452eb8ee239c76ade3ef"
+      },
+      "fixed_manifest_may_change": false
+    },
+    {
+      "original": {
+        "path": "/outputs/resume-smoke/smoke/student-pure-1791642571594633897.log",
+        "bytes": 83965,
+        "sha256": "0bdbc7b1c60e8038f2c113ff6b50aaf275f1c1b58ee605619d7377a9d128f889"
+      },
+      "retained": {
+        "path": "/outputs/baseline-archive/student-pure/files/003-student-pure-1791642571594633897.log",
+        "bytes": 83965,
+        "sha256": "0bdbc7b1c60e8038f2c113ff6b50aaf275f1c1b58ee605619d7377a9d128f889"
+      },
+      "fixed_manifest_may_change": false
+    },
+    {
+      "original": {
+        "path": "/outputs/resume-smoke/smoke/student-pure/PHP-research/20261010_142941-student-pure-locomotion/train.log",
+        "bytes": 21978,
+        "sha256": "6ab92f78c54bc52b6bc5a8e052437d9846c8fbfff10ab7b57f1c750548a1b3d0"
+      },
+      "retained": {
+        "path": "/outputs/baseline-archive/student-pure/files/004-train.log",
+        "bytes": 21978,
+        "sha256": "6ab92f78c54bc52b6bc5a8e052437d9846c8fbfff10ab7b57f1c750548a1b3d0"
+      },
+      "fixed_manifest_may_change": false
+    },
+    {
+      "original": {
+        "path": "/outputs/resume-smoke/smoke/student-pure/PHP-research/20261010_142941-student-pure-locomotion/events.out.tfevents.1791642588.25b00648e832.126.0",
+        "bytes": 6008,
+        "sha256": "536b2a6161d3ca6676f535194b281034c3eebe20cedfad8b86575977c2f0b94f"
+      },
+      "retained": {
+        "path": "/outputs/baseline-archive/student-pure/files/005-events.out.tfevents.1791642588.25b00648e832.126.0",
+        "bytes": 6008,
+        "sha256": "536b2a6161d3ca6676f535194b281034c3eebe20cedfad8b86575977c2f0b94f"
+      },
+      "fixed_manifest_may_change": false
+    },
+    {
+      "original": {
+        "path": "/outputs/resume-smoke/smoke/student-pure/PHP-research/20261010_142941-student-pure-locomotion/model_00001/student.onnx",
+        "bytes": 2710180,
+        "sha256": "1ab0469eb04f0fab8671d370f72617afa37fd48270fa19330c93778a5c3e0299"
+      },
+      "retained": {
+        "path": "/outputs/baseline-archive/student-pure/files/006-student.onnx",
+        "bytes": 2710180,
+        "sha256": "1ab0469eb04f0fab8671d370f72617afa37fd48270fa19330c93778a5c3e0299"
+      },
+      "fixed_manifest_may_change": false
+    },
+    {
+      "original": {
+        "path": "/outputs/resume-smoke/smoke/student-pure/PHP-research/20261010_142941-student-pure-locomotion/model_00001/depth_backbone.onnx",
+        "bytes": 105254,
+        "sha256": "ead61fb5c2efa082cbc6cb92dda01007ee9ce52b2f35e3099fb7744319eb8407"
+      },
+      "retained": {
+        "path": "/outputs/baseline-archive/student-pure/files/007-depth_backbone.onnx",
+        "bytes": 105254,
+        "sha256": "ead61fb5c2efa082cbc6cb92dda01007ee9ce52b2f35e3099fb7744319eb8407"
+      },
+      "fixed_manifest_may_change": false
+    }
+  ],
+  "scope": "Original bytes copied without rewriting. Not a resumed training claim."
+}

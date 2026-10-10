@@ -1,0 +1,90 @@
+--- outputs/research/final-student-native58-preparation/native58.py	2026-10-10 18:40:50.731651609 +0800
++++ outputs/research/final-student-native58-recovered-preparation-01/native58.py	2026-10-10 22:19:53.615029369 +0800
+@@ -9,6 +9,7 @@
+ import argparse
+ import contextlib
+ import fcntl
++import importlib.util
+ import json
+ import os
+ from pathlib import Path
+@@ -16,13 +17,36 @@
+ import subprocess
+ import sys
+ import time
++sys.dont_write_bytecode=True
+ from common import *
+ import common as contracts
+ 
+ HERE=Path(__file__).resolve().parent
+ ROOT=Path('/workspace/php_parkour')
+ CONTROL=('common.py','native58.py','phase_cpu.py','scene17.py','commands_executor.py',
+-         'sdk_actual_probe.py','verify_snapshot_imports.py','observe_container_pids.py','run_frozen_matrix.py')
++         'sdk_actual_probe.py','verify_snapshot_imports.py','observe_container_pids.py','run_frozen_matrix.py',
++         'previous_recovered_02.py')
++RECOVERED_GATE_SHA='dbc64d32e4da4e1d3791e4b34ab38c3a4035e70c59402183985dd0bc03ce6525'
++RECOVERED_PREVIOUS=HOST_WORKSPACE/'outputs/research/fresh629-recovery-01/missing-four-run-01/host/launch-receipt.json'
++LIFECYCLE='recovered_original629_and_separate_four_preserving_root143'
++
++
++def recovered_previous():
++    """Read the exact recovery proof; the original root exit143 remains143."""
++    path=HERE/'previous_recovered_02.py'
++    require(not path.is_symlink() and path.is_file() and sha(path)==RECOVERED_GATE_SHA,
++            'Reviewed recovered lifecycle gate changed')
++    spec=importlib.util.spec_from_file_location('native58_recovered_previous',path)
++    module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
++    result=module.previous_recovered()
++    require(sha(path)==RECOVERED_GATE_SHA,'Recovered lifecycle gate changed during read')
++    require(result.get('status') in ('waiting','recovered_previous_ready')
++            and result.get('original_session54334_exit_code')==143,'Recovered lifecycle proof schema differs')
++    if result.get('ready'):
++        require(result['status']=='recovered_previous_ready' and result['original_root_normal_exit_verified'] is False
++                and result['original_host_observer_gap_preserved'] is True,'Recovery must preserve the original failure/gap')
++    else:require(result['status']=='waiting','Recovery readiness differs')
++    return result
+ 
+ 
+ def call(argv, timeout=60):
+@@ -199,7 +223,8 @@
+               'freeze_manifest_sha256':sha(base/'freeze-manifest.json'),'origin_transfer':origin,'phases':phases,
+               'expected_counts':{'policies':2,'cases':58,'worker_exit0_empty_groups':116,'exact_host_maps':116,'full_mp4_decodes':58,'cpu_ort_cases':60},
+               'global_host_lock':str(workspace/'outputs/research'/('.local-native-'+UUID+'.lock')),
+-              'previous_cohort_receipt':str(workspace/'outputs/research/fresh629-sdk018-6cb2ae2-prepared02/host/launch-receipt.json'),
++              'previous_cohort_receipt':str(RECOVERED_PREVIOUS),'previous_lifecycle':LIFECYCLE,
++              'previous_gate':{'relative':'control/previous_recovered_02.py','sha256':RECOVERED_GATE_SHA},
+               'endpoint':endpoint,'host_total_timeout_seconds':43200,
+               'scope':'Two final official student pairs, each original12 plane directions and17 representative constant-forward geometries; not full629 or skill-success evidence',
+               'quality_verified':False,'obstacle_course_completion_verified':False}
+@@ -219,11 +244,14 @@
+             and plan['revision']==REVISION and plan['status']=='prepared_only' and plan['native_started'] is False,'Frozen host plan identity differs')
+     workspace=Path(plan['workspace'])
+     lock=HOST_WORKSPACE/'outputs/research'/('.local-native-'+UUID+'.lock')
+-    previous=HOST_WORKSPACE/'outputs/research/fresh629-sdk018-6cb2ae2-prepared02/host/launch-receipt.json'
++    previous=RECOVERED_PREVIOUS
+     require(workspace==HOST_WORKSPACE and base.is_relative_to(workspace/'outputs/research')
+             and plan['global_host_lock']==str(lock) and plan['previous_cohort_receipt']==str(previous)
++            and plan.get('previous_lifecycle')==LIFECYCLE
++            and plan.get('previous_gate')=={'relative':'control/previous_recovered_02.py','sha256':RECOVERED_GATE_SHA}
+             and not any(p.is_symlink() for path in (base,lock,previous) for p in (path,*path.parents)),
+             'Canonical workspace/global GPU mutex/previous cohort path contract differs')
++    require(sha(base/'control/previous_recovered_02.py')==RECOVERED_GATE_SHA,'Frozen recovered gate SHA differs')
+     require(sha(base/'freeze-manifest.json')==plan['freeze_manifest_sha256'],'Frozen manifest changed')
+     records=read(base/'freeze-manifest.json')['files'];seen=set()
+     for item in records:
+@@ -336,11 +364,12 @@
+         fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
+         receipt_path=base/'host/launch-receipt.json'
+         require(not receipt_path.exists() and not any((base/'phases').iterdir()),'Fresh never-attempted output required; no retry/resume')
+-        previous=read(plan['previous_cohort_receipt'])
+-        require(previous['status']=='completed' and previous['driver_returncode']==previous['cpu_validation_returncode']==0
+-                and previous['owned_gpu_container_stop']['running_after_stop'] is False,'Current released-model629 must finish and release first')
++        previous=recovered_previous()
++        require(previous.get('ready') is True and previous['status']=='recovered_previous_ready',
++                'Recovered original629 plus separate four must be verified and released first')
+         receipt={'schema_version':1,'status':'starting','native_started':False,'plan_sha256':plan['plan_sha256'],
+                  'started_unix':time.time(),'endpoint':local_docker(),'gpu_before':gpu_idle(),'phases':[],
++                 'previous_lifecycle':LIFECYCLE,'previous_recovered_proof':previous,
+                  'quality_verified':False,'obstacle_course_completion_verified':False}
+         write(receipt_path,receipt);deadline=time.monotonic()+plan['host_total_timeout_seconds']
+         try:

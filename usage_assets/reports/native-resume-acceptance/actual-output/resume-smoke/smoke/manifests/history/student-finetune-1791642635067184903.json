@@ -1,0 +1,81 @@
+{
+  "label": "student-finetune",
+  "profile": "smoke",
+  "started_utc": "2026-10-10T14:30:17.327593+00:00",
+  "command": [
+    "bash",
+    "/workspace/php_parkour/wbt_training/training_runs/run_terrain_warp_distill.sh",
+    "--training.headless",
+    "True",
+    "--training.num-envs",
+    "16",
+    "--training.name",
+    "student-finetune",
+    "--training.project",
+    "PHP-research",
+    "--logger.base-dir",
+    "/outputs/resume-smoke/smoke/student-finetune",
+    "--training.seed",
+    "42",
+    "--algo.config.num-learning-iterations",
+    "2",
+    "--algo.config.save-interval",
+    "1",
+    "--algo.config.num-mini-batches",
+    "4",
+    "--training.preprocess-hook-kwargs",
+    "{\"add_onpath_obstacle\": true, \"num_variants\": 1, \"obstacle_seed\": 42}"
+  ],
+  "environment": {
+    "LOGGER": "tensorboard",
+    "NGPUS": "1",
+    "CUDA_VISIBLE_DEVICES": "0",
+    "HSSIM_PYTHON": "/control/train-python-with-robot-assets",
+    "REGISTRY": "file:///data/assets/motions-locomotion",
+    "TEACHER_CHECKPOINT": "/outputs/resume-smoke/smoke/teacher-locomotion/PHP-research/20261010_141647-teacher-locomotion-locomotion/model_00003.pt",
+    "FINETUNE": "1"
+  },
+  "settings": {
+    "profile": "smoke",
+    "skills": [
+      "locomotion"
+    ],
+    "assets": "/data/assets",
+    "num_envs": 16,
+    "iterations_target": 2,
+    "registries": "file:///data/assets/motions-locomotion",
+    "finetune": "1",
+    "source_checkpoints": [
+      {
+        "path": "/outputs/resume-smoke/smoke/teacher-locomotion/PHP-research/20261010_141647-teacher-locomotion-locomotion/model_00003.pt",
+        "sha256": "938dbf8a0a902bfb24330ad04b955a8473c5fe658255bff695e33532e433ef67"
+      }
+    ],
+    "eval_steps": null,
+    "eval_quality_schema": null
+  },
+  "overrides": {
+    "num_envs": 16,
+    "iterations_target": 2
+  },
+  "quality_verified": false,
+  "scope": "execution smoke only",
+  "status": "passed",
+  "returncode": 0,
+  "finished_utc": "2026-10-10T14:30:33.303248+00:00",
+  "elapsed_seconds": 15.975681095849723,
+  "log": "/outputs/resume-smoke/smoke/student-finetune-1791642617327778758.log",
+  "performance": {
+    "iteration_samples": 2,
+    "median_collection_plus_learning_seconds": 0.7330000000000001,
+    "measured_num_envs": 16,
+    "estimate_scope": "Measured collection+learning only; excludes simulator initialization, exports/checkpoint writes and evaluation. No scaling to another environment count."
+  },
+  "checkpoint": "/outputs/resume-smoke/smoke/student-finetune/PHP-research/20261010_143025-student-finetune-locomotion/model_00001.pt",
+  "checkpoint_iteration": 1,
+  "checkpoint_sha256": "2710360b6854d38ea685a3a9afe61c0c2fa7083f05abbe90e42c919a5a328ba7",
+  "onnx_bundle_directories": [
+    "/outputs/resume-smoke/smoke/student-finetune/PHP-research/20261010_143025-student-finetune-locomotion/model_00000",
+    "/outputs/resume-smoke/smoke/student-finetune/PHP-research/20261010_143025-student-finetune-locomotion/model_00001"
+  ]
+}
