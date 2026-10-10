@@ -50,7 +50,7 @@ WBT 的 `env._update_log_dict()` 恰好在 termination / reward 之后、`reset_
 
 `motion/error_ref_lin_vel`、`error_ref_ang_vel`、`error_body_rot`、`error_joint_vel` 可同时保存，但前四项位置/姿态/关节误差足以组成最小评估集。所有主指标应有按 expert ID 分组统计，避免 locomotion 数量掩盖 climb / step 失败。长评估用在线均值/分位数汇总或有界 CPU 缓冲，禁止逐步打印海量日志。
 
-native BadTracking 的本配置阈值包含 reference z 误差、投影重力方向误差及特定手脚 body z 误差。报告应记录实际 target 类型与阈值；不同 pelvis / no-heightscan 配方不能套用同一套虚构的成功阈值。直接报告原生失败率与跟踪误差，然后比较同一配置的 smoke baseline 与正式 checkpoint。
+native BadTracking 的本配置位置判据均为完整三维 L2 误差：reference anchor position 误差 >0.5m，或两 ankle roll / 两 wrist yaw 指定 body 中任一的 reference-relative position 误差 >0.5m；这些位置判据不是仅比较 z。只有姿态判据比较参考与机器人 projected gravity 的 z 分量差绝对值 >0.8，这不是四元数角度 0.8rad。[原生 BadTracking 实现](../../thirdparty/holosoma/src/holosoma/holosoma/managers/termination/terms/wbt.py#L80)。报告应记录实际 target 类型与阈值；不同 pelvis / no-heightscan 配方不能套用同一套虚构的成功阈值。直接报告原生失败率与跟踪误差，然后比较同一配置的 smoke baseline 与正式 checkpoint。
 
 ## 建议正式评估设置
 

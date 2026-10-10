@@ -1,0 +1,1219 @@
+{
+  "schema_version": 1,
+  "created_at_utc": "2026-10-10T04:53:59.551144+00:00",
+  "git_head": "79d82bb673edb7a9980ebcc251ff1672e1fd4176",
+  "scope": "Read-only source/evidence audit; stdlib representative NPZ/NPY checks; no GPU, no human collection, no raw MoCap retarget execution, no policy training or new physics rollout",
+  "claims": [
+    {
+      "id": "source_origin",
+      "finding": "upstream described; this run consumed released G1 data",
+      "references": [
+        {
+          "path": "README.md",
+          "start_line": 24,
+          "end_line": 26
+        },
+        {
+          "path": "release-assets.json",
+          "start_line": 4,
+          "end_line": 10
+        }
+      ]
+    },
+    {
+      "id": "retarget_optimization",
+      "finding": "SQP differential IK using quadratic Laplacian costs and CLARABEL; implemented in separate Holosoma tool, not run here",
+      "references": [
+        {
+          "path": "thirdparty/holosoma/src/holosoma_retargeting/README.md",
+          "start_line": 3,
+          "end_line": 5
+        },
+        {
+          "path": "thirdparty/holosoma/src/holosoma_retargeting/holosoma_retargeting/src/interaction_mesh_retargeter.py",
+          "start_line": 65,
+          "end_line": 72
+        },
+        {
+          "path": "thirdparty/holosoma/src/holosoma_retargeting/holosoma_retargeting/src/interaction_mesh_retargeter.py",
+          "start_line": 698,
+          "end_line": 773
+        }
+      ]
+    },
+    {
+      "id": "raw_qpos_layout_difference",
+      "finding": "PHP input wxyz+XYZ+29; standalone Holosoma retarget writer uses XYZ+wxyz+29",
+      "references": [
+        {
+          "path": "motion_matching/motion_matching/generate_database.py",
+          "start_line": 182,
+          "end_line": 186
+        },
+        {
+          "path": "thirdparty/holosoma/src/holosoma_retargeting/holosoma_retargeting/examples/robot_retarget.py",
+          "start_line": 499,
+          "end_line": 516
+        },
+        {
+          "path": "thirdparty/holosoma/src/holosoma_retargeting/holosoma_retargeting/src/interaction_mesh_retargeter.py",
+          "start_line": 532,
+          "end_line": 539
+        }
+      ]
+    },
+    {
+      "id": "database_structure",
+      "finding": "60Hz 31bones: SimulationRoot + pelvis +29; mirrored/resampled and contact velocity heuristic",
+      "references": [
+        {
+          "path": "motion_matching/motion_matching/generate_database.py",
+          "start_line": 208,
+          "end_line": 274
+        },
+        {
+          "path": "motion_matching/motion_matching/generate_database.py",
+          "start_line": 301,
+          "end_line": 370
+        },
+        {
+          "path": "motion_matching/motion_matching/core/database.py",
+          "start_line": 105,
+          "end_line": 149
+        }
+      ]
+    },
+    {
+      "id": "feature_training",
+      "finding": "fixed27 features; mean and block-average std statistics, not learned network or PCA",
+      "references": [
+        {
+          "path": "motion_matching/motion_matching/core/features.py",
+          "start_line": 148,
+          "end_line": 191
+        },
+        {
+          "path": "motion_matching/motion_matching/core/features.py",
+          "start_line": 339,
+          "end_line": 480
+        }
+      ]
+    },
+    {
+      "id": "score",
+      "finding": "normalized squared L2 argmin, optional transition/mask, manual skill entry-window restrictions",
+      "references": [
+        {
+          "path": "motion_matching/motion_matching/core/database.py",
+          "start_line": 292,
+          "end_line": 363
+        },
+        {
+          "path": "motion_matching/motion_matching/core/database.py",
+          "start_line": 375,
+          "end_line": 485
+        },
+        {
+          "path": "motion_matching/motion_matching/run.py",
+          "start_line": 635,
+          "end_line": 641
+        }
+      ]
+    },
+    {
+      "id": "query_cached_prefix",
+      "finding": "first15 feature dimensions use current database-frame cached features; future12 constructed from root/prediction",
+      "references": [
+        {
+          "path": "motion_matching/motion_matching/run.py",
+          "start_line": 571,
+          "end_line": 600
+        }
+      ]
+    },
+    {
+      "id": "inertialization",
+      "finding": "analytic spring-damper pose offsets, runtime half-life0.1s",
+      "references": [
+        {
+          "path": "motion_matching/motion_matching/utils/animation_state.py",
+          "start_line": 55,
+          "end_line": 124
+        },
+        {
+          "path": "motion_matching/motion_matching/utils/animation_state.py",
+          "start_line": 151,
+          "end_line": 319
+        },
+        {
+          "path": "motion_matching/motion_matching/run.py",
+          "start_line": 224,
+          "end_line": 228
+        }
+      ]
+    },
+    {
+      "id": "runtime_ik",
+      "finding": "rootXY anchor correction; quat.ik is hierarchical global-to-local transform, not constrained end-effector optimizer",
+      "references": [
+        {
+          "path": "motion_matching/motion_matching/run.py",
+          "start_line": 888,
+          "end_line": 955
+        },
+        {
+          "path": "motion_matching/motion_matching/kinematics/quat.py",
+          "start_line": 236,
+          "end_line": 243
+        }
+      ]
+    },
+    {
+      "id": "pca",
+      "finding": "terrainXY OBB geometry fit, not27feature dimensionality reduction",
+      "references": [
+        {
+          "path": "motion_matching/motion_matching/utils/data_utils.py",
+          "start_line": 256,
+          "end_line": 305
+        }
+      ]
+    },
+    {
+      "id": "terrain_adaptation",
+      "finding": "rigidpairedterrainplacement, baseZcompensation and geometry noise; NvidiaWarp isdepthraycaster",
+      "references": [
+        {
+          "path": "motion_matching/motion_matching/run.py",
+          "start_line": 628,
+          "end_line": 665
+        },
+        {
+          "path": "motion_matching/motion_matching/run.py",
+          "start_line": 1081,
+          "end_line": 1161
+        },
+        {
+          "path": "wbt_training/config_values/depth_distillation.py",
+          "start_line": 122,
+          "end_line": 146
+        }
+      ]
+    },
+    {
+      "id": "command_source",
+      "finding": "authored scenario step index generates 15way onehot, not capture label/skill29 classification",
+      "references": [
+        {
+          "path": "motion_matching/motion_matching/scenarios/builtin.py",
+          "start_line": 6,
+          "end_line": 28
+        },
+        {
+          "path": "motion_matching/motion_matching/scenarios/builtin.py",
+          "start_line": 70,
+          "end_line": 81
+        },
+        {
+          "path": "motion_matching/motion_matching/run.py",
+          "start_line": 1179,
+          "end_line": 1219
+        }
+      ]
+    },
+    {
+      "id": "tracking_writer",
+      "finding": "29DOF/30body/50Hz output via mj_forward and temporal derivatives, no physics policy",
+      "references": [
+        {
+          "path": "motion_matching/motion_matching/utils/tracking_format.py",
+          "start_line": 5,
+          "end_line": 38
+        },
+        {
+          "path": "motion_matching/motion_matching/utils/tracking_format.py",
+          "start_line": 64,
+          "end_line": 137
+        },
+        {
+          "path": "motion_matching/motion_matching/io/motion_io.py",
+          "start_line": 24,
+          "end_line": 50
+        }
+      ]
+    },
+    {
+      "id": "native_converter",
+      "finding": "preserveposesvelocitieswxyz; permutations + footcontact duplicates, noFK;36qpos35qvel32body",
+      "references": [
+        {
+          "path": "wbt_training/training_runs/motion_convert.py",
+          "start_line": 23,
+          "end_line": 112
+        },
+        {
+          "path": "wbt_training/config_values/robot_config.py",
+          "start_line": 12,
+          "end_line": 109
+        }
+      ]
+    },
+    {
+      "id": "terrain_schema",
+      "finding": "box arrays B,V,10:xyz+wxyz+fullsize; V10; OBJ baselinegeometry, sourceJSON pos/quat/size",
+      "references": [
+        {
+          "path": "motion_matching/motion_matching/metadata/constants.py",
+          "start_line": 15,
+          "end_line": 16
+        },
+        {
+          "path": "motion_matching/motion_matching/io/terrain_io.py",
+          "start_line": 213,
+          "end_line": 298
+        },
+        {
+          "path": "motion_matching/motion_matching/run.py",
+          "start_line": 1440,
+          "end_line": 1463
+        }
+      ]
+    },
+    {
+      "id": "coherent_variant_limit",
+      "finding": "offpathcolumnsjointlyvalidated but train sampler independently chooses eachbox variant",
+      "references": [
+        {
+          "path": "motion_matching/motion_matching/io/terrain_io.py",
+          "start_line": 213,
+          "end_line": 271
+        },
+        {
+          "path": "motion_matching/motion_matching/motion_visualizer.py",
+          "start_line": 470,
+          "end_line": 497
+        },
+        {
+          "path": "wbt_training/utils/obstacle_helpers.py",
+          "start_line": 39,
+          "end_line": 69
+        }
+      ]
+    },
+    {
+      "id": "terrain_docstring_mismatch",
+      "finding": "obstacle_helpers:40 saysxyzw; actualreconstruction:230 unpackswxyz",
+      "references": [
+        {
+          "path": "wbt_training/utils/obstacle_helpers.py",
+          "start_line": 39,
+          "end_line": 40
+        },
+        {
+          "path": "wbt_training/utils/obstacle_helpers.py",
+          "start_line": 228,
+          "end_line": 237
+        }
+      ]
+    },
+    {
+      "id": "grid_root_columns",
+      "finding": "preprocessoffsetsonlybodypos; nativejointrootcolumnsreplicatedunchanged; currentloaderstripsrootcolumns",
+      "references": [
+        {
+          "path": "wbt_training/utils/obstacle_helpers.py",
+          "start_line": 148,
+          "end_line": 176
+        },
+        {
+          "path": "thirdparty/holosoma/src/holosoma/holosoma/managers/command/terms/wbt.py",
+          "start_line": 124,
+          "end_line": 142
+        }
+      ]
+    },
+    {
+      "id": "gui_save_handoff",
+      "finding": "interactiveSaveomitsvel_cmd andusesnestedterrainlayout; notdirectnativebundle",
+      "references": [
+        {
+          "path": "motion_matching/motion_matching/run.py",
+          "start_line": 1712,
+          "end_line": 1746
+        },
+        {
+          "path": "motion_matching/motion_matching/io/motion_io.py",
+          "start_line": 24,
+          "end_line": 50
+        }
+      ]
+    },
+    {
+      "id": "viser_save",
+      "finding": "tracking-onlyviewer preservesexistingcommands; noautomaticlabels",
+      "references": [
+        {
+          "path": "motion_matching/motion_matching/motion_visualizer.py",
+          "start_line": 84,
+          "end_line": 155
+        },
+        {
+          "path": "motion_matching/motion_matching/motion_visualizer.py",
+          "start_line": 776,
+          "end_line": 800
+        }
+      ]
+    },
+    {
+      "id": "offline_registry",
+      "finding": "explicitorderedfileURIs localresolution; motionkeyvalidationnotfullnumericvalidation",
+      "references": [
+        {
+          "path": "wbt_training/utils/registry.py",
+          "start_line": 60,
+          "end_line": 150
+        },
+        {
+          "path": "wbt_training/utils/registry.py",
+          "start_line": 243,
+          "end_line": 276
+        },
+        {
+          "path": "wbt_training/config_values/terrain.py",
+          "start_line": 417,
+          "end_line": 430
+        }
+      ]
+    },
+    {
+      "id": "reference_handoff",
+      "finding": "concatenate sourceclips, motion_ends boundaries, motion_idxs expertIDs; registryorderteacherorder",
+      "references": [
+        {
+          "path": "wbt_training/utils/multi_motion_helpers.py",
+          "start_line": 26,
+          "end_line": 119
+        },
+        {
+          "path": "wbt_training/utils/multi_motion_helpers.py",
+          "start_line": 170,
+          "end_line": 195
+        },
+        {
+          "path": "wbt_training/config_values/motion_command.py",
+          "start_line": 260,
+          "end_line": 322
+        },
+        {
+          "path": "wbt_training/config_values/motion_command.py",
+          "start_line": 698,
+          "end_line": 726
+        }
+      ]
+    },
+    {
+      "id": "cache_identity",
+      "finding": "combinedcachefilenamehashespathnamesnotfilecontent",
+      "references": [
+        {
+          "path": "wbt_training/utils/multi_motion_helpers.py",
+          "start_line": 56,
+          "end_line": 60
+        },
+        {
+          "path": "wbt_training/utils/multi_motion_helpers.py",
+          "start_line": 95,
+          "end_line": 99
+        }
+      ]
+    },
+    {
+      "id": "reference_clock",
+      "finding": "MotionLoader reads fps but commandstep advances one referenceframe percontroltick; non50Hz customdata needs explicitresampling",
+      "references": [
+        {
+          "path": "thirdparty/holosoma/src/holosoma/holosoma/managers/command/terms/wbt.py",
+          "start_line": 90,
+          "end_line": 90
+        },
+        {
+          "path": "thirdparty/holosoma/src/holosoma/holosoma/managers/command/terms/wbt.py",
+          "start_line": 1000,
+          "end_line": 1014
+        }
+      ]
+    },
+    {
+      "id": "coverage_semantics",
+      "finding": "num_motions1 is mergedloader; teacher evalphase0 vs studentexpertbalancedframepools",
+      "references": [
+        {
+          "path": "wbt_training/config_values/motion_command.py",
+          "start_line": 326,
+          "end_line": 400
+        },
+        {
+          "path": "wbt_training/config_values/motion_command.py",
+          "start_line": 432,
+          "end_line": 469
+        },
+        {
+          "path": "thirdparty/holosoma/src/holosoma/holosoma/managers/command/terms/wbt.py",
+          "start_line": 801,
+          "end_line": 838
+        }
+      ]
+    }
+  ],
+  "external_primary_sources": [
+    {
+      "url": "https://php-parkour.github.io/static/images/paper.pdf",
+      "pages_1based": [
+        2,
+        4,
+        12
+      ],
+      "sections": [
+        "Introduction human retarget overview",
+        "III-B2 manualskillstartend/entrywindow",
+        "AppendixA.1 mirrorG1/manualboxfit"
+      ],
+      "provenance_scope": "Upstream description, not this run raw data reconstruction"
+    },
+    {
+      "url": "https://omniretarget.github.io/",
+      "section": "interaction-preservingdata generation",
+      "provenance_scope": "Related upstream retarget project, not exact PHP clip manifest"
+    },
+    {
+      "url": "https://huggingface.co/datasets/omniretarget/OmniRetarget_Dataset/blob/main/README.md",
+      "sections": [
+        "DatasetStructure",
+        "DataFormat"
+      ],
+      "provenance_scope": "Related upstream OMOMO/in-houseMoCap/LAFAN1 licensing; no exactPHPcliplineage proof"
+    }
+  ],
+  "matching": {
+    "dimensions": 27,
+    "blocks": [
+      {
+        "indices": [
+          0,
+          2
+        ],
+        "name": "leftfootposition",
+        "dimension": 3,
+        "weight": 0.75
+      },
+      {
+        "indices": [
+          3,
+          5
+        ],
+        "name": "rightfootposition",
+        "dimension": 3,
+        "weight": 0.75
+      },
+      {
+        "indices": [
+          6,
+          8
+        ],
+        "name": "leftfootvelocity",
+        "dimension": 3,
+        "weight": 1
+      },
+      {
+        "indices": [
+          9,
+          11
+        ],
+        "name": "rightfootvelocity",
+        "dimension": 3,
+        "weight": 1
+      },
+      {
+        "indices": [
+          12,
+          14
+        ],
+        "name": "hipvelocity",
+        "dimension": 3,
+        "weight": 1
+      },
+      {
+        "indices": [
+          15,
+          20
+        ],
+        "name": "futureXYpositions",
+        "dimension": 6,
+        "weight": 1
+      },
+      {
+        "indices": [
+          21,
+          26
+        ],
+        "name": "futureXYheadings",
+        "dimension": 6,
+        "weight": 1.5
+      }
+    ],
+    "future_frame_offsets": [
+      20,
+      40,
+      60
+    ],
+    "database_fps": 60,
+    "normalization": "perdimensionmean; perblockmeanofcomponentstandarddeviations/weight",
+    "distance": "sumofsquarednormalizeddifference; argmin",
+    "neural_training": false,
+    "pca_in_matching": false,
+    "query_pose_prefix_source": "currentDBframecachedfeatures",
+    "query_future_source": "analytictrajectoryprediction"
+  },
+  "command15": {
+    "names": {
+      "0": "stand",
+      "1": "forward",
+      "2": "left_45",
+      "3": "left_90",
+      "4": "right_45",
+      "5": "right_90",
+      "6": "run_forward",
+      "7": "run_left_45",
+      "8": "run_left_90",
+      "9": "run_right_45",
+      "10": "run_right_90",
+      "11": "backward"
+    },
+    "reserved": [
+      12,
+      13,
+      14
+    ],
+    "default_walking_mps": 0.8,
+    "default_running_mps": 2.2,
+    "turn_label_units": "random_locomotion degrees/second; segment argument is totaldegrees and dividedbyduration",
+    "label_source": "authoredscenario vel_cmd_idx recordedperframeonehot; not inferredsensorlabel or skillclassifier"
+  },
+  "orders": {
+    "native_joint_names_29": [
+      "left_hip_pitch_joint",
+      "left_hip_roll_joint",
+      "left_hip_yaw_joint",
+      "left_knee_joint",
+      "left_ankle_pitch_joint",
+      "left_ankle_roll_joint",
+      "right_hip_pitch_joint",
+      "right_hip_roll_joint",
+      "right_hip_yaw_joint",
+      "right_knee_joint",
+      "right_ankle_pitch_joint",
+      "right_ankle_roll_joint",
+      "waist_yaw_joint",
+      "waist_roll_joint",
+      "waist_pitch_joint",
+      "left_shoulder_pitch_joint",
+      "left_shoulder_roll_joint",
+      "left_shoulder_yaw_joint",
+      "left_elbow_joint",
+      "left_wrist_roll_joint",
+      "left_wrist_pitch_joint",
+      "left_wrist_yaw_joint",
+      "right_shoulder_pitch_joint",
+      "right_shoulder_roll_joint",
+      "right_shoulder_yaw_joint",
+      "right_elbow_joint",
+      "right_wrist_roll_joint",
+      "right_wrist_pitch_joint",
+      "right_wrist_yaw_joint"
+    ],
+    "native_body_names_32": [
+      "pelvis",
+      "left_hip_pitch_link",
+      "left_hip_roll_link",
+      "left_hip_yaw_link",
+      "left_knee_link",
+      "left_ankle_pitch_link",
+      "left_ankle_roll_link",
+      "left_foot_contact_point",
+      "right_hip_pitch_link",
+      "right_hip_roll_link",
+      "right_hip_yaw_link",
+      "right_knee_link",
+      "right_ankle_pitch_link",
+      "right_ankle_roll_link",
+      "right_foot_contact_point",
+      "waist_yaw_link",
+      "waist_roll_link",
+      "torso_link",
+      "left_shoulder_pitch_link",
+      "left_shoulder_roll_link",
+      "left_shoulder_yaw_link",
+      "left_elbow_link",
+      "left_wrist_roll_link",
+      "left_wrist_pitch_link",
+      "left_wrist_yaw_link",
+      "right_shoulder_pitch_link",
+      "right_shoulder_roll_link",
+      "right_shoulder_yaw_link",
+      "right_elbow_link",
+      "right_wrist_roll_link",
+      "right_wrist_pitch_link",
+      "right_wrist_yaw_link"
+    ],
+    "tracking_joint_names_29": [
+      "left_hip_pitch_joint",
+      "right_hip_pitch_joint",
+      "waist_yaw_joint",
+      "left_hip_roll_joint",
+      "right_hip_roll_joint",
+      "waist_roll_joint",
+      "left_hip_yaw_joint",
+      "right_hip_yaw_joint",
+      "waist_pitch_joint",
+      "left_knee_joint",
+      "right_knee_joint",
+      "left_shoulder_pitch_joint",
+      "right_shoulder_pitch_joint",
+      "left_ankle_pitch_joint",
+      "right_ankle_pitch_joint",
+      "left_shoulder_roll_joint",
+      "right_shoulder_roll_joint",
+      "left_ankle_roll_joint",
+      "right_ankle_roll_joint",
+      "left_shoulder_yaw_joint",
+      "right_shoulder_yaw_joint",
+      "left_elbow_joint",
+      "right_elbow_joint",
+      "left_wrist_roll_joint",
+      "right_wrist_roll_joint",
+      "left_wrist_pitch_joint",
+      "right_wrist_pitch_joint",
+      "left_wrist_yaw_joint",
+      "right_wrist_yaw_joint"
+    ],
+    "tracking_body_names_30": [
+      "pelvis",
+      "left_hip_pitch_link",
+      "right_hip_pitch_link",
+      "waist_yaw_link",
+      "left_hip_roll_link",
+      "right_hip_roll_link",
+      "waist_roll_link",
+      "left_hip_yaw_link",
+      "right_hip_yaw_link",
+      "torso_link",
+      "left_knee_link",
+      "right_knee_link",
+      "left_shoulder_pitch_link",
+      "right_shoulder_pitch_link",
+      "left_ankle_pitch_link",
+      "right_ankle_pitch_link",
+      "left_shoulder_roll_link",
+      "right_shoulder_roll_link",
+      "left_ankle_roll_link",
+      "right_ankle_roll_link",
+      "left_shoulder_yaw_link",
+      "right_shoulder_yaw_link",
+      "left_elbow_link",
+      "right_elbow_link",
+      "left_wrist_roll_link",
+      "right_wrist_roll_link",
+      "left_wrist_pitch_link",
+      "right_wrist_pitch_link",
+      "left_wrist_yaw_link",
+      "right_wrist_yaw_link"
+    ],
+    "native_joint_from_tracking": [
+      0,
+      3,
+      6,
+      9,
+      13,
+      17,
+      1,
+      4,
+      7,
+      10,
+      14,
+      18,
+      2,
+      5,
+      8,
+      11,
+      15,
+      19,
+      21,
+      23,
+      25,
+      27,
+      12,
+      16,
+      20,
+      22,
+      24,
+      26,
+      28
+    ],
+    "native_body_from_tracking": [
+      0,
+      1,
+      4,
+      7,
+      10,
+      14,
+      18,
+      18,
+      2,
+      5,
+      8,
+      11,
+      15,
+      19,
+      19,
+      3,
+      6,
+      9,
+      12,
+      16,
+      20,
+      22,
+      24,
+      26,
+      28,
+      13,
+      17,
+      21,
+      23,
+      25,
+      27,
+      29
+    ],
+    "tracking_joint_from_rawMJ": [
+      0,
+      6,
+      12,
+      1,
+      7,
+      13,
+      2,
+      8,
+      14,
+      3,
+      9,
+      15,
+      22,
+      4,
+      10,
+      16,
+      23,
+      5,
+      11,
+      17,
+      24,
+      18,
+      25,
+      19,
+      26,
+      20,
+      27,
+      21,
+      28
+    ],
+    "tracking_body_from_filteredMJ": [
+      0,
+      1,
+      7,
+      13,
+      2,
+      8,
+      14,
+      3,
+      9,
+      15,
+      4,
+      10,
+      16,
+      23,
+      5,
+      11,
+      17,
+      24,
+      6,
+      12,
+      18,
+      25,
+      19,
+      26,
+      20,
+      27,
+      21,
+      28,
+      22,
+      29
+    ]
+  },
+  "terrain": {
+    "source_json_keys": [
+      "pos",
+      "quat",
+      "size"
+    ],
+    "npy_shape": [
+      "boxes",
+      "variants",
+      10
+    ],
+    "variant_count": 10,
+    "columns": [
+      "x",
+      "y",
+      "z",
+      "qw",
+      "qx",
+      "qy",
+      "qz",
+      "size_x",
+      "size_y",
+      "size_z"
+    ],
+    "size": "full_extents",
+    "quaternion": "wxyz",
+    "scene_variant_sampling": "offpathgeneration/Viser coherentcolumn; training independentlyperbox",
+    "generated_json": false,
+    "obj_scope": "baseline rigidposedreference obstacles + ground; not all NPYvariants or noisypreprocessmesh"
+  },
+  "coverage": {
+    "released_pair_count": 296,
+    "released_bundles": [
+      {
+        "path": "outputs/research/assets/motions-high-climb-76",
+        "motion_count": 40,
+        "terrain_count": 40,
+        "readme_variant_line": [
+          "Its `*_terrain.npy` contains paired terrain boxes and variants; an empty box",
+          "Dataset variant: `high_speed_climb_76_final_v0`. Motion and terrain files are unchanged from the source bundle."
+        ]
+      },
+      {
+        "path": "outputs/research/assets/motions-high-step",
+        "motion_count": 60,
+        "terrain_count": 60,
+        "readme_variant_line": [
+          "Its `*_terrain.npy` contains paired terrain boxes and variants; an empty box",
+          "Dataset variant: `high_speed_step_final_v0`. Motion and terrain files are unchanged from the source bundle."
+        ]
+      },
+      {
+        "path": "outputs/research/assets/motions-locomotion",
+        "motion_count": 100,
+        "terrain_count": 100,
+        "readme_variant_line": [
+          "Its `*_terrain.npy` contains paired terrain boxes and variants; an empty box",
+          "Dataset variant: `random_locomotion_final_v2`. Motion and terrain files are unchanged from the source bundle."
+        ]
+      },
+      {
+        "path": "outputs/research/assets/motions-low-climb-76",
+        "motion_count": 40,
+        "terrain_count": 40,
+        "readme_variant_line": [
+          "Its `*_terrain.npy` contains paired terrain boxes and variants; an empty box",
+          "Dataset variant: `low_speed_climb_76_final_v1`. Motion and terrain files are unchanged from the source bundle."
+        ]
+      },
+      {
+        "path": "outputs/research/assets/motions-low-step",
+        "motion_count": 56,
+        "terrain_count": 56,
+        "readme_variant_line": [
+          "Its `*_terrain.npy` contains paired terrain boxes and variants; an empty box",
+          "Dataset variant: `low_speed_step_final_v0`. Motion and terrain files are unchanged from the source bundle."
+        ]
+      }
+    ],
+    "generated_config_count": 629,
+    "scenarios": [
+      {
+        "name": "high_speed_cat_vault",
+        "config_count": 51
+      },
+      {
+        "name": "high_speed_climb_58",
+        "config_count": 40
+      },
+      {
+        "name": "high_speed_climb_76",
+        "config_count": 40
+      },
+      {
+        "name": "high_speed_climb_94",
+        "config_count": 15
+      },
+      {
+        "name": "high_speed_dash_vault",
+        "config_count": 51
+      },
+      {
+        "name": "high_speed_hurdle",
+        "config_count": 51
+      },
+      {
+        "name": "high_speed_jump_35",
+        "config_count": 1
+      },
+      {
+        "name": "high_speed_roll_134",
+        "config_count": 40
+      },
+      {
+        "name": "high_speed_speed_vault",
+        "config_count": 20
+      },
+      {
+        "name": "high_speed_step",
+        "config_count": 60
+      },
+      {
+        "name": "low_speed_climb_58",
+        "config_count": 40
+      },
+      {
+        "name": "low_speed_climb_76",
+        "config_count": 40
+      },
+      {
+        "name": "low_speed_climb_94",
+        "config_count": 20
+      },
+      {
+        "name": "low_speed_roll_78",
+        "config_count": 1
+      },
+      {
+        "name": "low_speed_roll_90",
+        "config_count": 3
+      },
+      {
+        "name": "low_speed_step",
+        "config_count": 56
+      },
+      {
+        "name": "random_locomotion",
+        "config_count": 100
+      }
+    ],
+    "registry_count": 29,
+    "registry_names": [
+      "locomotion",
+      "step",
+      "step_up",
+      "step_down",
+      "step_high_speed",
+      "step_high_speed_up",
+      "step_high_speed_down",
+      "climb_58",
+      "climb_58_up",
+      "climb_58_down",
+      "climb_76",
+      "climb_76_up",
+      "climb_76_down",
+      "climb_76_high_speed_up",
+      "climb_76_high_speed_down",
+      "climb_94_up",
+      "climb_94_down",
+      "climb_94_high_speed_up",
+      "climb_94_high_speed_down",
+      "climb_134_up",
+      "roll_78",
+      "roll_90",
+      "roll_136",
+      "hurdle",
+      "dash_vault",
+      "speed_vault",
+      "cat_vault",
+      "jump_35",
+      "drop_92"
+    ],
+    "isolated_nonlocomotion_executors": 28,
+    "materialized_native_clips": 925,
+    "offline_workflow_checks": 26,
+    "remote_sdk_import_attempts": 0,
+    "physical_policy_rollout_in_motion_matrix": false
+  },
+  "open_provenance_gaps": [
+    "No mapping of each PHPbinaryrange to originalhumanfile/person/device/capturedate/frameindices",
+    "No rawhumanMoCap-to-releasebinary full rebuild evidence",
+    "No newhuman or realrobotdata capture by this reproduction",
+    "No all629configuration learnedpolicyphysicscoverage",
+    "Representativeheaders are not newallarraysvalidation; refer existing fullmatrix checks"
+  ],
+  "source_hashes": [
+    {
+      "path": "README.md",
+      "sha256": "6a82740cce4702d8ef9867f413b38d60c8e7dace95ffbe7762e57ad87e90e7ab",
+      "bytes": 4001
+    },
+    {
+      "path": "motion_matching/motion_matching/core/database.py",
+      "sha256": "8bf552146ec658ec6e1666bc65fe1539f4d7a96d1af97e94d43d43d17bc86144",
+      "bytes": 19013
+    },
+    {
+      "path": "motion_matching/motion_matching/core/features.py",
+      "sha256": "cd526cadcd96f85e78233bfd53017d1ac3386e6d54cff5abaa060e1eb7683063",
+      "bytes": 20261
+    },
+    {
+      "path": "motion_matching/motion_matching/generate_database.py",
+      "sha256": "495c7e8a74320164ca99d845663477d4260a89fa8d7c66d1c3d78cf295ddb871",
+      "bytes": 16972
+    },
+    {
+      "path": "motion_matching/motion_matching/io/motion_io.py",
+      "sha256": "5e2ab9c805f3a530a8ced132b78b5039cb9f8cea8e900308afb5294dbfd7a2be",
+      "bytes": 3513
+    },
+    {
+      "path": "motion_matching/motion_matching/io/terrain_io.py",
+      "sha256": "86fdf6f7f8576afec46163a59a4aa5d66559f6e3e389b663c1000a701334a3b6",
+      "bytes": 13947
+    },
+    {
+      "path": "motion_matching/motion_matching/kinematics/quat.py",
+      "sha256": "f0c2238e7ee409a3edf112f40b4d632364518a4de432cdcba0ab10748518a811",
+      "bytes": 11300
+    },
+    {
+      "path": "motion_matching/motion_matching/metadata/constants.py",
+      "sha256": "27e784b05b4596a638ab28d902c42a0c8f4dcb31dc2458872559f2e550ab6ce5",
+      "bytes": 2656
+    },
+    {
+      "path": "motion_matching/motion_matching/motion_visualizer.py",
+      "sha256": "20ea84be41121267184f9683d4e17ee853f84e7637151139804731e158193273",
+      "bytes": 37866
+    },
+    {
+      "path": "motion_matching/motion_matching/run.py",
+      "sha256": "cf527c4d68684848858094e5d38e1bf789222b820261aa00e1b0f4a75581d78d",
+      "bytes": 94463
+    },
+    {
+      "path": "motion_matching/motion_matching/scenarios/builtin.py",
+      "sha256": "a1a25539c90d74c32ed6243c25f909c5e48d4e9dae72c14f43d7d5a8b5bfaff1",
+      "bytes": 42471
+    },
+    {
+      "path": "motion_matching/motion_matching/scenarios/skill_registry.py",
+      "sha256": "90b2ffa22247f3e7f9180960da22031283ba5a5f2dd2fb1743440828618545eb",
+      "bytes": 11008
+    },
+    {
+      "path": "motion_matching/motion_matching/utils/animation_state.py",
+      "sha256": "48bfb067e9011afa0131b520f258a506ca97fab9f53c40523b05e11d3f9c99e9",
+      "bytes": 23413
+    },
+    {
+      "path": "motion_matching/motion_matching/utils/data_utils.py",
+      "sha256": "71b54096bedcf355c2f80be35e3eeaa369c90d1a8037c6d71edc8bbe64c27d83",
+      "bytes": 12447
+    },
+    {
+      "path": "motion_matching/motion_matching/utils/tracking_format.py",
+      "sha256": "b20437ca7b9912a99d7164c3c1685c8015e789556df95fdb1a047cd91483f995",
+      "bytes": 5000
+    },
+    {
+      "path": "release-assets.json",
+      "sha256": "3bea66903fc05034b354519764c6997ce0900dbd32716b0356330b44ee8cc72c",
+      "bytes": 151971
+    },
+    {
+      "path": "thirdparty/holosoma/src/holosoma/holosoma/managers/command/terms/wbt.py",
+      "sha256": "4acfdb0d14e2877a1503bfb4508c6751db97d064ff270e99bdf74f489fe45d0a",
+      "bytes": 82749
+    },
+    {
+      "path": "thirdparty/holosoma/src/holosoma_retargeting/README.md",
+      "sha256": "326c5a8f2316ccd183bac8116af65142ee65b397bb6c5a59596eb7b9c02acd40",
+      "bytes": 12527
+    },
+    {
+      "path": "thirdparty/holosoma/src/holosoma_retargeting/holosoma_retargeting/examples/robot_retarget.py",
+      "sha256": "aa51b4d99c47f13c4cb11d6c9de9a82e57dfff02acbd3397c59957cc403a67bc",
+      "bytes": 29588
+    },
+    {
+      "path": "thirdparty/holosoma/src/holosoma_retargeting/holosoma_retargeting/src/interaction_mesh_retargeter.py",
+      "sha256": "587d7f5b2b9aeecdd74a84ae5a4d590a6f2dcc01f935b9219858549987e9adea",
+      "bytes": 56936
+    },
+    {
+      "path": "usage_assets/reports/asset-verification.json",
+      "sha256": "346b2ba19f24f4adcaa64178d297ad96bf99eeb78c436802ec3d6307230719e7",
+      "bytes": 152158
+    },
+    {
+      "path": "usage_assets/reports/motion-conversion.json",
+      "sha256": "6c1eb69efb45445b99ba989d55bdac75f9aeb70b772161a584424371b994a82f",
+      "bytes": 1887
+    },
+    {
+      "path": "usage_assets/reports/motion-matching.json",
+      "sha256": "ed413845f4b82156964e11ad6ee3faca30e3c0b10dbfdc295a8284f9ee3308ed",
+      "bytes": 2714019
+    },
+    {
+      "path": "usage_assets/reports/motion-workflows.json",
+      "sha256": "ecaba36f90ec17faeb150712fde63099f42095752b47f357f8a7715418c32da9",
+      "bytes": 35561
+    },
+    {
+      "path": "wbt_training/config_values/depth_distillation.py",
+      "sha256": "fd20b124ddf64b4815c30a862e8798150f931834f5fda79e916be0e845ff830a",
+      "bytes": 11889
+    },
+    {
+      "path": "wbt_training/config_values/motion_command.py",
+      "sha256": "e338182452f9eb26e46db4fa445b4a1ec071334f478d5fcb0a54a08ef2563607",
+      "bytes": 34416
+    },
+    {
+      "path": "wbt_training/config_values/robot_config.py",
+      "sha256": "0b1dfbc9d27c095e568255e78ef68ee0afe70314a6381ea6c4a8dd5384193c48",
+      "bytes": 8542
+    },
+    {
+      "path": "wbt_training/config_values/terrain.py",
+      "sha256": "1c73a314d9016ce923843a1b54273e608c94053fefdbb727056faab718523f7f",
+      "bytes": 21880
+    },
+    {
+      "path": "wbt_training/training_runs/motion_convert.py",
+      "sha256": "fa60ada9a0bc9b00bf17df0d97e411c0d0e17c84d3e1e6fd296feabbf0dd6cf5",
+      "bytes": 6041
+    },
+    {
+      "path": "wbt_training/utils/multi_motion_helpers.py",
+      "sha256": "6c4e16195f645bc93712a46a8e7188773aef1d0e66715bbba163a812dce62663",
+      "bytes": 7191
+    },
+    {
+      "path": "wbt_training/utils/obstacle_helpers.py",
+      "sha256": "08716396ab009571d91dc4973ee3fa1a83b1f7b9b05e9a2db41ac048a7e1189a",
+      "bytes": 15646
+    },
+    {
+      "path": "wbt_training/utils/registry.py",
+      "sha256": "7e87eeddf6b421b1fa4bf68891ede78dbfc778edeb38f4d5aa4940dca7ede88a",
+      "bytes": 16496
+    }
+  ],
+  "specimen_report": "motion-data-specimens.json",
+  "markdown_sha256": "94d9352333df04aa513997e1c35716373bcbc87b494b89dad0c05bac27591ef2"
+}

@@ -1,0 +1,125 @@
+{
+  "schema_version": 1,
+  "scope": "Read-only CPU torch.load of final smoke iteration1 checkpoints; top-level keys describe training artifact schema, not training convergence",
+  "normalizers_are_none_semantics": "Each value is true exactly when that checkpoint normalizer value is Python None; empty mapping means no such top-level normalizer keys",
+  "source_references": {
+    "teacher": "thirdparty/holosoma/src/holosoma/holosoma/agents/ppo/ppo.py:673-692",
+    "pure": "thirdparty/holosoma/src/holosoma/holosoma/agents/distillation/distillation.py:383-398",
+    "mixed": "thirdparty/holosoma/src/holosoma/holosoma/agents/distillation_ppo/distillation_ppo.py:849-865",
+    "metadata": "thirdparty/holosoma/src/holosoma/holosoma/agents/base_algo/base_algo.py:63-72"
+  },
+  "checkpoints": {
+    "teacher": {
+      "source": "/outputs/final-cloud-acceptance/results/smoke/teacher-locomotion/PHP-research/20261010_040645-teacher-locomotion-locomotion/model_00001.pt",
+      "sha256": "7068e26a93eedb24331975f9dcff824265e2f022eaa89bfb0ee6ba099744a78b",
+      "bytes": 10345023,
+      "top_level_keys": [
+        "actor_model_state_dict",
+        "actor_obs_normalizer_state_dict",
+        "actor_optimizer_state_dict",
+        "critic_model_state_dict",
+        "critic_obs_normalizer_state_dict",
+        "critic_optimizer_state_dict",
+        "experiment_config",
+        "infos",
+        "iter",
+        "iteration"
+      ],
+      "iter": 1,
+      "iteration": 1,
+      "has_env_state": false,
+      "model_state_prefixes": {
+        "actor_model_state_dict": [
+          "actor_module",
+          "std"
+        ],
+        "critic_model_state_dict": [
+          "critic_module"
+        ]
+      },
+      "teacher_loaded": null,
+      "num_teachers": null,
+      "ppo_coef": null,
+      "normalizers_are_none": {
+        "actor_obs_normalizer_state_dict": true,
+        "critic_obs_normalizer_state_dict": true
+      }
+    },
+    "pure": {
+      "source": "/outputs/final-cloud-acceptance/results/smoke/student-pure/PHP-research/20261010_041432-student-pure-locomotion/model_00001.pt",
+      "sha256": "959b668595ef7b8339eff616135d8011c0ad5ad887b00eae6f7ae8cc0769c77c",
+      "bytes": 11247879,
+      "top_level_keys": [
+        "experiment_config",
+        "iter",
+        "iteration",
+        "learning_rate",
+        "model_state_dict",
+        "num_teachers",
+        "optimizer_state_dict",
+        "teacher_loaded"
+      ],
+      "iter": 1,
+      "iteration": 1,
+      "has_env_state": false,
+      "model_state_prefixes": {
+        "model_state_dict": [
+          "depth_backbone",
+          "std",
+          "student",
+          "teacher_obs_normalizers",
+          "teachers"
+        ]
+      },
+      "teacher_loaded": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "num_teachers": 5,
+      "ppo_coef": null,
+      "normalizers_are_none": {}
+    },
+    "mixed": {
+      "source": "/outputs/final-cloud-acceptance/results/smoke/student-finetune/PHP-research/20261010_041630-student-finetune-locomotion/model_00001.pt",
+      "sha256": "8b7afb88adb5c6cf4ab599bd89a6d8e673695d74d7f9f10fc14fc7aa7e22422a",
+      "bytes": 50849709,
+      "top_level_keys": [
+        "experiment_config",
+        "iter",
+        "iteration",
+        "learning_rate",
+        "model_state_dict",
+        "num_teachers",
+        "optimizer_state_dict",
+        "ppo_coef",
+        "teacher_loaded"
+      ],
+      "iter": 1,
+      "iteration": 1,
+      "has_env_state": false,
+      "model_state_prefixes": {
+        "model_state_dict": [
+          "critic",
+          "depth_backbone",
+          "std",
+          "student",
+          "teacher_obs_normalizers",
+          "teachers"
+        ]
+      },
+      "teacher_loaded": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "num_teachers": 5,
+      "ppo_coef": 0.0001,
+      "normalizers_are_none": {}
+    }
+  }
+}

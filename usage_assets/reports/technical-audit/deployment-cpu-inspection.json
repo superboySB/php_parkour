@@ -1,0 +1,389 @@
+{
+  "scope": "CPU read-only asset/ONNX/installed SDK inspection; no simulation or physical robot execution",
+  "models": [
+    {
+      "path": "/data/assets/student/depth_backbone.onnx",
+      "sha256": "5b22466a218944e3b0ab0f4f82a910e3eec35375ee03e7fb94eb65fa88431b56",
+      "bytes": 105240,
+      "inputs": [
+        {
+          "name": "depth_image",
+          "shape": [
+            1,
+            58,
+            87
+          ]
+        }
+      ],
+      "outputs": [
+        {
+          "name": "depth_latent",
+          "shape": [
+            1,
+            32
+          ]
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "path": "/data/assets/student/student.onnx",
+      "sha256": "e426c4206181d511b838c76efc48e43636299b76cb5a15183977011589931628",
+      "bytes": 13841549,
+      "inputs": [
+        {
+          "name": "obs",
+          "shape": [
+            1,
+            140
+          ]
+        },
+        {
+          "name": "time_step",
+          "shape": [
+            1,
+            1
+          ]
+        }
+      ],
+      "outputs": [
+        {
+          "name": "actions",
+          "shape": [
+            1,
+            29
+          ]
+        },
+        {
+          "name": "joint_pos",
+          "shape": [
+            1,
+            29
+          ]
+        },
+        {
+          "name": "joint_vel",
+          "shape": [
+            1,
+            29
+          ]
+        },
+        {
+          "name": "body_pos_w",
+          "shape": [
+            1,
+            32,
+            3
+          ]
+        },
+        {
+          "name": "body_quat_w",
+          "shape": [
+            1,
+            32,
+            4
+          ]
+        },
+        {
+          "name": "body_lin_vel_w",
+          "shape": [
+            1,
+            32,
+            3
+          ]
+        },
+        {
+          "name": "body_ang_vel_w",
+          "shape": [
+            1,
+            32,
+            3
+          ]
+        }
+      ],
+      "metadata": {
+        "joint_names": "left_hip_pitch_joint,left_hip_roll_joint,left_hip_yaw_joint,left_knee_joint,left_ankle_pitch_joint,left_ankle_roll_joint,right_hip_pitch_joint,right_hip_roll_joint,right_hip_yaw_joint,right_knee_joint,right_ankle_pitch_joint,right_ankle_roll_joint,waist_yaw_joint,waist_roll_joint,waist_pitch_joint,left_shoulder_pitch_joint,left_shoulder_roll_joint,left_shoulder_yaw_joint,left_elbow_joint,left_wrist_roll_joint,left_wrist_pitch_joint,left_wrist_yaw_joint,right_shoulder_pitch_joint,right_shoulder_roll_joint,right_shoulder_yaw_joint,right_elbow_joint,right_wrist_roll_joint,right_wrist_pitch_joint,right_wrist_yaw_joint",
+        "action_scale": "1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000",
+        "default_joint_pos": "-0.312,0.000,0.000,0.669,-0.363,0.000,-0.312,0.000,0.000,0.669,-0.363,0.000,0.000,0.000,0.000,0.200,0.200,0.000,0.600,0.000,0.000,0.000,0.200,-0.200,0.000,0.600,0.000,0.000,0.000",
+        "joint_stiffness": "40.179,99.098,40.179,99.098,28.501,28.501,40.179,99.098,40.179,99.098,28.501,28.501,40.179,28.501,28.501,14.251,14.251,14.251,14.251,14.251,16.778,16.778,14.251,14.251,14.251,14.251,14.251,16.778,16.778",
+        "joint_damping": "2.558,6.309,2.558,6.309,1.814,1.814,2.558,6.309,2.558,6.309,1.814,1.814,2.558,1.814,1.814,0.907,0.907,0.907,0.907,0.907,1.068,1.068,0.907,0.907,0.907,0.907,0.907,1.068,1.068",
+        "kp": "40.179,99.098,40.179,99.098,28.501,28.501,40.179,99.098,40.179,99.098,28.501,28.501,40.179,28.501,28.501,14.251,14.251,14.251,14.251,14.251,16.778,16.778,14.251,14.251,14.251,14.251,14.251,16.778,16.778",
+        "kd": "2.558,6.309,2.558,6.309,1.814,1.814,2.558,6.309,2.558,6.309,1.814,1.814,2.558,1.814,1.814,0.907,0.907,0.907,0.907,0.907,1.068,1.068,0.907,0.907,0.907,0.907,0.907,1.068,1.068",
+        "command_names": "motion_command",
+        "observation_names": "robot_anchor_projected_gravity,base_ang_vel,dof_pos,dof_vel,actions,velocity_command,placeholder",
+        "anchor_body_name": "torso_link",
+        "body_names": "pelvis,left_hip_roll_link,left_knee_link,left_ankle_roll_link,right_hip_roll_link,right_knee_link,right_ankle_roll_link,torso_link,left_shoulder_roll_link,left_elbow_link,left_wrist_yaw_link,right_shoulder_roll_link,right_elbow_link,right_wrist_yaw_link"
+      },
+      "joint_names_equal_robot_preset": true,
+      "default_joint_pos_equal_robot_preset": true,
+      "model_order_from_robot": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28
+      ],
+      "robot_order_from_model": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28
+      ],
+      "metadata_kp_equal_robot_preset": true,
+      "metadata_kd_equal_robot_preset": true
+    }
+  ],
+  "robot_preset": {
+    "dof_names": [
+      "left_hip_pitch_joint",
+      "left_hip_roll_joint",
+      "left_hip_yaw_joint",
+      "left_knee_joint",
+      "left_ankle_pitch_joint",
+      "left_ankle_roll_joint",
+      "right_hip_pitch_joint",
+      "right_hip_roll_joint",
+      "right_hip_yaw_joint",
+      "right_knee_joint",
+      "right_ankle_pitch_joint",
+      "right_ankle_roll_joint",
+      "waist_yaw_joint",
+      "waist_roll_joint",
+      "waist_pitch_joint",
+      "left_shoulder_pitch_joint",
+      "left_shoulder_roll_joint",
+      "left_shoulder_yaw_joint",
+      "left_elbow_joint",
+      "left_wrist_roll_joint",
+      "left_wrist_pitch_joint",
+      "left_wrist_yaw_joint",
+      "right_shoulder_pitch_joint",
+      "right_shoulder_roll_joint",
+      "right_shoulder_yaw_joint",
+      "right_elbow_joint",
+      "right_wrist_roll_joint",
+      "right_wrist_pitch_joint",
+      "right_wrist_yaw_joint"
+    ],
+    "default_dof_angles": [
+      -0.312,
+      0.0,
+      0.0,
+      0.669,
+      -0.363,
+      0.0,
+      -0.312,
+      0.0,
+      0.0,
+      0.669,
+      -0.363,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.2,
+      0.2,
+      0.0,
+      0.6,
+      0.0,
+      0.0,
+      0.0,
+      0.2,
+      -0.2,
+      0.0,
+      0.6,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "motor_kp": [
+      40.179,
+      99.098,
+      40.179,
+      99.098,
+      28.501,
+      28.501,
+      40.179,
+      99.098,
+      40.179,
+      99.098,
+      28.501,
+      28.501,
+      40.179,
+      28.501,
+      28.501,
+      14.251,
+      14.251,
+      14.251,
+      14.251,
+      14.251,
+      16.778,
+      16.778,
+      14.251,
+      14.251,
+      14.251,
+      14.251,
+      14.251,
+      16.778,
+      16.778
+    ],
+    "motor_kd": [
+      2.558,
+      6.309,
+      2.558,
+      6.309,
+      1.814,
+      1.814,
+      2.558,
+      6.309,
+      2.558,
+      6.309,
+      1.814,
+      1.814,
+      2.558,
+      1.814,
+      1.814,
+      0.907,
+      0.907,
+      0.907,
+      0.907,
+      0.907,
+      1.068,
+      1.068,
+      0.907,
+      0.907,
+      0.907,
+      0.907,
+      0.907,
+      1.068,
+      1.068
+    ],
+    "motor2joint": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28
+    ],
+    "joint2motor": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28
+    ],
+    "joint_offsets_deg": null,
+    "message_type": "HG"
+  },
+  "sdk": {
+    "package": "far-unitree-sdk",
+    "version": "0.1.6",
+    "binary": "/opt/php/envs/inference/lib/python3.12/site-packages/unitree_interface/unitree_interface.cpython-312-x86_64-linux-gnu.so",
+    "binary_sha256": "40632e9e05cb7e931c136eaa9ead62df37a19a905b7b38378f5c337040130f5a",
+    "matching_binary_literals": [
+      "unitree_hg::msg::dds_::LowCmd_",
+      "unitree_hg::msg::dds_::LowState_",
+      "rt/lowcmd",
+      "rt/lowstate",
+      "unitree_hg::msg::dds_::LowState_",
+      "unitree_hg::msg::dds_::LowCmd_"
+    ]
+  }
+}

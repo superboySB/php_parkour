@@ -1,0 +1,892 @@
+{
+  "schema_version": 1,
+  "created_at_utc": "2026-10-10T04:58:45.110290+00:00",
+  "git_head": "79d82bb673edb7a9980ebcc251ff1672e1fd4176",
+  "holosoma_head": "4a0bf04cde5930af5ed59da797568d32be972525",
+  "image_id": "sha256:88254ac0b90a3056375145601d741aa3e08726e18412d201a3c7e7915a23996f",
+  "scope": "Read-only source + CPU asset/model/binary inspection and existing runtime evidence; no GPU task, no physical robot, no runtime code edits, no Git commit.",
+  "fact_count": 25,
+  "facts": [
+    {
+      "id": "upstream_real_data_boundary",
+      "claim": "本次从已有 G1 发布数据库/native motions开始；未采集人体动作、未重跑原始 MoCap→OmniRetarget。详见 motion-data audit。",
+      "status": "source_and_existing_assets",
+      "references": [
+        {
+          "path": "README.md",
+          "line": 23,
+          "end_line": 29
+        }
+      ],
+      "evidence": [
+        "outputs/research/technical-audit/motion-data.json"
+      ]
+    },
+    {
+      "id": "native_conversion",
+      "claim": "BM29 joints/30 bodies转native qpos36 XYZ+wxyz+29与qvel35；HS32 foot_contact_point复制ankle_roll而非重算接触点。",
+      "status": "implemented_and_cpu_verified",
+      "references": [
+        {
+          "path": "wbt_training/training_runs/motion_convert.py",
+          "line": 23,
+          "end_line": 35
+        },
+        {
+          "path": "wbt_training/training_runs/motion_convert.py",
+          "line": 44,
+          "end_line": 108
+        },
+        {
+          "path": "wbt_training/config_values/robot_config.py",
+          "line": 12,
+          "end_line": 108
+        }
+      ],
+      "evidence": [
+        "usage_assets/reports/motion-conversion.json"
+      ]
+    },
+    {
+      "id": "asset_formats",
+      "claim": "Isaac训练URDF临时转换USD；MuJoCo使用独立MJCF。活动关节名相同不代表动力学完全一致。",
+      "status": "implemented_and_static_cpu_inspected",
+      "references": [
+        {
+          "path": "wbt_training/config_values/experiment.py",
+          "line": 100,
+          "end_line": 117
+        },
+        {
+          "path": "thirdparty/holosoma/src/holosoma/holosoma/simulator/isaacsim/isaacsim.py",
+          "line": 346,
+          "end_line": 379
+        },
+        {
+          "path": "run_php_sim.sh",
+          "line": 32,
+          "end_line": 39
+        }
+      ],
+      "evidence": [
+        "outputs/research/technical-audit/asset-description-inspection.json"
+      ]
+    },
+    {
+      "id": "unified_frames",
+      "claim": "unified root quaternion xyzw/linear+angular world；MuJoCo freejoint angular local双向转换；SDK IMU wxyz/body gyro。",
+      "status": "implemented_simulation_path",
+      "references": [
+        {
+          "path": "thirdparty/holosoma/src/holosoma/holosoma/simulator/isaacsim/isaacsim.py",
+          "line": 1055,
+          "end_line": 1081
+        },
+        {
+          "path": "thirdparty/holosoma/src/holosoma/holosoma/simulator/mujoco/mujoco.py",
+          "line": 1102,
+          "end_line": 1125
+        },
+        {
+          "path": "thirdparty/holosoma/src/holosoma/holosoma/bridge/base/basic_sdk2py_bridge.py",
+          "line": 286,
+          "end_line": 315
+        }
+      ]
+    },
+    {
+      "id": "sdk_root_zero",
+      "claim": "Unitree SDK adapter root XYZ和linear velocity为零占位，depth student不消费；c键录制不能称真实世界轨迹或原生training bundle。",
+      "status": "source_and_existing_recording_verified",
+      "references": [
+        {
+          "path": "thirdparty/holosoma/src/holosoma_inference/holosoma_inference/sdk/unitree/unitree_interface.py",
+          "line": 45,
+          "end_line": 64
+        },
+        {
+          "path": "thirdparty/holosoma/src/holosoma_inference/holosoma_inference/policies/depth_distillation.py",
+          "line": 434,
+          "end_line": 470
+        }
+      ],
+      "evidence": [
+        "usage_assets/reports/deployment-summary.json"
+      ]
+    },
+    {
+      "id": "imu_frame_gap",
+      "claim": "源码注释称硬件IMU是torso，但_get_anchor_quat无real/sim分支总乘waist chain；实际硬件SDK frame需真实消息标定，未证明是bug或已兼容。",
+      "status": "hardware_unverified_conditional_gap",
+      "references": [
+        {
+          "path": "thirdparty/holosoma/src/holosoma_inference/holosoma_inference/policies/depth_distillation.py",
+          "line": 342,
+          "end_line": 379
+        },
+        {
+          "path": "thirdparty/holosoma/src/holosoma/holosoma/data/robots/g1/g1_29dof_halfspherehand.xml",
+          "line": 476,
+          "end_line": 478
+        }
+      ]
+    },
+    {
+      "id": "teacher_dimensions",
+      "claim": "当前官方preset teacher actor449/critic575，非398/449；原始privileged height scan/reference输入不是部署D435i actor。",
+      "status": "source_derived",
+      "actor_dim": 449,
+      "critic_dim": 575,
+      "references": [
+        {
+          "path": "wbt_training/config_values/terrain.py",
+          "line": 112,
+          "end_line": 171
+        },
+        {
+          "path": "thirdparty/holosoma/src/holosoma/holosoma/managers/observation/manager.py",
+          "line": 159,
+          "end_line": 171
+        }
+      ],
+      "evidence": [
+        "outputs/research/technical-audit/learning.md"
+      ]
+    },
+    {
+      "id": "student_obs",
+      "claim": "训练actor108+latent32；部署按actions29,gyro3,q29,dq29,torso gravity3,command15,latent32拼成140。",
+      "status": "source_and_onnx_verified",
+      "references": [
+        {
+          "path": "wbt_training/config_values/depth_distillation.py",
+          "line": 50,
+          "end_line": 87
+        },
+        {
+          "path": "thirdparty/holosoma/src/holosoma_inference/holosoma_inference/config/config_values/observation.py",
+          "line": 177,
+          "end_line": 218
+        },
+        {
+          "path": "thirdparty/holosoma/src/holosoma_inference/holosoma_inference/policies/depth_distillation.py",
+          "line": 373,
+          "end_line": 412
+        },
+        {
+          "path": "thirdparty/holosoma/src/holosoma_inference/holosoma_inference/policies/depth_distillation.py",
+          "line": 483,
+          "end_line": 520
+        }
+      ],
+      "evidence": [
+        "usage_assets/reports/onnx-released.json",
+        "outputs/research/technical-audit/deployment-cpu-inspection.json"
+      ]
+    },
+    {
+      "id": "camera_geometry",
+      "claim": "106x60 metric image-plane depth,HFOV89.5/VFOV58.5953,torso(.01,.01,.44),RPY(1,27,1)并转换camera +Z→MuJoCo -Z。",
+      "status": "implemented_simulation_path",
+      "references": [
+        {
+          "path": "thirdparty/holosoma/src/holosoma/holosoma/sensors/warp/camera_config/d435i_depth_config.py",
+          "line": 16,
+          "end_line": 59
+        },
+        {
+          "path": "thirdparty/holosoma/src/holosoma/holosoma/config_values/wbt/g1/sensor.py",
+          "line": 134,
+          "end_line": 168
+        },
+        {
+          "path": "thirdparty/holosoma/src/holosoma/holosoma/sensors/warp/camera_kernels_warp.py",
+          "line": 138,
+          "end_line": 142
+        },
+        {
+          "path": "thirdparty/holosoma/src/holosoma/holosoma/sensors/warp/camera_kernels_warp.py",
+          "line": 195,
+          "end_line": 197
+        }
+      ]
+    },
+    {
+      "id": "depth_preprocess",
+      "claim": "clip .3..3→crop top2 left/right4→58x98→bicubic antialias alignFalse58x87→postfar clamp/empty .15→normalize;近侧undershoot与训练noise故不是严格[-.5,.5]。",
+      "status": "implemented_and_prior_cpu_tests",
+      "references": [
+        {
+          "path": "thirdparty/holosoma/src/holosoma/holosoma/managers/observation/terms/depth.py",
+          "line": 272,
+          "end_line": 297
+        },
+        {
+          "path": "thirdparty/holosoma/src/holosoma/holosoma/managers/observation/terms/depth.py",
+          "line": 353,
+          "end_line": 366
+        },
+        {
+          "path": "thirdparty/holosoma/src/holosoma/holosoma/simulator/plugins/depth_shm_plugin.py",
+          "line": 332,
+          "end_line": 364
+        }
+      ]
+    },
+    {
+      "id": "camera_randomization",
+      "claim": "外参每env初始化平移±.025m,R/P/Y±2.5/3/2.5degree；训练有edge/holes/Gaussian .03m +每envoffset .03m。默认模拟插件无此扰动。",
+      "status": "source_implemented",
+      "references": [
+        {
+          "path": "thirdparty/holosoma/src/holosoma/holosoma/sensors/warp/camera_config/d435i_depth_config.py",
+          "line": 28,
+          "end_line": 40
+        },
+        {
+          "path": "thirdparty/holosoma/src/holosoma/holosoma/sensors/warp/camera_sensor.py",
+          "line": 118,
+          "end_line": 164
+        },
+        {
+          "path": "thirdparty/holosoma/src/holosoma/holosoma/managers/observation/terms/depth.py",
+          "line": 103,
+          "end_line": 120
+        },
+        {
+          "path": "thirdparty/holosoma/src/holosoma/holosoma/managers/observation/terms/depth.py",
+          "line": 299,
+          "end_line": 354
+        }
+      ]
+    },
+    {
+      "id": "depth_latency",
+      "claim": "训练buffer6、随机3/4控制frame=名义60/80ms；模拟plugin10Hz render default latency_frames0，1 rendered frame=100ms，policy50Hz重复最新frame。",
+      "status": "source_implemented",
+      "references": [
+        {
+          "path": "wbt_training/config_values/depth_distillation.py",
+          "line": 124,
+          "end_line": 146
+        },
+        {
+          "path": "thirdparty/holosoma/src/holosoma/holosoma/managers/observation/terms/depth.py",
+          "line": 202,
+          "end_line": 242
+        },
+        {
+          "path": "thirdparty/holosoma/src/holosoma/holosoma/config_types/plugin.py",
+          "line": 459,
+          "end_line": 477
+        }
+      ]
+    },
+    {
+      "id": "eval_noise",
+      "claim": "native get_eval_config不关闭actor group noise；实测teacher evalconfig actor enable_noise True。显式group关闭也不关闭depth内部扰动/延迟。",
+      "status": "source_and_saved_config_verified",
+      "references": [
+        {
+          "path": "thirdparty/holosoma/src/holosoma/holosoma/config_types/experiment.py",
+          "line": 213,
+          "end_line": 246
+        },
+        {
+          "path": "thirdparty/holosoma/src/holosoma/holosoma/envs/base_task/base_task.py",
+          "line": 358,
+          "end_line": 362
+        },
+        {
+          "path": "thirdparty/holosoma/src/holosoma/holosoma/managers/observation/manager.py",
+          "line": 130,
+          "end_line": 141
+        },
+        {
+          "path": "thirdparty/holosoma/src/holosoma/holosoma/managers/observation/terms/depth.py",
+          "line": 299,
+          "end_line": 354
+        },
+        {
+          "path": "usage_assets/reports/official-pilot-quality/actual-eval-config.yaml",
+          "line": 247
+        }
+      ]
+    },
+    {
+      "id": "seeding",
+      "claim": "eval helper seed42及独立obstacle_seed42；全局Python/NumPy/Torch seeds，torch_deterministic默认False。seed不消除逐ticknoise，非跨硬件bitwise保证。",
+      "status": "source_and_saved_config_verified",
+      "references": [
+        {
+          "path": "scripts/research/eval_quality.sh",
+          "line": 24,
+          "end_line": 25
+        },
+        {
+          "path": "wbt_training/config_values/terrain.py",
+          "line": 438,
+          "end_line": 454
+        },
+        {
+          "path": "thirdparty/holosoma/src/holosoma/holosoma/utils/common.py",
+          "line": 93,
+          "end_line": 112
+        },
+        {
+          "path": "thirdparty/holosoma/src/holosoma/holosoma/config_types/experiment.py",
+          "line": 63,
+          "end_line": 74
+        }
+      ]
+    },
+    {
+      "id": "depth_transport",
+      "claim": "SHM float32(1,1,58,87)20184B且消费者只读copy；seq heartbeat是liveness非原子seqlock图像协议/端到端时延测量。",
+      "status": "implemented_and_simulation_verified",
+      "references": [
+        {
+          "path": "thirdparty/holosoma/src/holosoma/holosoma/simulator/plugins/depth_shm_plugin.py",
+          "line": 148,
+          "end_line": 163
+        },
+        {
+          "path": "thirdparty/holosoma/src/holosoma/holosoma/simulator/plugins/depth_shm_plugin.py",
+          "line": 273,
+          "end_line": 309
+        },
+        {
+          "path": "thirdparty/holosoma/src/holosoma_inference/holosoma_inference/sensors/depth_shm.py",
+          "line": 88,
+          "end_line": 160
+        }
+      ]
+    },
+    {
+      "id": "depth_safety_scope",
+      "claim": "有heartbeat时.25s警告/.5s或FAILED stiff hold；从未收到heartbeat只警告、unchecked。真实depth acquisition daemon未本次部署。",
+      "status": "source_implemented_hardware_unverified",
+      "references": [
+        {
+          "path": "thirdparty/holosoma/src/holosoma_inference/holosoma_inference/config/config_types/task.py",
+          "line": 107,
+          "end_line": 126
+        },
+        {
+          "path": "thirdparty/holosoma/src/holosoma_inference/holosoma_inference/sensors/depth_heartbeat.py",
+          "line": 158,
+          "end_line": 168
+        },
+        {
+          "path": "thirdparty/holosoma/src/holosoma_inference/holosoma_inference/policies/depth_distillation.py",
+          "line": 604,
+          "end_line": 641
+        },
+        {
+          "path": "thirdparty/holosoma/src/holosoma_inference/holosoma_inference/policies/depth_distillation.py",
+          "line": 158,
+          "end_line": 186
+        }
+      ]
+    },
+    {
+      "id": "onnx_pair",
+      "claim": "两个模型为一条组合policy，CPU ORT；实际single-frame backbone1x58x87→1x32，studentobs1x140+time_step1x1→action1x29及辅助reference。",
+      "status": "actual_cpu_inspected_and_prior_runtime_verified",
+      "references": [
+        {
+          "path": "thirdparty/holosoma/src/holosoma_inference/holosoma_inference/policies/depth_distillation.py",
+          "line": 189,
+          "end_line": 258
+        }
+      ],
+      "evidence": [
+        "outputs/research/technical-audit/deployment-cpu-inspection.json",
+        "usage_assets/reports/onnx-released.json"
+      ]
+    },
+    {
+      "id": "reference_outputs_not_control",
+      "claim": "当前student exporter只嵌第一段reference；部署time_step恒0、只取actions，不按reference输出进行动作replay。",
+      "status": "source_verified",
+      "references": [
+        {
+          "path": "wbt_training/utils/exporter.py",
+          "line": 69,
+          "end_line": 103
+        },
+        {
+          "path": "thirdparty/holosoma/src/holosoma_inference/holosoma_inference/policies/depth_distillation.py",
+          "line": 483,
+          "end_line": 520
+        }
+      ]
+    },
+    {
+      "id": "metadata_vs_preset",
+      "claim": "joint_names/action_scale读metadata，显式presetKP/KD优先；default_joint_posmetadata未被policy读取，实际发布权重与preset逐项相同。",
+      "status": "source_and_cpu_verified",
+      "references": [
+        {
+          "path": "thirdparty/holosoma/src/holosoma_inference/holosoma_inference/policies/depth_distillation.py",
+          "line": 256,
+          "end_line": 340
+        },
+        {
+          "path": "thirdparty/holosoma/src/holosoma_inference/holosoma_inference/policies/base.py",
+          "line": 70,
+          "end_line": 79
+        },
+        {
+          "path": "thirdparty/holosoma/src/holosoma_inference/holosoma_inference/policies/base.py",
+          "line": 458,
+          "end_line": 498
+        },
+        {
+          "path": "thirdparty/holosoma/src/holosoma_inference/holosoma_inference/policies/base.py",
+          "line": 587
+        },
+        {
+          "path": "thirdparty/holosoma/src/holosoma_inference/holosoma_inference/policies/base.py",
+          "line": 743,
+          "end_line": 746
+        }
+      ],
+      "evidence": [
+        "outputs/research/technical-audit/deployment-cpu-inspection.json"
+      ]
+    },
+    {
+      "id": "pd_and_joint_mapping",
+      "claim": "29joint canonicalleftleg6/rightleg6/waist3/leftarm7/rightarm7，按joint_names双向重排；50Hz目标q，模拟500Hz PD+torque clip，非policy直接输出29torques。",
+      "status": "implemented_and_simulation_verified",
+      "references": [
+        {
+          "path": "thirdparty/holosoma/src/holosoma_inference/holosoma_inference/config/config_values/robot.py",
+          "line": 60,
+          "end_line": 105
+        },
+        {
+          "path": "thirdparty/holosoma/src/holosoma_inference/holosoma_inference/policies/depth_distillation.py",
+          "line": 500,
+          "end_line": 520
+        },
+        {
+          "path": "thirdparty/holosoma/src/holosoma_inference/holosoma_inference/policies/base.py",
+          "line": 688,
+          "end_line": 757
+        },
+        {
+          "path": "thirdparty/holosoma/src/holosoma/holosoma/simulator/shared/simulator_bridge.py",
+          "line": 74,
+          "end_line": 80
+        },
+        {
+          "path": "thirdparty/holosoma/src/holosoma/holosoma/bridge/base/basic_sdk2py_bridge.py",
+          "line": 104,
+          "end_line": 108
+        }
+      ]
+    },
+    {
+      "id": "dds_contract",
+      "claim": "far-unitree-sdk0.1.6，G1/HG/PR；wheel binary含hgLowCmd/LowState与rt/lowcmd,rt/lowstate literal；本次未构造SDK或物理连接。",
+      "status": "source_and_cpu_binary_inspected",
+      "references": [
+        {
+          "path": "thirdparty/holosoma/src/holosoma_inference/holosoma_inference/sdk/unitree/unitree_interface.py",
+          "line": 26,
+          "end_line": 39
+        },
+        {
+          "path": "thirdparty/holosoma/src/holosoma/holosoma/bridge/unitree/unitree_sdk2py_bridge.py",
+          "line": 22,
+          "end_line": 57
+        }
+      ],
+      "evidence": [
+        "outputs/research/technical-audit/deployment-cpu-inspection.json"
+      ]
+    },
+    {
+      "id": "clock_and_command",
+      "claim": "Isaac200Hz/decim4=50Hz，nativeframe每tick+1；公开296clipfps50匹配但不自动重采样任意fps。部署15维categoricalcommand0..11已用/12..14保留，不是自主导航。",
+      "status": "source_and_asset_inventory",
+      "references": [
+        {
+          "path": "thirdparty/holosoma/src/holosoma/holosoma/config_values/simulator.py",
+          "line": 36,
+          "end_line": 55
+        },
+        {
+          "path": "thirdparty/holosoma/src/holosoma/holosoma/managers/command/terms/wbt.py",
+          "line": 90
+        },
+        {
+          "path": "thirdparty/holosoma/src/holosoma/holosoma/managers/command/terms/wbt.py",
+          "line": 1000,
+          "end_line": 1014
+        },
+        {
+          "path": "thirdparty/holosoma/src/holosoma_inference/holosoma_inference/policies/depth_distillation.py",
+          "line": 54,
+          "end_line": 60
+        },
+        {
+          "path": "thirdparty/holosoma/src/holosoma_inference/holosoma_inference/policies/depth_distillation.py",
+          "line": 539,
+          "end_line": 579
+        }
+      ],
+      "evidence": [
+        "outputs/research/coverage-asset-inventory.json"
+      ]
+    },
+    {
+      "id": "active_dr",
+      "claim": "PHP当前启用material friction/restitution、COM、dof bias/ankleextra、push；action_delay/PD gain/RFI关闭，无物理系统辨识证据。",
+      "status": "source_verified_hardware_unverified",
+      "references": [
+        {
+          "path": "wbt_training/config_values/terrain.py",
+          "line": 200,
+          "end_line": 284
+        },
+        {
+          "path": "wbt_training/config_values/terrain.py",
+          "line": 67,
+          "end_line": 78
+        },
+        {
+          "path": "wbt_training/config_values/depth_distillation.py",
+          "line": 55,
+          "end_line": 87
+        }
+      ]
+    },
+    {
+      "id": "real_robot_boundary",
+      "claim": "PHP launcher用lo与MuJoCo depth plugin；可复用SDK改物理网卡/注入depth，但未提供已验真实D435i采集与标定。上游realWBT dancing示例不代表PHP student真机完成。",
+      "status": "implemented_interfaces_hardware_unverified",
+      "references": [
+        {
+          "path": "run_php_sim.sh",
+          "line": 32,
+          "end_line": 39
+        },
+        {
+          "path": "run_php_inference.sh",
+          "line": 59,
+          "end_line": 63
+        },
+        {
+          "path": "thirdparty/holosoma/src/holosoma_inference/holosoma_inference/policies/depth_distillation.py",
+          "line": 158,
+          "end_line": 186
+        },
+        {
+          "path": "thirdparty/holosoma/src/holosoma_inference/docs/workflows/real-robot-wbt.md",
+          "line": 13,
+          "end_line": 60
+        }
+      ]
+    },
+    {
+      "id": "validation_scope",
+      "claim": "已验ONNXcontract/本地MuJoCo17代表scene真实物理闭环/Isaac训练eval接口；17scene14threshold events，非skills success；official20iterquality false，本地16GB64env迁移接口已实测。",
+      "status": "existing_real_runtime_evidence",
+      "references": [],
+      "evidence": [
+        "usage_assets/reports/onnx-released.json",
+        "usage_assets/reports/sim2sim-scene-matrix.json",
+        "usage_assets/reports/official-pilot-quality/summary.json",
+        "usage_assets/reports/official-pilot-local-quality/summary.json"
+      ]
+    }
+  ],
+  "source_hashes": [
+    {
+      "path": "README.md",
+      "bytes": 4001,
+      "sha256": "6a82740cce4702d8ef9867f413b38d60c8e7dace95ffbe7762e57ad87e90e7ab"
+    },
+    {
+      "path": "run_php_inference.sh",
+      "bytes": 2287,
+      "sha256": "c90e010800a9395b5b2aaa3913d5f48c5907d5c2a9a1dfa8da9aef1359669c58"
+    },
+    {
+      "path": "run_php_sim.sh",
+      "bytes": 1605,
+      "sha256": "03a497ce5a22e9fa2e86820d40c4e2faa8d0fc0e89ca583e92b821f53c36af58"
+    },
+    {
+      "path": "scripts/research/eval_quality.sh",
+      "bytes": 1174,
+      "sha256": "8434b82dba5acc79deb785b9c6e7ba057879c0300b95dd1f30d6036bc6b1d7c5"
+    },
+    {
+      "path": "thirdparty/holosoma/src/holosoma/holosoma/bridge/base/basic_sdk2py_bridge.py",
+      "bytes": 15265,
+      "sha256": "8453b7a734cc20776ee3514935a730cc0ff12bdbdff56b9f9047fe635512dab6"
+    },
+    {
+      "path": "thirdparty/holosoma/src/holosoma/holosoma/bridge/unitree/unitree_sdk2py_bridge.py",
+      "bytes": 7185,
+      "sha256": "249020b197a4d365d2174e057ff54f7e23ed48f9dc6dcf647338a2b3d17a1166"
+    },
+    {
+      "path": "thirdparty/holosoma/src/holosoma/holosoma/config_types/experiment.py",
+      "bytes": 10694,
+      "sha256": "77a369834ac89987e7aedaafcff03a7b65e613ba137c37dc839a7e50a0e8d290"
+    },
+    {
+      "path": "thirdparty/holosoma/src/holosoma/holosoma/config_types/plugin.py",
+      "bytes": 24369,
+      "sha256": "e8c4609e689a3b2229e9d34d5b549dd16244c194936f8885c17da34cddba951c"
+    },
+    {
+      "path": "thirdparty/holosoma/src/holosoma/holosoma/config_values/simulator.py",
+      "bytes": 3420,
+      "sha256": "5ee77fe1b1f2704544f7bed9659510b61c7c94c5f05477e57d73199bd87b62dc"
+    },
+    {
+      "path": "thirdparty/holosoma/src/holosoma/holosoma/config_values/wbt/g1/sensor.py",
+      "bytes": 6879,
+      "sha256": "14d0f8e4fd4a8353db6a2275c0a608f868a6661d7d8640f31b0d66cc788873b4"
+    },
+    {
+      "path": "thirdparty/holosoma/src/holosoma/holosoma/data/robots/g1/g1_29dof_halfspherehand.xml",
+      "bytes": 37266,
+      "sha256": "3d936f6c49deccb906f04f9d02ba109424b7a19a477674d1d3d3ced5b17d1ea0"
+    },
+    {
+      "path": "thirdparty/holosoma/src/holosoma/holosoma/envs/base_task/base_task.py",
+      "bytes": 27080,
+      "sha256": "4e66b8aea909c4ddc3d2cf344a33d5883c7e04edd1d0724be2b9e01b88ffe115"
+    },
+    {
+      "path": "thirdparty/holosoma/src/holosoma/holosoma/managers/command/terms/wbt.py",
+      "bytes": 82749,
+      "sha256": "4acfdb0d14e2877a1503bfb4508c6751db97d064ff270e99bdf74f489fe45d0a"
+    },
+    {
+      "path": "thirdparty/holosoma/src/holosoma/holosoma/managers/observation/manager.py",
+      "bytes": 15827,
+      "sha256": "3c5ac22ba33894ce42a4ac12cb067dfd59da33b52f8fca5fc30f16586f371470"
+    },
+    {
+      "path": "thirdparty/holosoma/src/holosoma/holosoma/managers/observation/terms/depth.py",
+      "bytes": 17116,
+      "sha256": "6d1483e1381e8ccb66aa6f23c236da2678783023a9b0f9d71af25942f133502c"
+    },
+    {
+      "path": "thirdparty/holosoma/src/holosoma/holosoma/sensors/warp/camera_config/d435i_depth_config.py",
+      "bytes": 3826,
+      "sha256": "217dfd41c6046d4c24f7ad3654810021f37232b4bf5d5de38e0ee51318959415"
+    },
+    {
+      "path": "thirdparty/holosoma/src/holosoma/holosoma/sensors/warp/camera_kernels_warp.py",
+      "bytes": 7811,
+      "sha256": "4c698aae6266b2d5f9c5b604c78073e5259c367c73f4fd3ab9e65ba2d77b1ef2"
+    },
+    {
+      "path": "thirdparty/holosoma/src/holosoma/holosoma/sensors/warp/camera_sensor.py",
+      "bytes": 10629,
+      "sha256": "92c84461c81a5173f7310ca4bb705a6bb313ba45330b45f0f22adf0bf1886bed"
+    },
+    {
+      "path": "thirdparty/holosoma/src/holosoma/holosoma/simulator/isaacsim/isaacsim.py",
+      "bytes": 80011,
+      "sha256": "2d20d063af240935260250a39aaace0028309efe4ce19c2a6915f0265be7e3a1"
+    },
+    {
+      "path": "thirdparty/holosoma/src/holosoma/holosoma/simulator/mujoco/mujoco.py",
+      "bytes": 90590,
+      "sha256": "7281feb29e34d7fd0cdf3d2f42e8f358e111eae8deeafcc6a6a22a69482a1049"
+    },
+    {
+      "path": "thirdparty/holosoma/src/holosoma/holosoma/simulator/plugins/depth_shm_plugin.py",
+      "bytes": 19677,
+      "sha256": "c148ae88d0909a50390750f01f9924e8d6ff0daf76ddfcd9a63002a845af4a81"
+    },
+    {
+      "path": "thirdparty/holosoma/src/holosoma/holosoma/simulator/shared/simulator_bridge.py",
+      "bytes": 7752,
+      "sha256": "b1fdde6e0939c24a490a7168400cc7b1d216f73482931b7e72c6ee10fd9e72d5"
+    },
+    {
+      "path": "thirdparty/holosoma/src/holosoma/holosoma/utils/common.py",
+      "bytes": 5427,
+      "sha256": "25d65373bfe84529775a014533e791daecd677032b11f96f0685fe68424115c5"
+    },
+    {
+      "path": "thirdparty/holosoma/src/holosoma_inference/docs/workflows/real-robot-wbt.md",
+      "bytes": 6495,
+      "sha256": "d494b73f234358ad85745b8528228c8f451edaab510af61db6b5f20ca2bb5758"
+    },
+    {
+      "path": "thirdparty/holosoma/src/holosoma_inference/holosoma_inference/config/config_types/task.py",
+      "bytes": 11679,
+      "sha256": "5e37ef03c99a53f3f64c339f74a4542ec4f4550f94985341b82f2530377690c2"
+    },
+    {
+      "path": "thirdparty/holosoma/src/holosoma_inference/holosoma_inference/config/config_values/observation.py",
+      "bytes": 7502,
+      "sha256": "58dd5660591b0eaaa86262170ff222ca39099c1570212e066823cedf84f067d3"
+    },
+    {
+      "path": "thirdparty/holosoma/src/holosoma_inference/holosoma_inference/config/config_values/robot.py",
+      "bytes": 11755,
+      "sha256": "c4926b695d54a92162813b4fc9e6ace10a00cfa2c6e8d93bb11db7e2b04944fa"
+    },
+    {
+      "path": "thirdparty/holosoma/src/holosoma_inference/holosoma_inference/policies/base.py",
+      "bytes": 41056,
+      "sha256": "616b862d3e4467cff2f3717d56605563050c5211d1fdebc1aa5baa70d67dcd5b"
+    },
+    {
+      "path": "thirdparty/holosoma/src/holosoma_inference/holosoma_inference/policies/depth_distillation.py",
+      "bytes": 34923,
+      "sha256": "ed512b487fc4c74adcf69eec0a98c0e54be84f08dedf97ead6a826fb3270f3e5"
+    },
+    {
+      "path": "thirdparty/holosoma/src/holosoma_inference/holosoma_inference/sdk/unitree/unitree_interface.py",
+      "bytes": 5272,
+      "sha256": "c97e8eda01f7b2ebe79b8f8449f13b0d6044fbf9f089902498d97c46667b6446"
+    },
+    {
+      "path": "thirdparty/holosoma/src/holosoma_inference/holosoma_inference/sensors/depth_heartbeat.py",
+      "bytes": 6923,
+      "sha256": "54f933d9b30abfe95c4417a81973b94172332197e2611e06a5af9fe748b2f8ad"
+    },
+    {
+      "path": "thirdparty/holosoma/src/holosoma_inference/holosoma_inference/sensors/depth_shm.py",
+      "bytes": 6968,
+      "sha256": "13855a7e38331a1caaa52ef099d5c18cb589ac5c4aeaa316f3bedaa1312db8ed"
+    },
+    {
+      "path": "usage_assets/reports/official-pilot-quality/actual-eval-config.yaml",
+      "bytes": 31085,
+      "sha256": "0842ce0f15d99d8b1111031a3aa792415af8143e81c2f6c31e0e8f9c1bffd6e8"
+    },
+    {
+      "path": "wbt_training/config_values/depth_distillation.py",
+      "bytes": 11889,
+      "sha256": "fd20b124ddf64b4815c30a862e8798150f931834f5fda79e916be0e845ff830a"
+    },
+    {
+      "path": "wbt_training/config_values/experiment.py",
+      "bytes": 11989,
+      "sha256": "416e2d1b8720bc4bf4da98681386c6ad85bc4c3804334608820bf6cf3e20d112"
+    },
+    {
+      "path": "wbt_training/config_values/robot_config.py",
+      "bytes": 8542,
+      "sha256": "0b1dfbc9d27c095e568255e78ef68ee0afe70314a6381ea6c4a8dd5384193c48"
+    },
+    {
+      "path": "wbt_training/config_values/terrain.py",
+      "bytes": 21880,
+      "sha256": "1c73a314d9016ce923843a1b54273e608c94053fefdbb727056faab718523f7f"
+    },
+    {
+      "path": "wbt_training/training_runs/motion_convert.py",
+      "bytes": 6041,
+      "sha256": "fa60ada9a0bc9b00bf17df0d97e411c0d0e17c84d3e1e6fd296feabbf0dd6cf5"
+    },
+    {
+      "path": "wbt_training/utils/exporter.py",
+      "bytes": 13616,
+      "sha256": "ae6fa7776bbe3c97c9c70921bd5f0a15137189e6603bd09b0a5d9b73fdf2045e"
+    }
+  ],
+  "evidence_hashes": [
+    {
+      "path": "outputs/research/coverage-asset-inventory.json",
+      "bytes": 200547,
+      "sha256": "5e6b6edbea234f89ab4789b74e13c42d878dfbdbb5ddd047fe8209e9a7712f70"
+    },
+    {
+      "path": "outputs/research/technical-audit/asset-description-inspection.json",
+      "bytes": 5877,
+      "sha256": "a78fa057621d0376f224833046a3c3eaed155511b8d13cc1f2882b63d6745da0"
+    },
+    {
+      "path": "outputs/research/technical-audit/deployment-cpu-inspection.json",
+      "bytes": 8681,
+      "sha256": "50bc0f7dc46015df22b242bbb39445b518b751b54eb317e32a36206d92d186ee"
+    },
+    {
+      "path": "outputs/research/technical-audit/learning.md",
+      "bytes": 30847,
+      "sha256": "849a2400c0fee3964298926e459679bec7f689ef6385c0e43373604de0afddf5"
+    },
+    {
+      "path": "outputs/research/technical-audit/motion-data-specimens.json",
+      "bytes": 34461,
+      "sha256": "b3ab37eec503f66fbe2e9aaf16545f5cf8e646984c007c2380f10d5d17abb5f5"
+    },
+    {
+      "path": "outputs/research/technical-audit/motion-data.json",
+      "bytes": 33748,
+      "sha256": "70cccd1d8a8aced4e53df6818e9c5fac4fd86b72ef0451eadc245c3a8694c6b4"
+    },
+    {
+      "path": "usage_assets/reports/deployment-summary.json",
+      "bytes": 11246,
+      "sha256": "32f11040f646353bee157278722e176ec74da3d87cda76a3432a1c86efb9f606"
+    },
+    {
+      "path": "usage_assets/reports/motion-conversion.json",
+      "bytes": 1887,
+      "sha256": "6c1eb69efb45445b99ba989d55bdac75f9aeb70b772161a584424371b994a82f"
+    },
+    {
+      "path": "usage_assets/reports/official-pilot-local-quality/summary.json",
+      "bytes": 980,
+      "sha256": "18fc85a4bbf8cdf08b251dad32a9c87d931ca2c7e4d578cfba003021acab7a39"
+    },
+    {
+      "path": "usage_assets/reports/official-pilot-quality/summary.json",
+      "bytes": 3271,
+      "sha256": "99f6421bcc07e235d8c89934140d6230c096af70ece7cefa8280927c175f484b"
+    },
+    {
+      "path": "usage_assets/reports/onnx-released.json",
+      "bytes": 26443,
+      "sha256": "c95164eb65415ecd66c55c1dd60c8b168e7513ffb5cdf7e348c508aa44e94d3d"
+    },
+    {
+      "path": "usage_assets/reports/sim2sim-scene-matrix.json",
+      "bytes": 107138,
+      "sha256": "1ff2dd59a01cca2deb9ff9b226548eb7bd887e052b7fe02aa84a4c3fb818b39b"
+    },
+    {
+      "path": "usage_assets/reports/training-cloud-final/student-onnx/export-student-pure-onnx-validation-0.json",
+      "bytes": 26762,
+      "sha256": "dff06de3fddda8b486efa59597a3365b6dbffabe7407365251f2938a12a063c1"
+    },
+    {
+      "path": "usage_assets/reports/training-cloud-final/teacher-onnx/locomotion.json",
+      "bytes": 86418,
+      "sha256": "a91b0a63af126de8e6e0a318b39e12ea792eb204a5fb5d6a70b28b14ca034831"
+    }
+  ],
+  "markdown_path": "outputs/research/technical-audit/real2sim2real.md",
+  "markdown_sha256": "a69eae7a0fd4978d4f11244d2bd52546f1c1a560d54359390709a1a57ca16e30",
+  "unverified": [
+    "Physical G1 execution and SDK IMU frame",
+    "Real D435i acquisition daemon / intrinsics and extrinsics calibration",
+    "Mass/inertia/motor/friction physical system identification",
+    "Complete real sensor-to-actuator latency distribution",
+    "Official full-schedule convergence and 296-clip teacher/pure/finetune coverage"
+  ],
+  "important_qualifications": [
+    "449/575 teacher and 108+32 student apply to the actual official PHP preset, not arbitrary upstream policies.",
+    "Native evaluation retains actor group noise by default and depth term internal stochastic augmentation.",
+    "Static URDF/MJCF declared masses are not a measurement of converted simulator assets or physical robot.",
+    "Merged loader ID0 is not raw clip coverage; student expert IDs have different semantics.",
+    "Local official20iter checkpoint64env evaluation passed interface/memory migration only, quality_verified=false."
+  ]
+}

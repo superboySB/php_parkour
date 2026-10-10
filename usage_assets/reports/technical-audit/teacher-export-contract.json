@@ -1,0 +1,408 @@
+{
+  "schema_version": 1,
+  "created_at_utc": "2026-10-10T05:04:06.851782+00:00",
+  "git_head": "79d82bb673edb7a9980ebcc251ff1672e1fd4176",
+  "scope": "Read-only source audit, existing actual CPU ONNX validation and arithmetic; no new GPU task, no new model export, no PT/ONNX parity claim.",
+  "teacher": {
+    "entry": {
+      "class": "_OnnxMotionPolicyExporter",
+      "source": {
+        "path": "thirdparty/holosoma/src/holosoma/holosoma/utils/inference_helpers.py",
+        "lines": [
+          142,
+          167
+        ],
+        "sha256": "8954b3e768193867a826bf70c99e2581b8c81bf6497bc9658be00f8074e46f29"
+      }
+    },
+    "export_call": {
+      "path": "thirdparty/holosoma/src/holosoma/holosoma/agents/ppo/ppo.py",
+      "lines": [
+        694,
+        714
+      ],
+      "sha256": "0899268dff8e9f8def38db6b76d2e4afd193c3d7a4ef28550217dc142d6898f6"
+    },
+    "inputs": [
+      {
+        "name": "obs",
+        "shape": [
+          1,
+          449
+        ],
+        "type": "tensor(float)"
+      },
+      {
+        "name": "time_step",
+        "shape": [
+          1,
+          1
+        ],
+        "type": "tensor(float)"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "actions",
+        "shape": [
+          1,
+          29
+        ],
+        "type": "tensor(float)"
+      },
+      {
+        "name": "joint_pos",
+        "shape": [
+          1,
+          29
+        ],
+        "type": "tensor(float)"
+      },
+      {
+        "name": "joint_vel",
+        "shape": [
+          1,
+          29
+        ],
+        "type": "tensor(float)"
+      },
+      {
+        "name": "ref_pos_xyz",
+        "shape": [
+          1,
+          3
+        ],
+        "type": "tensor(float)"
+      },
+      {
+        "name": "ref_quat_xyzw",
+        "shape": [
+          1,
+          4
+        ],
+        "type": "tensor(float)"
+      }
+    ],
+    "time_step_semantics": {
+      "dtype": "float32 input cast to long",
+      "selection": "squeeze last dim then clamp max=T-1; select embedded reference row",
+      "actor_dependence": "actions = actor(obs), no direct time_step argument in actor; upstream constructs privileged obs including reference command",
+      "source": {
+        "path": "thirdparty/holosoma/src/holosoma/holosoma/utils/inference_helpers.py",
+        "lines": [
+          190,
+          216
+        ],
+        "sha256": "8954b3e768193867a826bf70c99e2581b8c81bf6497bc9658be00f8074e46f29"
+      }
+    },
+    "embedded_reference": {
+      "coverage": "entire loaded/merged/preprocessed motion tensor, not first source clip",
+      "float32_columns_per_frame": {
+        "joint_pos": 29,
+        "joint_vel": 29,
+        "ref_pos_xyz": 3,
+        "ref_quat_xyzw": 4
+      },
+      "floats_per_frame": 65,
+      "bytes_per_float32": 4,
+      "bytes_per_frame": 260,
+      "quaternion": "runtime xyzw anchor body reference",
+      "source": {
+        "path": "thirdparty/holosoma/src/holosoma/holosoma/utils/inference_helpers.py",
+        "lines": [
+          151,
+          167
+        ],
+        "sha256": "8954b3e768193867a826bf70c99e2581b8c81bf6497bc9658be00f8074e46f29"
+      }
+    },
+    "locomotion_official_64_variants": {
+      "original_source_clip_count": 100,
+      "base_merged_frames": 71042,
+      "terrain_variants": 64,
+      "embedded_frames": 4546688,
+      "formula": "71042 * 64 * (29 + 29 + 3 + 4) * 4",
+      "reference_constant_bytes": 1182138880,
+      "reference_constant_decimal_GB": 1.18213888,
+      "reference_constant_GiB": 1.1009526252746582,
+      "note": "1.182GB is reference payload arithmetic, not learned network weights. Total graph also includes network, graph and metadata.",
+      "old_20iter_pilot_graph_bytes_from_prior_read_only_stat": 1183810736,
+      "old_pilot_stat_record": "outputs/research/coverage-followup-plan.md:96",
+      "old_pilot_stat_record_sha256": "7cc6cf5640d6a2a21ddd19942a3b2c1af0ec8ed23478b8e1a3095a3ac094c229",
+      "full_vs_eval": "A separate one-variant eval export would contain one variant and cannot replace the original 64-variant graph as if byte/content-equivalent.",
+      "default_preset_source": {
+        "path": "wbt_training/config_values/experiment.py",
+        "lines": [
+          60,
+          67
+        ],
+        "sha256": "416e2d1b8720bc4bf4da98681386c6ad85bc4c3804334608820bf6cf3e20d112"
+      }
+    },
+    "reference_preparation": [
+      {
+        "path": "wbt_training/utils/multi_motion_helpers.py",
+        "lines": [
+          26,
+          60
+        ],
+        "sha256": "6c4e16195f645bc93712a46a8e7188773aef1d0e66715bbba163a812dce62663"
+      },
+      {
+        "path": "wbt_training/utils/obstacle_helpers.py",
+        "lines": [
+          148,
+          176
+        ],
+        "sha256": "08716396ab009571d91dc4973ee3fa1a83b1f7b9b05e9a2db41ac048a7e1189a"
+      },
+      {
+        "path": "wbt_training/utils/obstacle_helpers.py",
+        "lines": [
+          368,
+          396
+        ],
+        "sha256": "08716396ab009571d91dc4973ee3fa1a83b1f7b9b05e9a2db41ac048a7e1189a"
+      }
+    ],
+    "metadata": {
+      "encoding": "native attach_onnx_metadata JSON values",
+      "keys": [
+        "dof_names",
+        "kp",
+        "kd",
+        "action_scale",
+        "command_ranges",
+        "robot_urdf",
+        "robot_urdf_path",
+        "experiment_config",
+        "iteration"
+      ],
+      "optional_legacy_key": "wandb_run_path only if attached; no W&B use implied by name",
+      "sources": [
+        {
+          "path": "thirdparty/holosoma/src/holosoma/holosoma/agents/ppo/ppo.py",
+          "lines": [
+            722,
+            747
+          ],
+          "sha256": "0899268dff8e9f8def38db6b76d2e4afd193c3d7a4ef28550217dc142d6898f6"
+        },
+        {
+          "path": "thirdparty/holosoma/src/holosoma/holosoma/agents/base_algo/base_algo.py",
+          "lines": [
+            63,
+            72
+          ],
+          "sha256": "b29d389ca908a8860545f1ada578c5fe408387aade0b21e51234c20470c39a5a"
+        }
+      ]
+    },
+    "actual_smoke_cpu_evidence": {
+      "path": "usage_assets/reports/training-cloud-final/teacher-onnx/locomotion.json",
+      "sha256": "a91b0a63af126de8e6e0a318b39e12ea792eb204a5fb5d6a70b28b14ca034831",
+      "model_sha256": "382585bcfe7fc9aafb901bff493fc022dba8531e1fea809e7578846306326aba",
+      "model_bytes": 20142615,
+      "source_variants": 1,
+      "motion_frames": 71042,
+      "reference_constants": [
+        {
+          "name": "",
+          "shape": [
+            71042,
+            29
+          ],
+          "bytes": 8240872
+        },
+        {
+          "name": "",
+          "shape": [
+            71042,
+            29
+          ],
+          "bytes": 8240872
+        },
+        {
+          "name": "",
+          "shape": [
+            71042,
+            3
+          ],
+          "bytes": 852504
+        },
+        {
+          "name": "",
+          "shape": [
+            71042,
+            4
+          ],
+          "bytes": 1136672
+        }
+      ],
+      "status": "passed",
+      "scope": "Teacher ONNX structure, metadata, deterministic CPU inference and exact embedded reference lookup; not policy quality or PT/ONNX numerical parity",
+      "saved_config_num_envs": 64,
+      "saved_config_preprocess_kwargs": {
+        "add_onpath_obstacle": true,
+        "num_variants": 1,
+        "obstacle_seed": 42
+      }
+    }
+  },
+  "student_contrast": {
+    "entry": {
+      "class": "_OnnxDepthStudentPolicyExporter",
+      "source": {
+        "path": "wbt_training/utils/exporter.py",
+        "lines": [
+          49,
+          103
+        ],
+        "sha256": "ae6fa7776bbe3c97c9c70921bd5f0a15137189e6603bd09b0a5d9b73fdf2045e"
+      }
+    },
+    "embedded_reference": "first true motion_ends + 1, or full tensor if no boundary; 32-body reference fields; not all merged clips or all variants",
+    "reference_floats_per_frame": 474,
+    "reference_float_columns": {
+      "joint_pos": 29,
+      "joint_vel": 29,
+      "body_pos_w": 96,
+      "body_quat_w": 128,
+      "body_lin_vel_w": 96,
+      "body_ang_vel_w": 96
+    },
+    "actor_inputs": "actor108 + depth latent32 = 140; depth backbone1x58x87 separately emits1x32",
+    "time_step_semantics": "selects auxiliary reference only; DepthDistillationPolicy supplies0 and consumes actions",
+    "deployment_source": {
+      "path": "thirdparty/holosoma/src/holosoma_inference/holosoma_inference/policies/depth_distillation.py",
+      "lines": [
+        483,
+        520
+      ],
+      "sha256": "ed512b487fc4c74adcf69eec0a98c0e54be84f08dedf97ead6a826fb3270f3e5"
+    },
+    "actual_smoke_cpu_evidence": {
+      "path": "usage_assets/reports/training-cloud-final/student-onnx/export-student-pure-onnx-validation-0.json",
+      "sha256": "dff06de3fddda8b486efa59597a3365b6dbffabe7407365251f2938a12a063c1",
+      "status": "passed",
+      "model_contracts": [
+        {
+          "sha256": "27a29b25e52f10be15158e2138afc4f465c046fafbb1111d7bab39b92000488f",
+          "bytes": 105254,
+          "inputs": [
+            {
+              "name": "depth_image",
+              "shape": [
+                1,
+                58,
+                87
+              ],
+              "dtype": "tensor(float)"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "depth_latent",
+              "shape": [
+                1,
+                32
+              ],
+              "dtype": "tensor(float)"
+            }
+          ]
+        },
+        {
+          "sha256": "586bd70acad2767a9db9bcc6c773ed0dcdb8a584c23f94e0a3b1884ccbe36797",
+          "bytes": 2710180,
+          "inputs": [
+            {
+              "name": "obs",
+              "shape": [
+                1,
+                140
+              ],
+              "dtype": "tensor(float)"
+            },
+            {
+              "name": "time_step",
+              "shape": [
+                1,
+                1
+              ],
+              "dtype": "tensor(float)"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "actions",
+              "shape": [
+                1,
+                29
+              ],
+              "dtype": "tensor(float)"
+            },
+            {
+              "name": "joint_pos",
+              "shape": [
+                1,
+                29
+              ],
+              "dtype": "tensor(float)"
+            },
+            {
+              "name": "joint_vel",
+              "shape": [
+                1,
+                29
+              ],
+              "dtype": "tensor(float)"
+            },
+            {
+              "name": "body_pos_w",
+              "shape": [
+                1,
+                32,
+                3
+              ],
+              "dtype": "tensor(float)"
+            },
+            {
+              "name": "body_quat_w",
+              "shape": [
+                1,
+                32,
+                4
+              ],
+              "dtype": "tensor(float)"
+            },
+            {
+              "name": "body_lin_vel_w",
+              "shape": [
+                1,
+                32,
+                3
+              ],
+              "dtype": "tensor(float)"
+            },
+            {
+              "name": "body_ang_vel_w",
+              "shape": [
+                1,
+                32,
+                3
+              ],
+              "dtype": "tensor(float)"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "limitations": [
+    "A reference row table embedded in ONNX does not prove original source clips were rolled out or tracked.",
+    "Teacher graph is not a directly deployable depth student: it expects privileged449-dimensional inputs.",
+    "CPU ONNX checks do not establish PT/ONNX numerical parity or locomotion skill quality.",
+    "Declared payload arithmetic describes current full 64-variant locomotion configuration; other skills/variant overrides have different frame counts."
+  ]
+}

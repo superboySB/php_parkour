@@ -2,6 +2,8 @@
 
 配置和首次启动见 [note.md](note.md)。本项目使用 Unitree G1 29 DOF，功能覆盖以 [验收定义](scripts/research/acceptance_matrix.json) 和代码注册表为准。本文件随真实运行结果更新；没有对应日志、JSON 和源文件校验记录的项目不记为通过。
 
+学习流程、输入输出、数据/label 来源与 real2sim2real 实现细节见独立的 [technical_pipeline.md](technical_pipeline.md)。
+
 先看真实结果：[17 场景物理闭环视频](usage_assets/sim2sim/scenarios/playback.html)、[17 场景参考动作播放页](usage_assets/motion_matching/playback.html)、[12 指令物理闭环视频](usage_assets/sim2sim/directions.mp4)、[逐项原始报告](usage_assets/reports/)。参考动作来自生成数组，闭环录像来自公开 ONNX 策略驱动的 MuJoCo，训练录像来自实际 Isaac checkpoint。
 
 在本地仓库运行下面的标准库服务后，可打开 `http://127.0.0.1:8088/sim2sim/scenarios/playback.html` 或 `http://127.0.0.1:8088/motion_matching/playback.html` 交互查看；不需要安装包。
@@ -146,6 +148,10 @@ smoke 采用显式缩小的并行环境、布局和迭代数，检查实际梯�
 独立质量入口还真实复跑本地未收敛教师：16 环境 × 100 control steps，共 32 env-seconds，49 次失败 reset、0 次超时；四项跟踪误差各记录 1600 个有限样本。它在 reset 清除状态前采样，关联 checkpoint SHA、实际录像和 17 个 `Evaluation/*` TensorBoard 标量。[质量 JSON](usage_assets/reports/isaac-local-quality.json)、[测试记录](usage_assets/reports/research-quality-training.xml)、[真实失败短片](usage_assets/isaac/local-teacher-quality.mp4)。报告的 motion ID 0 指顶层合并 NPZ，未记录原始动作片段的覆盖范围，不能据此声称覆盖全部 locomotion 数据。
 
 4096 环境、20 轮 pilot 的 checkpoint 也实际通过云端新版入口评估：64 环境 × 250 步，四项误差各有 16000 个有限样本，发生 **3971 次失败 reset、0 次超时**。这是同一批环境反复终止的回合总数；64 段录像均来自配置指定的环境 0，最长仅 0.08 秒，不能称为 64 个环境各录一段或学习成功。合并输入包含 100 个源动作边界，但 native teacher eval 每次从合并库起点重置，这次短回合只反复测试起始部分。[原始评估与语义核验](usage_assets/reports/official-pilot-quality/summary.md)、[最长失败原片](usage_assets/isaac/official-pilot-quality/longest-original.mp4)。
+
+随后将同一 PT 回传本地，实际完成 **16 GiB 卡上的 64 环境 × 250 步 Isaac 评估**，退出码 0、耗时 36.861 秒。35 次显存采样中，总峰值为 5797 MiB（含桌面），评估 compute process 峰值为 4826 MiB；可能漏掉短峰值。真实重建 1 variant 的地形/动作、四项误差各 16000 个有限样本、64 个新录像与 17 个 TensorBoard 标量均核验通过，仍有 3971 次失败 reset，最长原片 0.08 秒。[本地回传闭环完整记录](usage_assets/reports/official-pilot-local-quality/summary.md)。本次验证加载与仿真通路，不是收敛结论，也不证明本地能承担 4096 环境训练。
+
+正式长训的 **iteration 500 中间 PT** 已单独回传、校验远端/本地 SHA，并在同样 64 环境 × 250 步设置下实际评估：退出码 0、全程 wall 28.405 秒，累计 **75 次失败 reset、0 次超时**，四项误差各有 16000 个有限样本。3 段原片来自环境 0，最长 3.22 秒；相较 iteration 19 pilot 的失败次数减少，但两个 checkpoint 来自不同运行，且仍未完成课程，`quality_verified=false`。PT 从 iteration 0 到 500 的 actor/critic 权重均有真实非零更新。[检查点来源、权重差异与本地录像](usage_assets/reports/official-progress-0500-local/summary.md)。云端 20000 轮首教师及后续完整日程继续运行。
 
 ![本地未收敛教师的实际评估帧](usage_assets/isaac/local-teacher-quality.png)
 

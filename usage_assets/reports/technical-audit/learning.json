@@ -1,0 +1,1430 @@
+{
+  "schema_version": 1,
+  "audit_date": "2026-10-10",
+  "method": "read-only source audit plus CPU container import/dataclasses.asdict; no GPU jobs; no cloud source mutations",
+  "root_commit": "79d82bb673edb7a9980ebcc251ff1672e1fd4176",
+  "holosoma_commit": "4a0bf04cde5930af5ed59da797568d32be972525",
+  "source_alias": {
+    "H/": "thirdparty/holosoma/src/holosoma/holosoma/"
+  },
+  "markdown": "outputs/research/technical-audit/learning.md",
+  "resolved_defaults": {
+    "path": "outputs/research/technical-audit/resolved-defaults.json",
+    "sha256": "870972d7cb4c159e68335278ece924ee19dc7fe3deb8dd0b4b1f04d1de7d2319",
+    "stage": "typed preset before terrain preprocessing"
+  },
+  "presets": {
+    "teacher": {
+      "name": "exp:g1-wbt-terrain-ref-noscale",
+      "num_envs_single_gpu": 4096,
+      "seed": 42,
+      "torch_deterministic": false,
+      "preprocess": {
+        "add_onpath_obstacle": true,
+        "num_variants": 64
+      },
+      "algorithm_target": "holosoma.agents.ppo.ppo.PPO",
+      "algorithm_config": {
+        "module_dict": {
+          "actor": {
+            "type": "MLP",
+            "input_dim": [
+              "actor_obs"
+            ],
+            "output_dim": [
+              "robot_action_dim"
+            ],
+            "layer_config": {
+              "hidden_dims": [
+                512,
+                256,
+                128
+              ],
+              "activation": "ELU",
+              "dropout_prob": 0.0,
+              "use_layer_norm": false,
+              "encoder_activation": "ELU",
+              "encoder_output_dim": null,
+              "encoder_hidden_dims": null,
+              "encoder_input_name": "",
+              "input_channels": 1,
+              "input_height": 1,
+              "input_width": 1,
+              "hidden_channels": null,
+              "kernel_size": 3,
+              "stride": 1,
+              "padding": "same",
+              "module_input_name": []
+            },
+            "min_noise_std": null,
+            "min_mean_noise_std": null
+          },
+          "critic": {
+            "type": "MLP",
+            "input_dim": [
+              "critic_obs"
+            ],
+            "output_dim": [
+              1
+            ],
+            "layer_config": {
+              "hidden_dims": [
+                512,
+                256,
+                128
+              ],
+              "activation": "ELU",
+              "dropout_prob": 0.0,
+              "use_layer_norm": false,
+              "encoder_activation": "ELU",
+              "encoder_output_dim": null,
+              "encoder_hidden_dims": null,
+              "encoder_input_name": "",
+              "input_channels": 1,
+              "input_height": 1,
+              "input_width": 1,
+              "hidden_channels": null,
+              "kernel_size": 3,
+              "stride": 1,
+              "padding": "same",
+              "module_input_name": []
+            },
+            "min_noise_std": null,
+            "min_mean_noise_std": null
+          }
+        },
+        "num_learning_epochs": 5,
+        "num_mini_batches": 4,
+        "clip_param": 0.2,
+        "gamma": 0.99,
+        "lam": 0.95,
+        "value_loss_coef": 1.0,
+        "entropy_coef": 0.005,
+        "actor_learning_rate": 0.001,
+        "actor_optimizer": {
+          "_target_": "torch.optim.AdamW",
+          "weight_decay": 0.0
+        },
+        "critic_learning_rate": 0.001,
+        "critic_optimizer": {
+          "_target_": "torch.optim.AdamW",
+          "weight_decay": 0.0
+        },
+        "max_grad_norm": 1.0,
+        "schedule": "adaptive",
+        "desired_kl": 0.01,
+        "use_symmetry": false,
+        "symmetry_actor_coef": 1.0,
+        "symmetry_critic_coef": 0.0,
+        "num_steps_per_env": 24,
+        "save_interval": 500,
+        "load_optimizer": true,
+        "init_noise_std": 1.0,
+        "num_learning_iterations": 20000,
+        "init_at_random_ep_len": false,
+        "empirical_normalization": false,
+        "eval_callbacks": null,
+        "max_actor_learning_rate": null,
+        "min_actor_learning_rate": null,
+        "max_critic_learning_rate": null,
+        "min_critic_learning_rate": null
+      },
+      "single_gpu_rollout_size": 98304,
+      "single_gpu_minibatch_size": 24576,
+      "updates_per_iteration": 20
+    },
+    "pure": {
+      "name": "exp:g1-wbt-terrain-warp-distill",
+      "num_envs_single_gpu": 2048,
+      "seed": 42,
+      "torch_deterministic": false,
+      "preprocess": {
+        "add_onpath_obstacle": true,
+        "num_variants": 3
+      },
+      "algorithm_target": "wbt_training.utils.student_teacher.PhpDistillation",
+      "algorithm_config": {
+        "module": {
+          "student_hidden_dims": [
+            512,
+            256,
+            128
+          ],
+          "teacher_hidden_dims": [
+            512,
+            256,
+            128
+          ],
+          "critic_hidden_dims": [
+            512,
+            256,
+            128
+          ],
+          "activation": "ELU",
+          "depth_backbone": "holosoma.agents.modules.depth_backbone.DepthOnlyFCBackbone58x87Small",
+          "depth_output_dim": 32
+        },
+        "num_learning_epochs": 2,
+        "num_mini_batches": 96,
+        "learning_rate": 0.0003,
+        "max_grad_norm": 1.0,
+        "num_steps_per_env": 24,
+        "save_interval": 500,
+        "init_noise_std": 0.001,
+        "num_learning_iterations": 10000,
+        "empirical_normalization": false,
+        "distill_loss_type": "mse",
+        "distillation_warmup_steps": 0,
+        "eval_callbacks": null
+      },
+      "single_gpu_rollout_size": 49152,
+      "single_gpu_minibatch_size": 512,
+      "updates_per_iteration": 192
+    },
+    "finetune": {
+      "name": "exp:g1-wbt-terrain-warp-distill-finetune",
+      "num_envs_single_gpu": 2048,
+      "seed": 42,
+      "torch_deterministic": false,
+      "preprocess": {
+        "add_onpath_obstacle": true,
+        "num_variants": 3
+      },
+      "algorithm_target": "wbt_training.utils.student_teacher.PhpDistillationPPO",
+      "algorithm_config": {
+        "module": {
+          "student_hidden_dims": [
+            2048,
+            1024,
+            512,
+            256,
+            128
+          ],
+          "teacher_hidden_dims": [
+            512,
+            256,
+            128
+          ],
+          "critic_hidden_dims": [
+            512,
+            256,
+            128
+          ],
+          "activation": "ELU",
+          "depth_backbone": "holosoma.agents.modules.depth_backbone.DepthOnlyFCBackbone58x87Small",
+          "depth_output_dim": 32
+        },
+        "num_learning_epochs": 2,
+        "num_mini_batches": 96,
+        "clip_param": 0.2,
+        "gamma": 0.99,
+        "lam": 0.95,
+        "value_loss_coef": 1.0,
+        "entropy_coef": 0.001,
+        "learning_rate": 0.0003,
+        "max_grad_norm": 1.0,
+        "schedule": "adaptive",
+        "desired_kl": 0.01,
+        "num_steps_per_env": 24,
+        "save_interval": 500,
+        "init_noise_std": 0.01,
+        "num_learning_iterations": 30000,
+        "empirical_normalization": false,
+        "ppo_start_epoch": 0,
+        "dagger_end_epoch": 10000,
+        "distill_loss_type": "mse",
+        "dagger_loss_coef": 10.0,
+        "distillation_warmup_steps": 0,
+        "weight_decay": 0.0,
+        "depth_weight_decay": 0.01,
+        "eval_callbacks": null
+      },
+      "single_gpu_rollout_size": 49152,
+      "single_gpu_minibatch_size": 512,
+      "updates_per_iteration": 192
+    }
+  },
+  "observations": {
+    "concatenation_order": "sorted term names",
+    "flat_history_length": 1,
+    "flat_clip": [
+      -100,
+      100
+    ],
+    "teacher_actor": {
+      "shape": [
+        "N",
+        449
+      ],
+      "enable_noise": true,
+      "terms": [
+        {
+          "name": "actions",
+          "width": 29,
+          "start": 0,
+          "end_exclusive": 29,
+          "scale": 1.0,
+          "uniform_noise_half_width": 0,
+          "meaning": "raw previous policy action, not torque"
+        },
+        {
+          "name": "base_ang_vel",
+          "width": 3,
+          "start": 29,
+          "end_exclusive": 32,
+          "scale": 1.0,
+          "uniform_noise_half_width": 0.2,
+          "meaning": "actual angular velocity in base frame"
+        },
+        {
+          "name": "base_lin_vel",
+          "width": 3,
+          "start": 32,
+          "end_exclusive": 35,
+          "scale": 1.0,
+          "uniform_noise_half_width": 0.5,
+          "meaning": "actual linear velocity in base frame"
+        },
+        {
+          "name": "dof_pos",
+          "width": 29,
+          "start": 35,
+          "end_exclusive": 64,
+          "scale": 1.0,
+          "uniform_noise_half_width": 0.01,
+          "meaning": "actual q minus default_dof_pos"
+        },
+        {
+          "name": "dof_vel",
+          "width": 29,
+          "start": 64,
+          "end_exclusive": 93,
+          "scale": 1.0,
+          "uniform_noise_half_width": 0.5,
+          "meaning": "actual joint velocity"
+        },
+        {
+          "name": "height_scan",
+          "width": 289,
+          "start": 93,
+          "end_exclusive": 382,
+          "scale": 1.0,
+          "uniform_noise_half_width": 0,
+          "meaning": "17x17 terrain mesh ray oracle; sensor_z-hit_z-.5"
+        },
+        {
+          "name": "motion_command",
+          "width": 58,
+          "start": 382,
+          "end_exclusive": 440,
+          "scale": 1.0,
+          "uniform_noise_half_width": 0,
+          "meaning": "reference joint positions29 concatenated reference velocities29"
+        },
+        {
+          "name": "motion_ref_ori_b",
+          "width": 6,
+          "start": 440,
+          "end_exclusive": 446,
+          "scale": 1.0,
+          "uniform_noise_half_width": 0.05,
+          "meaning": "reference anchor orientation relative actual robot anchor: rotation first two columns"
+        },
+        {
+          "name": "motion_ref_pos_b",
+          "width": 3,
+          "start": 446,
+          "end_exclusive": 449,
+          "scale": 1.0,
+          "uniform_noise_half_width": 0.25,
+          "meaning": "reference anchor position in actual robot anchor frame"
+        }
+      ]
+    },
+    "teacher_critic": {
+      "shape": [
+        "N",
+        575
+      ],
+      "enable_noise": false,
+      "terms": [
+        {
+          "name": "actions",
+          "width": 29,
+          "start": 0,
+          "end_exclusive": 29,
+          "scale": 1.0,
+          "uniform_noise_half_width": 0,
+          "meaning": "raw previous policy action, not torque"
+        },
+        {
+          "name": "base_ang_vel",
+          "width": 3,
+          "start": 29,
+          "end_exclusive": 32,
+          "scale": 1.0,
+          "uniform_noise_half_width": 0,
+          "meaning": "actual angular velocity in base frame"
+        },
+        {
+          "name": "base_lin_vel",
+          "width": 3,
+          "start": 32,
+          "end_exclusive": 35,
+          "scale": 1.0,
+          "uniform_noise_half_width": 0,
+          "meaning": "actual linear velocity in base frame"
+        },
+        {
+          "name": "dof_pos",
+          "width": 29,
+          "start": 35,
+          "end_exclusive": 64,
+          "scale": 1.0,
+          "uniform_noise_half_width": 0,
+          "meaning": "actual q minus default_dof_pos"
+        },
+        {
+          "name": "dof_vel",
+          "width": 29,
+          "start": 64,
+          "end_exclusive": 93,
+          "scale": 1.0,
+          "uniform_noise_half_width": 0,
+          "meaning": "actual joint velocity"
+        },
+        {
+          "name": "height_scan",
+          "width": 289,
+          "start": 93,
+          "end_exclusive": 382,
+          "scale": 1.0,
+          "uniform_noise_half_width": 0,
+          "meaning": "17x17 terrain mesh ray oracle; sensor_z-hit_z-.5"
+        },
+        {
+          "name": "motion_command",
+          "width": 58,
+          "start": 382,
+          "end_exclusive": 440,
+          "scale": 1.0,
+          "uniform_noise_half_width": 0,
+          "meaning": "reference joint positions29 concatenated reference velocities29"
+        },
+        {
+          "name": "motion_ref_ori_b",
+          "width": 6,
+          "start": 440,
+          "end_exclusive": 446,
+          "scale": 1.0,
+          "uniform_noise_half_width": 0,
+          "meaning": "reference anchor orientation relative actual robot anchor: rotation first two columns"
+        },
+        {
+          "name": "motion_ref_pos_b",
+          "width": 3,
+          "start": 446,
+          "end_exclusive": 449,
+          "scale": 1.0,
+          "uniform_noise_half_width": 0,
+          "meaning": "reference anchor position in actual robot anchor frame"
+        },
+        {
+          "name": "robot_body_ori_b",
+          "width": 84,
+          "start": 449,
+          "end_exclusive": 533,
+          "scale": 1.0,
+          "uniform_noise_half_width": 0,
+          "meaning": "14 actual tracked-body rotations relative actual anchor, six values each"
+        },
+        {
+          "name": "robot_body_pos_b",
+          "width": 42,
+          "start": 533,
+          "end_exclusive": 575,
+          "scale": 1.0,
+          "uniform_noise_half_width": 0,
+          "meaning": "14 actual tracked-body positions relative actual anchor"
+        }
+      ]
+    },
+    "student_actor": {
+      "shape": [
+        "N",
+        108
+      ],
+      "enable_noise": true,
+      "terms": [
+        {
+          "name": "actions",
+          "width": 29,
+          "start": 0,
+          "end_exclusive": 29,
+          "scale": 1.0,
+          "uniform_noise_half_width": 0,
+          "meaning": "raw previous policy action"
+        },
+        {
+          "name": "base_ang_vel",
+          "width": 3,
+          "start": 29,
+          "end_exclusive": 32,
+          "scale": 1.0,
+          "uniform_noise_half_width": 0.2,
+          "meaning": "actual base angular velocity"
+        },
+        {
+          "name": "dof_pos",
+          "width": 29,
+          "start": 32,
+          "end_exclusive": 61,
+          "scale": 1.0,
+          "uniform_noise_half_width": 0.01,
+          "meaning": "q-default_dof_pos"
+        },
+        {
+          "name": "dof_vel",
+          "width": 29,
+          "start": 61,
+          "end_exclusive": 90,
+          "scale": 1.0,
+          "uniform_noise_half_width": 0.5,
+          "meaning": "joint velocity"
+        },
+        {
+          "name": "robot_anchor_projected_gravity",
+          "width": 3,
+          "start": 90,
+          "end_exclusive": 93,
+          "scale": 1.0,
+          "uniform_noise_half_width": 0.05,
+          "meaning": "actual robot anchor quaternion inverse-rotated gravity"
+        },
+        {
+          "name": "velocity_command",
+          "width": 15,
+          "start": 93,
+          "end_exclusive": 108,
+          "scale": 1.0,
+          "uniform_noise_half_width": 0,
+          "meaning": "current reference-frame 15-way one-hot vel_cmd"
+        }
+      ]
+    },
+    "student_teacher_obs": {
+      "shape": [
+        "N",
+        450
+      ],
+      "enable_noise": false,
+      "teacher_actor_terms_without_noise": true,
+      "routing_column": 449,
+      "teacher_input_after_strip": 449
+    },
+    "student_critic": {
+      "shape": [
+        "N",
+        575
+      ],
+      "enable_noise": false,
+      "same_as_teacher_critic": true
+    },
+    "student_depth": {
+      "shape": [
+        "N",
+        58,
+        87
+      ],
+      "history_frames_to_policy": 1,
+      "latency_buffer_length": 6,
+      "latency_frames_inclusive": [
+        3,
+        4
+      ],
+      "latency_ms_at_50hz": [
+        60,
+        80
+      ],
+      "normalize": "(depth_m-.3)/2.7-.5",
+      "final_clamp": false,
+      "outer_group_noise": false,
+      "internal_augmentation_independent": true
+    },
+    "student_latent": 32,
+    "student_mlp_input": 140,
+    "eval_noise": "Default eval config does not override group.enable_noise; actor outer uniform noise remains unless explicitly overridden. Depth internal augmentation is independent."
+  },
+  "actions": {
+    "width": 29,
+    "dof_names": [
+      "left_hip_pitch_joint",
+      "left_hip_roll_joint",
+      "left_hip_yaw_joint",
+      "left_knee_joint",
+      "left_ankle_pitch_joint",
+      "left_ankle_roll_joint",
+      "right_hip_pitch_joint",
+      "right_hip_roll_joint",
+      "right_hip_yaw_joint",
+      "right_knee_joint",
+      "right_ankle_pitch_joint",
+      "right_ankle_roll_joint",
+      "waist_yaw_joint",
+      "waist_roll_joint",
+      "waist_pitch_joint",
+      "left_shoulder_pitch_joint",
+      "left_shoulder_roll_joint",
+      "left_shoulder_yaw_joint",
+      "left_elbow_joint",
+      "left_wrist_roll_joint",
+      "left_wrist_pitch_joint",
+      "left_wrist_yaw_joint",
+      "right_shoulder_pitch_joint",
+      "right_shoulder_roll_joint",
+      "right_shoulder_yaw_joint",
+      "right_elbow_joint",
+      "right_wrist_roll_joint",
+      "right_wrist_pitch_joint",
+      "right_wrist_yaw_joint"
+    ],
+    "meaning": "joint-position deltas about env.default_dof_pos",
+    "formula": "q_target=default_dof_pos+clip(raw_action,-100,100)*1.0",
+    "action_scale": 1.0,
+    "effort_over_kp_scaling": false,
+    "control": "IsaacSim implicit PD position target",
+    "physics_hz": 200,
+    "policy_hz": 50,
+    "decimation": 4,
+    "deployment_mujoco_physics_hz": 500,
+    "deployment_policy_hz": 50,
+    "research_sim2sim_decimation": 10,
+    "native_interactive_wrapper_sets_decimation10": false,
+    "trained_action": "sampled diagonal Gaussian",
+    "inference_action": "Gaussian mean"
+  },
+  "teacher_rewards": {
+    "dt_multiplier": 0.02,
+    "formula": "dt * sum(weight_j * raw_reward_j)",
+    "terms": [
+      {
+        "name": "motion_global_ref_position_error_exp",
+        "weight": 1,
+        "sigma": 0.3,
+        "formula": "exp(-L2(anchor_ref-anchor_robot)^2/sigma^2)"
+      },
+      {
+        "name": "motion_global_ref_orientation_error_exp",
+        "weight": 1,
+        "sigma": 0.4,
+        "formula": "exp(-quat_error_magnitude(anchor_ref,anchor_robot)^2/sigma^2)"
+      },
+      {
+        "name": "motion_relative_body_position_error_exp",
+        "weight": 1,
+        "sigma": 0.3,
+        "formula": "exp(-mean14(L2(yaw_aligned_ref_body-actual_body)^2)/sigma^2)"
+      },
+      {
+        "name": "motion_relative_body_orientation_error_exp",
+        "weight": 1,
+        "sigma": 0.4,
+        "formula": "exp(-mean14(quat_error_magnitude(yaw_aligned_ref_body,actual_body)^2)/sigma^2)"
+      },
+      {
+        "name": "motion_global_body_lin_vel",
+        "weight": 1,
+        "sigma": 1,
+        "formula": "exp(-mean14(L2(world_ref_linear_velocity-world_actual_linear_velocity)^2)/sigma^2)"
+      },
+      {
+        "name": "motion_global_body_ang_vel",
+        "weight": 1,
+        "sigma": 3.14,
+        "formula": "exp(-mean14(L2(world_ref_angular_velocity-world_actual_angular_velocity)^2)/sigma^2)"
+      },
+      {
+        "name": "action_rate_l2",
+        "weight": -0.1,
+        "formula": "sum29((raw_action_t-raw_action_previous)^2)"
+      },
+      {
+        "name": "limits_dof_pos",
+        "weight": -10,
+        "soft_limit_fraction": 0.9,
+        "formula": "sum29(relu(soft_lower-q)+relu(q-soft_upper))"
+      },
+      {
+        "name": "undesired_contacts",
+        "weight": -0.5,
+        "force_norm_threshold": 1,
+        "physics_history_length": 3,
+        "formula": "count selected bodies whose max_history force norm > threshold"
+      }
+    ],
+    "no_explicit_joint_action_supervised_loss": true
+  },
+  "termination": {
+    "timeout_s": 10,
+    "anchor_position_l2_m": 0.5,
+    "orientation": "absolute difference of projected-gravity z > .8, not quaternion-angle .8 rad",
+    "four_ankle_wrist_body_l2_m": 0.5,
+    "objects_conditional_only": true,
+    "motion_end_is_command_resampling": true,
+    "student_curriculum": {
+      "common_step_start": 24000,
+      "common_step_end": 240000,
+      "multiplier_start": 1,
+      "multiplier_end": 2,
+      "after_end": "remains2",
+      "counter_increments_per_vector_env_step": 1,
+      "expert_lost_thresholds_are_separate": true
+    }
+  },
+  "ppo": {
+    "gae": "delta=r+gamma*(1-done)*Vnext-V; A=delta+gamma*lambda*(1-done)*Anext; return=A+V",
+    "advantage_normalization": "whole rollout (global moments when multiGPU enabled)",
+    "surrogate": "mean(max(-A*ratio,-A*clip(ratio,.8,1.2)))",
+    "value_loss": "mean(max((V-return)^2,(Vold+clip(V-Vold,-.2,.2)-return)^2)); no .5 factor",
+    "actor_loss": "surrogate-.005*mean_entropy",
+    "critic_loss": "value_loss",
+    "symmetry_default_active": false,
+    "timeout_bootstrap": "reward += gamma*V(final_obs)",
+    "kl": "old Normal || new Normal, sum action dims",
+    "kl_lr_rule": {
+      "desired": 0.01,
+      "high": 0.02,
+      "low": 0.005,
+      "factor": 1.5,
+      "min": 1e-05,
+      "max": 0.01
+    }
+  },
+  "dagger": {
+    "label": "online frozen teacher actor deterministic mean29 on student-visited state; not dataset q/dq or human labels",
+    "teacher_detached": true,
+    "teacher_order": "same ordered five registries and checkpoints",
+    "routing": "current frame motion_idxs expertID; lost sets -1 => all-zero teacher action",
+    "sampling": "uniform expert then uniform frame from explicit per-expert pools; variants may interleave",
+    "buffer": "current rollout only; random permutation each epoch; clear after update",
+    "pure": {
+      "loss": "mean over batch and29 of (student_mean-teacher_action)^2",
+      "lost_zero_labels_masked": false,
+      "optimizer": "Adam student MLP+depth CNN only",
+      "critic": false,
+      "reward_in_loss": false,
+      "std_optimized": false
+    },
+    "mixed": {
+      "per_sample_bc": "d_n=1[teacher_action not all-zero]*mean29((student_mean-teacher_action)^2)",
+      "masked_denominator": "full batch, not valid count",
+      "scalar_ppo_ramp": "c_i=min(i/10000,.9); reaches .9 at i9000",
+      "std_lr_and_kl_active_when": "c_i>.1 (i>1000 for fresh default run)",
+      "loss": "Lvalue + mean(c_i*g_n*(surrogate_n-.001*entropy_n)) + mean((1-c_i*g_n)*10*d_n)",
+      "critic_input_independent_of_depth": true,
+      "value_loss_updates_depth": false,
+      "gradients": {
+        "value": [
+          "critic"
+        ],
+        "ppo_actor": [
+          "student_mlp",
+          "depth_cnn",
+          "std when LR active"
+        ],
+        "behavior": [
+          "student_mlp",
+          "depth_cnn"
+        ],
+        "teacher": [],
+        "gate": []
+      },
+      "logged_behavior": "mean((1-c_i*g_n)*d_n), excludes coefficient10",
+      "optimizer": "AdamW with groups student0wd,critic0wd,depth.01wd,std0wd"
+    }
+  },
+  "residual_ppo_gate": {
+    "default_enabled_mixed": true,
+    "pure_algorithm_uses_gate": false,
+    "binning": "B=floor(F/50)+1; bin(f)=floor(f*B/F), across combined frames",
+    "per_expert_or_clip_table": false,
+    "residual": "raw mean29 squared mean-action error, detach; keep excludes all-zero teacher labels",
+    "ema_alpha": 0.001,
+    "ema": "sum <- .999sum+.001step_residual_sum; count <- .999count+.001step_sample_count",
+    "warmup_kept_individual_samples": 500000,
+    "minimum_seen_bins": 8,
+    "cold_gate": 1,
+    "quantiles": [
+      0.5,
+      0.95
+    ],
+    "unseen_bin_normalized_gate": 1,
+    "normalization": "clip((residual_mean-q50)/max(q95-q50,1e-8),0,1)",
+    "lookahead_bins": 1,
+    "smear": "max current and next bin: raises earlier bins before hard future bin",
+    "clip_or_expert_boundary_mask": false,
+    "floor": 0.5,
+    "adaptive_blend": 1,
+    "checkpoint_restored": false
+  },
+  "resume_limitations": [
+    "gate EMA/count/seen not checkpointed",
+    "WBT common_step_counter/curriculum not restored",
+    "weights/optimizer/iteration/LR/c restore does not imply exact simulator/RNG/rollout continuation"
+  ],
+  "export": {
+    "depth_input": [
+      1,
+      58,
+      87
+    ],
+    "depth_output": [
+      1,
+      32
+    ],
+    "student_input": [
+      1,
+      140
+    ],
+    "student_action_output": [
+      1,
+      29
+    ],
+    "batch_fixed": true,
+    "opset": 11,
+    "metadata_order": "sorted actor term names plus placeholder latent slot",
+    "reference_arrays": "first original clip only through first motion_end",
+    "released_models": "read each model own metadata; old order may differ",
+    "on_save_export_failure": "caught warning; independent export verification required"
+  },
+  "evidence_limits": [
+    "smoke/pilot is not full schedule",
+    "finite losses/weight changes/ORT correctness do not prove convergence or continuous success across all original clips",
+    "source configuration changes require live dimension and metadata verification"
+  ],
+  "references": [
+    {
+      "reference": "H/agents/ppo/ppo.py:565",
+      "path": "thirdparty/holosoma/src/holosoma/holosoma/agents/ppo/ppo.py",
+      "lines": "565"
+    },
+    {
+      "reference": "thirdparty/holosoma/src/holosoma/holosoma/agents/ppo/ppo.py:565",
+      "path": "thirdparty/holosoma/src/holosoma/holosoma/agents/ppo/ppo.py",
+      "lines": "565"
+    },
+    {
+      "reference": "wbt_training/training_runs/run_terrain_teacher.sh:17–20",
+      "path": "wbt_training/training_runs/run_terrain_teacher.sh",
+      "lines": "17–20"
+    },
+    {
+      "reference": "wbt_training/training_runs/run_terrain_warp_distill.sh:11–38",
+      "path": "wbt_training/training_runs/run_terrain_warp_distill.sh",
+      "lines": "11–38"
+    },
+    {
+      "reference": "wbt_training/config_values/terrain.py:112–171",
+      "path": "wbt_training/config_values/terrain.py",
+      "lines": "112–171"
+    },
+    {
+      "reference": "H/managers/observation/manager.py:130–171,215–235",
+      "path": "thirdparty/holosoma/src/holosoma/holosoma/managers/observation/manager.py",
+      "lines": "130–171,215–235"
+    },
+    {
+      "reference": "H/envs/base_task/base_task.py:548–563",
+      "path": "thirdparty/holosoma/src/holosoma/holosoma/envs/base_task/base_task.py",
+      "lines": "548–563"
+    },
+    {
+      "reference": "H/managers/observation/terms/wbt.py:34–118,133–173",
+      "path": "thirdparty/holosoma/src/holosoma/holosoma/managers/observation/terms/wbt.py",
+      "lines": "34–118,133–173"
+    },
+    {
+      "reference": "H/managers/command/terms/wbt.py:1095–1108",
+      "path": "thirdparty/holosoma/src/holosoma/holosoma/managers/command/terms/wbt.py",
+      "lines": "1095–1108"
+    },
+    {
+      "reference": "wbt_training/config_values/terrain.py:391–395",
+      "path": "wbt_training/config_values/terrain.py",
+      "lines": "391–395"
+    },
+    {
+      "reference": "H/simulator/isaacsim/isaacsim.py:464–471",
+      "path": "thirdparty/holosoma/src/holosoma/holosoma/simulator/isaacsim/isaacsim.py",
+      "lines": "464–471"
+    },
+    {
+      "reference": "H/config_values/wbt/g1/command.py:19–35",
+      "path": "thirdparty/holosoma/src/holosoma/holosoma/config_values/wbt/g1/command.py",
+      "lines": "19–35"
+    },
+    {
+      "reference": "H/config_values/wbt/g1/observation.py:43–94",
+      "path": "thirdparty/holosoma/src/holosoma/holosoma/config_values/wbt/g1/observation.py",
+      "lines": "43–94"
+    },
+    {
+      "reference": "H/managers/observation/terms/wbt.py:176–201",
+      "path": "thirdparty/holosoma/src/holosoma/holosoma/managers/observation/terms/wbt.py",
+      "lines": "176–201"
+    },
+    {
+      "reference": "wbt_training/config_values/experiment.py:125–135",
+      "path": "wbt_training/config_values/experiment.py",
+      "lines": "125–135"
+    },
+    {
+      "reference": "H/config_values/algo.py:54–66",
+      "path": "thirdparty/holosoma/src/holosoma/holosoma/config_values/algo.py",
+      "lines": "54–66"
+    },
+    {
+      "reference": "wbt_training/config_values/experiment.py:81–98",
+      "path": "wbt_training/config_values/experiment.py",
+      "lines": "81–98"
+    },
+    {
+      "reference": "H/agents/modules/ppo_modules.py:29–37,76–108",
+      "path": "thirdparty/holosoma/src/holosoma/holosoma/agents/modules/ppo_modules.py",
+      "lines": "29–37,76–108"
+    },
+    {
+      "reference": "wbt_training/config_values/experiment.py:100–117,138–152",
+      "path": "wbt_training/config_values/experiment.py",
+      "lines": "100–117,138–152"
+    },
+    {
+      "reference": "H/managers/action/terms/joint_control.py:15–100",
+      "path": "thirdparty/holosoma/src/holosoma/holosoma/managers/action/terms/joint_control.py",
+      "lines": "15–100"
+    },
+    {
+      "reference": "H/config_values/robot.py:28–58",
+      "path": "thirdparty/holosoma/src/holosoma/holosoma/config_values/robot.py",
+      "lines": "28–58"
+    },
+    {
+      "reference": "H/config_values/simulator.py:36–56",
+      "path": "thirdparty/holosoma/src/holosoma/holosoma/config_values/simulator.py",
+      "lines": "36–56"
+    },
+    {
+      "reference": "H/envs/base_task/base_task.py:441–464",
+      "path": "thirdparty/holosoma/src/holosoma/holosoma/envs/base_task/base_task.py",
+      "lines": "441–464"
+    },
+    {
+      "reference": "thirdparty/holosoma/src/holosoma_inference/holosoma_inference/config/config_types/task.py:161",
+      "path": "thirdparty/holosoma/src/holosoma_inference/holosoma_inference/config/config_types/task.py",
+      "lines": "161"
+    },
+    {
+      "reference": "scripts/research/sim2sim.py:45–50,88–118",
+      "path": "scripts/research/sim2sim.py",
+      "lines": "45–50,88–118"
+    },
+    {
+      "reference": "wbt_training/config_values/robot_config.py:118–251",
+      "path": "wbt_training/config_values/robot_config.py",
+      "lines": "118–251"
+    },
+    {
+      "reference": "H/config_values/robot.py:490–531",
+      "path": "thirdparty/holosoma/src/holosoma/holosoma/config_values/robot.py",
+      "lines": "490–531"
+    },
+    {
+      "reference": "H/managers/reward/manager.py:126–174",
+      "path": "thirdparty/holosoma/src/holosoma/holosoma/managers/reward/manager.py",
+      "lines": "126–174"
+    },
+    {
+      "reference": "wbt_training/config_values/terrain.py:290–320",
+      "path": "wbt_training/config_values/terrain.py",
+      "lines": "290–320"
+    },
+    {
+      "reference": "H/config_values/wbt/g1/reward.py:5–62",
+      "path": "thirdparty/holosoma/src/holosoma/holosoma/config_values/wbt/g1/reward.py",
+      "lines": "5–62"
+    },
+    {
+      "reference": "H/managers/reward/terms/wbt.py:32–109,134–162",
+      "path": "thirdparty/holosoma/src/holosoma/holosoma/managers/reward/terms/wbt.py",
+      "lines": "32–109,134–162"
+    },
+    {
+      "reference": "H/managers/command/terms/wbt.py:1063–1087",
+      "path": "thirdparty/holosoma/src/holosoma/holosoma/managers/command/terms/wbt.py",
+      "lines": "1063–1087"
+    },
+    {
+      "reference": "wbt_training/config_values/terrain.py:327–366",
+      "path": "wbt_training/config_values/terrain.py",
+      "lines": "327–366"
+    },
+    {
+      "reference": "H/managers/termination/terms/wbt.py:59–102",
+      "path": "thirdparty/holosoma/src/holosoma/holosoma/managers/termination/terms/wbt.py",
+      "lines": "59–102"
+    },
+    {
+      "reference": "H/managers/termination/terms/common.py:8–12",
+      "path": "thirdparty/holosoma/src/holosoma/holosoma/managers/termination/terms/common.py",
+      "lines": "8–12"
+    },
+    {
+      "reference": "wbt_training/config_values/terrain.py:71–78",
+      "path": "wbt_training/config_values/terrain.py",
+      "lines": "71–78"
+    },
+    {
+      "reference": "wbt_training/config_values/depth_distillation.py:163–184",
+      "path": "wbt_training/config_values/depth_distillation.py",
+      "lines": "163–184"
+    },
+    {
+      "reference": "wbt_training/config_values/curriculum.py:97–136",
+      "path": "wbt_training/config_values/curriculum.py",
+      "lines": "97–136"
+    },
+    {
+      "reference": "H/envs/wbt/wbt_manager.py:30–37",
+      "path": "thirdparty/holosoma/src/holosoma/holosoma/envs/wbt/wbt_manager.py",
+      "lines": "30–37"
+    },
+    {
+      "reference": "H/agents/modules/data_utils.py:44–69,101–135",
+      "path": "thirdparty/holosoma/src/holosoma/holosoma/agents/modules/data_utils.py",
+      "lines": "44–69,101–135"
+    },
+    {
+      "reference": "H/agents/ppo/ppo.py:387–450",
+      "path": "thirdparty/holosoma/src/holosoma/holosoma/agents/ppo/ppo.py",
+      "lines": "387–450"
+    },
+    {
+      "reference": "H/agents/ppo/ppo.py:452–470",
+      "path": "thirdparty/holosoma/src/holosoma/holosoma/agents/ppo/ppo.py",
+      "lines": "452–470"
+    },
+    {
+      "reference": "H/agents/ppo/ppo.py:474–611",
+      "path": "thirdparty/holosoma/src/holosoma/holosoma/agents/ppo/ppo.py",
+      "lines": "474–611"
+    },
+    {
+      "reference": "H/agents/ppo/ppo.py:624–649",
+      "path": "thirdparty/holosoma/src/holosoma/holosoma/agents/ppo/ppo.py",
+      "lines": "624–649"
+    },
+    {
+      "reference": "H/config_values/algo.py:28–66",
+      "path": "thirdparty/holosoma/src/holosoma/holosoma/config_values/algo.py",
+      "lines": "28–66"
+    },
+    {
+      "reference": "wbt_training/config_values/experiment.py:82–98",
+      "path": "wbt_training/config_values/experiment.py",
+      "lines": "82–98"
+    },
+    {
+      "reference": "wbt_training/config_values/depth_distillation.py:50–88",
+      "path": "wbt_training/config_values/depth_distillation.py",
+      "lines": "50–88"
+    },
+    {
+      "reference": "H/managers/observation/terms/wbt.py:138–150",
+      "path": "thirdparty/holosoma/src/holosoma/holosoma/managers/observation/terms/wbt.py",
+      "lines": "138–150"
+    },
+    {
+      "reference": "wbt_training/config_values/motion_command.py:260–322,672–690",
+      "path": "wbt_training/config_values/motion_command.py",
+      "lines": "260–322,672–690"
+    },
+    {
+      "reference": "H/sensors/warp/camera_config/d435i_depth_config.py:11–59",
+      "path": "thirdparty/holosoma/src/holosoma/holosoma/sensors/warp/camera_config/d435i_depth_config.py",
+      "lines": "11–59"
+    },
+    {
+      "reference": "wbt_training/config_values/depth_distillation.py:122–155",
+      "path": "wbt_training/config_values/depth_distillation.py",
+      "lines": "122–155"
+    },
+    {
+      "reference": "H/managers/observation/terms/depth.py:202–242",
+      "path": "thirdparty/holosoma/src/holosoma/holosoma/managers/observation/terms/depth.py",
+      "lines": "202–242"
+    },
+    {
+      "reference": "H/managers/observation/terms/depth.py:244–366",
+      "path": "thirdparty/holosoma/src/holosoma/holosoma/managers/observation/terms/depth.py",
+      "lines": "244–366"
+    },
+    {
+      "reference": "H/config_types/experiment.py:213–246",
+      "path": "thirdparty/holosoma/src/holosoma/holosoma/config_types/experiment.py",
+      "lines": "213–246"
+    },
+    {
+      "reference": "H/envs/base_task/base_task.py:358–362",
+      "path": "thirdparty/holosoma/src/holosoma/holosoma/envs/base_task/base_task.py",
+      "lines": "358–362"
+    },
+    {
+      "reference": "H/managers/observation/manager.py:130–141",
+      "path": "thirdparty/holosoma/src/holosoma/holosoma/managers/observation/manager.py",
+      "lines": "130–141"
+    },
+    {
+      "reference": "H/agents/modules/depth_backbone.py:11–19,50–80",
+      "path": "thirdparty/holosoma/src/holosoma/holosoma/agents/modules/depth_backbone.py",
+      "lines": "11–19,50–80"
+    },
+    {
+      "reference": "H/agents/modules/student_teacher_modules.py:384–403",
+      "path": "thirdparty/holosoma/src/holosoma/holosoma/agents/modules/student_teacher_modules.py",
+      "lines": "384–403"
+    },
+    {
+      "reference": "wbt_training/config_values/experiment.py:185–224,253–285",
+      "path": "wbt_training/config_values/experiment.py",
+      "lines": "185–224,253–285"
+    },
+    {
+      "reference": "H/agents/modules/student_teacher_modules.py:470–475",
+      "path": "thirdparty/holosoma/src/holosoma/holosoma/agents/modules/student_teacher_modules.py",
+      "lines": "470–475"
+    },
+    {
+      "reference": "wbt_training/config_values/depth_distillation.py:90–120",
+      "path": "wbt_training/config_values/depth_distillation.py",
+      "lines": "90–120"
+    },
+    {
+      "reference": "wbt_training/utils/student_teacher.py:63–97,243–251",
+      "path": "wbt_training/utils/student_teacher.py",
+      "lines": "63–97,243–251"
+    },
+    {
+      "reference": "H/agents/modules/student_teacher_modules.py:136–140,198–255,305–358",
+      "path": "thirdparty/holosoma/src/holosoma/holosoma/agents/modules/student_teacher_modules.py",
+      "lines": "136–140,198–255,305–358"
+    },
+    {
+      "reference": "wbt_training/utils/multi_motion_helpers.py:103–119",
+      "path": "wbt_training/utils/multi_motion_helpers.py",
+      "lines": "103–119"
+    },
+    {
+      "reference": "wbt_training/config_values/motion_command.py:339–398",
+      "path": "wbt_training/config_values/motion_command.py",
+      "lines": "339–398"
+    },
+    {
+      "reference": "wbt_training/config_values/depth_distillation.py:197–205",
+      "path": "wbt_training/config_values/depth_distillation.py",
+      "lines": "197–205"
+    },
+    {
+      "reference": "wbt_training/config_values/motion_command.py:698–750",
+      "path": "wbt_training/config_values/motion_command.py",
+      "lines": "698–750"
+    },
+    {
+      "reference": "H/agents/distillation/rollout_storage.py:52–57",
+      "path": "thirdparty/holosoma/src/holosoma/holosoma/agents/distillation/rollout_storage.py",
+      "lines": "52–57"
+    },
+    {
+      "reference": "H/agents/distillation_ppo/rollout_storage.py:68–92",
+      "path": "thirdparty/holosoma/src/holosoma/holosoma/agents/distillation_ppo/rollout_storage.py",
+      "lines": "68–92"
+    },
+    {
+      "reference": "wbt_training/config_values/experiment.py:253–290",
+      "path": "wbt_training/config_values/experiment.py",
+      "lines": "253–290"
+    },
+    {
+      "reference": "H/agents/distillation/distillation.py:267–303",
+      "path": "thirdparty/holosoma/src/holosoma/holosoma/agents/distillation/distillation.py",
+      "lines": "267–303"
+    },
+    {
+      "reference": "H/agents/distillation/distillation.py:183–199,307–344",
+      "path": "thirdparty/holosoma/src/holosoma/holosoma/agents/distillation/distillation.py",
+      "lines": "183–199,307–344"
+    },
+    {
+      "reference": "H/agents/distillation_ppo/distillation_ppo.py:245–270",
+      "path": "thirdparty/holosoma/src/holosoma/holosoma/agents/distillation_ppo/distillation_ppo.py",
+      "lines": "245–270"
+    },
+    {
+      "reference": "H/config_types/algo.py:450–451",
+      "path": "thirdparty/holosoma/src/holosoma/holosoma/config_types/algo.py",
+      "lines": "450–451"
+    },
+    {
+      "reference": "H/agents/distillation_ppo/distillation_ppo.py:369–391,576–594,634–649",
+      "path": "thirdparty/holosoma/src/holosoma/holosoma/agents/distillation_ppo/distillation_ppo.py",
+      "lines": "369–391,576–594,634–649"
+    },
+    {
+      "reference": "wbt_training/utils/student_teacher.py:190–206",
+      "path": "wbt_training/utils/student_teacher.py",
+      "lines": "190–206"
+    },
+    {
+      "reference": "H/agents/distillation_ppo/distillation_ppo.py:651–695",
+      "path": "thirdparty/holosoma/src/holosoma/holosoma/agents/distillation_ppo/distillation_ppo.py",
+      "lines": "651–695"
+    },
+    {
+      "reference": "H/agents/distillation_ppo/distillation_ppo.py:720–775",
+      "path": "thirdparty/holosoma/src/holosoma/holosoma/agents/distillation_ppo/distillation_ppo.py",
+      "lines": "720–775"
+    },
+    {
+      "reference": "wbt_training/config_values/depth_distillation.py:216–260",
+      "path": "wbt_training/config_values/depth_distillation.py",
+      "lines": "216–260"
+    },
+    {
+      "reference": "wbt_training/config_values/motion_command.py:99–131",
+      "path": "wbt_training/config_values/motion_command.py",
+      "lines": "99–131"
+    },
+    {
+      "reference": "wbt_training/utils/student_teacher.py:208–224",
+      "path": "wbt_training/utils/student_teacher.py",
+      "lines": "208–224"
+    },
+    {
+      "reference": "wbt_training/config_values/motion_command.py:149–178",
+      "path": "wbt_training/config_values/motion_command.py",
+      "lines": "149–178"
+    },
+    {
+      "reference": "H/agents/distillation_ppo/distillation_ppo.py:395–473",
+      "path": "thirdparty/holosoma/src/holosoma/holosoma/agents/distillation_ppo/distillation_ppo.py",
+      "lines": "395–473"
+    },
+    {
+      "reference": "H/agents/distillation_ppo/distillation_ppo.py:849–895",
+      "path": "thirdparty/holosoma/src/holosoma/holosoma/agents/distillation_ppo/distillation_ppo.py",
+      "lines": "849–895"
+    },
+    {
+      "reference": "H/agents/base_algo/base_algo.py:144–155",
+      "path": "thirdparty/holosoma/src/holosoma/holosoma/agents/base_algo/base_algo.py",
+      "lines": "144–155"
+    },
+    {
+      "reference": "H/envs/base_task/base_task.py:217–224",
+      "path": "thirdparty/holosoma/src/holosoma/holosoma/envs/base_task/base_task.py",
+      "lines": "217–224"
+    },
+    {
+      "reference": "wbt_training/utils/exporter.py:49–106,131–163",
+      "path": "wbt_training/utils/exporter.py",
+      "lines": "49–106,131–163"
+    },
+    {
+      "reference": "wbt_training/utils/exporter.py:362–366",
+      "path": "wbt_training/utils/exporter.py",
+      "lines": "362–366"
+    },
+    {
+      "reference": "wbt_training/utils/student_teacher.py:124–136",
+      "path": "wbt_training/utils/student_teacher.py",
+      "lines": "124–136"
+    }
+  ],
+  "source_files": {
+    "thirdparty/holosoma/src/holosoma/holosoma/agents/ppo/ppo.py": {
+      "sha256": "0899268dff8e9f8def38db6b76d2e4afd193c3d7a4ef28550217dc142d6898f6",
+      "line_count": 920
+    },
+    "wbt_training/training_runs/run_terrain_teacher.sh": {
+      "sha256": "6d3bdd623e470bd6acc25782dba2a9a54d0bd8acff8e872449ceda5a8e41abe9",
+      "line_count": 21
+    },
+    "wbt_training/training_runs/run_terrain_warp_distill.sh": {
+      "sha256": "8d1f3a6d467d2e952766f7fa2da9582920afeb14f9f5bd682062af8ce5369f14",
+      "line_count": 38
+    },
+    "wbt_training/config_values/terrain.py": {
+      "sha256": "1c73a314d9016ce923843a1b54273e608c94053fefdbb727056faab718523f7f",
+      "line_count": 561
+    },
+    "thirdparty/holosoma/src/holosoma/holosoma/managers/observation/manager.py": {
+      "sha256": "3c5ac22ba33894ce42a4ac12cb067dfd59da33b52f8fca5fc30f16586f371470",
+      "line_count": 384
+    },
+    "thirdparty/holosoma/src/holosoma/holosoma/envs/base_task/base_task.py": {
+      "sha256": "4e66b8aea909c4ddc3d2cf344a33d5883c7e04edd1d0724be2b9e01b88ffe115",
+      "line_count": 616
+    },
+    "thirdparty/holosoma/src/holosoma/holosoma/managers/observation/terms/wbt.py": {
+      "sha256": "470b1b83cd8a11f2b4920f0d8a4f87526240a35707d514afc340810023e16893",
+      "line_count": 260
+    },
+    "thirdparty/holosoma/src/holosoma/holosoma/managers/command/terms/wbt.py": {
+      "sha256": "4acfdb0d14e2877a1503bfb4508c6751db97d064ff270e99bdf74f489fe45d0a",
+      "line_count": 1729
+    },
+    "thirdparty/holosoma/src/holosoma/holosoma/simulator/isaacsim/isaacsim.py": {
+      "sha256": "2d20d063af240935260250a39aaace0028309efe4ce19c2a6915f0265be7e3a1",
+      "line_count": 1596
+    },
+    "thirdparty/holosoma/src/holosoma/holosoma/config_values/wbt/g1/command.py": {
+      "sha256": "8bb7fc26b934124dab66de4b996ebc845677c21222d56cbb548cb59a9a3d4231",
+      "line_count": 84
+    },
+    "thirdparty/holosoma/src/holosoma/holosoma/config_values/wbt/g1/observation.py": {
+      "sha256": "71c0115764595aea0ed7ad5e3e5038999dd2857296f3f3cfc0f6160ebaaab2ee",
+      "line_count": 146
+    },
+    "wbt_training/config_values/experiment.py": {
+      "sha256": "416e2d1b8720bc4bf4da98681386c6ad85bc4c3804334608820bf6cf3e20d112",
+      "line_count": 317
+    },
+    "thirdparty/holosoma/src/holosoma/holosoma/config_values/algo.py": {
+      "sha256": "02b99b641826d6acf3013927cfdf52f0cce6572d6912ee12bcde35acd444ad28",
+      "line_count": 143
+    },
+    "thirdparty/holosoma/src/holosoma/holosoma/agents/modules/ppo_modules.py": {
+      "sha256": "46142be3c3d700aafb13c401750918dd641eb12f266ee6adad71a341c7f9618f",
+      "line_count": 197
+    },
+    "thirdparty/holosoma/src/holosoma/holosoma/managers/action/terms/joint_control.py": {
+      "sha256": "c98847e89b3f8fca281c69ea0534272a669c9a4811de550863275b99caa8803f",
+      "line_count": 433
+    },
+    "thirdparty/holosoma/src/holosoma/holosoma/config_values/robot.py": {
+      "sha256": "1b05ccd2c03d5402c6949a41619551ca6aa47a2dcfe018d40eb6711a85c0a678",
+      "line_count": 1128
+    },
+    "thirdparty/holosoma/src/holosoma/holosoma/config_values/simulator.py": {
+      "sha256": "5ee77fe1b1f2704544f7bed9659510b61c7c94c5f05477e57d73199bd87b62dc",
+      "line_count": 117
+    },
+    "thirdparty/holosoma/src/holosoma_inference/holosoma_inference/config/config_types/task.py": {
+      "sha256": "5e37ef03c99a53f3f64c339f74a4542ec4f4550f94985341b82f2530377690c2",
+      "line_count": 298
+    },
+    "scripts/research/sim2sim.py": {
+      "sha256": "b286b1a6a9f883bc28aca3dab2256deefd4b567d1c71e2fa2f770a128c8d9879",
+      "line_count": 451
+    },
+    "wbt_training/config_values/robot_config.py": {
+      "sha256": "0b1dfbc9d27c095e568255e78ef68ee0afe70314a6381ea6c4a8dd5384193c48",
+      "line_count": 257
+    },
+    "thirdparty/holosoma/src/holosoma/holosoma/managers/reward/manager.py": {
+      "sha256": "01c6cb683b2e66840d566af61822e0c3e3383e0ae6e7becbf7c69f271c476041",
+      "line_count": 333
+    },
+    "thirdparty/holosoma/src/holosoma/holosoma/config_values/wbt/g1/reward.py": {
+      "sha256": "921dd0e1857661fa71c5af963571167001334ec8665eaa32aafe3a6f89d5e55a",
+      "line_count": 113
+    },
+    "thirdparty/holosoma/src/holosoma/holosoma/managers/reward/terms/wbt.py": {
+      "sha256": "7e6d018276c80839b0e55c612d12aad91c7733fb95fd11db61942f7344ca0a45",
+      "line_count": 175
+    },
+    "thirdparty/holosoma/src/holosoma/holosoma/managers/termination/terms/wbt.py": {
+      "sha256": "366740bf315c19a184d1aa3ca21a239d23a96516e525db100b09448dabb20065",
+      "line_count": 150
+    },
+    "thirdparty/holosoma/src/holosoma/holosoma/managers/termination/terms/common.py": {
+      "sha256": "11b69be9c846557a41db4671ca2cf36e27ca2072f98ad10b45d7940b59060cae",
+      "line_count": 12
+    },
+    "wbt_training/config_values/depth_distillation.py": {
+      "sha256": "fd20b124ddf64b4815c30a862e8798150f931834f5fda79e916be0e845ff830a",
+      "line_count": 264
+    },
+    "wbt_training/config_values/curriculum.py": {
+      "sha256": "a40159e70f5ad782e9b1b49d91d3d1c36dc4967e943fe348f201658d684c275f",
+      "line_count": 136
+    },
+    "thirdparty/holosoma/src/holosoma/holosoma/envs/wbt/wbt_manager.py": {
+      "sha256": "5bd1b8626781773d5368a14fefb16e35e8ffdd85728bcd389d345da0fce87735",
+      "line_count": 256
+    },
+    "thirdparty/holosoma/src/holosoma/holosoma/agents/modules/data_utils.py": {
+      "sha256": "7ddf6fc9ac2cad3e2fcc614983283265242791bbcf1ec4e783fd298d9274dfab",
+      "line_count": 135
+    },
+    "wbt_training/config_values/motion_command.py": {
+      "sha256": "e338182452f9eb26e46db4fa445b4a1ec071334f478d5fcb0a54a08ef2563607",
+      "line_count": 750
+    },
+    "thirdparty/holosoma/src/holosoma/holosoma/sensors/warp/camera_config/d435i_depth_config.py": {
+      "sha256": "217dfd41c6046d4c24f7ad3654810021f37232b4bf5d5de38e0ee51318959415",
+      "line_count": 101
+    },
+    "thirdparty/holosoma/src/holosoma/holosoma/managers/observation/terms/depth.py": {
+      "sha256": "6d1483e1381e8ccb66aa6f23c236da2678783023a9b0f9d71af25942f133502c",
+      "line_count": 366
+    },
+    "thirdparty/holosoma/src/holosoma/holosoma/config_types/experiment.py": {
+      "sha256": "77a369834ac89987e7aedaafcff03a7b65e613ba137c37dc839a7e50a0e8d290",
+      "line_count": 256
+    },
+    "thirdparty/holosoma/src/holosoma/holosoma/agents/modules/depth_backbone.py": {
+      "sha256": "ae8d50d5b51128d8933785ba51d65338b98a24f72c6789a13ccbaf95930892c4",
+      "line_count": 117
+    },
+    "thirdparty/holosoma/src/holosoma/holosoma/agents/modules/student_teacher_modules.py": {
+      "sha256": "7db02a6c8cd1c441d8d0cf0fd86958ab0b83dd52ab9cf49806d210f6ad5b8251",
+      "line_count": 475
+    },
+    "wbt_training/utils/student_teacher.py": {
+      "sha256": "773dd44971d1b09beb76da780422c16de66cd4ac0d9cf65dfd5bf6dd27f30eff",
+      "line_count": 305
+    },
+    "wbt_training/utils/multi_motion_helpers.py": {
+      "sha256": "6c4e16195f645bc93712a46a8e7188773aef1d0e66715bbba163a812dce62663",
+      "line_count": 195
+    },
+    "thirdparty/holosoma/src/holosoma/holosoma/agents/distillation/rollout_storage.py": {
+      "sha256": "cf868947dfd8edc7a44ab8888c7699e7a924c22f5d6c48815418ad9d3322fc8e",
+      "line_count": 69
+    },
+    "thirdparty/holosoma/src/holosoma/holosoma/agents/distillation_ppo/rollout_storage.py": {
+      "sha256": "074bb8bc3b624b7cad4ff99e5500375e61357c6ad59bd3fa4d8091264d7b8888",
+      "line_count": 108
+    },
+    "thirdparty/holosoma/src/holosoma/holosoma/agents/distillation/distillation.py": {
+      "sha256": "f8a01a1f5c7058ec2f832ea483a484b8dccb1e793f0cb9a8112c9acf8650495a",
+      "line_count": 603
+    },
+    "thirdparty/holosoma/src/holosoma/holosoma/agents/distillation_ppo/distillation_ppo.py": {
+      "sha256": "cb90b00a16b8749358610f48a87ff5c12ab22326f8a72c81595966c9cb01f8f9",
+      "line_count": 1088
+    },
+    "thirdparty/holosoma/src/holosoma/holosoma/config_types/algo.py": {
+      "sha256": "d64e36ce3ca3a5ab17702a3575a4a9a8886e92f931d113217ead4775b4dcb33e",
+      "line_count": 532
+    },
+    "thirdparty/holosoma/src/holosoma/holosoma/agents/base_algo/base_algo.py": {
+      "sha256": "b29d389ca908a8860545f1ada578c5fe408387aade0b21e51234c20470c39a5a",
+      "line_count": 155
+    },
+    "wbt_training/utils/exporter.py": {
+      "sha256": "ae6fa7776bbe3c97c9c70921bd5f0a15137189e6603bd09b0a5d9b73fdf2045e",
+      "line_count": 379
+    }
+  }
+}
