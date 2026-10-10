@@ -137,6 +137,8 @@ smoke 采用显式缩小的并行环境、布局和迭代数，检查实际梯�
 
 另按官方 locomotion 默认并行量和完整预处理运行 **4096 环境、20 迭代 pilot**，保存 iteration 19 的原生 checkpoint。显存采样峰值为 20479 MiB，18 个稳定核心迭代的中位耗时为 2.321 秒；对应 20000 轮的 collection+learning 估算约 12.89 小时，不包括初始化、保存和评估。其他教师和学生的耗时需要分别测量。完整官方日程尚未完成，见[pilot 实测与限制](usage_assets/reports/training-cloud-official-pilot.json)。
 
+两种学生也已按官方并行量和完整学生预处理各运行 **2048 环境、20 迭代容量 pilot**。纯 DAgger / DAgger+PPO 的显存峰值为 11399 / 9063 MiB，去首两轮的核心耗时中位数为 3.4255 / 3.9320 秒；两者实际配置均为 3 variants、96 minibatches、2 epochs、24 steps/env、save interval 500。权重更新、各 30 组双 ONNX 推理和 TensorBoard 0–19 全部通过。[容量实测报告](usage_assets/reports/training-cloud-student-capacity.md)注明旧镜像、未收敛专家与唯一的 20 轮日程缩短；这些数据不证明正式训练质量或已训练专家下的最终吞吐。
+
 独立质量入口还真实复跑本地未收敛教师：16 环境 × 100 control steps，共 32 env-seconds，49 次失败 reset、0 次超时；四项跟踪误差各记录 1600 个有限样本。它在 reset 清除状态前采样，关联 checkpoint SHA、实际录像和 17 个 `Evaluation/*` TensorBoard 标量。[质量 JSON](usage_assets/reports/isaac-local-quality.json)、[测试记录](usage_assets/reports/research-quality-training.xml)、[真实失败短片](usage_assets/isaac/local-teacher-quality.mp4)。该运行仅观察到一个动作片段，没有声称覆盖全部 locomotion 数据。
 
 ![本地未收敛教师的实际评估帧](usage_assets/isaac/local-teacher-quality.png)
@@ -246,3 +248,5 @@ CPU 测试统一在 Docker 中运行，分别保留根目录/训练和 motion ma
 最终镜像为 `sha256:88254ac0b90a3056375145601d741aa3e08726e18412d201a3c7e7915a23996f`，对应干净源码提交 `64ebc5f`，镜像内记录大小为 22,704,771,469 字节。独立容器只挂只读资产、输出和空缓存，`--network none`、私有 IPC，**没有宿主源码挂载**：三环境 doctor、全部 265 项锁定版本、真实 16 环境两轮 Isaac 训练、有限权重更新、教师 ONNX 12 组真实 CPU 推理和离线 TensorBoard 均通过。[完整离线证明](usage_assets/reports/runtime-final-offline-summary.json)及[原始记录](usage_assets/reports/runtime-final-offline/)记录源码边界、模型与镜像 SHA；motion/inference 的 `pip check` 通过，train 仍保留前述三项上游元数据冲突。
 
 最终归档 **10,858,424,068 字节**、SHA-256 `e6c0483f15242e9da95aaa136e21eb10b746a2e423a5e206f03e174b76d5e4c3` 已完整传输并在云端加载，两端 Config/RootFS 指纹为 `2a43037e2397fac3e343e8d621dd42c41ea7c27da82602789d575fddda112482`。[最终镜像传输核验](usage_assets/reports/cloud-final-image-transfer.json)保留本地/远端镜像 ID；Docker 存储实现导致两端 manifest ID 不同，层内容与配置已独立核对。
+
+最终云端部署也已完成：仍选物理 GPU 1，实际挂载源码树 `0093aa40fbae2bcf219d39ace222e0c4d8a71e305551939a5a1b9c0e40c683ab`（来自 `3439cb7`），包含镜像构建之后的恢复来源检查修复。三套运行环境 doctor 通过。[最终部署](usage_assets/reports/cloud-final-deployment.json)、[最终云端 doctor](usage_assets/reports/cloud-final-runtime.json)。镜像内封存源码 `64ebc5f` 的独立断网证明与这次挂载源码运行分别记录。
