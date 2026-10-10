@@ -367,7 +367,7 @@ Gate EMA/counters 是 detached 统计，当前不进入网络 checkpoint；BaseT
 | `depth_backbone.onnx` | `depth_image (1,58,87)` | `depth_latent (1,32)` |
 | `student.onnx` | `obs (1,140)`；`time_step (1,1)` | `actions (1,29)`，以及辅助reference字段 |
 
-student的辅助输出为joint_pos/vel `(1,29)`，body_pos/lin_vel/ang_vel `(1,32,3)`、body_quat `(1,32,4)`。当前exporter只嵌第一段reference；部署每tick给time_step=0，只用返回的第0项actions。reference输出不是控制器要求机器人逐帧replay的轨迹，也不能证明原片段覆盖。
+student的辅助输出为joint_pos/vel `(1,29)`，body_pos/lin_vel/ang_vel `(1,32,3)`、body_quat `(1,32,4)`；这里辅助四元数来自运行时数组，为 `xyzw`。当前exporter只嵌第一段reference。两种图的 `time_step` 都从 float32 转成整数并做参考表上界截断，只决定辅助 reference 输出，action 分支由 obs 计算。部署每tick给time_step=0，只用返回的第0项actions。reference输出不是控制器要求机器人逐帧replay的轨迹，也不能证明原片段覆盖。
 
 源码：[exporter.py:69–127](wbt_training/utils/exporter.py#L69)；[depth_distillation.py:189–258,483–520](thirdparty/holosoma/src/holosoma_inference/holosoma_inference/policies/depth_distillation.py#L189)。
 
