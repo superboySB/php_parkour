@@ -1,0 +1,39 @@
+--- /home/dzp/projects/php_parkour/outputs/research/official-full/teacher-high-step-final-cpu-preparation-01/source-original/firstcpu02/teacher-locomotion-final-cpu-launch-02.py
++++ /home/dzp/projects/php_parkour/outputs/research/official-full/teacher-high-step-final-cpu-01/run_cpu.py
+@@ -5,10 +5,10 @@
+ import json
+ import subprocess
+ 
+-ROOT=Path(__file__).resolve().parents[3]
+-BASE=Path(__file__).parent/'teacher-locomotion-final-cpu-02'
++ROOT=Path(__file__).resolve().parents[4]
++BASE=Path(__file__).resolve().parent
+ IMAGE='sha256:2be18521015b2a84ef7a4442af9a94ef041a19feb9ce385ae15424b1dc158d8f'
+-NAME='php-official-locomotion-final-cpu-02'
++NAME='php-official-high-step-final-cpu-01'
+ 
+ def fp(path):
+     p=Path(path).resolve(); h=hashlib.sha256()
+@@ -20,18 +20,18 @@
+     host=BASE/'host';validation=BASE/'validation'
+     host.mkdir(exist_ok=False);validation.mkdir(exist_ok=False)
+     source=[fp(p) for p in sorted((BASE/'source').glob('*.py'))]
+-    expected={'accept_teacher.py':'61b43730942cbd5af868007bc7a013fbbdb4a5ae261050c3e160fcfd80decc9a',
+-              'plot_learning_curves.py':'84d7ab2a0d26e35d21fc25e6f1c9bafe93422d0d80cbb264526a39bf2b5d82c2'}
++    expected={'accept_teacher.py':'f0a3384bcabe863fe7f05a6a7631a450cf1c4f721e3ffea43a7ef6b4c78031da',
++              'plot_learning_curves.py':'2b3727c6e8198b9580e6b7c141a14291c90f88919766f35dc81c72a4d4deeb6d'}
+     assert all(next(r for r in source if Path(r['path']).name==name)['sha256']==sha for name,sha in expected.items())
+     original=ROOT/'scripts/research/validate_teacher_onnx.py'
+     assert fp(original)['sha256']==fp(BASE/'source/validate_teacher_onnx.py')['sha256']
+     argv=['docker','create','--name',NAME,'--runtime','runc','--init','--network','none','--cpus','2','--memory','12g',
+-          '--label','php.research.owner=official-locomotion-final-cpu-02',
++          '--label','php.research.owner=official-high-step-final-cpu-01',
+           '-e','CUDA_VISIBLE_DEVICES=','-e','NVIDIA_VISIBLE_DEVICES=void','-e','PYTHONDONTWRITEBYTECODE=1',
+           '-e','OMP_NUM_THREADS=1','-e','OPENBLAS_NUM_THREADS=1','-e','MKL_NUM_THREADS=1',
+           '-e','ACCEPT_EULA=Y','-e','OMNI_KIT_ACCEPT_EULA=YES']
+     for src,dst,ro in [(BASE/'source','/code',True),(BASE/'input','/control',True),
+-                       (Path(__file__).parent/'teacher-locomotion-final-01/artifacts','/artifacts',True),
++                       (BASE.parent/'teacher-high-step-final-01/artifacts','/artifacts',True),
+                        (validation,'/validation',False)]:
+         argv += ['--mount',f'type=bind,src={src.resolve()},dst={dst}'+(',readonly' if ro else '')]
+     argv += [IMAGE,'/usr/bin/python3','-B','/code/run_cpu_phases.py']

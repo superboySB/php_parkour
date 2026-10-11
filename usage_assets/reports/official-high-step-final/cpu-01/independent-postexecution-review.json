@@ -1,0 +1,612 @@
+{
+  "schema_version": 1,
+  "status": "passed_readonly_postexecution_review",
+  "reviewed_utc": "2026-10-11T17:31:44.131350+00:00",
+  "method": "Host stdlib reads and SHA of actual CPU reports/receipts/immutable inputs; no scientific model load or rerun",
+  "must_fix": [],
+  "container": {
+    "id": "a862a5e60ff55299d85ab1661f39bdb91c44bf358d30141ead643f0ee30aac40",
+    "image": "sha256:2be18521015b2a84ef7a4442af9a94ef041a19feb9ce385ae15424b1dc158d8f",
+    "started_at": "2026-10-11T17:27:31.573087802Z",
+    "finished_at": "2026-10-11T17:27:48.522170262Z",
+    "actual_attached_wait": 0,
+    "actual_container_exit": 0,
+    "naturally_exited": true,
+    "GPU_hidden": true,
+    "runtime": "runc",
+    "network": "none",
+    "cpus": 2,
+    "memory_bytes": 12884901888,
+    "mount_RO_RW": [
+      3,
+      1
+    ]
+  },
+  "phase_actual_wait_returncodes": [
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "source_before_after_current_equal": true,
+  "preparation_and_contract_dependencies_unchanged": true,
+  "input_before_after_current_sha_equal": true,
+  "verified_input_records": 16,
+  "checkpoint": {
+    "iteration": 19999,
+    "baseline_iteration": 0,
+    "baseline_scope": "Native saved iteration-zero point after first optimization, not untrained random initialization",
+    "tensor_count": 68,
+    "all_actual_CPU_checked_tensors_finite": true,
+    "actor_observation_dim": 449,
+    "critic_observation_dim": 575,
+    "action_dim": 29,
+    "normalizers": {
+      "actor": null,
+      "critic": null
+    },
+    "contract": {
+      "algorithm": "holosoma.agents.ppo.ppo.PPO",
+      "num_envs": 4096,
+      "seed": 42,
+      "registry": "file:///data/assets/motions-high-step",
+      "preprocessing": {
+        "add_onpath_obstacle": true,
+        "num_variants": 64,
+        "obstacle_seed": 42
+      },
+      "learning_iterations": 20000,
+      "save_interval": 500,
+      "steps_per_env": 24,
+      "mini_batches": 4,
+      "epochs": 5,
+      "empirical_normalization": false,
+      "actor_terms": [
+        "actions",
+        "base_ang_vel",
+        "base_lin_vel",
+        "dof_pos",
+        "dof_vel",
+        "height_scan",
+        "motion_command",
+        "motion_ref_ori_b",
+        "motion_ref_pos_b"
+      ],
+      "actor_history": 1,
+      "actor_observation_dim": 449,
+      "critic_observation_dim": 575,
+      "actions_dim": 29,
+      "action_scale": 1.0,
+      "action_scales_by_effort_limit_over_p_gain": false
+    },
+    "actual_saved_updates": {
+      "actor": {
+        "tensor_count": 9,
+        "changed_elements": 398394,
+        "max_absolute_delta": 2.0586738139390945,
+        "Adam_baseline_steps": [
+          20
+        ],
+        "Adam_final_steps": [
+          400000
+        ]
+      },
+      "critic": {
+        "tensor_count": 8,
+        "changed_elements": 457729,
+        "max_absolute_delta": 3.5745070446282625,
+        "Adam_baseline_steps": [
+          20
+        ],
+        "Adam_final_steps": [
+          400000
+        ]
+      }
+    },
+    "cuda_initialized": false
+  },
+  "tensorboard": {
+    "Train/mean_reward": {
+      "samples": 20000,
+      "first_step": 0,
+      "last_step": 19999,
+      "final_value": 38.5565299987793,
+      "minimum": -1.731575846672058,
+      "maximum": 39.359718322753906
+    },
+    "Loss/Value": {
+      "samples": 20000,
+      "first_step": 0,
+      "last_step": 19999,
+      "final_value": 0.05058148875832558,
+      "minimum": 0.001142396591603756,
+      "maximum": 0.3931119740009308
+    },
+    "Loss/Surrogate": {
+      "samples": 20000,
+      "first_step": 0,
+      "last_step": 19999,
+      "final_value": -0.008427823893725872,
+      "minimum": -0.02421671897172928,
+      "maximum": 0.017246579751372337
+    },
+    "Loss/Entropy": {
+      "samples": 20000,
+      "first_step": 0,
+      "last_step": 19999,
+      "final_value": 0.11766765266656876,
+      "minimum": -0.006826835684478283,
+      "maximum": 41.09033203125
+    }
+  },
+  "onnx": {
+    "actual_cases": 12,
+    "motion_frames": 1696832,
+    "reference_constants": [
+      {
+        "name": "",
+        "shape": [
+          1696832,
+          29
+        ],
+        "bytes": 196832512
+      },
+      {
+        "name": "",
+        "shape": [
+          1696832,
+          29
+        ],
+        "bytes": 196832512
+      },
+      {
+        "name": "",
+        "shape": [
+          1696832,
+          3
+        ],
+        "bytes": 20361984
+      },
+      {
+        "name": "",
+        "shape": [
+          1696832,
+          4
+        ],
+        "bytes": 27149312
+      }
+    ],
+    "self_contained": true,
+    "source_bytes": 442848025,
+    "source_sha256": "54583a56de697d79432b85be60bcb2557825557f63cdccef6683d83af820865e",
+    "inputs": [
+      {
+        "name": "obs",
+        "shape": [
+          1,
+          449
+        ],
+        "type": "tensor(float)"
+      },
+      {
+        "name": "time_step",
+        "shape": [
+          1,
+          1
+        ],
+        "type": "tensor(float)"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "actions",
+        "shape": [
+          1,
+          29
+        ],
+        "type": "tensor(float)"
+      },
+      {
+        "name": "joint_pos",
+        "shape": [
+          1,
+          29
+        ],
+        "type": "tensor(float)"
+      },
+      {
+        "name": "joint_vel",
+        "shape": [
+          1,
+          29
+        ],
+        "type": "tensor(float)"
+      },
+      {
+        "name": "ref_pos_xyz",
+        "shape": [
+          1,
+          3
+        ],
+        "type": "tensor(float)"
+      },
+      {
+        "name": "ref_quat_xyzw",
+        "shape": [
+          1,
+          4
+        ],
+        "type": "tensor(float)"
+      }
+    ],
+    "exact_embedded_lookup_and_finite_actions_checked_by_original_CPU_validator": true
+  },
+  "config_binding": {
+    "baseline_final_full_config_equal": true,
+    "pt_onnx_full_config_equal": true,
+    "raw_yaml_pt_equal": false,
+    "sole_symbolic_resolution": {
+      "path": "$.algo.config.module_dict.actor.output_dim",
+      "raw_yaml_value": [
+        "robot_action_dim"
+      ],
+      "saved_pt_value": [
+        29
+      ],
+      "source": "thirdparty/holosoma/src/holosoma/holosoma/agents/modules/ppo_modules.py:40-43 PPOActor._process_module_config",
+      "scope": "Single documented runtime output_dim resolution; all other configuration fields exactly equal"
+    }
+  },
+  "plots": {
+    "report": {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-high-step-final-cpu-01/validation/plots/plot-report.json",
+      "bytes": 2304,
+      "sha256": "9370050425a3c8285c6a0dea86f4ff3f170f6246f6705c8241df92c31732b8f0"
+    },
+    "smoothing": {
+      "method": "trailing arithmetic mean",
+      "window_samples": 25,
+      "early_window": "all available samples",
+      "raw_samples_plotted": true
+    },
+    "figures": [
+      {
+        "path": "/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-high-step-final-cpu-01/validation/plots/learning-curves.png",
+        "bytes": 290834,
+        "sha256": "b8a0f1a456d0636a8a303fc33e6d5b791ed3539dbaa09c5dc7deda5f94f7115a"
+      },
+      {
+        "path": "/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-high-step-final-cpu-01/validation/plots/learning-curves.svg",
+        "bytes": 1345876,
+        "sha256": "111b149f85fe7dd6190c2d095b8e35890a5a67c5796104e03386bf41f9ccad35"
+      }
+    ]
+  },
+  "cgroup_memory_peak_bytes": 1730846720,
+  "cgroup_memory_peak_gib": 1.6119766235351562,
+  "evidence_fingerprints": [
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-high-step-final-01/artifacts/events.out.tfevents.1791695821.pro5000-6.93019.0",
+      "bytes": 72561360,
+      "sha256": "dcd98916219f4bf4696e864dfdfc0c9837433ce50327cd44697111d159367f82"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-high-step-final-01/artifacts/holosoma_config.yaml",
+      "bytes": 30947,
+      "sha256": "e7bc003ab863531ef19546e2cb5957ed748789207937142e7499a6f762ed5f25"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-high-step-final-01/artifacts/model_00000.pt",
+      "bytes": 10345023,
+      "sha256": "a3b84b609ec3984510d37e0287f66a0f77d10d61d649f55b90fb3f166c0350f7"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-high-step-final-01/artifacts/model_19999.onnx",
+      "bytes": 442848025,
+      "sha256": "54583a56de697d79432b85be60bcb2557825557f63cdccef6683d83af820865e"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-high-step-final-01/artifacts/model_19999.pt",
+      "bytes": 10345023,
+      "sha256": "3acf40817296326e272c8be47e683517efa9db2f7f4c654512644def478bee13"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-high-step-final-01/receipt.json",
+      "bytes": 21353,
+      "sha256": "f3da130d8f08ff8413a329e4aef1a7b8753c33922ee004774429b25c557f1a6b"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-high-step-final-01/root-transfer-verification.json",
+      "bytes": 2963,
+      "sha256": "adb23dddfd086665338fd0f3c5a4bccb2c0baf1cf26c144d178f3f75255e1b08"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-high-step-final-cpu-01/contract.json",
+      "bytes": 8299,
+      "sha256": "00694ca7dcb3c6198bbac166a6adaefc772f0d48d15e8c189ae5028e2d8ded3f"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-high-step-final-cpu-01/diffs/accept_teacher.py.diff",
+      "bytes": 7048,
+      "sha256": "250b8e356f225f9ba7a731d43cba15dac09f1844328fbd7271095dbc0ccbc4ad"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-high-step-final-cpu-01/diffs/plot_learning_curves.py.diff",
+      "bytes": 4484,
+      "sha256": "5926d5a4421d53e8db72df85beba1dcc704124b8ae03a76f48ad5dbecb81f0fc"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-high-step-final-cpu-01/diffs/run_cpu.py.diff",
+      "bytes": 2710,
+      "sha256": "b928a39d86e8b0f930e3a2658d40fac51f1ee4797928e16f51dc44238fe6fe7e"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-high-step-final-cpu-01/diffs/run_cpu_phases.py.diff",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-high-step-final-cpu-01/diffs/validate_teacher_onnx.py.diff",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-high-step-final-cpu-01/host/create.stderr.raw",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-high-step-final-cpu-01/host/create.stdout.raw",
+      "bytes": 65,
+      "sha256": "a1f1f300d471d1bf48ac46a5acc56d141186475a6a4fad3bf973242cbb160c52"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-high-step-final-cpu-01/host/execution.json",
+      "bytes": 4151,
+      "sha256": "f02fa514bcaa5d7a885da39ee23b2d60c7145292810e8461c24c18426dd16ea8"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-high-step-final-cpu-01/host/inspect-after.raw.json",
+      "bytes": 15746,
+      "sha256": "4cabe26e8e916acdc1920170e6204e30a4cc93a291c30534657df7b18cfd920c"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-high-step-final-cpu-01/host/inspect-before.raw.json",
+      "bytes": 15185,
+      "sha256": "6e7bd1af025577d1ea8ce3abaef8278197ed7faf5699a35a0762152933869da5"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-high-step-final-cpu-01/host/start.stderr.raw",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-high-step-final-cpu-01/host/start.stdout.raw",
+      "bytes": 150,
+      "sha256": "6ed7baef5a35d1da10e17d9b0d5559cf84d88860f223bb403bfbdaf059ee4bb5"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-high-step-final-cpu-01/independent-prelaunch-review.json",
+      "bytes": 15275,
+      "sha256": "f631082e37b00c36fa003fcbb533a604e5afac199fc64ac930bb22d7716f61c9"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-high-step-final-cpu-01/input/input-manifest.json",
+      "bytes": 2033,
+      "sha256": "83f54dcf20a76a1dcf33793104f5943ea811dfc90a1c6b776bae0d45def26df1"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-high-step-final-cpu-01/input/inventory-after.json",
+      "bytes": 54014,
+      "sha256": "b7a1c77c559820814cb1bc7042ecc0c9ad60bcfae65743c4363cca0c8ba6bda6"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-high-step-final-cpu-01/input/inventory-before.json",
+      "bytes": 54014,
+      "sha256": "6b6979186a610f8e1ba9499d3b7a323357cb55445ebf73582e4cc754f37a78f3"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-high-step-final-cpu-01/input/model_00000.pt",
+      "bytes": 10345023,
+      "sha256": "a3b84b609ec3984510d37e0287f66a0f77d10d61d649f55b90fb3f166c0350f7"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-high-step-final-cpu-01/input/runtime-resolution-source.py",
+      "bytes": 7326,
+      "sha256": "46142be3c3d700aafb13c401750918dd641eb12f266ee6adad71a341c7f9618f"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-high-step-final-cpu-01/input/teacher-high-step.json",
+      "bytes": 2247,
+      "sha256": "18cc82fa61a87084e3ccd52e78e0940681fc1090f80283b90ca055b56a7d5da2"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-high-step-final-cpu-01/input/transfer-receipt.json",
+      "bytes": 21353,
+      "sha256": "f3da130d8f08ff8413a329e4aef1a7b8753c33922ee004774429b25c557f1a6b"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-high-step-final-cpu-01/preparation.json",
+      "bytes": 8449,
+      "sha256": "858fc883598c96fcbf7a101f7217a6b4faac4582742aee62339afb05d346f8d2"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-high-step-final-cpu-01/root-actual-launch.json",
+      "bytes": 494,
+      "sha256": "d1d2692097df2e83865412c796b8313d87882b153c21fb430c8c5b4873de218f"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-high-step-final-cpu-01/root-launch-inspect.raw.json",
+      "bytes": 15904,
+      "sha256": "60ff24eb33df2f3379c19c78bedab4b7b21c1403ec8b5783ee716cd77e2b8951"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-high-step-final-cpu-01/root-postexecution-verification.json",
+      "bytes": 16232,
+      "sha256": "2a49e88dbe674e088dc747d5aa1a373354e3b4c5fa149cfa0758107d67556483"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-high-step-final-cpu-01/root-prelaunch-review.json",
+      "bytes": 6482,
+      "sha256": "1307853a0b9654763c4f7aaa7747f3700d11e5e6c01f42f57afaa75a77830d51"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-high-step-final-cpu-01/root-terminal-inspect.raw.json",
+      "bytes": 15746,
+      "sha256": "e6ce9c238ad04a1cd4be00254918f02e74cf3bd1e1e3dd71b533de423d6a0c4e"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-high-step-final-cpu-01/root_verify_actual_cpu.py",
+      "bytes": 8199,
+      "sha256": "2b0aec73612c16b69dc7c88eeaf0b2045e9e471261990f1945be8701ab9300ec"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-high-step-final-cpu-01/run_cpu.py",
+      "bytes": 4853,
+      "sha256": "de7922f0f8a22856c28af3d7eb8997699f14b187fb1466a09298786d9bd3bd27"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-high-step-final-cpu-01/source/accept_teacher.py",
+      "bytes": 18989,
+      "sha256": "f0a3384bcabe863fe7f05a6a7631a450cf1c4f721e3ffea43a7ef6b4c78031da"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-high-step-final-cpu-01/source/plot_learning_curves.py",
+      "bytes": 7375,
+      "sha256": "2b3727c6e8198b9580e6b7c141a14291c90f88919766f35dc81c72a4d4deeb6d"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-high-step-final-cpu-01/source/run_cpu_phases.py",
+      "bytes": 3698,
+      "sha256": "faacb90fbf89ca3b26561034f8c9fa654ab0ccc1bbcdbc98fe448e583aa30e0d"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-high-step-final-cpu-01/source/validate_teacher_onnx.py",
+      "bytes": 6575,
+      "sha256": "cbc997fb2a39f2aa047f015ba49ecd21d717acff6ea060daeafe80347288bcf7"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-high-step-final-cpu-01/source-original/accept_teacher.py",
+      "bytes": 18385,
+      "sha256": "61b43730942cbd5af868007bc7a013fbbdb4a5ae261050c3e160fcfd80decc9a"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-high-step-final-cpu-01/source-original/plot_learning_curves.py",
+      "bytes": 7348,
+      "sha256": "84d7ab2a0d26e35d21fc25e6f1c9bafe93422d0d80cbb264526a39bf2b5d82c2"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-high-step-final-cpu-01/source-original/run_cpu_phases.py",
+      "bytes": 3698,
+      "sha256": "faacb90fbf89ca3b26561034f8c9fa654ab0ccc1bbcdbc98fe448e583aa30e0d"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-high-step-final-cpu-01/source-original/teacher-locomotion-final-cpu-launch-02.py",
+      "bytes": 4890,
+      "sha256": "f69a568d28db51bef5e09d8a8d440f6e0ce3553c9209bdddd214007e3e958b73"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-high-step-final-cpu-01/source-original/validate_teacher_onnx.py",
+      "bytes": 6575,
+      "sha256": "cbc997fb2a39f2aa047f015ba49ecd21d717acff6ea060daeafe80347288bcf7"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-high-step-final-cpu-01/validation/bind.json",
+      "bytes": 2606,
+      "sha256": "36e33f40e3a1b78d9a8f7c1e4ee203ddc34d4fda275ed937af8151f5c812ce8a"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-high-step-final-cpu-01/validation/bind.stderr.raw",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-high-step-final-cpu-01/validation/bind.stdout.raw",
+      "bytes": 65,
+      "sha256": "b44437d2e7a83048a2410d05dccba0fafe53f4d957df4131d06bae499fe1ae78"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-high-step-final-cpu-01/validation/checkpoint.json",
+      "bytes": 51529,
+      "sha256": "fe900c852dacc1a51f4aecb4898b12ddee9716c3de8f377cf5574f709dda617b"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-high-step-final-cpu-01/validation/checkpoint.stderr.raw",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-high-step-final-cpu-01/validation/checkpoint.stdout.raw",
+      "bytes": 71,
+      "sha256": "e5ca72ea473d080ad6f4f5a4ef5609fccd6de1d8d8f60fbc7f80f2389f4ad45d"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-high-step-final-cpu-01/validation/onnx.json",
+      "bytes": 86360,
+      "sha256": "ddc94a399272980662e93bfffb0d89ca55e03562fcb5b03ac4f20b2ad280d04e"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-high-step-final-cpu-01/validation/onnx.stderr.raw",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-high-step-final-cpu-01/validation/onnx.stdout.raw",
+      "bytes": 56,
+      "sha256": "36af60a871d659149b4b29c83a368add512b11c6e5db5022853db3e1fe33c15a"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-high-step-final-cpu-01/validation/phases.json",
+      "bytes": 8270,
+      "sha256": "c6fec33e238de64538e4e18b48b1f4aec4d01eaaa91bbfcdf7f7d9dcac9047e1"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-high-step-final-cpu-01/validation/plots/learning-curves.png",
+      "bytes": 290834,
+      "sha256": "b8a0f1a456d0636a8a303fc33e6d5b791ed3539dbaa09c5dc7deda5f94f7115a"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-high-step-final-cpu-01/validation/plots/learning-curves.svg",
+      "bytes": 1345876,
+      "sha256": "111b149f85fe7dd6190c2d095b8e35890a5a67c5796104e03386bf41f9ccad35"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-high-step-final-cpu-01/validation/plots/plot-report.json",
+      "bytes": 2304,
+      "sha256": "9370050425a3c8285c6a0dea86f4ff3f170f6246f6705c8241df92c31732b8f0"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-high-step-final-cpu-01/validation/plots.stderr.raw",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-high-step-final-cpu-01/validation/plots.stdout.raw",
+      "bytes": 191,
+      "sha256": "df04c5ff5775192d0c0db89e3fc53a86381bed7dcf196c5656e58f41d72c4140"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-high-step-final-cpu-01/validation/scalars.json",
+      "bytes": 9348399,
+      "sha256": "dca61e11db4d5743ef220d93fa8f18ba95bd719b7abf7ae408f6285c66caafa4"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-high-step-final-cpu-01/validation/scalars.stderr.raw",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-high-step-final-cpu-01/validation/scalars.stdout.raw",
+      "bytes": 68,
+      "sha256": "def322fbd2dedd456255cdd7a5bdd0b1a476000ad389fcae79ddc74439022bb8"
+    }
+  ],
+  "quality_verified": false,
+  "convergence_verified": false,
+  "pt_onnx_numerical_parity_verified": false,
+  "official_schedule_complete": false,
+  "official_physical_eval_replaced": false,
+  "existing_files_modified": false,
+  "audit_hash_helper_initial_atime_overconstraint_corrected_without_model_or_CPU_rerun": true
+}

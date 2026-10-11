@@ -1,0 +1,106 @@
+{
+  "started_utc": "2026-10-11T17:27:31.486599+00:00",
+  "helper": {
+    "path": "/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-high-step-final-cpu-01/run_cpu.py",
+    "bytes": 4853,
+    "sha256": "de7922f0f8a22856c28af3d7eb8997699f14b187fb1466a09298786d9bd3bd27"
+  },
+  "source_before": [
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-high-step-final-cpu-01/source/accept_teacher.py",
+      "bytes": 18989,
+      "sha256": "f0a3384bcabe863fe7f05a6a7631a450cf1c4f721e3ffea43a7ef6b4c78031da"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-high-step-final-cpu-01/source/plot_learning_curves.py",
+      "bytes": 7375,
+      "sha256": "2b3727c6e8198b9580e6b7c141a14291c90f88919766f35dc81c72a4d4deeb6d"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-high-step-final-cpu-01/source/run_cpu_phases.py",
+      "bytes": 3698,
+      "sha256": "faacb90fbf89ca3b26561034f8c9fa654ab0ccc1bbcdbc98fe448e583aa30e0d"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-high-step-final-cpu-01/source/validate_teacher_onnx.py",
+      "bytes": 6575,
+      "sha256": "cbc997fb2a39f2aa047f015ba49ecd21d717acff6ea060daeafe80347288bcf7"
+    }
+  ],
+  "create_argv": [
+    "docker",
+    "create",
+    "--name",
+    "php-official-high-step-final-cpu-01",
+    "--runtime",
+    "runc",
+    "--init",
+    "--network",
+    "none",
+    "--cpus",
+    "2",
+    "--memory",
+    "12g",
+    "--label",
+    "php.research.owner=official-high-step-final-cpu-01",
+    "-e",
+    "CUDA_VISIBLE_DEVICES=",
+    "-e",
+    "NVIDIA_VISIBLE_DEVICES=void",
+    "-e",
+    "PYTHONDONTWRITEBYTECODE=1",
+    "-e",
+    "OMP_NUM_THREADS=1",
+    "-e",
+    "OPENBLAS_NUM_THREADS=1",
+    "-e",
+    "MKL_NUM_THREADS=1",
+    "-e",
+    "ACCEPT_EULA=Y",
+    "-e",
+    "OMNI_KIT_ACCEPT_EULA=YES",
+    "--mount",
+    "type=bind,src=/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-high-step-final-cpu-01/source,dst=/code,readonly",
+    "--mount",
+    "type=bind,src=/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-high-step-final-cpu-01/input,dst=/control,readonly",
+    "--mount",
+    "type=bind,src=/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-high-step-final-01/artifacts,dst=/artifacts,readonly",
+    "--mount",
+    "type=bind,src=/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-high-step-final-cpu-01/validation,dst=/validation",
+    "sha256:2be18521015b2a84ef7a4442af9a94ef041a19feb9ce385ae15424b1dc158d8f",
+    "/usr/bin/python3",
+    "-B",
+    "/code/run_cpu_phases.py"
+  ],
+  "quality_verified": false,
+  "official_schedule_complete": false,
+  "create_actual_returncode": 0,
+  "container_id": "a862a5e60ff55299d85ab1661f39bdb91c44bf358d30141ead643f0ee30aac40",
+  "actual_start_attached_wait_returncode": 0,
+  "container_running": false,
+  "actual_container_exit_code": 0,
+  "source_after": [
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-high-step-final-cpu-01/source/accept_teacher.py",
+      "bytes": 18989,
+      "sha256": "f0a3384bcabe863fe7f05a6a7631a450cf1c4f721e3ffea43a7ef6b4c78031da"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-high-step-final-cpu-01/source/plot_learning_curves.py",
+      "bytes": 7375,
+      "sha256": "2b3727c6e8198b9580e6b7c141a14291c90f88919766f35dc81c72a4d4deeb6d"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-high-step-final-cpu-01/source/run_cpu_phases.py",
+      "bytes": 3698,
+      "sha256": "faacb90fbf89ca3b26561034f8c9fa654ab0ccc1bbcdbc98fe448e583aa30e0d"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-high-step-final-cpu-01/source/validate_teacher_onnx.py",
+      "bytes": 6575,
+      "sha256": "cbc997fb2a39f2aa047f015ba49ecd21d717acff6ea060daeafe80347288bcf7"
+    }
+  ],
+  "finished_utc": "2026-10-11T17:27:48.561772+00:00",
+  "source_unchanged": true
+}

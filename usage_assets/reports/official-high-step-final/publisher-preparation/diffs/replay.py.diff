@@ -1,0 +1,14 @@
+--- source-original/replay.py
++++ replay.py
+@@ -169,9 +169,9 @@
+     host, validation = output / 'host', output / 'validation'
+     host.mkdir()
+     validation.mkdir()
+-    name = 'php-official-low-step-replay-' + uuid.uuid4().hex[:12]
++    name = 'php-official-high-step-replay-' + uuid.uuid4().hex[:12]
+     argv = ['docker', 'create', '--name', name, '--runtime', 'runc', '--init', '--network', 'none',
+-            '--cpus', '2', '--memory', '12g', '--label', 'php.research.owner=official-low-step-replay',
++            '--cpus', '2', '--memory', '12g', '--label', 'php.research.owner=official-high-step-replay',
+             '-e', 'CUDA_VISIBLE_DEVICES=', '-e', 'NVIDIA_VISIBLE_DEVICES=void',
+             '-e', 'PYTHONDONTWRITEBYTECODE=1', '-e', 'OMP_NUM_THREADS=1', '-e', 'OPENBLAS_NUM_THREADS=1',
+             '-e', 'MKL_NUM_THREADS=1', '-e', 'ACCEPT_EULA=Y', '-e', 'OMNI_KIT_ACCEPT_EULA=YES']

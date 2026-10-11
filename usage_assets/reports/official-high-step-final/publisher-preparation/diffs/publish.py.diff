@@ -1,0 +1,156 @@
+--- source-original/publish.py
++++ publish.py
+@@ -11,15 +11,17 @@
+ 
+ ROOT = next(parent for parent in Path(__file__).resolve().parents
+             if (parent / 'release-assets.json').is_file() and (parent / 'scripts/research').is_dir())
+-BASE = ROOT / 'usage_assets/reports/official-low-step-final'
+-PREPARATION = ROOT / 'outputs/research/official-full/teacher-low-step-final-publication-preparation-01'
++BASE = ROOT / 'usage_assets/reports/official-high-step-final'
++PREPARATION = ROOT / 'outputs/research/official-full/teacher-high-step-final-publication-preparation-01'
+ SOURCE = ROOT / 'outputs/research/official-full'
+ LIMIT = 25_000_000
+-EVENT = 'events.out.tfevents.1791651217.pro5000-6.71862.0'
++CONTRACT_SHA256 = '00694ca7dcb3c6198bbac166a6adaefc772f0d48d15e8c189ae5028e2d8ded3f'
++Q = SOURCE / 'verified-cloud-waits/20261011T171218931711Z'
++TRANSITION = SOURCE / 'bounded-verified-wait-20261011T170036Z/root-terminal-transition-verification.json'
+ 
+ 
+ def fp(path):
+-    if path.is_symlink() or not path.is_file():
++    if any(item.is_symlink() for item in (path, *path.parents)) or not path.is_file():
+         raise ValueError('Regular nonsymlink file required: ' + str(path))
+     sha = hashlib.sha256()
+     with path.open('rb') as stream:
+@@ -34,24 +36,81 @@
+ 
+ def main():
+     if BASE.exists() or BASE.is_symlink():
+-        raise ValueError('Use the fresh dedicated low-step publication; preserve all previous evidence')
+-    cohort = SOURCE / 'teacher-low-step-final-cpu-01'
++        raise ValueError('Use the fresh dedicated high-step publication; preserve all previous evidence')
++    plan = json.loads((PREPARATION / 'publication-plan.json').read_bytes())
++    binding = plan['reviewed_cpu_postexecution_binding']
++    if not binding or binding['status'] != 'root_and_independent_reviewed_actual_high_step_cpu':
++        raise ValueError('Bind actual high-step CPU terminal reports and obtain new review before publication')
++    for row in plan['actual_input_fingerprints'] + binding['files']:
++        if fp(Path(row['path'])) != {key: row[key] for key in ('bytes', 'sha256')}:
++            raise ValueError('Pinned actual high-step input changed: ' + row['path'])
++    cohort = SOURCE / 'teacher-high-step-final-cpu-01'
++    required_reports = {str(cohort / name) for name in ('independent-postexecution-review.json', 'validation/phases.json', 'host/execution.json')}
++    if {row['path'] for row in binding['files']} != required_reports:
++        raise ValueError('Bind exactly the actual independent review, five-phase receipt and CPU execution receipt')
++    if fp(cohort / 'contract.json')['sha256'] != CONTRACT_SHA256:
++        raise ValueError('Generated actual high-step CPU contract differs')
++    transfer = SOURCE / 'teacher-high-step-final-01'
++    terminal = json.loads((transfer / 'inventory-before.stdout.raw').read_bytes())
++    after = json.loads((transfer / 'inventory-after.stdout.raw').read_bytes())
++    transferred = json.loads((transfer / 'receipt.json').read_bytes())
++    native = json.loads((transfer / 'teacher-high-step.json').read_bytes())
++    if (native['status'] != 'passed' or type(native['returncode']) is not int or native['returncode'] != 0
++            or type(native['checkpoint_iteration']) is not int or native['checkpoint_iteration'] != 19999
++            or native['environment']['REGISTRY'] != 'file:///data/assets/motions-high-step'
++            or not native['checkpoint'].startswith('/outputs/official-full/official/teacher-high-step/')
++            or Path(native['checkpoint']).name != 'model_19999.pt'
++            or terminal['status'] != 'passed' or after['status'] != 'passed'
++            or terminal['artifacts'] != after['artifacts']
++            or transferred['status'] != 'completed' or not transferred['remote_source_unchanged']
++            or not transferred['source_helpers_unchanged'] or transferred['verified_artifact_count'] != 5):
++        raise ValueError('Require actual high-step passed0/19999 and stable completed five-artifact transfer')
++    events = terminal['event_file_names']
++    if len(events) != 1 or Path(events[0]).name != events[0]:
++        raise ValueError('Require the single actual high-step TensorBoard event')
++    EVENT = events[0]
++    expected_names = {'model_00000.pt', 'model_19999.pt', 'model_19999.onnx', 'holosoma_config.yaml', EVENT}
++    artifact_rows = plan['actual_artifacts']
++    if ({Path(row['path']).name for row in artifact_rows} != expected_names or len(artifact_rows) != 5
++            or {path.name for path in (transfer / 'artifacts').iterdir()} != expected_names):
++        raise ValueError('Exact actual high-step artifact set differs')
++    for row in artifact_rows:
++        if Path(row['path']).parent != transfer / 'artifacts' or fp(Path(row['path'])) != {key: row[key] for key in ('bytes', 'sha256')}:
++            raise ValueError('Actual high-step artifact body changed')
++    if next(row['sha256'] for row in artifact_rows if Path(row['path']).name == 'model_19999.pt') != native['checkpoint_sha256']:
++        raise ValueError('Native high-step final checkpoint SHA differs')
+     review = json.loads((cohort / 'independent-postexecution-review.json').read_bytes())
+     phases = json.loads((cohort / 'validation/phases.json').read_bytes())
+     execution = json.loads((cohort / 'host/execution.json').read_bytes())
+     if (review['status'] != 'passed_readonly_postexecution_review' or review['must_fix']
+             or phases['status'] != 'passed' or [row['actual_wait_returncode'] for row in phases['phases']] != [0] * 5
++            or any(type(row['actual_wait_returncode']) is not int for row in phases['phases'])
+             or execution['actual_start_attached_wait_returncode'] != 0 or execution['actual_container_exit_code'] != 0
+             or execution['container_running'] or not execution['source_unchanged']):
+-        raise ValueError('Require the actual low-step CPU terminal evidence')
++        raise ValueError('Require the actual high-step CPU terminal evidence')
+     for row in review['evidence_fingerprints']:
+         if fp(Path(row['path'])) != {key: row[key] for key in ('bytes', 'sha256')}:
+             raise ValueError('Actual reviewed report changed: ' + row['path'])
++    preparation = json.loads((PREPARATION / 'preparation-manifest.json').read_bytes())
++    expected_files = plan['actual_input_fingerprints'] + binding['files'] + artifact_rows + review['evidence_fingerprints']
++    expected_files += [{'path': str(PREPARATION / row['path']), 'bytes': row['bytes'], 'sha256': row['sha256']}
++                       for row in preparation['files']]
++    pinned = {}
++    for row in expected_files:
++        path = Path(row['path'])
++        expected = {key: row[key] for key in ('bytes', 'sha256')}
++        if path in pinned and pinned[path] != expected:
++            raise ValueError('Conflicting original fingerprints: ' + str(path))
++        if fp(path) != expected:
++            raise ValueError('Reviewed source/input differs before publication: ' + str(path))
++        pinned[path] = expected
+     BASE.mkdir(exist_ok=False)
+     mapping = []
+     def copy(source, relative):
+         target = BASE / relative
+-        expected = fp(source)
++        expected = pinned.get(source, fp(source))
++        if fp(source) != expected:
++            raise ValueError('Reviewed copy source changed: ' + str(source))
+         target.parent.mkdir(parents=True, exist_ok=True)
+         with source.open('rb') as old, target.open('xb') as new:
+             shutil.copyfileobj(old, new, length=8 * 1024 * 1024)
+@@ -64,13 +123,13 @@
+                 raise ValueError('Source symlink rejected: ' + str(path))
+             if path.is_file() and path.name not in exclude:
+                 copy(path, str(Path(relative) / path.relative_to(source)))
+-    cohort = SOURCE / 'teacher-low-step-final-cpu-01'
++    cohort = SOURCE / 'teacher-high-step-final-cpu-01'
+     for kind in ('source', 'source-original', 'diffs', 'host', 'validation', 'input'):
+         tree(cohort / kind, 'cpu-01/' + kind)
+     for path in sorted(cohort.iterdir()):
+         if path.is_file():
+             copy(path, 'cpu-01/' + path.name)
+-    transfer = SOURCE / 'teacher-low-step-final-01'
++    transfer = SOURCE / 'teacher-high-step-final-01'
+     excluded = ('model_19999.pt', 'model_19999.onnx', 'holosoma_config.yaml', EVENT, 'model_00000.pt')
+     tree(transfer, 'transfer', excluded)
+     for name in ('model_19999.pt', 'holosoma_config.yaml'):
+@@ -80,7 +139,8 @@
+     mapping.append({'source': str(transfer / 'artifacts/model_00000.pt'),
+                     'published': 'cpu-01/input/model_00000.pt',
+                     **fp(BASE / 'cpu-01/input/model_00000.pt'), 'encoding': 'original_bytes_shared_identical_copy'})
+-    tree(SOURCE / 'low-step-terminal-checkpoint-01', 'terminal-checkpoint-observation')
++    tree(Q, 'terminal-observation')
++    copy(TRANSITION, 'terminal-observation/root-terminal-transition-verification.json')
+     tree(PREPARATION, 'publisher-preparation')
+     copy(PREPARATION / 'replay.py', 'replay.py')
+     copy(PREPARATION / 'index.md', 'index.md')
+@@ -147,12 +207,18 @@
+     save(BASE / 'external-onnx.json', {'schema_version': 1, 'included_in_git': False,
+         'local_original': str(onnx), 'remote_original': onnx_record['path'],
+         'bytes': onnx_record['bytes'], 'sha256': onnx_record['sha256'],
+-        'reason': 'The exact self-contained 428920342-byte low-step final ONNX remains an external replay prerequisite.'})
++        'reason': 'The exact self-contained high-step final ONNX remains an external replay prerequisite.',
++        'download': {'ssh_alias': 'tencent-231', 'port': 22, 'remote_path': onnx_record['path'],
++                     'argv_template': ['rsync', '-av', '--partial', '-e', 'ssh -p 22 -o BatchMode=yes -o PasswordAuthentication=no',
++                                       'tencent-231:' + onnx_record['path'], '<fresh-local-onnx-path>']}})
+     save(BASE / 'path-map.json', {'schema_version': 1, 'raw_json_rewritten': False, 'records': mapping,
+          'docker_namespace': {'/code': 'cpu-01/source', '/control': 'cpu-01/input',
+                               '/artifacts': 'Fresh replay directory with restored event, PT/config and verified external ONNX',
+                               '/validation': 'Fresh replay output directory'},
+          'excluded_external_artifact': 'external-onnx.json'})
++    for path, expected in pinned.items():
++        if fp(path) != expected:
++            raise ValueError('Actual high-step input changed while archiving: ' + str(path))
+     oversized = [str(path.relative_to(BASE)) for path in BASE.rglob('*') if path.is_file() and path.stat().st_size > LIMIT]
+     if oversized:
+         raise ValueError('Publication file exceeds 25 MB: ' + repr(oversized))

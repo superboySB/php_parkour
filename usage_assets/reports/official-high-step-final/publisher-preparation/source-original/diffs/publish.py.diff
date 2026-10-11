@@ -1,0 +1,125 @@
+--- /home/dzp/projects/php_parkour/usage_assets/reports/official-locomotion-final/publish.py
++++ /home/dzp/projects/php_parkour/outputs/research/official-full/teacher-low-step-final-publication-preparation-01/publish.py
+@@ -9,11 +9,13 @@
+ from pathlib import Path
+ import shutil
+ 
+-BASE = Path(__file__).resolve().parent
+-ROOT = BASE.parents[2]
++ROOT = next(parent for parent in Path(__file__).resolve().parents
++            if (parent / 'release-assets.json').is_file() and (parent / 'scripts/research').is_dir())
++BASE = ROOT / 'usage_assets/reports/official-low-step-final'
++PREPARATION = ROOT / 'outputs/research/official-full/teacher-low-step-final-publication-preparation-01'
+ SOURCE = ROOT / 'outputs/research/official-full'
+ LIMIT = 25_000_000
+-EVENT = 'events.out.tfevents.1791606211.pro5000-6.47700.0'
++EVENT = 'events.out.tfevents.1791651217.pro5000-6.71862.0'
+ 
+ 
+ def fp(path):
+@@ -31,8 +33,21 @@
+ 
+ 
+ def main():
+-    if (BASE / 'path-map.json').exists():
+-        raise ValueError('Publication already populated; preserve all original evidence')
++    if BASE.exists() or BASE.is_symlink():
++        raise ValueError('Use the fresh dedicated low-step publication; preserve all previous evidence')
++    cohort = SOURCE / 'teacher-low-step-final-cpu-01'
++    review = json.loads((cohort / 'independent-postexecution-review.json').read_bytes())
++    phases = json.loads((cohort / 'validation/phases.json').read_bytes())
++    execution = json.loads((cohort / 'host/execution.json').read_bytes())
++    if (review['status'] != 'passed_readonly_postexecution_review' or review['must_fix']
++            or phases['status'] != 'passed' or [row['actual_wait_returncode'] for row in phases['phases']] != [0] * 5
++            or execution['actual_start_attached_wait_returncode'] != 0 or execution['actual_container_exit_code'] != 0
++            or execution['container_running'] or not execution['source_unchanged']):
++        raise ValueError('Require the actual low-step CPU terminal evidence')
++    for row in review['evidence_fingerprints']:
++        if fp(Path(row['path'])) != {key: row[key] for key in ('bytes', 'sha256')}:
++            raise ValueError('Actual reviewed report changed: ' + row['path'])
++    BASE.mkdir(exist_ok=False)
+     mapping = []
+     def copy(source, relative):
+         target = BASE / relative
+@@ -49,30 +64,27 @@
+                 raise ValueError('Source symlink rejected: ' + str(path))
+             if path.is_file() and path.name not in exclude:
+                 copy(path, str(Path(relative) / path.relative_to(source)))
+-    for attempt in ('01', '02'):
+-        source = SOURCE / ('teacher-locomotion-final-cpu-' + attempt)
+-        for kind in ('source', 'host', 'validation'):
+-            tree(source / kind, 'cpu-' + attempt + '/' + kind)
+-        tree(source / 'input', 'cpu-' + attempt + '/input', ('model_00000.pt',) if attempt == '01' else ())
+-        copy(SOURCE / ('teacher-locomotion-final-cpu-launch-' + attempt + '.py'), 'control/cpu-launch-' + attempt + '.py')
+-    old_baseline = SOURCE / 'teacher-locomotion-final-cpu-01/input/model_00000.pt'
+-    new_baseline = BASE / 'cpu-02/input/model_00000.pt'
+-    if fp(old_baseline) != fp(new_baseline):
+-        raise ValueError('Historical baseline differs from published baseline')
+-    mapping.append({'source': str(old_baseline), 'published': 'cpu-02/input/model_00000.pt',
+-                    **fp(new_baseline), 'encoding': 'original_bytes_shared_identical_copy'})
+-    tree(SOURCE / 'teacher-locomotion-final-01', 'transfer', ('model_19999.pt', 'model_19999.onnx', 'holosoma_config.yaml', EVENT))
++    cohort = SOURCE / 'teacher-low-step-final-cpu-01'
++    for kind in ('source', 'source-original', 'diffs', 'host', 'validation', 'input'):
++        tree(cohort / kind, 'cpu-01/' + kind)
++    for path in sorted(cohort.iterdir()):
++        if path.is_file():
++            copy(path, 'cpu-01/' + path.name)
++    transfer = SOURCE / 'teacher-low-step-final-01'
++    excluded = ('model_19999.pt', 'model_19999.onnx', 'holosoma_config.yaml', EVENT, 'model_00000.pt')
++    tree(transfer, 'transfer', excluded)
+     for name in ('model_19999.pt', 'holosoma_config.yaml'):
+-        copy(SOURCE / 'teacher-locomotion-final-01/artifacts' / name, 'artifacts/' + name)
+-    copy(SOURCE / 'first-teacher-terminal-observation-20261010T165258Z.json', 'terminal-observation.json')
+-    for source, relative in (
+-        ('teacher-locomotion-final-control-01', 'cloud-control'),
+-        ('teacher-locomotion-final-cpu-diagnostic-01', 'config-diagnostic'),
+-        ('teacher-locomotion-config-resolution-source-01', 'runtime-resolution-source'),
+-    ):
+-        tree(SOURCE / source, relative)
+-    copy(SOURCE / 'capture-first-teacher-control-01.py', 'control/capture-first-teacher-control-01.py')
+-    original = SOURCE / 'teacher-locomotion-final-01/artifacts' / EVENT
++        copy(transfer / 'artifacts' / name, 'artifacts/' + name)
++    if fp(transfer / 'artifacts/model_00000.pt') != fp(BASE / 'cpu-01/input/model_00000.pt'):
++        raise ValueError('Same-run baseline copy differs')
++    mapping.append({'source': str(transfer / 'artifacts/model_00000.pt'),
++                    'published': 'cpu-01/input/model_00000.pt',
++                    **fp(BASE / 'cpu-01/input/model_00000.pt'), 'encoding': 'original_bytes_shared_identical_copy'})
++    tree(SOURCE / 'low-step-terminal-checkpoint-01', 'terminal-checkpoint-observation')
++    tree(PREPARATION, 'publisher-preparation')
++    copy(PREPARATION / 'replay.py', 'replay.py')
++    copy(PREPARATION / 'index.md', 'index.md')
++    original = transfer / 'artifacts' / EVENT
+     expected = fp(original)
+     event_dir = BASE / 'tensorboard'
+     event_dir.mkdir(exist_ok=False)
+@@ -127,23 +139,26 @@
+     save(event_dir / 'event-archive.json', event_manifest)
+     mapping.append({'source': str(original), 'published': 'tensorboard/event-archive.json',
+                     **expected, 'encoding': 'lossless_gzip_chunk_contract'})
+-    onnx = SOURCE / 'teacher-locomotion-final-01/artifacts/model_19999.onnx'
+-    terminal = json.loads((BASE / 'terminal-observation.json').read_bytes())
++    onnx = transfer / 'artifacts/model_19999.onnx'
++    terminal = json.loads((BASE / 'transfer/inventory-before.stdout.raw').read_bytes())
+     onnx_record = next(row for row in terminal['artifacts'] if row['path'].endswith('.onnx'))
+     if fp(onnx) != {key: onnx_record[key] for key in ('bytes', 'sha256')}:
+         raise ValueError('External ONNX differs from original terminal observation')
+     save(BASE / 'external-onnx.json', {'schema_version': 1, 'included_in_git': False,
+         'local_original': str(onnx), 'remote_original': onnx_record['path'],
+         'bytes': onnx_record['bytes'], 'sha256': onnx_record['sha256'],
+-        'reason': 'The exact self-contained 1.183 GB final ONNX remains an external replay prerequisite.'})
++        'reason': 'The exact self-contained 428920342-byte low-step final ONNX remains an external replay prerequisite.'})
+     save(BASE / 'path-map.json', {'schema_version': 1, 'raw_json_rewritten': False, 'records': mapping,
+-         'docker_namespace': {'/code': 'cpu-02/source', '/control': 'cpu-02/input',
++         'docker_namespace': {'/code': 'cpu-01/source', '/control': 'cpu-01/input',
+                               '/artifacts': 'Fresh replay directory with restored event, PT/config and verified external ONNX',
+                               '/validation': 'Fresh replay output directory'},
+          'excluded_external_artifact': 'external-onnx.json'})
+     oversized = [str(path.relative_to(BASE)) for path in BASE.rglob('*') if path.is_file() and path.stat().st_size > LIMIT]
+     if oversized:
+         raise ValueError('Publication file exceeds 25 MB: ' + repr(oversized))
++    files = [{'path': str(path.relative_to(BASE)), **fp(path)} for path in sorted(BASE.rglob('*')) if path.is_file()]
++    save(BASE / 'evidence-manifest.json', {'schema_version': 1, 'files': files,
++        'raw_json_rewritten': False, 'quality_verified': False, 'official_schedule_complete': False})
+     print(json.dumps({'status': 'raw_archive_populated', 'original_copies': len(mapping),
+                       'event_compressed': compressed_expected, 'event_chunks': len(chunks),
+                       'actual_restored': restored, 'science_executed': False}))

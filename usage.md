@@ -4,13 +4,17 @@
 
 学习流程、输入输出、数据/label 来源与 real2sim2real 实现细节见独立的 [technical_pipeline.md](technical_pipeline.md)。
 
-**最新进度（2026-10-11 08:14 UTC）：官方教师已完成2/5，locomotion与low-step各完成20,000轮及最终CPU验收；整套复现尚未完成。** 两者均使用4096环境、64地形变体、seed/obstacle_seed 42，最终checkpoint为`model_19999.pt`。low-step于05:16 UTC自然完成，原顺序任务自动进入high-step，08:13 UTC阶段快照确认其仍在训练。其余三教师、两学生、官方物理评估、888逐源尝试及最终自训学生58例仍待完成。公开ONNX的全629逐帧闭环结果已另行出版，不能代替正式自训学生验收。[首教师历史最终产物与CPU验收](usage_assets/reports/official-locomotion-final/index.md)及首次失败记录保持原样。
+**最新进度（2026-10-11 17:39 UTC）：官方教师已完成3/5，locomotion、low-step与high-step各完成20,000轮及最终CPU验收；整套复现尚未完成。** 三者均使用4096环境、64地形变体、seed/obstacle_seed 42，最终checkpoint为`model_19999.pt`。high-step于17:10 UTC自然完成，原顺序任务自动进入low-climb-76；17:12 UTC真实阶段快照确认该第四教师已开始运行。其余两教师、两学生、官方物理评估、888逐源尝试及最终自训学生58例仍待完成。公开ONNX的全629逐帧闭环结果已另行出版，不能代替正式自训学生验收。[首教师历史最终产物与CPU验收](usage_assets/reports/official-locomotion-final/index.md)及首次失败记录保持原样。
 
 ![首个官方教师完整20000轮TensorBoard曲线](usage_assets/reports/official-locomotion-final/cpu-02/validation/plots/learning-curves.png)
 
 [low-step最终产物与可复现CPU验收](usage_assets/reports/official-low-step-final/index.md)已实际通过五阶段，宿主等待与容器退出均为0。完整PT的68个tensor均有限，actor/critic输入为449/575维、动作29维；相对同run的iter0 PT，actor和critic权重更新，Adam计数从20推进到400,000。iter0已经过第一轮优化，不能当成未训练初值。四条TensorBoard tag各有20,000个有限样本，覆盖step 0–19999；原ONNX的12项CPU检查通过，内嵌参考表长度`T=1,643,264`。12项是两种合成观测×六个时间索引，不是全部参考帧或56个原动作片段的物理覆盖。YAML仅`actor.output_dim`由`['robot_action_dim']`解析为`[29]`，其余配置精确相等，PT与ONNX内嵌全配置也精确一致。[checkpoint报告](usage_assets/reports/official-low-step-final/cpu-01/validation/checkpoint.json)、[完整标量](usage_assets/reports/official-low-step-final/cpu-01/validation/scalars.json)、[ONNX报告](usage_assets/reports/official-low-step-final/cpu-01/validation/onnx.json)及[绑定报告](usage_assets/reports/official-low-step-final/cpu-01/validation/bind.json)保留数值和来源；`quality_verified=false`、`convergence_verified=false`、`pt_onnx_numerical_parity_verified=false`。 [公开恢复入口的实际复跑记录](usage_assets/reports/official-low-step-final-replay/index.md)另行封存：恢复输入SHA与原件一致，五阶段及容器再次实际退出0；原验收包保持不变。
 
 ![low-step官方教师完整20000轮TensorBoard曲线；仅证明训练记录完整，不证明技能质量](usage_assets/reports/official-low-step-final/cpu-01/validation/plots/learning-curves.png)
+
+第三个high-step教师于2026-10-11 17:10:20 UTC自然完成20,000轮，最终checkpoint为19999；原顺序任务已进入low-climb-76。17:27 UTC，[high-step最终产物与五阶段CPU验收](usage_assets/reports/official-high-step-final/index.md)的checkpoint、scalars、ONNX、bind、plots均实际退出0，容器自然退出0。68个tensor有限，actor/critic输入449/575维、动作29维，同run的iter0/最终PT全配置相等，权重更新且Adam计数20→400,000；iter0已经过第一轮优化。四条TensorBoard tag各有20,000个有限样本；原442,848,025-byte ONNX通过12项CPU检查，参考表`T=1,696,832`。12项仅为两种合成观测×六个时间索引，T也不是独立动作数或课程成功数。YAML仍只允许`robot_action_dim→29`这一项原生解析，PT与ONNX内嵌全配置精确相等；`quality/convergence/PT-ONNX parity=false`。[公开恢复入口的实际复跑](usage_assets/reports/official-high-step-final-replay/index.md)已用无损还原的同一输入再次实际通过五阶段与容器退出0，原封存验收包保持原字节。官方教师已完成 **3/5**，其余两教师、两学生、官方物理评估、888逐源尝试及最终自训学生58例仍待完成。
+
+![high-step官方教师完整20000轮TensorBoard曲线；全日程及技能质量仍未验证](usage_assets/reports/official-high-step-final/cpu-01/validation/plots/learning-curves.png)
 
 旧SDK历史纠正：北京时间15:48已有序停止旧629物理批次，原279 reported completed/5失败/1中断/344未运行均保留。旧监督遗漏最终worker退出码，已有10个reported completed及旧12指令的command02存在模拟器SIGSEGV；这些不能作为正常退出验收。修复监督与SDK后，原5个显式失败配置的新闭环全部正常退出，[新五例原生试跑](usage_assets/reports/sdk018-native-pilot/summary.md)、[停止回执](usage_assets/reports/sim2sim-cohort-halt/summary.md)、[逐日志实证](usage_assets/reports/worker-exit-completed-log-audit/report.md)保持原始范围；新629的实际终态见下文。
 

@@ -2,7 +2,7 @@
 
 本文解释当前 `research` 分支的实际实现：每个模块接收什么、产生什么、监督信号从哪里来，以及训练得到的动作如何进入机器人控制器。配置与命令见 [note.md](note.md)，真实运行结果、录像与失败记录见 [usage.md](usage.md)。本文件独立于 README。
 
-截至 2026-10-11 08:14 UTC，官方教师已完成2/5：locomotion与low-step各完成20,000轮及最终CPU验收，high-step在08:13 UTC阶段快照中仍在训练。公开ONNX的全629逐帧闭环也已完成CPU后验并出版；其余三教师、两学生、官方物理评估、888逐源尝试及最终自训学生58例尚未全部完成。本文的算法说明来自源码和实际实验，不表示完整日程、策略技能质量或真机验收已经完成。
+截至 2026-10-11 17:39 UTC，官方教师已完成3/5：locomotion、low-step与high-step各完成20,000轮及最终CPU验收；原顺序任务已自然进入low-climb-76。公开ONNX的全629逐帧闭环也已完成CPU后验并出版；其余两教师、两学生、官方物理评估、888逐源尝试及最终自训学生58例尚未全部完成。本文的算法说明来自源码和实际实验，不表示完整日程、策略技能质量或真机验收已经完成。
 
 北京时间15:48，旧629物理扫描已因SDK退出异常及父监督漏查最终worker退出码而有序中断，全部相关本地进程退出。原279项reported completed中也已发现崩溃日志，因此这些状态不能作为正常退出验收；修复监督和SDK后，原五个显式失败配置的新试跑已正常退出，新的fresh629已完成原629次rollout与四例独立观察补验，完整终态和历史观察缺口见[恢复后的结果包](usage_assets/reports/sim2sim-full629-sdk018-recovered/index.md)。[原状态及停止回执](usage_assets/reports/sim2sim-cohort-halt/summary.md)、[漏记崩溃实证](usage_assets/reports/worker-exit-completed-log-audit/report.md)、[新SDK五例闭环](usage_assets/reports/sdk018-native-pilot/summary.md)。下文带具体时间的运行快照均保留历史含义。
 
@@ -550,6 +550,8 @@ startup default pose bias同时修改qtarget中心与观测`q−default`基准�
 
 第二个low-step教师的[最终产物与五阶段CPU验收](usage_assets/reports/official-low-step-final/index.md)也已通过：原生训练于2026-10-11 05:16 UTC完成，08:14 UTC隔离CPU进程及容器实际退出0。`iter/iteration=19999`，完整PT有68个有限tensor；actor输入449维、critic输入575维、动作29维，同run的iter0全配置与最终PT相等，权重变化且Adam计数20→400,000。四条TensorBoard tag各保留20,000个有限样本。原ONNX内嵌参考表`T=1,643,264`，12项CPU测试仅覆盖两种合成观测与六个时间索引，并未逐帧对照全部外部参考数据或评估56个source clip的物理技能。YAML仍只允许`actor.output_dim`中`robot_action_dim→29`这一项原生解析，其余全配置精确比较；PT与ONNX配置完全相等不等于两者动作数值parity。[checkpoint](usage_assets/reports/official-low-step-final/cpu-01/validation/checkpoint.json)、[ONNX](usage_assets/reports/official-low-step-final/cpu-01/validation/onnx.json)和[绑定报告](usage_assets/reports/official-low-step-final/cpu-01/validation/bind.json)明确保留`quality/convergence/PT-ONNX parity=false`。参考表行数也不是独立动作数量或课程成功数。 [公开恢复入口的实际复跑记录](usage_assets/reports/official-low-step-final-replay/index.md)另行封存：恢复输入SHA与原件一致，五阶段及容器再次实际退出0；原验收包保持不变。
 
+第三个high-step教师于2026-10-11 17:10:20 UTC自然完成20,000轮，最终checkpoint为19999；原顺序任务已进入low-climb-76。17:27 UTC，[high-step最终产物与五阶段CPU验收](usage_assets/reports/official-high-step-final/index.md)的checkpoint、scalars、ONNX、bind、plots均实际退出0，容器自然退出0。68个tensor有限，actor/critic输入449/575维、动作29维，同run的iter0/最终PT全配置相等，权重更新且Adam计数20→400,000；iter0已经过第一轮优化。四条TensorBoard tag各有20,000个有限样本；原442,848,025-byte ONNX通过12项CPU检查，参考表`T=1,696,832`。12项仅为两种合成观测×六个时间索引，T也不是独立动作数或课程成功数。YAML仍只允许`robot_action_dim→29`这一项原生解析，PT与ONNX内嵌全配置精确相等；`quality/convergence/PT-ONNX parity=false`。[公开恢复入口的实际复跑](usage_assets/reports/official-high-step-final-replay/index.md)已用无损还原的同一输入再次实际通过五阶段与容器退出0，原封存验收包保持原字节。官方教师已完成 **3/5**，其余两教师、两学生、官方物理评估、888逐源尝试及最终自训学生58例仍待完成。
+
 真实续训也已分别验收教师、纯DAgger和DAgger+PPO：[6次原生训练及原始产物](usage_assets/reports/native-resume-acceptance/index.md)。每类先运行target2，保存iter0/1，再从iter1恢复到target4，最终保存iter3。原生循环会再次执行已保存的index1，所以这次是baseline两轮加resume三轮，不能理解成总共仅四次rollout。教师Adam步数40→60→100，两个学生16→24→40；恢复后的权重产生有限非零变化，冻结教师张量保持一致，新的TensorBoard样本、最终ONNX和已达目标skip均实测通过。混合学生早期std学习率为零，验收要求其参数保持原值而优化器计数继续推进。
 
 这证明模型/优化器/迭代接口可以继续执行，不保证同连续训练逐位一致：随机数、环境状态、curriculum common step及gate统计的恢复边界见第5节。Isaac关闭原生进程时可能无法返回Python，因此缺失close之后的INFO不作为失败的唯一条件；原失败记录保留，新检查同时核对精确checkpoint加载、shutdown开始、真实native退出0及Kit进程已消失，不声称`close()`已经返回。
@@ -563,7 +565,7 @@ startup default pose bias同时修改qtarget中心与观测`q−default`基准�
 | 统一容器与云端同步 | 一个镜像、本地/云端相同 Config/RootFS 指纹、完整镜像离线传输、内容校验源码快照、SSH 密钥登录 | 环境与传输已验证；主机和服务器未安装项目依赖 |
 | 动作生成 | 17 场景、629 配置，28 个独立 traversal executor；公开资产 296 对 native 数据 | 运动学生成与格式通路通过，不等于策略学会全部技能 |
 | 原生训练接口 | 既有22/22有界阶段、13次权重检查；另6次真实teacher/pure/finetune baseline与resume | 加载、优化器连续更新、TensorBoard、ONNX、skip通过；smoke不代表官方日程或收敛完成 |
-| 正式训练 | 五教师各 20000 轮、纯学生 10000、混合学生 30000 的原顺序 driver | locomotion/low-step已完成20000轮及最终CPU验收，教师2/5；high-step在训，整套日程与官方物理评估未完成 |
+| 正式训练 | 五教师各 20000 轮、纯学生 10000、混合学生 30000 的原顺序 driver | locomotion/low-step/high-step已完成20000轮及最终CPU验收，教师3/5；low-climb-76在训，整套日程与官方物理评估未完成 |
 | 云端 PT 回传本地 | iteration 19 pilot 与正式 iteration 500 都真实加载，在 16GiB 卡运行 64env×250step | 模型传输与 Isaac 推理通路通过；两次均 `quality_verified=false` |
 | 逐原始源片段验收 | 296 对输入逐项校验、后续116项目标CPU回归；原3次Isaac尝试加新RO资产合同1次实测 | teacher500为158策略步，两种student smoke各21步后失败；0片段完成，尚未跑完296源×三策略 |
 | 发布学生的固定指令 sim2sim | 原生 ONNX、DDS、深度 SHM、PD；12个有效command及17场景全部629配置的恒定前进扫描 | 新SDK12command的24worker/12视频通过；恒定前进全629原始rollout、1258worker及629全片解码也通过，[完整结果](usage_assets/reports/sim2sim-full629-sdk018-recovered/index.md)保留全部阈值事件，未确认技能成功 |
