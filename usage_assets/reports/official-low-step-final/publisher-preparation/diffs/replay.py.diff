@@ -1,0 +1,44 @@
+--- /home/dzp/projects/php_parkour/usage_assets/reports/official-locomotion-final/replay.py
++++ /home/dzp/projects/php_parkour/outputs/research/official-full/teacher-low-step-final-publication-preparation-01/replay.py
+@@ -115,8 +115,8 @@
+ 
+ 
+ def inputs(artifacts):
+-    manifest = read(BASE / 'cpu-02/input/input-manifest.json')
+-    mapping = {'/control': BASE / 'cpu-02/input', '/artifacts': artifacts}
++    manifest = read(BASE / 'cpu-01/input/input-manifest.json')
++    mapping = {'/control': BASE / 'cpu-01/input', '/artifacts': artifacts}
+     result = []
+     for record in manifest['records']:
+         source = Path(record['path'])
+@@ -144,9 +144,10 @@
+     artifacts.mkdir()
+     transfer = read(BASE / 'transfer/receipt.json')
+     originals = {Path(row['path']).name: {key: row[key] for key in ('bytes', 'sha256')}
+-                 for row in transfer['expected_artifacts']}
++                 for row in transfer['remote_artifacts_before']}
+     for name in ('model_19999.pt', 'holosoma_config.yaml'):
+         copy(BASE / 'artifacts' / name, artifacts / name, originals[name])
++    copy(BASE / 'cpu-01/input/model_00000.pt', artifacts / 'model_00000.pt', originals['model_00000.pt'])
+     copy(onnx.absolute(), artifacts / 'model_19999.onnx', expected_onnx)
+     event = restore_event(artifacts)
+     restored = inputs(artifacts)
+@@ -168,14 +169,14 @@
+     host, validation = output / 'host', output / 'validation'
+     host.mkdir()
+     validation.mkdir()
+-    name = 'php-official-locomotion-replay-' + uuid.uuid4().hex[:12]
++    name = 'php-official-low-step-replay-' + uuid.uuid4().hex[:12]
+     argv = ['docker', 'create', '--name', name, '--runtime', 'runc', '--init', '--network', 'none',
+-            '--cpus', '2', '--memory', '12g', '--label', 'php.research.owner=official-locomotion-replay',
++            '--cpus', '2', '--memory', '12g', '--label', 'php.research.owner=official-low-step-replay',
+             '-e', 'CUDA_VISIBLE_DEVICES=', '-e', 'NVIDIA_VISIBLE_DEVICES=void',
+             '-e', 'PYTHONDONTWRITEBYTECODE=1', '-e', 'OMP_NUM_THREADS=1', '-e', 'OPENBLAS_NUM_THREADS=1',
+             '-e', 'MKL_NUM_THREADS=1', '-e', 'ACCEPT_EULA=Y', '-e', 'OMNI_KIT_ACCEPT_EULA=YES']
+-    for source, destination, readonly in ((BASE / 'cpu-02/source', '/code', True),
+-        (BASE / 'cpu-02/input', '/control', True), (artifacts, '/artifacts', True), (validation, '/validation', False)):
++    for source, destination, readonly in ((BASE / 'cpu-01/source', '/code', True),
++        (BASE / 'cpu-01/input', '/control', True), (artifacts, '/artifacts', True), (validation, '/validation', False)):
+         argv.extend(['--mount', f'type=bind,src={source},dst={destination}' + (',readonly' if readonly else '')])
+     argv.extend([IMAGE, '/usr/bin/python3', '-B', '/code/run_cpu_phases.py'])
+     report = {'status': 'starting', 'create_argv': argv, 'image_id': IMAGE,

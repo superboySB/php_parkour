@@ -4,9 +4,13 @@
 
 学习流程、输入输出、数据/label 来源与 real2sim2real 实现细节见独立的 [technical_pipeline.md](technical_pipeline.md)。
 
-**最新进度（2026-10-10 20:23 UTC）：首个官方 locomotion 教师已完成，公开ONNX的全629逐帧闭环已完成后验并出版，整套复现尚未完成。** 原始顺序任务完成4096环境、64地形变体的20,000轮训练，最终checkpoint为`model_19999.pt`，随后自动进入low-step教师。最终PT、ONNX、配置和TensorBoard已按云端传输前后及本地SHA逐项核对，[首教师最终产物与可复现CPU验收](usage_assets/reports/official-locomotion-final/index.md)保存完整证据。五项CPU阶段均实际退出0，四条曲线各有完整20,000点；这还不证明最终策略的技能质量、收敛或PT/ONNX数值一致性。其余四教师、两学生、888逐源尝试和最终自训学生验收仍在后续日程中。
+**最新进度（2026-10-11 08:14 UTC）：官方教师已完成2/5，locomotion与low-step各完成20,000轮及最终CPU验收；整套复现尚未完成。** 两者均使用4096环境、64地形变体、seed/obstacle_seed 42，最终checkpoint为`model_19999.pt`。low-step于05:16 UTC自然完成，原顺序任务自动进入high-step，08:13 UTC阶段快照确认其仍在训练。其余三教师、两学生、官方物理评估、888逐源尝试及最终自训学生58例仍待完成。公开ONNX的全629逐帧闭环结果已另行出版，不能代替正式自训学生验收。[首教师历史最终产物与CPU验收](usage_assets/reports/official-locomotion-final/index.md)及首次失败记录保持原样。
 
 ![首个官方教师完整20000轮TensorBoard曲线](usage_assets/reports/official-locomotion-final/cpu-02/validation/plots/learning-curves.png)
+
+[low-step最终产物与可复现CPU验收](usage_assets/reports/official-low-step-final/index.md)已实际通过五阶段，宿主等待与容器退出均为0。完整PT的68个tensor均有限，actor/critic输入为449/575维、动作29维；相对同run的iter0 PT，actor和critic权重更新，Adam计数从20推进到400,000。iter0已经过第一轮优化，不能当成未训练初值。四条TensorBoard tag各有20,000个有限样本，覆盖step 0–19999；原ONNX的12项CPU检查通过，内嵌参考表长度`T=1,643,264`。12项是两种合成观测×六个时间索引，不是全部参考帧或56个原动作片段的物理覆盖。YAML仅`actor.output_dim`由`['robot_action_dim']`解析为`[29]`，其余配置精确相等，PT与ONNX内嵌全配置也精确一致。[checkpoint报告](usage_assets/reports/official-low-step-final/cpu-01/validation/checkpoint.json)、[完整标量](usage_assets/reports/official-low-step-final/cpu-01/validation/scalars.json)、[ONNX报告](usage_assets/reports/official-low-step-final/cpu-01/validation/onnx.json)及[绑定报告](usage_assets/reports/official-low-step-final/cpu-01/validation/bind.json)保留数值和来源；`quality_verified=false`、`convergence_verified=false`、`pt_onnx_numerical_parity_verified=false`。 [公开恢复入口的实际复跑记录](usage_assets/reports/official-low-step-final-replay/index.md)另行封存：恢复输入SHA与原件一致，五阶段及容器再次实际退出0；原验收包保持不变。
+
+![low-step官方教师完整20000轮TensorBoard曲线；仅证明训练记录完整，不证明技能质量](usage_assets/reports/official-low-step-final/cpu-01/validation/plots/learning-curves.png)
 
 旧SDK历史纠正：北京时间15:48已有序停止旧629物理批次，原279 reported completed/5失败/1中断/344未运行均保留。旧监督遗漏最终worker退出码，已有10个reported completed及旧12指令的command02存在模拟器SIGSEGV；这些不能作为正常退出验收。修复监督与SDK后，原5个显式失败配置的新闭环全部正常退出，[新五例原生试跑](usage_assets/reports/sdk018-native-pilot/summary.md)、[停止回执](usage_assets/reports/sim2sim-cohort-halt/summary.md)、[逐日志实证](usage_assets/reports/worker-exit-completed-log-audit/report.md)保持原始范围；新629的实际终态见下文。
 
@@ -199,7 +203,7 @@ smoke 采用显式缩小的并行环境、布局和迭代数，检查实际梯�
 
 随后将同一 PT 回传本地，实际完成 **16 GiB 卡上的 64 环境 × 250 步 Isaac 评估**，退出码 0、耗时 36.861 秒。35 次显存采样中，总峰值为 5797 MiB（含桌面），评估 compute process 峰值为 4826 MiB；可能漏掉短峰值。真实重建 1 variant 的地形/动作、四项误差各 16000 个有限样本、64 个新录像与 17 个 TensorBoard 标量均核验通过，仍有 3971 次失败 reset，最长原片 0.08 秒。[本地回传闭环完整记录](usage_assets/reports/official-pilot-local-quality/summary.md)。本次验证加载与仿真通路，不是收敛结论，也不证明本地能承担 4096 环境训练。
 
-正式长训的 **iteration 500 中间 PT** 已单独回传、校验远端/本地 SHA，并在同样 64 环境 × 250 步设置下实际评估：退出码 0、全程 wall 28.405 秒，累计 **75 次失败 reset、0 次超时**，四项误差各有 16000 个有限样本。3 段原片来自环境 0，最长 3.22 秒；相较 iteration 19 pilot 的失败次数减少，但两个 checkpoint 来自不同运行，且仍未完成课程，`quality_verified=false`。PT 从 iteration 0 到 500 的 actor/critic 权重均有真实非零更新。[检查点来源、权重差异与本地录像](usage_assets/reports/official-progress-0500-local/summary.md)。云端 20000 轮首教师及后续完整日程继续运行。
+正式长训的 **iteration 500 中间 PT** 已单独回传、校验远端/本地 SHA，并在同样 64 环境 × 250 步设置下实际评估：退出码 0、全程 wall 28.405 秒，累计 **75 次失败 reset、0 次超时**，四项误差各有 16000 个有限样本。3 段原片来自环境 0，最长 3.22 秒；相较 iteration 19 pilot 的失败次数减少，但两个 checkpoint 来自不同运行，且仍未完成课程，`quality_verified=false`。PT 从 iteration 0 到 500 的 actor/critic 权重均有真实非零更新。[检查点来源、权重差异与本地录像](usage_assets/reports/official-progress-0500-local/summary.md)。这是首教师仍在训练时的历史检查；当前两教师完成状态见本文开头，不把中间模型质量扩大为最终模型结论。
 
 为避免合并库 ID 掩盖覆盖范围，另实现了 [逐源片段工具](scripts/research/eval_source_coverage.py)：全部 **296 对、181236 帧、50 FPS** 的数据格式、来源 SHA 和顺序校验通过，**48/48 项独立 CPU 回归通过**。实际本地 Isaac 分别尝试完整 920 帧 locomotion 源和两次完整 455 帧 low-step 源：teacher 第500轮运行 **158 策略步**后失败，纯/混合 student 的第1轮 smoke PT 均运行 **21 步**后失败。三次执行与证据保存通过，片段完成数为0，未声称跑完296源或888次尝试。[完整记录、复跑命令与原视频](usage_assets/reports/source-coverage-pilot/summary.md)。
 

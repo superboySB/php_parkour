@@ -31,7 +31,7 @@ flowchart LR
 
 镜像里的 `train-python` 使用 NVIDIA 的 Python 3.11.13；`motion-python` 与 `inference-python` 使用各自隔离的 Python 3.12.3 环境。动作生成/Pinocchio 的 NumPy 2 依赖与训练的 NumPy 1.26.4 分开安装。它们都属于同一镜像，绝不要求宿主安装对应环境。Isaac Lab 的产品 release 为 2.3.0，而上游 `isaaclab` Python distribution 显示 0.47.1；doctor 会同时保留实际版本。最终依赖以镜像内 `/opt/php-build/*.freeze.txt`、[版本约束](docker/) 和 doctor 报告为准。
 
-仓库映射为 `/workspace/php_parkour`，研究产物为 `/outputs`，资产为 `/data/assets`，缓存为 `/data/cache`。镜像封存构建时的源码，可独立断网运行；日常启动挂载当前仓库，云端挂载按内容校验的源码快照。构建提交与实际挂载源码可能不同，复现时以部署记录的 `source_tree_sha256`、逐文件 manifest 和镜像 Config/RootFS 指纹共同确定版本，不能只看镜像标签。同一容器内仿真进程与推理进程共享私有 `/dev/shm`；不要给此容器启用宿主 IPC。大数据、checkpoint 和缓存不进 Git。
+仓库映射为 `/workspace/php_parkour`，研究产物为 `/outputs`，资产为 `/data/assets`，缓存为 `/data/cache`。镜像封存构建时的源码，可独立断网运行；日常启动挂载当前仓库，云端挂载按内容校验的源码快照。构建提交与实际挂载源码可能不同，复现时以部署记录的 `source_tree_sha256`、逐文件 manifest 和镜像 Config/RootFS 指纹共同确定版本，不能只看镜像标签。同一容器内仿真进程与推理进程共享私有 `/dev/shm`；不要给此容器启用宿主 IPC。日常数据、checkpoint 与缓存目录不进 Git；审计结果包只封存明确列出的少量权重及压缩日志，大型 ONNX 按 SHA 单独保留。
 
 首个正式教师的验收包单独保存了最终PT及用于比较的iter0 PT；这是经过校验的小型复现输入。1.18GB原ONNX仍在本地忽略目录和云端，原TensorBoard事件按无损压缩保存，取回与还原见[最终教师验收说明](usage_assets/reports/official-locomotion-final/index.md)。
 
@@ -259,7 +259,9 @@ ssh -p 22 -N -L 6007:127.0.0.1:6006 tencent-231
 
 保持 SSH 转发运行，在本地浏览器打开 `http://127.0.0.1:6007/`。若训练指定了其他 `--output`，同步调整 `--logdir`。查看本仓库已验收的原始曲线则用本地 Docker 的 `--logdir /workspace/php_parkour/usage_assets/tensorboard`，打开本地 6006 端口；同一端口只启动一个服务。
 
-2026-10-10 16:52 UTC，原顺序任务已自然完成首个locomotion教师，20,000轮的最终编号为19999，随后自动开始low-step。不要重新启动同一教师或覆盖原运行快照。[最终教师验收包](usage_assets/reports/official-locomotion-final/index.md)给出原生终态、四产物SHA、原曲线、首次验收失败和修正后五项CPU阶段的实际退出码。其复现入口仅使用宿主标准库准备输入，再在相同统一镜像中执行Torch、TensorBoard及ORT；源码与输入只读挂载、无GPU和网络、使用新的输出目录。1.18GB ONNX必须取回原字节并匹配SHA，不能以删减参考帧的重新导出图替代。原YAML仅`actor.output_dim`中的`robot_action_dim`由训练源码解析为29；验收只允许这一项转换，其余全配置精确比较。其余四教师、两学生和官方后续评估仍未完成。
+2026-10-10 16:52 UTC，原顺序任务已自然完成首个locomotion教师，20,000轮的最终编号为19999，随后自动开始low-step。不要重新启动同一教师或覆盖原运行快照。[首教师最终验收包](usage_assets/reports/official-locomotion-final/index.md)给出原生终态、四产物SHA、原曲线、首次验收失败和修正后五项CPU阶段的实际退出码。其复现入口仅使用宿主标准库准备输入，再在相同统一镜像中执行Torch、TensorBoard及ORT；源码与输入只读挂载、无GPU和网络、使用新的输出目录。1.18GB ONNX必须取回原字节并匹配SHA，不能以删减参考帧的重新导出图替代。原YAML仅`actor.output_dim`中的`robot_action_dim`由训练源码解析为29；验收只允许这一项转换，其余全配置精确比较。
+
+low-step教师于2026-10-11 05:16 UTC完成同样的20,000轮，08:14 UTC五项隔离CPU阶段均实际退出0、容器退出0；官方教师已完成 **2/5**。[low-step最终验收包](usage_assets/reports/official-low-step-final/index.md)保存同run的iter0/19999 PT、传输SHA、复现入口和完整曲线：68个tensor有限，actor/critic输入维数449/575、动作29维，Adam计数由20推进至400,000，四条TensorBoard tag各20,000点，原ONNX的12项CPU检查通过。其参考表长度`T=1,643,264`，不是独立动作数量；仍只允许上述YAML单字段解析，PT与ONNX内嵌全配置精确相等。08:13 UTC阶段快照为high-step在训；其余三教师、两学生、官方物理评估、888逐源尝试和最终自训学生58例仍待完成，`quality/convergence/PT-ONNX parity=false`。 [公开恢复入口的实际复跑记录](usage_assets/reports/official-low-step-final-replay/index.md)另行封存：恢复输入SHA与原件一致，五阶段及容器再次实际退出0；原验收包保持不变。
 
 评估入口 `eval-teachers` / `eval-student` 会生成 `quality.json`：checkpoint SHA、实际仿真时间、失败/超时 reset、跟踪误差、观察到的 motion IDs、录像 SHA 和本地 TensorBoard `Evaluation/*`。`--eval-steps` 控制本次有界 rollout 的步数。当前 MotionLoader 把源动作合并为一个 NPZ，顶层 ID 0 和 `available_clip_count=1` 不能直接统计原始片段覆盖；需要结合 `motion_ends` 和参考时间索引。不能从步数或录像数量推断遍历了整套动作。
 
