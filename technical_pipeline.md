@@ -4,6 +4,8 @@
 
 截至 2026-10-11 17:39 UTC，官方教师已完成3/5：locomotion、low-step与high-step各完成20,000轮及最终CPU验收；原顺序任务已自然进入low-climb-76。公开ONNX的全629逐帧闭环也已完成CPU后验并出版；其余两教师、两学生、官方物理评估、888逐源尝试及最终自训学生58例尚未全部完成。本文的算法说明来自源码和实际实验，不表示完整日程、策略技能质量或真机验收已经完成。
 
+**验收范围补充：** 原58例对每个正式学生只测试12个平地方向项（各8秒）和17个代表场景项（固定前进各10秒）；17场景名称全选却仍有612/629配置未选，9个所选参考长于10秒，low-speed roll参考还含backward code11。后续另以原15维50Hz逐帧指令各执行全629（合计1258例/2516worker），不改变原58判据，也不把NPY变体与OBJ配置混为同一轴。[源码准备、实际waiting与恢复合同](usage_assets/reports/final-student-reference629-preparation/index.md)只证明准备及只读分支可用，未来真实模型/58后验/CPU计划/新合同仍待绑定和审查，未产生新的科学结果；公开ONNX扫描不能替代正式模型，quality/course保持false。
+
 北京时间15:48，旧629物理扫描已因SDK退出异常及父监督漏查最终worker退出码而有序中断，全部相关本地进程退出。原279项reported completed中也已发现崩溃日志，因此这些状态不能作为正常退出验收；修复监督和SDK后，原五个显式失败配置的新试跑已正常退出，新的fresh629已完成原629次rollout与四例独立观察补验，完整终态和历史观察缺口见[恢复后的结果包](usage_assets/reports/sim2sim-full629-sdk018-recovered/index.md)。[原状态及停止回执](usage_assets/reports/sim2sim-cohort-halt/summary.md)、[漏记崩溃实证](usage_assets/reports/worker-exit-completed-log-audit/report.md)、[新SDK五例闭环](usage_assets/reports/sdk018-native-pilot/summary.md)。下文带具体时间的运行快照均保留历史含义。
 
 ## 1. 先把整个系统连起来
