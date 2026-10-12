@@ -1,0 +1,75 @@
+{
+  "schema_version": 1,
+  "status": "prior_documentation_fix_closed_but_git_mode_portability_correction_required",
+  "reviewed_utc": "2026-10-12T00:47:10.406482+00:00",
+  "reviewer": "/root/runtime",
+  "candidate_directory": "/home/dzp/projects/php_parkour/outputs/research/final-student-reference629-publication-source-release-candidate-02",
+  "reviewed_delta_files": [
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/final-student-reference629-publication-source-release-candidate-02/package/index.md",
+      "bytes": 7482,
+      "sha256": "f7e2dbd0be82947c6ef6f23eeacd268a371d892c98ffe448464e481dfa157ab6",
+      "mode": 436
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/final-student-reference629-publication-source-release-candidate-02/package/publication-manifest.json",
+      "bytes": 31595,
+      "sha256": "449471c38b9b4e58cd7893f6caf986551ac423cb005a3457bf1115bd769d9be1",
+      "mode": 420
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/final-student-reference629-publication-source-release-candidate-02/candidate-verification.json",
+      "bytes": 5383,
+      "sha256": "1533145963c472d89f53aa3fc8f7de5e1705d1b349f7b7617b4cbedd5c9c03dc",
+      "mode": 420
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/final-student-reference629-publication-source-release-candidate-02/candidate-inventory.json",
+      "bytes": 16765,
+      "sha256": "90f345ced205e7531ed01cd84204d4f0c956f7a168193082009835ab3b0642b0",
+      "mode": 420
+    }
+  ],
+  "prior_review": {
+    "path": "/home/dzp/projects/php_parkour/outputs/research/official-full/formal-pair-publisher-source-release-independent-review-01/review.json",
+    "sha256": "d825ac40e3d3d40ec33228ed13e4970145a2263bf010c9873b1aec1c0b9d5360"
+  },
+  "closed_findings": [
+    {
+      "id": "DOC1",
+      "status": "closed_static_delta",
+      "finding": "The only index prose addition explicitly requires the complete byte-identical package to be staged outside the target workspace, gives an external /tmp example, and says in-workspace usage_assets cannot directly be the copy example source. The ancestor guard and entire example code remain unchanged."
+    }
+  ],
+  "must_fix": [
+    {
+      "id": "DOC2",
+      "severity": "medium",
+      "source": "/home/dzp/projects/php_parkour/outputs/research/final-student-reference629-publication-source-release-candidate-02/package/index.md",
+      "line": 51,
+      "summary": "Do not require historical public-copy read/write mode bits to survive Git checkout.",
+      "evidence": "The package manifest records original copy modes including0664 and0444, and the example requires fp(package/path)==(bytes,SHA,mode). Git stores the executable distinction rather than those read/write bits; correct bytes in a normal fresh checkout are0644 and would be rejected before restoration. This review used source semantics and recorded modes; no Git operation or example was executed.",
+      "minimal_correction": "For the public-package input verification require safe nonsymlink regular files and exact bytes/SHA only. Keep historical mode in metadata and explicitly explain that restore-map original target modes are rebuilt. Preserve exact existing-target mode checks, per-new-target chmod and target postcopy mode checks. Do not weaken byte hashes or target safety."
+    }
+  ],
+  "delta_checks": {
+    "exactly_four_files_changed": true,
+    "all_other68_candidate_files_byte_and_mode_identical": true,
+    "all64_original_source_and_proof_copies_unchanged": true,
+    "restore_map_and_documentation_drafts_unchanged": true,
+    "all71_inventory_entries_actual_byte_size_mode_verified": true,
+    "all67_publication_manifest_entries_actual_byte_size_mode_verified": true,
+    "manifest_changes_only_index_fp_sum_and_candidate_self_source_locations": true,
+    "index_only_expected_external_package_paragraph_added": true,
+    "copy_example_code_byte_identical_and_ast_parsed_only": true,
+    "candidate01_immutable_inventory_sha256": "f8eb34a685a7fca6b58444528cfbab37be02605a2662710b41d11f7ea8983271"
+  },
+  "public_manifest_file_mode_counts": {
+    "0o664": 22,
+    "0o444": 44,
+    "0o644": 1
+  },
+  "future_actual_acceptance": false,
+  "quality_verified": false,
+  "scope": "Narrow candidate01→02 four-file delta and newly raised Git-mode portability question only. No repeat three-module/scientific review, no original proof deep replay, and no controller/CLI/import/tests/SSH/Docker/Git/H mutations."
+}

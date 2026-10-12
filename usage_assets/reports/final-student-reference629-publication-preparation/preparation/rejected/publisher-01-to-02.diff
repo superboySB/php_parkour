@@ -1,0 +1,53 @@
+--- rejected/publisher-01.py
++++ publisher.py
+@@ -63,24 +63,35 @@
+     require(fingerprint(record['path']) == record, 'Initially bound evidence changed: ' + record['path'])
+ 
+ 
+-def read_json(path):
++def parse_json(raw):
+     def pairs(items):
+         result = {}
+         for key, value in items:
+             require(key not in result, 'Duplicate JSON key: ' + key)
+             result[key] = value
+         return result
+-    return json.loads(Path(path).read_bytes(), object_pairs_hook=pairs,
++    return json.loads(raw, object_pairs_hook=pairs,
+                       parse_constant=lambda x: (_ for _ in ()).throw(ValueError('Nonfinite JSON: ' + x)))
++
++
++def read_json(path):
++    return parse_json(Path(path).read_bytes())
+ 
+ 
+ def reviewed_preparation(expected_sha):
+     require(isinstance(expected_sha, str) and re.fullmatch('[0-9a-f]{64}', expected_sha),
+             'Explicit reviewed publication-preparation SHA required')
+-    path = HERE / 'preparation-manifest.json'
+-    record = fingerprint(path)
++    path = safe_path(HERE / 'preparation-manifest.json')
++    before = path.stat()
++    require(stat.S_ISREG(before.st_mode), 'Regular preparation manifest required')
++    raw = path.read_bytes()
++    after = path.stat()
++    require((before.st_ino, before.st_size, before.st_mtime_ns, before.st_mode) ==
++            (after.st_ino, after.st_size, after.st_mtime_ns, after.st_mode)
++            and len(raw) == after.st_size, 'Preparation manifest changed while reading')
++    record = {'path': str(path), 'bytes': len(raw), 'sha256': hashlib.sha256(raw).hexdigest()}
+     require(record['sha256'] == expected_sha, 'Publication preparation differs from reviewed SHA')
+-    manifest = read_json(path)
++    manifest = parse_json(raw)
+     records, seen = [record], set()
+     for item in manifest['files']:
+         rel = Path(item['path'])
+@@ -322,6 +333,9 @@
+     page = page.replace(phrase, html.escape(identification))
+     page = page.replace('原生SDK策略录制NPZ（root XYZ为占位零，物理位置见CSV）',
+                         '原生SDK策略录制NPZ或分块描述（root XYZ为占位零，物理位置见CSV）')
++    manifest_link = 'href="evidence-manifest.json"'
++    require(page.count(manifest_link) == 1, 'Pinned legacy manifest link contract changed')
++    page = page.replace(manifest_link, 'href="../evidence-manifest.json"')
+     copies.generated(kind + '/playback.html', page.encode())
+     return summary
+ 

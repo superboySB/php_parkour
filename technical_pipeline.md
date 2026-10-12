@@ -6,6 +6,8 @@
 
 **验收范围补充：** 原58例对每个正式学生只测试12个平地方向项（各8秒）和17个代表场景项（固定前进各10秒）；17场景名称全选却仍有612/629配置未选，9个所选参考长于10秒，low-speed roll参考还含backward code11。后续另以原15维50Hz逐帧指令各执行全629（合计1258例/2516worker），不改变原58判据，也不把NPY变体与OBJ配置混为同一轴。[源码准备、实际waiting与恢复合同](usage_assets/reports/final-student-reference629-preparation/index.md)只证明准备及只读分支可用，未来真实模型/58后验/CPU计划/新合同仍待绑定和审查，未产生新的科学结果；公开ONNX扫描不能替代正式模型，quality/course保持false。
 
+正式模型结果的[发布/恢复接口源码](usage_assets/reports/final-student-reference629-publication-preparation/index.md)按实际双模型合同读取原生仿真、CPU后验与真实父退出记录。计划保留1258配置、2516个正常worker/宿主出生映射和1258段全片解码的原始证据；当前仅源码准备与有限CLI检查完成，另有[隔离源码复制实测](usage_assets/reports/final-student-reference629-publication-source-checks/index.md)。正式模型验收、完整结果发布及恢复尚未执行，不增加策略质量或实机结论。
+
 北京时间15:48，旧629物理扫描已因SDK退出异常及父监督漏查最终worker退出码而有序中断，全部相关本地进程退出。原279项reported completed中也已发现崩溃日志，因此这些状态不能作为正常退出验收；修复监督和SDK后，原五个显式失败配置的新试跑已正常退出，新的fresh629已完成原629次rollout与四例独立观察补验，完整终态和历史观察缺口见[恢复后的结果包](usage_assets/reports/sim2sim-full629-sdk018-recovered/index.md)。[原状态及停止回执](usage_assets/reports/sim2sim-cohort-halt/summary.md)、[漏记崩溃实证](usage_assets/reports/worker-exit-completed-log-audit/report.md)、[新SDK五例闭环](usage_assets/reports/sdk018-native-pilot/summary.md)。下文带具体时间的运行快照均保留历史含义。
 
 ## 1. 先把整个系统连起来

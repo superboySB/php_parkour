@@ -8,6 +8,8 @@
 
 **验收范围补充：** 正式两学生的原58例包括每模型12个平地方向项（各8秒）及17个代表场景项（固定前进各10秒）；之后仍须分别执行原始逐帧参考指令全629配置，共1258例、2516个worker。公开ONNX的629结果不能替代正式自训学生。[全629源码准备与恢复门槛](usage_assets/reports/final-student-reference629-preparation/index.md)已审查，仅缺前提的只读`status`实际退出0并返回waiting；真实模型、同模型58终态及独立后验齐备后才生成两套CPU计划和新合同，再审查后执行。这项1258例尚未执行，技能/课程质量仍未成立。
 
+正式两学生后续1258例结果的[发布与恢复源码准备](usage_assets/reports/final-student-reference629-publication-preparation/index.md)已封存，包含真实帮助入口和缺前提`status`返回waiting的记录。它要求真实模型、同模型58例终态/60项ORT检查、新合同和完整原生/CPU退出证据齐备后才发布；当前正式结果及完整恢复尚未执行。包内92个固定工具路径的复制示例已在隔离目录实际跑通，并模拟Git下载后的权限，见[源码恢复实测](usage_assets/reports/final-student-reference629-publication-source-checks/index.md)。宿主仅使用Python标准库。
+
 ## 1. 机器、目录与环境
 
 | 位置 | 用途 | 持久路径 |

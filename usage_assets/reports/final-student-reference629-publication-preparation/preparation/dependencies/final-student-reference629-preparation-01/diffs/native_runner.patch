@@ -1,0 +1,178 @@
+--- source-original/reference_controller.py
++++ native_runner.py
+@@ -16,30 +16,15 @@
+ import traceback
+ import uuid
+ 
++from support import HERE, IMAGE, GPU, LOCK, SOURCE_SHAS, verify_contract, check as check_record
++# Each actual value is bound explicitly from the separately reviewed new contract.
+ ROOT = Path('/home/dzp/projects/php_parkour')
+-OLD = ROOT / 'outputs/research/fresh629-sdk018-6cb2ae2-prepared02'
+-BASE = ROOT / 'outputs/research/reference-native629-01'
+-CPU_PLAN = ROOT / 'outputs/research/reference629-cpu-plan-01/checks/reference629-plan.json'
+-CPU_PLAN_SHA = '7729d5e6b4ea740e69511172c2331dd880cb7aaac3c75a07ccebb8e50d47311f'
+-CPU_OVERLAY = ROOT / 'outputs/research/reference629-preparation-01/overlay'
+-MATRIX_SHA = 'ed413845f4b82156964e11ad6ee3faca30e3c0b10dbfdc295a8284f9ee3308ed'
+-HOST = BASE / 'host'
+-IMAGE = 'sha256:2be18521015b2a84ef7a4442af9a94ef041a19feb9ce385ae15424b1dc158d8f'
+-GPU = 'GPU-1803972d-e774-ee96-e6f6-1ee1ce47bb25'
+-LOCK = ROOT / ('outputs/research/.local-native-' + GPU + '.lock')
+-NAME = 'php-reference-native629-01'
+-FREEZE_SHA = '599e09e78fdabd4a7a7792a7cd66e2dcddf25f5e1e6aaf56582b2d1cf7e77169'
+-SOURCE_SHAS = {
+-    'sim2sim.py': '023fed0f9f31f79b506b370a96013c18e8b1c94239e0504eca4bcea6076c3f4d',
+-    'reference_commands.py': '1af208fc1f57bac61d37256a4bdbb20fa45b05817291c3372c92b5a8c3807d57',
+-    'sim2sim_scene_matrix.py': '599c75df14c5ac902d57f88bfd3d752317e332abce5751153bef8d20d8d0bb70',
+-}
+-OBSERVER = OLD / 'control/observe_container_pids.py'
++OLD = BASE = CPU_PLAN = CPU_OVERLAY = HOST = NAME = CPU_PLAN_SHA = None
++CONTRACT_PATH = CONTRACT_SHA = None
++OBSERVER = HERE / 'frozen/observe_container_pids.py'
+ OBSERVER_SHA = 'e2f8c31fc7136027ebd2d8ec6a973753d56a7a60fdd5434e741b0db4022f40d0'
+-MODEL_SHAS = {
+-    'depth_backbone.onnx': '5b22466a218944e3b0ab0f4f82a910e3eec35375ee03e7fb94eb65fa88431b56',
+-    'student.onnx': 'e426c4206181d511b838c76efc48e43636299b76cb5a15183977011589931628',
+-}
++MODEL_SHAS = None
++
+ 
+ 
+ def require(condition, message):
+@@ -68,33 +53,18 @@
+ 
+ 
+ def snapshot():
+-    manifest = OLD / 'freeze-manifest.json'
+-    require(fp(manifest)['sha256'] == FREEZE_SHA, 'Original frozen manifest changed')
+-    records = [row for row in json.loads(manifest.read_text())['files'] if row['relative'].startswith('source/')]
+-    require(len(records) == 5184, 'Original full source must contain 5184 frozen files')
+-    expected = set()
+-    for row in records:
+-        relative = Path(row['relative'])
+-        require(not relative.is_absolute() and '..' not in relative.parts, 'Unsafe frozen source path')
+-        expected.add(relative.relative_to('source').as_posix())
+-        actual = fp(OLD / relative)
+-        require((actual['bytes'], actual['sha256']) == (row['bytes'], row['sha256']), 'Original source changed: ' + str(relative))
+-    actual_files = {path.relative_to(OLD / 'source').as_posix() for path in (OLD / 'source').rglob('*') if path.is_file()}
+-    require(actual_files == expected, 'Original source file set changed')
++    contract = verify_contract(CONTRACT_PATH, CONTRACT_SHA)
+     models = {}
+     for name, sha in MODEL_SHAS.items():
+-        models[name] = fp(OLD / 'inputs/assets/student' / name)
+-        require(models[name]['sha256'] == sha, 'Released model changed: ' + name)
+-    require(fp(OBSERVER)['sha256'] == OBSERVER_SHA, 'Original observer changed')
+-    matrix = fp(OLD / 'inputs/matrix.json')
+-    require(matrix['sha256'] == MATRIX_SHA, 'Original input matrix changed')
+-    require(fp(CPU_PLAN)['sha256'] == CPU_PLAN_SHA, 'Actual CPU reference plan changed')
+-    return {'source_files_verified': len(records), 'freeze_manifest': fp(manifest), 'models': models,
+-            'source_matrix': matrix, 'cpu_reference_plan': fp(CPU_PLAN), 'observer': fp(OBSERVER)}
+-
+-
+-
+-def verify_matrix_and_host_mappings():
++        models[name] = fp(OLD / 'inputs' / CURRENT_KIND / 'assets/student' / name)
++        require(models[name]['sha256'] == sha, 'Actual fetched official model changed')
++    require(fp(OBSERVER)['sha256'] == OBSERVER_SHA, 'Frozen observer changed')
++    return {'source_files_verified': 5184, 'freeze_manifest': contract['freeze_manifest'],
++            'models': models, 'cpu_reference_plan': fp(CPU_PLAN), 'observer': fp(OBSERVER)}
++
++
++
++def verify_matrix_and_host_mappings(container_id, started_at):
+     expected = json.loads(CPU_PLAN.read_text())
+     output = BASE / 'outputs/reference629'
+     saved = output / 'plan.json'
+@@ -113,6 +83,9 @@
+     observed = json.loads((HOST / 'observer/summary.json').read_text())
+     require(observed['mapping_scope_complete'] is True and not observed['errors']
+             and observed['stop_reason'] == 'stop_file', 'Host observer incomplete or expired')
++    require(observed['identity']['container_id'] == container_id
++            and observed['identity']['image_id'] == IMAGE and observed['identity']['started_at'] == started_at,
++            'Host observer is from a different actual container birth')
+     rows = matrix['selections']
+     require(len(rows) == len(expected['selections']) == 629, 'Native configuration count changed')
+     mappings, worker_receipts = [], []
+@@ -174,6 +147,9 @@
+                         and mapping['worker_output'] == planned['output'] and mapping['container_tgid'] == entry['pid']
+                         and mapping['owner_start_time_clock_ticks'] == entry['start_time_clock_ticks']]
+             require(len(matching) == 1, 'Missing or ambiguous host writer birth: ' + planned['case_id'] + ':' + role)
++            mapping = matching[0]
++            require(mapping['nspid'] == [mapping['host_tid'], mapping['container_tid']]
++                    and mapping['nstgid'] == [mapping['host_tgid'], entry['pid']], 'Host writer namespace/owner mismatch')
+             mappings.append({'case_id': planned['case_id'], 'role': role, 'entry': fp(entry_path), 'mapping': matching[0]})
+         require(len(evidence['worker_receipts']) == 3 and all(record in evidence['files'] for record in evidence['worker_receipts']),
+                 'Sealed mandatory worker receipts missing')
+@@ -189,12 +165,30 @@
+             'scope': 'Full reference-command physical replay execution plus sealed artifacts/worker exits and actual host births; skill/course quality unverified; separate full MP4 decode remains required'}
+ 
+ 
+-def main():
+-    parser = argparse.ArgumentParser(description=__doc__)
+-    parser.add_argument('--root-authorized-start', action='store_true')
+-    args = parser.parse_args()
+-    if not args.root_authorized_start:
+-        parser.error('Root must explicitly authorize this reviewed full reference629 native attempt')
++def run_kind(contract, kind, already_held_fd, contract_sha):
++    """Called only by adapter.execute while its single UUID flock remains held.
++
++    No nested lock acquisition, lock carrier, fcntl monkeypatch, or implicit
++    function replacement. Closing our duplicate fd cannot unlock the outer fd.
++    """
++    global OLD, BASE, CPU_PLAN, CPU_OVERLAY, HOST, NAME, CPU_PLAN_SHA, MODEL_SHAS
++    global CONTRACT_PATH, CONTRACT_SHA, CURRENT_KIND
++    CURRENT_KIND = kind
++    require(kind in ('pure', 'finetune'), 'Unknown official student kind')
++    OLD = Path(contract['base'])
++    CONTRACT_PATH, CONTRACT_SHA = OLD / 'contract.json', contract_sha
++    require(verify_contract(CONTRACT_PATH, CONTRACT_SHA) == contract, 'Explicit contract changed')
++    BASE = OLD / 'runs' / kind
++    HOST = BASE / 'host'
++    CPU_PLAN = Path(contract['kinds'][kind]['cpu_plan']['path'])
++    CPU_PLAN_SHA = contract['kinds'][kind]['cpu_plan']['sha256']
++    CPU_OVERLAY = OLD / 'overlay'
++    MODEL_SHAS = {Path(row['path']).name: row['sha256'] for row in contract['admission']['models'] if row['kind'] == kind}
++    require(set(MODEL_SHAS) == {'depth_backbone.onnx', 'student.onnx'}, 'Exact actual official pair required')
++    NAME = 'php-final-reference629-' + kind + '-' + contract['contract_identity'][:12]
++    held, canonical = os.fstat(already_held_fd), LOCK.stat()
++    require((held.st_dev, held.st_ino) == (canonical.st_dev, canonical.st_ino) and not LOCK.is_symlink(),
++            'Caller fd is not the canonical already-held UUID mutex')
+     require(not BASE.exists(), 'One-attempt output already exists; never retry or overwrite it')
+     token = uuid.uuid4().hex
+     native = observer = None
+@@ -264,9 +258,10 @@
+     # Pending operator signals never escape while native/observer cleanup owns resources.
+     for number in (signal.SIGINT, signal.SIGTERM):
+         prior_handlers[number] = signal.signal(number, lambda signum, frame: pending.append({'signal': signum, 'unix': time.time()}))
+-    lock = LOCK.open('a+')
++    lock = os.fdopen(os.dup(already_held_fd), 'a+')
+     try:
+-        fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
++        # The adapter owns the only flock for pure native+CPU then finetune native+CPU.
++        require(os.fstat(lock.fileno()).st_ino == held.st_ino, 'Borrowed fd identity changed')
+         BASE.mkdir()
+         HOST.mkdir()
+         for directory in ('overlay', 'checks', 'outputs', 'cache'):
+@@ -294,7 +289,7 @@
+                 'GPU occupied; do not kill or interrupt another task')
+         mounts = [(OLD / 'source', '/workspace/php_parkour', True),
+                   (BASE / 'overlay', '/workspace/php_parkour/scripts/research', True),
+-                  (OLD / 'inputs', '/data', True), (BASE / 'cache', '/data/cache', False),
++                  (OLD / 'inputs' / kind, '/data', True), (BASE / 'cache', '/data/cache', False),
+                   (BASE / 'checks', '/checks', False), (BASE / 'outputs', '/outputs', False)]
+         argv = ['docker', 'create', '--name', NAME, '--label', 'php.reference629.owner=' + token,
+                 '--network', 'none', '--ipc', 'private', '--init', '--shm-size', '8g',
+@@ -363,7 +358,7 @@
+         persist()
+         require(receipt['native']['actual_wait_returncode'] == receipt['observer']['actual_wait_returncode'] == 0,
+                 'Native or observer failed; retain the first failure')
+-        receipt.update(verify_matrix_and_host_mappings())
++        receipt.update(verify_matrix_and_host_mappings(cid, started_at))
+         receipt['status'] = 'native_reference629_completed_worker1258_hostwriter1258'
+     except BaseException as error:
+         receipt['status'] = 'failed'
+@@ -431,4 +426,4 @@
+ 
+ 
+ if __name__ == '__main__':
+-    raise SystemExit(main())
++    raise SystemExit('Use the separately reviewed adapter execute entry; no standalone GPU start')

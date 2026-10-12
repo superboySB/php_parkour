@@ -1,0 +1,91 @@
+{
+  "schema_version": 1,
+  "status": "passed_readonly_source_delta_review",
+  "reviewed_utc": "2026-10-12T00:12:57.471542+00:00",
+  "reviewer": "/root/runtime",
+  "scope": "Only the two prior publisher corrections and exact unified diff were reviewed. No repeated full review and no candidate imports, CLI/functions, tests, SSH, Docker, Git, assets, publication or scientific execution.",
+  "reviewed_sources": [
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/final-student-reference629-publication-preparation-01/publisher.py",
+      "bytes": 34047,
+      "sha256": "2c73241af972d2b04789f67456dac2838d18f67b339f937a8759d09920edda55"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/final-student-reference629-publication-preparation-01/rejected/publisher-01.py",
+      "bytes": 33295,
+      "sha256": "63f5ad40b1f24a47e8c3e953229c2897dae2ff88fe24d2f7f7bffb51c668a102"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/final-student-reference629-publication-preparation-01/rejected/publisher-01-to-02.diff",
+      "bytes": 2461,
+      "sha256": "0fd001f13c8c8d895801841992c5f5403057cc107724af6c741f17342a17294a"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/final-student-reference629-publication-preparation-01/rejected/publisher-01-rejection.json",
+      "bytes": 973,
+      "sha256": "1e9d6dc3bb017e4293d977633603ace6deefdc7ead054ba4f6d96738cafe9e47"
+    }
+  ],
+  "prior_review": {
+    "path": "/home/dzp/projects/php_parkour/outputs/research/official-full/formal-pair-publication-publisher-source-review-01/review.json",
+    "sha256": "c7a1e77cc321790531b45efb29462b8fbcc5a252da009b15ff4a0eec22951dc9"
+  },
+  "must_fix": [],
+  "fixes": [
+    {
+      "id": "MF1",
+      "status": "closed_by_static_source_delta",
+      "source": "/home/dzp/projects/php_parkour/outputs/research/final-student-reference629-publication-preparation-01/publisher.py",
+      "function": "reviewed_preparation",
+      "lines": [
+        81,
+        106
+      ],
+      "finding": "The nonsymlink regular manifest is read once into raw. Pre/post stat tuples require identical inode/size/mtime/mode and len(raw)==stat.size. Its fingerprint SHA is checked against the explicit reviewed SHA; parse_json(raw) then strictly rejects duplicate keys and nonfinite constants on those exact same bytes. Dependency fingerprints come from this bound parsed manifest. Subsequent load_admission still hashes and sizes its actual code bytes before exec. main calls reviewed_preparation before either status or publish may load admission."
+    },
+    {
+      "id": "MF2",
+      "status": "closed_by_static_source_delta",
+      "source": "/home/dzp/projects/php_parkour/outputs/research/final-student-reference629-publication-preparation-01/publisher.py",
+      "function": "kind_page",
+      "lines": [
+        336,
+        338
+      ],
+      "finding": "After pinned legacy rendering the exact href=\"evidence-manifest.json\" must occur once, and is changed to href=\"../evidence-manifest.json\". The same kind_page factory writes both pure/playback.html and finetune/playback.html, so each now targets the package-root manifest. Actual page generation/browser traversal remains unexecuted."
+    }
+  ],
+  "delta_checks": {
+    "full_unified_diff_matches_old_to_new_bytes": true,
+    "old_candidate_exactly_preserved": true,
+    "new_source_ast_parse": "passed",
+    "old_source_ast_parse": "passed",
+    "modified_existing_definitions": [
+      "kind_page",
+      "read_json",
+      "reviewed_preparation"
+    ],
+    "only_new_definition": "parse_json",
+    "all_other_function_class_asts_identical": true,
+    "all_non_definition_module_asts_identical": true,
+    "prior_two_findings_closed": true,
+    "new_source_bytes": 34047,
+    "new_source_sha256": "2c73241af972d2b04789f67456dac2838d18f67b339f937a8759d09920edda55"
+  },
+  "unchanged_science_scope": "The delta does not alter actual contract/parent/container/worker/admission checks, model/count/gallery data, original inventory/chunk/mode/final-marker behavior, native core, current jobs or waiters.",
+  "limits": [
+    "This is a static source-only delta PASS, not actual future formal1258-case admission/publication/restoration/browser/Git acceptance.",
+    "The separate restore.py source is still outside this review.",
+    "Future real contracts and parent/native/CPU results remain required; no such artifacts were supplied or manufactured by this review."
+  ],
+  "activity": {
+    "ast_parse": true,
+    "executed_candidate_code": false,
+    "tests": false,
+    "ssh": false,
+    "docker": false,
+    "git": false,
+    "read_big_assets": false,
+    "original_or_active_files_modified": false
+  }
+}
