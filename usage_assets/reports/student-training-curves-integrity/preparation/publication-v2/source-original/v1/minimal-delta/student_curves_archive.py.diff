@@ -1,0 +1,562 @@
+--- source-original/draft/student_curves_archive.py
++++ student_curves_archive.py
+@@ -7,9 +7,11 @@
+ from __future__ import annotations
+ 
+ import argparse
++from collections import Counter
+ import gzip
+ import hashlib
+ import json
++import math
+ from pathlib import Path, PurePosixPath
+ import re
+ import shutil
+@@ -21,8 +23,9 @@
+ LIMIT = 25_000_000
+ BLOCK = 8 * 1024 * 1024
+ IMAGE = 'sha256:2be18521015b2a84ef7a4442af9a94ef041a19feb9ce385ae15424b1dc158d8f'
+-EXTRACT_SOURCE_SHA256 = None  # Fill only from the independently reviewed strict-TFRecord v2 freeze.
+-PLOT_SOURCE_SHA256 = None  # Unapproved v1 is deliberately not admitted.
++EXTRACT_SOURCE_SHA256 = 'e8bf7156013e7c31200ab39c9511020ed17c2e6726d79bc368939b44b5507b12'
++PLOT_SOURCE_SHA256 = '6a14cfa86df96199e575384c48466d44046b1a2fad8ce76c1427b7d5add7abd0'
++MAX_EVENT_RECORD_BYTES = 67_108_864
+ TARGETS = {'pure': 10000, 'finetune': 30000}
+ CORE = {
+     'pure': ['Loss/behavior', 'Loss/warmup_active'],
+@@ -33,6 +36,8 @@
+ CONDITIONAL = {'Train/mean_reward', 'Train/mean_episode_length', 'Loss/ppo_gate_mean'}
+ FALSE_FLAGS = ['quality_verified', 'convergence_verified', 'official_schedule_complete',
+                'seven_PT_acceptance_verified', 'pt_onnx_numerical_parity_verified']
++RAW_LOGS = {phase + '_' + stream for phase in ('create', 'attached', 'extract', 'plot')
++            for stream in ('stdout', 'stderr')}
+ ROLES = {'input_contract', 'scalars', 'plot_report', 'extract_source', 'plot_source',
+          'cpu_execution', 'cpu_phases', 'created_inspect', 'running_inspect',
+          'final_inspect', 'root_review', 'independent_review', 'publication_source'}
+@@ -69,8 +74,10 @@
+ 
+ 
+ def body(record):
++    require(isinstance(record, dict), 'Fingerprint object required')
+     require(type(record.get('bytes')) is int and record['bytes'] >= 0
+-            and re.fullmatch('[0-9a-f]{64}', record.get('sha256', '')),
++            and isinstance(record.get('sha256'), str)
++            and re.fullmatch('[0-9a-f]{64}', record['sha256']),
+             'Invalid fingerprint')
+     return {'bytes': record['bytes'], 'sha256': record['sha256']}
+ 
+@@ -133,7 +140,7 @@
+     contract_fp = fingerprint(contract_path)
+     require(contract_fp['sha256'] == contract_sha256, 'Acceptance contract SHA differs')
+     c = load(contract_path, contract_fp)
+-    require(c.get('schema_version') == 1
++    require(type(c.get('schema_version')) is int and c['schema_version'] == 1
+             and c.get('status') == 'reviewed_actual_student_learning_curves_cpu_acceptance'
+             and c.get('kind') in TARGETS and set(c.get('files', {})) == ROLES,
+             'Incomplete actual student curve acceptance contract')
+@@ -147,6 +154,9 @@
+ 
+     def retain(record, path=None):
+         requested = path or record['path']
++        body(record)
++        require(isinstance(requested, (str, Path)) and Path(requested).is_absolute(),
++                'Absolute host evidence provider required')
+         try:
+             path = regular(requested)
+         except FileNotFoundError as error:
+@@ -160,7 +170,9 @@
+         records[path] = actual
+         return path
+ 
+-    for record in [*c['files'].values(), *c['figures'].values()]:
++    require(isinstance(c.get('cpu_raw_logs'), dict) and set(c['cpu_raw_logs']) == RAW_LOGS,
++            'Actual create/attached/extract/plot original stdout and stderr fingerprints required')
++    for record in [*c['files'].values(), *c['figures'].values(), *c['cpu_raw_logs'].values()]:
+         retain(record)
+     require(regular(c['files']['publication_source']['path']) == regular(__file__),
+             'Reviewed publication source must be this exact file')
+@@ -182,21 +194,25 @@
+         require(value['Id'] == cid and value['Image'] == IMAGE, 'Own actual CPU identity/image differs')
+         cfg = value['HostConfig']
+         require(cfg['Runtime'] == 'runc' and cfg['NetworkMode'] == 'none'
+-                and cfg['DeviceRequests'] in (None, []) and cfg['NanoCpus'] == 2_000_000_000
++                and cfg['DeviceRequests'] in (None, []) and cfg.get('Devices') in (None, []) and cfg['NanoCpus'] == 2_000_000_000
+                 and cfg['Memory'] == 12 * 1024**3, 'Actual CPU isolation differs')
+         env = dict(item.split('=', 1) for item in value['Config']['Env'])
+         require(env.get('CUDA_VISIBLE_DEVICES') == '' and env.get('NVIDIA_VISIBLE_DEVICES') == 'void'
+                 and env.get('PYTHONDONTWRITEBYTECODE') == '1', 'GPU hidden/bytecode-off required')
++        require(value['Config']['Image'] == IMAGE, 'Container configured image must be the reviewed digest')
+         current = sorted(value['Mounts'], key=lambda item: item['Destination'])
+         require(len(current) == 4 and len({item['Destination'] for item in current}) == 4,
+                 'Four unique actual bind mounts required')
+         require({item['Destination']: item['RW'] for item in current}
+                 == {'/code': False, '/control': False, '/artifacts': False, '/validation': True}
+-                and all(item['Type'] == 'bind' for item in current), 'Three RO and one RW bind required')
++                and all(item['Type'] == 'bind' and Path(item['Source']).is_absolute()
++                        and '..' not in Path(item['Source']).parts for item in current), 'Three RO and one RW bind required')
+         if mounts is not None:
+             require(current == mounts, 'Inspect mount identity changed')
+         mounts = current
+     require(inspections[0]['State']['Status'] == 'created'
++            and inspections[0]['State']['Running'] is False
++            and inspections[1]['State']['Status'] == 'running'
+             and inspections[1]['State']['Running'] is True
+             and inspections[2]['State']['Status'] == 'exited'
+             and inspections[2]['State']['Running'] is False
+@@ -205,42 +221,107 @@
+             and all(value['Name'] == inspections[0]['Name'] for value in inspections),
+             'Actual created/live/naturally-exited CPU observations required')
+     namespace = [(Path(item['Destination']), Path(item['Source'])) for item in mounts]
++    copies = c.get('native_file_copies')
++    require(isinstance(copies, list), 'Explicit native-path to host-copy mappings required')
++    native_copies, used_copies = {}, set()
++    for item in copies:
++        native_path = item['native_path']
++        native = Path(native_path)
++        require(isinstance(native_path, str) and native.is_absolute() and str(native) == native_path
++                and '..' not in native.parts and native_path not in native_copies
++                and not any(native.is_relative_to(prefix) for prefix, _ in namespace),
++                'Unique canonical external native path required; cannot shadow actual mounts')
++        provider = retain(item['host_copy'])
++        native_copies[native_path] = (provider, body(item['host_copy']))
++
++    relative_copies, used_relative = {}, set()
++    require(isinstance(c.get('relative_file_copies', []), list), 'Relative provider mappings must be an array')
++    for item in c.get('relative_file_copies', []):
++        document = Path(item['document_path'])
++        reference = str(relative(item['relative_path']))
++        key = (str(document), reference)
++        require(document.is_absolute() and '..' not in document.parts and key not in relative_copies,
++                'Unique canonical document/relative-reference provider required')
++        relative_copies[key] = (retain(item['host_copy']), body(item['host_copy']))
+ 
+     def translate(path):
+         path = Path(path)
+         require(path.is_absolute() and '..' not in path.parts, 'Absolute safe evidence path required')
++        if str(path) in native_copies:
++            return native_copies[str(path)][0]
+         for prefix, provider in namespace:
+             if path.is_relative_to(prefix):
+                 return provider / path.relative_to(prefix)
+         return path
+ 
+     def bound(record, role=None):
++        if record['path'] in native_copies:
++            require(body(record) == native_copies[record['path']][1], 'Native fingerprint and host-copy bytes/SHA differ')
++            used_copies.add(record['path'])
+         path = retain(record, translate(record['path']))
+         if role:
+             require(path == regular(c['files'][role]['path']), 'Accepted producer binding differs: ' + role)
+         return path
+ 
+-    def references(value):
+-        if isinstance(value, dict):
+-            if {'path', 'bytes', 'sha256'} <= value.keys():
+-                bound(value)
+-            for item in value.values():
+-                references(item)
+-        elif isinstance(value, list):
+-            for item in value:
+-                references(item)
+-
+-    references(execution)
++    inspected_json = {regular(contract_path),
++                      *[regular(row['path']) for key, row in c['files'].items()
++                        if key not in {'extract_source', 'plot_source', 'publication_source'}]}
++
++    def references(value, document_path):
++        # Walk actual fingerprints, resolving relative manifest rows in their
++        # original JSON namespace. Descriptive JSON-schema strings are not pins.
++        pending = [(value, Path(document_path))]
++        while pending:
++            item, document = pending.pop()
++            if isinstance(item, dict):
++                if {'path', 'bytes', 'sha256'} <= item.keys() and (
++                        type(item['bytes']) is int or (isinstance(item['sha256'], str)
++                        and re.fullmatch('[0-9a-f]{64}', item['sha256']))):
++                    pin = item
++                    if not Path(item['path']).is_absolute():
++                        rel = relative(item['path'])
++                        key = (str(document), str(rel))
++                        if key in relative_copies:
++                            provider, expected_body = relative_copies[key]
++                            require(body(item) == expected_body, 'Relative original fingerprint and host-copy bytes/SHA differ')
++                            used_relative.add(key)
++                            pin = dict(item, path=str(provider))
++                        else:
++                            pin = dict(item, path=str(document.parent.joinpath(*rel.parts)))
++                    path = bound(pin)
++                    if (path.suffix.lower() == '.json' or Path(item['path']).suffix.lower() == '.json') and path not in inspected_json:
++                        inspected_json.add(path)
++                        pending.append((load(path, pin), Path(pin['path'])))
++                pending.extend((child, document) for child in item.values())
++            elif isinstance(item, list):
++                pending.extend((child, document) for child in item)
++
++    references(execution, c['files']['cpu_execution']['path'])
+     require(phases['status'] == 'passed' and phases['inputs_unchanged'] is True
+             and phases['inputs_before'] == phases['inputs_after']
+             and [row['phase'] for row in phases['phases']] == ['extract', 'plot']
+             and all(type(row['actual_wait_returncode']) is int and row['actual_wait_returncode'] == 0
+                     for row in phases['phases']), 'Two actual extract/plot phase0 receipts required')
+-    references(phases)
++    references(phases, c['files']['cpu_phases']['path'])
++
++    def inventory(value, description):
++        require(isinstance(value, list) and value, 'Nonempty actual fingerprint inventory required: ' + description)
++        paths = set()
++        for row in value:
++            path = str(bound(row))
++            require(path not in paths, 'Duplicate actual fingerprint inventory: ' + description)
++            paths.add(path)
++        return paths
++
++    source_paths = inventory(execution['source_before'], 'execution.source_before')
++    require({str(regular(c['files'][role]['path'])) for role in ('extract_source', 'plot_source')} <= source_paths,
++            'Actual source before/after must bind both accepted producers')
++    phase_input_paths = inventory(phases['inputs_before'], 'phases.inputs_before')
+     sc, pl, inp = files['scalars'], files['plot_report'], files['input_contract']
+-    require(sc['schema_version'] == 1 and sc['phase'] == 'student_training_scalars'
++    require(type(sc['schema_version']) is int and sc['schema_version'] == 1 and sc['phase'] == 'student_training_scalars'
+             and sc['status'] == 'passed' and sc['kind'] == kind and sc['stage'] == 'student-' + kind
+-            and sc['target_iterations'] == target and sc['training_scalar_integrity_complete'] is True
++            and type(sc['target_iterations']) is int and sc['target_iterations'] == target
++            and sc['training_scalar_integrity_complete'] is True
+             and sc['required_core_tags'] == CORE[kind] and sc['diagnostics'] == []
+             and sc['input_files_unchanged'] is True and sc['event_integrity_complete'] is True,
+             'Typed full scalar and strict event-integrity acceptance required')
+@@ -248,7 +329,7 @@
+             'Scalar/archive acceptance cannot claim model, quality, convergence or full schedule acceptance')
+     bound(sc['input_contract'], 'input_contract')
+     bound(sc['extractor_source'], 'extract_source')
+-    require(inp['schema_version'] == 1 and inp['kind'] == kind, 'Actual extractor input contract differs')
++    require(type(inp['schema_version']) is int and inp['schema_version'] == 1 and inp['kind'] == kind, 'Actual extractor input contract differs')
+     native_path = bound(inp['native_manifest'])
+     native = load(native_path, inp['native_manifest'])
+     require(native['status'] == 'passed' and type(native['returncode']) is int and native['returncode'] == 0
+@@ -256,13 +337,26 @@
+             and type(native['checkpoint_iteration']) is int and native['checkpoint_iteration'] == target - 1
+             and str(Path(native['checkpoint']).parent) == inp['native_run_directory'],
+             'Actual same-run official native manifest identity required')
++    checkpoint = PurePosixPath(native['checkpoint'])
++    prefix = PurePosixPath('/outputs/official-full/official') / ('student-' + kind) / 'PHP-research'
++    require(checkpoint.is_absolute() and '..' not in checkpoint.parts and str(checkpoint) == native['checkpoint']
++            and checkpoint.is_relative_to(prefix) and len(checkpoint.relative_to(prefix).parts) == 2
++            and checkpoint.name == 'model_' + str(target - 1).zfill(5) + '.pt'
++            and isinstance(native['checkpoint_sha256'], str)
++            and re.fullmatch('[0-9a-f]{64}', native['checkpoint_sha256'])
++            and isinstance(native['finished_utc'], str) and native['finished_utc'],
++            'Actual final native checkpoint path/SHA identity required; no model parsing')
+     require(sc['native_terminal'] == {key: native[key] for key in
+             ('label', 'profile', 'status', 'returncode', 'checkpoint', 'checkpoint_iteration',
+              'checkpoint_sha256', 'finished_utc')}, 'Scalar native identity subset differs')
++    require(sc['run_directory'] == inp['run_directory']
++            and sc['native_run_directory'] == inp['native_run_directory'], 'Scalar run identity differs')
+     bound(sc['native_manifest'])
+     require(body(sc['native_manifest']) == body(inp['native_manifest']), 'Scalar native manifest differs')
+     events = inp['events']
+-    require(events and len({row['path'] for row in events}) == len(events), 'Exact actual event set required')
++    require(isinstance(events, list) and events and len({row['path'] for row in events}) == len(events)
++            and len({row['native_path'] for row in events}) == len(events), 'Exact actual event set required')
++    require(Path(inp['run_directory']).is_relative_to('/artifacts'), 'Read-only artifact event run required')
+     run_dir = translate(inp['run_directory'])
+     require({str(path) for path in run_dir.glob('events.out.tfevents.*')}
+             == {str(translate(row['path'])) for row in events}, 'Actual same-run event file-set changed')
+@@ -278,57 +372,120 @@
+         require(integrity['status'] == 'passed' and integrity['format'] == 'TFRecord'
+                 and integrity['complete_eof'] is True and integrity['crc32c_verified'] is True
+                 and type(integrity['records']) is int and integrity['records'] > 0
++                and integrity['expected_file'] == {key: row[key] for key in ('path', 'bytes', 'sha256')}
++                and integrity['diagnostics'] == [] and integrity['max_record_bytes'] == MAX_EVENT_RECORD_BYTES
++                and type(integrity['largest_record_bytes']) is int
++                and 0 <= integrity['largest_record_bytes'] <= MAX_EVENT_RECORD_BYTES
+                 and body(integrity) == body(row), 'Strict same-whole-event TFRecord CRC/EOF proof required')
++    require({str(bound(row)) for row in sc['input_files']} <= phase_input_paths,
++            'Actual phase before/after must bind the complete extractor inputs')
+     require(sc['input_files'] == [sc['input_contract'], sc['native_manifest'],
+             *[{key: row[key] for key in ('path', 'bytes', 'sha256')} for row in events]],
+             'Full accepted extractor input inventory differs')
+-    for tag in CORE[kind]:
+-        coverage = sc['tag_coverage'][tag]
+-        unique = coverage['unique_steps']
+-        require((unique == target or unique == list(range(target))) and coverage['samples'] == target
+-                and coverage['first_step'] == 0 and coverage['last_step'] == target - 1
+-                and not any(coverage[key] for key in ('missing_steps', 'duplicate_steps', 'out_of_range_steps', 'out_of_order'))
+-                and coverage['all_finite'] is True and coverage['required_core'] is True,
+-                'Core scalar coverage incomplete: ' + tag)
+-    require(set(sc['tag_coverage']) == set(sc['scalars']) | set(CORE[kind]) | CONDITIONAL
+-            and all(row['all_finite'] is True for row in sc['tag_coverage'].values()), 'Actual tags must remain complete and finite')
+-    require(pl['status'] == 'rendered_student_training_curves' and pl['kind'] == kind
+-            and pl['stage'] == sc['stage'] and pl['target_iterations'] == target
++    checker = sc['event_integrity_checker']
++    require(checker['algorithm'] == 'TFRecord little-endian length/header/body masked CRC32C and exact whole-file EOF'
++            and checker['max_record_bytes'] == MAX_EVENT_RECORD_BYTES
++            and checker['payload_chunk_bytes'] == 1048576,
++            'Frozen v2 TFRecord checker parameters differ')
++    crc_source = checker['crc_update_source']
++    require(crc_source['path'] in native_copies
++            and Path(crc_source['path']).as_posix().endswith('/tensorboard/compat/tensorflow_stub/pywrap_tensorflow.py'),
++            'Actual installed CRC module needs its explicit original-byte host copy')
++    bound(crc_source)
++    scalar_rows, coverage = sc['scalars'], sc['tag_coverage']
++    require(isinstance(scalar_rows, dict) and isinstance(coverage, dict)
++            and set(coverage) == set(scalar_rows) | set(CORE[kind]) | CONDITIONAL,
++            'Every actual and conditional tag coverage must remain complete')
++    event_order = {row['path']: index for index, row in enumerate(events)}
++    event_counts = Counter()
++    actual_tags = set()
++    for event in sc['events']:
++        require(isinstance(event['scalar_tags'], list)
++                and all(isinstance(tag, str) for tag in event['scalar_tags'])
++                and len(set(event['scalar_tags'])) == len(event['scalar_tags']), 'Exact per-event scalar tag inventory required')
++        actual_tags.update(event['scalar_tags'])
++    require(set(scalar_rows) == actual_tags, 'Scalar tags differ from actual event inventories')
++    for tag in coverage:
++        rows = scalar_rows.get(tag, [])
++        require(isinstance(tag, str) and isinstance(rows, list), 'Original scalar row arrays required')
++        indices, previous_event, steps = Counter(), -1, []
++        for row in rows:
++            require(isinstance(row, dict) and set(row) == {'step', 'wall_time', 'value', 'source_event', 'event_sample_index'}
++                    and type(row['step']) is int and type(row['event_sample_index']) is int
++                    and all(type(row[field]) in (int, float) and math.isfinite(row[field])
++                            for field in ('value', 'wall_time'))
++                    and row['source_event'] in event_order, 'Typed finite original scalar sample required: ' + tag)
++            event = row['source_event']
++            require(event_order[event] >= previous_event and row['event_sample_index'] == indices[event]
++                    and tag in sc['events'][event_order[event]]['scalar_tags'], 'Original per-event scalar sequence/provenance differs')
++            previous_event = event_order[event]
++            indices[event] += 1
++            event_counts[event] += 1
++            steps.append(row['step'])
++        counts = Counter(steps)
++        expected_coverage = {'samples': len(rows), 'unique_steps': len(counts),
++            'first_step': min(steps) if steps else None, 'last_step': max(steps) if steps else None,
++            'missing_steps': [step for step in range(target) if step not in counts],
++            'duplicate_steps': [{'step': step, 'count': count} for step, count in sorted(counts.items()) if count > 1],
++            'out_of_range_steps': sorted(step for step in counts if step < 0 or step >= target),
++            'out_of_order': any(right < left for left, right in zip(steps, steps[1:])),
++            'all_finite': True, 'required_core': tag in CORE[kind]}
++        require(json.dumps(coverage[tag], sort_keys=True, allow_nan=False)
++                == json.dumps(expected_coverage, sort_keys=True, allow_nan=False), 'Coverage differs from preserved actual rows: ' + tag)
++        if tag in CORE[kind]:
++            require(steps == list(range(target)), 'Full ordered once-per-step actual core rows required: ' + tag)
++    require(all(type(event['parsed_scalar_samples']) is int
++                and event['parsed_scalar_samples'] == event_counts[event['path']] for event in sc['events']),
++            'Actual per-event scalar sample count differs')
++    plotted = [*CORE[kind], 'Train/mean_reward', 'Train/mean_episode_length']
++    if kind == 'finetune':
++        plotted.append('Loss/ppo_gate_mean')
++    require(type(pl['schema_version']) is int and pl['schema_version'] == 1
++            and pl['status'] == 'rendered_student_training_curves' and pl['kind'] == kind
++            and pl['stage'] == sc['stage'] and type(pl['target_iterations']) is int and pl['target_iterations'] == target
+             and pl['input_files_unchanged'] is True and pl['events'] == sc['events']
++            and pl['event_integrity_complete'] is True and pl['event_integrity_checker'] == checker
+             and pl['input_contract'] == sc['input_contract'] and pl['native_manifest'] == sc['native_manifest']
+-            and pl['input_files'] == [*sc['input_files'], pl['input']],
++            and pl['input_files'] == [*sc['input_files'], pl['input']]
++            and pl['tags'] == [dict({'tag': tag}, **coverage[tag]) for tag in plotted]
++            and pl['unplotted_actual_tags'] == sorted(set(scalar_rows) - set(plotted)),
+             'Actual matching plot acceptance required')
+     bound(pl['input'], 'scalars')
+     bound(pl['plot_source'], 'plot_source')
+     require(len(pl['figures']) == 2, 'Both actual plot figures required')
+     require({str(translate(row['path'])): body(row) for row in pl['figures']}
+             == {str(regular(row['path'])): body(row) for row in c['figures'].values()}, 'Plot figure originals differ')
+-    references(sc)
+-    references(pl)
++    references(sc, c['files']['scalars']['path'])
++    references(pl, c['files']['plot_report']['path'])
+     for phase, role in zip(phases['phases'], ('extract_source', 'plot_source')):
+-        matching = [arg for arg in phase['argv'] if isinstance(arg, str)
+-                    and Path(arg).name == Path(c['files'][role]['path']).name]
+-        require(len(matching) == 1 and translate(matching[0]) == regular(c['files'][role]['path']),
+-                'Actual phase argv does not bind accepted producer source')
+         argv = phase['argv']
+-        def argument(flag):
+-            require(argv.count(flag) == 1 and argv.index(flag) + 1 < len(argv),
+-                    'Actual producer argument missing/duplicated: ' + flag)
+-            return argv[argv.index(flag) + 1]
+-        if role == 'extract_source':
+-            require(translate(argument('--contract')) == regular(c['files']['input_contract']['path'])
+-                    and argument('--contract-sha256') == c['files']['input_contract']['sha256']
+-                    and translate(argument('--output')) == regular(c['files']['scalars']['path']),
+-                    'Actual extract argv input/output SHA binding differs')
+-        else:
+-            require(translate(argument('--input')) == regular(c['files']['scalars']['path'])
+-                    and argument('--input-sha256') == c['files']['scalars']['sha256']
+-                    and translate(argument('--output')) == regular(c['files']['plot_report']['path']).parent,
+-                    'Actual plot argv input/output SHA binding differs')
++        require(isinstance(argv, list) and all(isinstance(arg, str) for arg in argv)
++                and len(argv) >= 9 and argv[:2] == ['/opt/php/bin/train-python', '-B']
++                and translate(argv[2]) == regular(c['files'][role]['path']),
++                'Actual phase must execute the accepted script with the reviewed Python interpreter')
++        flags = ['--contract', '--contract-sha256', '--output'] if role == 'extract_source' else ['--input', '--input-sha256', '--output']
++        require(argv[3::2][:3] == flags and (len(argv) == 9 or
++                (role == 'plot_source' and len(argv) == 11 and argv[9] == '--window'
++                 and re.fullmatch('[1-9][0-9]*', argv[10]))), 'Unexpected actual phase arguments')
++        source_role, output_role = ('input_contract', 'scalars') if role == 'extract_source' else ('scalars', 'plot_report')
++        actual_output = regular(c['files'][output_role]['path'])
++        if role == 'plot_source':
++            actual_output = actual_output.parent
++        require(translate(argv[4]) == regular(c['files'][source_role]['path'])
++                and argv[6] == c['files'][source_role]['sha256']
++                and translate(argv[8]) == actual_output, 'Actual phase input/output SHA binding differs')
++        if role == 'plot_source':
++            window = int(argv[10]) if len(argv) == 11 else 25
++            require(pl['smoothing']['method'] == 'trailing arithmetic mean'
++                    and type(pl['smoothing']['window_samples']) is int
++                    and pl['smoothing']['window_samples'] == window, 'Actual plot smoothing arguments differ')
+     required_review_paths = {str(regular(c['files'][role]['path'])) for role in
+                              ('input_contract', 'scalars', 'plot_report', 'cpu_execution', 'cpu_phases',
+-                              'extract_source', 'plot_source')}
++                              'extract_source', 'plot_source', 'created_inspect', 'running_inspect',
++                              'final_inspect', 'publication_source')}
+     required_review_paths |= {str(regular(row['path'])) for row in c['figures'].values()}
++    required_review_paths |= {str(native_path), str(translate(crc_source['path']))}
++    required_review_paths |= {str(regular(row['path'])) for row in c['cpu_raw_logs'].values()}
+     for role in ('root_review', 'independent_review'):
+         review = files[role]
+         require(review.get('status') in ('passed', 'passed_readonly_postexecution_review',
+@@ -337,9 +494,16 @@
+         refs = review.get('evidence_fingerprints')
+         require(isinstance(refs, list) and required_review_paths <= {str(translate(row['path'])) for row in refs},
+                 'Review must bind actual scientific, execution, source and figure evidence')
+-        references(review)
++        for record in refs:
++            bound(record)
++        references(review, c['files'][role]['path'])
++    for role, document in files.items():
++        references(document, c['files'][role]['path'])
++    require(used_copies == set(native_copies) and used_relative == set(relative_copies),
++            'Unused native/relative host-copy mapping is not accepted evidence')
+     rows = [('acceptance/contract.json', contract_fp, False)]
+     rows += [('acceptance/' + role + Path(row['path']).suffix, row, False) for role, row in c['files'].items()]
++    rows += [('cpu-raw/' + role + '.raw', row, False) for role, row in c['cpu_raw_logs'].items()]
+     rows += [('figures/learning-curves.' + suffix, row, False) for suffix, row in c['figures'].items()]
+     rows += [('inputs/native-manifest.json', fingerprint(native_path), False)]
+     rows += [('inputs/events/' + str(index).zfill(4) + '/' + Path(row['path']).name,
+@@ -350,7 +514,7 @@
+     for index, (path, record) in enumerate(sorted(records.items(), key=lambda item: str(item[0]))):
+         if str(path) not in used:
+             rows.append(('referenced/' + str(index).zfill(5) + '/' + path.name, record, False))
+-    return c, sc, rows, records
++    return c, sc, rows, records, run_dir
+ 
+ 
+ class ChunkWriter:
+@@ -429,15 +593,23 @@
+ def decode_record(package, record, destination=None):
+     encoded_sha, original_sha = hashlib.sha256(), hashlib.sha256()
+     encoded_size = original_size = 0
++    gzip_header = bytearray()
++    body(record)
++    body(record['encoded'])
++    require(isinstance(record['chunks'], list), 'Ordered chunk array required')
+     decoder = zlib.decompressobj(31) if record['encoding'] == 'gzip' else None
+     require(record['encoding'] in ('raw', 'gzip')
+-            and (decoder is None or record['gzip_mtime'] == 0), 'Unsupported archive encoding')
++            and ((decoder is None and record['gzip_mtime'] is None)
++                 or (decoder is not None and type(record['gzip_mtime']) is int and record['gzip_mtime'] == 0)), 'Unsupported archive encoding')
+     for chunk in record['chunks']:
+         path = package.joinpath(*relative(chunk['path']).parts)
+-        require(chunk['offset'] == encoded_size and 0 < chunk['bytes'] <= LIMIT
++        require(type(chunk['offset']) is int and chunk['offset'] == encoded_size
++                and type(chunk['bytes']) is int and 0 < chunk['bytes'] <= LIMIT
+                 and body(fingerprint(path)) == body(chunk), 'Chunk offset, size or SHA differs')
+         with path.open('rb') as stream:
+             for data in iter(lambda: stream.read(BLOCK), b''):
++                if decoder and len(gzip_header) < 10:
++                    gzip_header.extend(data[:10 - len(gzip_header)])
+                 encoded_sha.update(data)
+                 encoded_size += len(data)
+                 pending = data
+@@ -451,6 +623,8 @@
+                         destination.write(output)
+         require(body(fingerprint(path)) == body(chunk), 'Chunk changed during restoration')
+     if decoder:
++        require(len(gzip_header) == 10 and gzip_header[:4] == b'\x1f\x8b\x08\x00'
++                and gzip_header[4:8] == b'\x00\x00\x00\x00', 'Exact no-name gzip mtime=0 header required')
+         output = decoder.flush()
+         original_size += len(output)
+         original_sha.update(output)
+@@ -465,26 +639,37 @@
+ 
+ def verify(package, manifest_sha256):
+     package = Path(package).absolute()
++    require(isinstance(manifest_sha256, str) and re.fullmatch('[0-9a-f]{64}', manifest_sha256),
++            'Explicit reviewed package manifest SHA required')
+     expected = fingerprint(package / 'evidence-manifest.json')
++    require(expected['bytes'] <= LIMIT, 'Manifest itself exceeds the Git blob bound')
+     require(expected['sha256'] == manifest_sha256, 'Explicit package manifest SHA differs')
+     manifest = load(package / 'evidence-manifest.json', expected)
+-    require(manifest['status'] == 'completed_student_learning_curves_archive'
+-            and manifest['kind'] in TARGETS and manifest['quality_verified'] is False
+-            and manifest['official_schedule_complete'] is False, 'Actual scalar archive manifest required')
++    require(type(manifest['schema_version']) is int and manifest['schema_version'] == 1
++            and manifest['status'] == 'completed_student_learning_curves_archive'
++            and manifest['kind'] in TARGETS and all(manifest[flag] is False for flag in FALSE_FLAGS)
++            and type(manifest['restore_records']) is int and manifest['restore_records'] > 0 and manifest['raw_json_rewritten'] is False
++            and manifest['chunk_limit_bytes'] == LIMIT,  'Actual scalar archive manifest required')
+     paths = set()
+     for row in manifest['files']:
+         rel = str(relative(row['path']))
+-        require(rel not in paths and row['bytes'] <= LIMIT, 'Duplicate or over-limit Git blob')
++        require(rel != 'evidence-manifest.json' and rel not in paths
++                and type(row['bytes']) is int and 0 <= row['bytes'] <= LIMIT, 'Duplicate or over-limit Git blob')
+         paths.add(rel)
+         require(body(fingerprint(package / rel)) == body(row), 'Package bytes changed: ' + rel)
+     require({str(path.relative_to(package)) for path in package.rglob('*') if path.is_file()}
+             == paths | {'evidence-manifest.json'}
+             and not any(path.is_symlink() for path in package.rglob('*')), 'Exact package file-set differs')
++    require({'restore-map.json', 'summary.json', 'index.md', 'student_curves_archive.py'} <= paths,
++            'Sealed restore map, summary, index and helper required')
+     mapping = load(package / 'restore-map.json')
++    require(type(mapping['schema_version']) is int and mapping['schema_version'] == 1
++            and mapping['raw_json_rewritten'] is False and mapping['mode_restored_not_uid_gid'] is True,
++            'Exact original-byte restoration schema required')
+     logical = set()
+     for row in mapping['records']:
+         rel = str(relative(row['logical_path']))
+-        require(rel != 'restoration.json' and rel not in logical
++        require(rel != 'restoration.json' and not rel.startswith('restoration.json/') and rel not in logical
+                 and type(row['mode']) is int and 0 <= row['mode'] <= 0o777,
+                 'Duplicate restore path or unsupported mode')
+         require(not any(rel.startswith(other + '/') or other.startswith(rel + '/') for other in logical),
+@@ -492,13 +677,16 @@
+         logical.add(rel)
+         require(all(str(relative(chunk['path'])) in paths for chunk in row['chunks']), 'Unsealed restore chunk')
+         decode_record(package, row)
++    accepted = [row for row in mapping['records'] if row['logical_path'] == 'acceptance/contract.json']
++    require(len(accepted) == 1 and accepted[0]['sha256'] == manifest['acceptance_contract_sha256'],
++            'Restorable original acceptance contract must match the sealed acceptance SHA')
+     require(mapping['status'] == 'original_byte_restore_map' and len(logical) == manifest['restore_records'],
+             'Restore record count differs')
+     return manifest, mapping
+ 
+ 
+ def publish(args):
+-    c, scalars, inputs, expected = admit(args.contract, args.contract_sha256)
++    c, scalars, inputs, expected, event_directory = admit(args.contract, args.contract_sha256)
+     output = fresh(args.output, [Path(row['path']).parent for _, row, _ in inputs])
+     output.mkdir(exist_ok=False)
+     try:
+@@ -545,6 +733,8 @@
+             + '[校验与恢复源码](student_curves_archive.py)\n\n'
+             + '用已审源码 student_curves_archive.py 的 verify/restore 子命令，显式传本manifest SHA；'
+             + 'restore只向全新目录恢复原bytes及mode，不改JSON内部原绝对路径，不运行科学任务。\n')
++        require({str(path) for path in event_directory.glob('events.out.tfevents.*')}
++                == {row['path'] for _, row, event in inputs if event}, 'Original event file-set changed before archive seal')
+         for row in expected.values():
+             require(body(fingerprint(row['path'])) == body(row), 'Accepted source changed before seal')
+         for row in mapping:
+@@ -560,7 +750,9 @@
+         manifest = {'schema_version': 1, 'status': 'completed_student_learning_curves_archive',
+                     'kind': c['kind'], 'acceptance_contract_sha256': args.contract_sha256,
+                     'restore_records': len(mapping), 'chunk_limit_bytes': LIMIT, 'files': files,
+-                    'raw_json_rewritten': False, 'quality_verified': False, 'official_schedule_complete': False}
++                    'raw_json_rewritten': False, **{flag: False for flag in FALSE_FLAGS}}
++        require(len((json.dumps(manifest, ensure_ascii=False, indent=2, allow_nan=False) + '\n').encode()) <= LIMIT,
++                'Manifest itself exceeds 25MB')
+         save(output / 'evidence-manifest.json', manifest)  # Only successful seal, always last.
+         return {'status': manifest['status'], 'package': str(output),
+                 'manifest': fingerprint(output / 'evidence-manifest.json'), 'files': len(files) + 1}

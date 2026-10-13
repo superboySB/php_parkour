@@ -1,0 +1,30 @@
+--- cpu-v1/README.md
++++ cpu-v2/README.md
+@@ -1,13 +1,20 @@
+-本目录仅为正式学生完整训练标量/曲线提供可审查 CPU 源码。没有实际事件、终态绑定、提取报告、图片、容器或通过结论；只做 AST 解析，未 import/执行两入口或科学包。future actual 路径和 SHA 在 source-interface.json 中为 null/类型说明，不能充作实际 input-contract。
++本目录是 student-final learning curves 的 CPU v2 源准备，尚待 Root/独立静态审查及未来真实 CPU 协议验证，未执行、未 import 新helper或科学包，未解析事件。cpu/ 原 v1 两源码及其全部历史原件保持不变；v1 初始审查结论因 EA 可吞掉坏尾部 DataLossError 的缺口已撤回未来执行批准，撤回addendum原字节保存在source-original/v1/。不能称v1已批准或v2运行通过。
+ 
+-extract_student_scalars.py 接受 --contract /control/input-contract.json --contract-sha256 <实际SHA> --output /validation/scalars.json。contract 精确字段见 source-interface.json：kind、原 native_manifest 指纹、native_run_directory、CPU run_directory 和 events 各原路径/bytes/SHA。native manifest 必须是该学生官方 passed / integer0 / 最终 iteration9999或29999，checkpoint.parent 与全部原 event basename 绑定同run。run_directory 必须是只读 /artifacts 映射，全部 events.out.tfevents.* 的实际集合必须与合同完全一致，不能漏掉第二个事件或把其它run混入。input-contract/native manifest/events/源码逐字节核验并在后验重核；Root未来另保存远端真实出处/稳定性及实际Docker执行证据，本文不代替这些证明。
++v2只增加完整 TFRecord framing/CRC/EOF 门卫和plot对应门卫，原kind/target/core tags、无purge多event提取、nonfinite合法JSON诊断、conditional reward/PPO-gate真覆盖与未来CLI均保持：
+ 
+-逐文件 EventAccumulator(size_guidance={'scalars':0}, purge_orphaned_data=False) 保留原重启/重复记录。纯学生要求 Loss/behavior、Loss/warmup_active 实际精确0..9999；fine要求两update分支共同输出的九个Loss标签实际精确0..29999（完整列表在源码/接口）。任何核心缺步、重复、越界、顺序异常、非finite不能passed。所有实际scalar tags及原row来源保留，不重命名，不去重，不补步。非finite写null和原repr+定位diagnostics，failed报告仍是allow_nan=False合法JSON；原events仍为权威原件。
++```text
++/opt/php/bin/train-python -B /code/extract_student_scalars.py --contract /control/input-contract.json --contract-sha256 <实际SHA> --output /validation/scalars.json
++/opt/php/bin/train-python -B /code/plot_student_learning_curves.py --input /validation/scalars.json --input-sha256 <实际提取报告SHA> --output /validation/plots
++```
+ 
+-Train/mean_reward、Train/mean_episode_length 条件写入，Loss/ppo_gate_mean仅PPO update分支输出；都记录真实覆盖、缺失、重复及顺序，缺样本不补齐。其它实际tags同样完整保留。任何tag的实际非finite仍拒绝通过。报告逐row保留source_event/event_sample_index，多文件按合同声明顺序读取；若核心原序列不能精确达到0..target-1则保留原问题并failed，不能重排/删旧event来获得passed。
++每原event先由 verify_tfrecord(event_fp, crc_update) 严格读到完整EOF：header为little-endian uint64 length，紧随4-byte masked CRC32C；然后读取完整body和4-byte masked body CRC32C。payload每次最多1MiB，逐块增量CRC/SHA，不把声明的大长度一次读入RAM；单record payload上限64MiB，声明长度也不能大于原文件bytes。任一短header/短CRC/短body、错误CRC、长度越界、额外坏尾、I/O错误、整文件SHA/bytes或stat变化均failed并保留准确byte offset/record_index/record_offset诊断；不会只采纳已经齐全的core前缀或EA warning。EOF必须正好落在完整record边界且至少有一条完整记录。
+ 
+-plot_student_learning_curves.py 接受 --input /validation/scalars.json --input-sha256 <实际提取报告SHA> --output /validation/plots [--window 25]，再次核精确核心序列、所有绑定输入/源码，输出 learning-curves.png、learning-curves.svg、plot-report.json。原采样点全部保留；均值线在缺步/重复/倒序处分段，绝不插值或跨缺失平滑。图包含核心loss、reward/episode及fine条件PPO gate；其余实际tags保留在完整scalars.json并以unplotted_actual_tags明示。
++CRC updater取自已有TensorBoard compat包，import发生在CPU Docker guard之后；mask公式由本源显式给出。未来实际报告记录安装模块文件指纹（event_integrity_checker.crc_update_source），该模块是固定Docker镜像的运行依赖，不是捏造的本次host安装验证。协议依据：[TensorFlow TFRecord格式](https://www.tensorflow.org/tutorials/load_data/tfrecord)、[TensorBoard compat CRC源码](https://raw.githubusercontent.com/tensorflow/tensorboard/master/tensorboard/compat/tensorflow_stub/pywrap_tensorflow.py)。这些upstream master引用只说明协议/故障语义，没有冒充已固定运行镜像版本或实际坏样本测试。
+ 
+-future Root执行器需另提供两phase实际wait0、正确image/runc/networknone/GPUhidden、原始start/finalinspect及自然stop0、源/输入前后相同、独立后验。两脚本在CPU Docker guard之后才导入TensorBoard/Matplotlib，不依赖host科学包。提取器只验标量完整性，绘图器只可视化这些实际值；quality/convergence/whole schedule/7PT/ONNX parity全部false。图或loss下降不能代替学生技能、58/1258物理case或全部官方流程验收。
++只有event完整性通过才逐file EventAccumulator(size_guidance={'scalars':0}, purge_orphaned_data=False)；不purge、不去重、不补步。纯核心Loss/behavior、Loss/warmup_active要求精确0..9999；fine九个共同核心Loss要求精确0..29999。所有实际scalar tags原row和来源保留，核心重复/缺步/越界/乱序及任一tag非finite不能passed。nonfinite原值写null+原repr+定位diagnostics，allow_nan=False合法failed报告。reward/episode、分支条件ppo_gate_mean仅报告真实覆盖/缺失/重复，不能硬补成target条数或称技能质量。
+ 
+-source-original保留已完成教师五阶段验收的直接原始accept_teacher.py与plot_learning_curves.py；minimal-delta保存两份完整unified diff及full.diff。新源删除教师PT/单ONNX/PPO配置验收功能，只保留并加强学生事件和曲线所需逻辑；native算法/模型/训练不改。原teacher文件、armed paired gate、H、项目docs/README/Git及正在运行的任务均不动。无科学重跑、网络或Docker操作。实际报告可较大，未来publication需将大JSON和event一同保真分块，不能丢原rows。
++scalars.json新增顶层event_integrity_complete和event_integrity_checker；每events[].tfrecord_integrity必须是passed/TFRecord、原expected_file、整bytes/SHA一致、正records、complete_eof=true、crc32c_verified=true、diagnostics=[]。失败事件保留已检查bytes/read_sha256及准确offset诊断，不称整体SHA完整通过。plotter逐event核这些字段后才写图；plot报告同时保留完整性结果。PNG/SVG、report路径及其它API见source-interface.json，未来真实inputcontract/events/CPU/Root/独立审查均null。
++
++source-original/v1是先前v1目录的逐原件快照（包括当时审查与撤回原件）；minimal-delta包含v1→v2两个源码、README及source-interface的完整unified diff，full.diff不包含自引用manifest生成差异。source-manifest逐bytes/SHA覆盖本目录静态依赖。这里只AST解析/字节核对，无协议fixture、无真实event解析、无Docker/SSH/训练/模型/GPU/科学重跑/H/Git/文档更改；Root未来会在隔离CPU容器实际验证协议和既有event，这不能假称正式学生训练/交付已经完成。
++
++所有图表/报告仍仅是训练标量完整性和可视化；convergence、policy quality、完整官方流程、7PT、ONNX parity均false。armed paired学生交付门卫完全不动。

@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "status": "passed_readonly_static_protocol_host_driver_v2_review",
+  "reviewed_utc": "2026-10-13T05:25:43.010503+00:00",
+  "must_fix": [],
+  "source": {
+    "path": "outputs/research/official-full/student-final-learning-curves-protocol-preparation-01/run_owned_cpu_v2.py",
+    "bytes": 9855,
+    "sha256": "b46a7dfb1ce9b04e952ab1871d1a33296f48b64d6e43fc205bdf8c5164736f50"
+  },
+  "preserved_v1_source": {
+    "path": "outputs/research/official-full/student-final-learning-curves-protocol-preparation-01/run_owned_cpu.py",
+    "bytes": 9559,
+    "sha256": "391ba90980bac1b800e4469dffa6c020ada1540a940569a41f43edd18a6b02f8"
+  },
+  "preserved_v1_blocking_review": {
+    "path": "outputs/research/official-full/student-final-learning-curves-protocol-preparation-01/driver-review.json",
+    "bytes": 2038,
+    "sha256": "1add8bc7465479f90171bf2de5c111fabea2d25c08c1cf3e95cb3991310597dc"
+  },
+  "complete_v1_to_v2_delta": "--- run_owned_cpu.py\n+++ run_owned_cpu_v2.py\n@@ -113,17 +113,22 @@\n         with attached_out.open('xb') as stdout, attached_err.open('xb') as stderr:\n             process = subprocess.Popen(attached_argv, stdout=stdout, stderr=stderr)\n             report['attached_pid'] = process.pid\n-            for attempt in range(20):\n-                if process.poll() is not None:\n-                    break\n-                live = inspect('inspect-live-' + str(attempt))\n-                if live['State']['Running']:\n-                    report['observed_live'] = True\n-                    break\n-                time.sleep(0.1)\n-            report['attached_actual_wait'] = process.wait()\n-        report['commands'].append({'label': 'attached', 'argv': attached_argv,\n-            'actual_wait': report['attached_actual_wait'], 'stdout': fp(attached_out), 'stderr': fp(attached_err)})\n+            try:\n+                for attempt in range(20):\n+                    if process.poll() is not None:\n+                        break\n+                    live = inspect('inspect-live-' + str(attempt))\n+                    if live['State']['Running']:\n+                        report['observed_live'] = True\n+                        break\n+                    time.sleep(0.1)\n+            finally:\n+                # An inspection failure must still reap the process we own.\n+                # Preserve that failure; wait for natural exit without retry/kill.\n+                report['attached_actual_wait'] = process.wait()\n+                stdout.flush(); stderr.flush()\n+                report['commands'].append({'label': 'attached', 'argv': attached_argv,\n+                    'actual_wait': report['attached_actual_wait'], 'stdout': fp(attached_out), 'stderr': fp(attached_err)})\n         final = inspect('inspect-final')\n         require(report['attached_actual_wait'] == 0 and report['observed_live'] and\n             final['State']['Status'] == 'exited' and not final['State']['Running'] and\n",
+  "checks": {
+    "only_attached_child_try_finally_wait_recording_changed": true,
+    "Popen_success_always_natural_wait_before_inspect_error_returns_failed": true,
+    "actual_attached_rc_and_original_stdout_stderr_recorded_after_wait": true,
+    "original_inspect_exception_remains_failed_not_swallowed": true,
+    "no_kill_remove_restart_or_retry_added": true,
+    "same_fixed_single_phase_CPUimage_RO_inputs_fresh_RW_output_protocol_scope": true,
+    "AST_only_no_execution": true
+  },
+  "future_Root_isolated_CPU_single_phase_static_admissible": true,
+  "limits": [
+    "No host driver, Docker container, protocol fixture or teacher-event read was executed by this reviewer. Installed API and protocol behavior remain for the actual Root-owned CPU invocation.",
+    "The initial driver/source review are preserved. This v2 fixes the identified ordinary-exception path; it introduces no timeout/kill/remove or scientific control. Root must retain actual parent/phase waits and container terminal records.",
+    "No student training/scalar completion, quality, convergence or whole schedule is inferred."
+  ],
+  "driver_or_helper_executed": false,
+  "Docker_or_network_used": false,
+  "quality_verified": false,
+  "official_schedule_complete": false
+}

@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "status": "v1_future_execution_approval_withdrawn_pending_strict_TFRecord_integrity_v2",
+  "reviewed_utc": "2026-10-13T04:53:47.214898+00:00",
+  "original_static_review_preserved": {
+    "path": "outputs/research/official-full/student-final-learning-curves-source-preparation-01/cpu/independent-review.json",
+    "bytes": 4477,
+    "sha256": "d36423c17832441e9ff82f344de2ddbe303c2deb933e4ca465d03f4a9b747126"
+  },
+  "earlier_separate_blocker_preserved": {
+    "path": "outputs/research/official-full/student-final-learning-curves-source-preparation-01/cpu/independent-review-tfrecord-blocker.json",
+    "bytes": 2820,
+    "sha256": "e18a4276e64271d1feec35d3dfce435420115b7800732069757be8859e932af3"
+  },
+  "must_fix": [
+    {
+      "file": "extract_student_scalars.py",
+      "lines": [
+        160,
+        161
+      ],
+      "problem": "v1 calls EventAccumulator/Reload without independently requiring complete TFRecord framing, length CRC32C, data CRC32C and exact EOF. Upstream RawEventFileLoader treats DataLossError as end-of-stream, while the upstream compatible reader raises that error on truncated/CRC-invalid records. Consequently core step completeness alone is insufficient to establish complete event-file integrity: a damaged tail after all core samples may be silently ignored by such a loader. Before/after SHA establishes the same bytes, not valid record framing.",
+      "required_change": "New immutable v2 must validate every original event record with both masked CRC32C values, exact declared lengths/framing and complete EOF before extraction; fail closed with original event, offset and diagnostics. Plotting must require and bind the resulting full-event integrity proof."
+    }
+  ],
+  "upstream_source_references": [
+    {
+      "url": "https://raw.githubusercontent.com/tensorflow/tensorboard/master/tensorboard/backend/event_processing/event_file_loader.py",
+      "location": "Load()169–174",
+      "finding": "DataLossError is caught and iteration stops."
+    },
+    {
+      "url": "https://raw.githubusercontent.com/tensorflow/tensorboard/master/tensorboard/compat/tensorflow_stub/pywrap_tensorflow.py",
+      "location": "GetNext193–235",
+      "finding": "Truncation or CRC failure raises DataLossError."
+    },
+    {
+      "url": "https://www.tensorflow.org/tutorials/load_data/tfrecord",
+      "finding": "Official TFRecord framing and masked CRC32C description."
+    }
+  ],
+  "source_reference_provenance": {
+    "provided_by": "Root actual upstream-source review",
+    "root_source_review_tools": [
+      "889f6d",
+      "924eac"
+    ],
+    "root_web_outputs": [
+      "turn15view0",
+      "turn15view1",
+      "turn15view2"
+    ],
+    "reviewer_network_access": false,
+    "root_tool_receipts_independently_read_by_this_reviewer": false,
+    "source_branch": "upstream master, not a pinned2be image package read"
+  },
+  "claim_correction": "The earlier separate blocker basis called the inspected source installed. That word was inaccurate: Root inspected upstream master source, not these files inside pinned2be. This addendum corrects that attribution without changing the preserved earlier report. No claim of installed-image loader behavior or actual malformed-event acceptance is made.",
+  "evidence_boundary": "This is a static source/data-flow risk conclusion and required independent integrity gate, not an actual corrupted/truncated-event experiment. No helper, scientific import, event parse, Docker, network, test or model run was executed by this reviewer.",
+  "future_v1_execution_approved": false,
+  "future_v2_static_review_required": true,
+  "v1_source_and_manifest_unchanged": true,
+  "unaffected_actual_terminal_review": {
+    "path": "outputs/research/official-full/bounded-verified-wait-student-pure-20261013T042438Z/independent-terminal-review.json",
+    "sha256": "3d53b884e423ab2370d29b43cd1731e5bb28761db33eb62c09bdeb68e531ac4e"
+  },
+  "scientific_completion_verified": false,
+  "quality_verified": false,
+  "official_schedule_complete": false
+}

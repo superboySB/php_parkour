@@ -1,0 +1,386 @@
+--- cpu-v1/extract_student_scalars.py
++++ cpu-v2/extract_student_scalars.py
+@@ -12,6 +12,7 @@
+ from pathlib import Path, PurePosixPath
+ import re
+ import stat
++import struct
+ 
+ TARGETS = {'pure': 10000, 'finetune': 30000}
+ CORE_TAGS = {
+@@ -21,6 +22,7 @@
+                  'Loss/behavior', 'Loss/entropy_mean', 'Loss/mean_kl'),
+ }
+ CONDITIONAL_TAGS = ('Train/mean_reward', 'Train/mean_episode_length', 'Loss/ppo_gate_mean')
++MAX_EVENT_RECORD_BYTES = 64 * 1024 * 1024
+ FALSE_FLAGS = {key: False for key in ('quality_verified', 'convergence_verified',
+     'official_schedule_complete', 'seven_PT_acceptance_verified', 'pt_onnx_numerical_parity_verified')}
+ 
+@@ -143,6 +145,93 @@
+         'all_finite': finite, 'required_core': required}
+ 
+ 
++def masked_crc32c(crc):
++    crc &= 0xffffffff
++    return (((crc >> 15) | ((crc << 17) & 0xffffffff)) + 0xa282ead8) & 0xffffffff
++
++
++def verify_tfrecord(event_fp, crc_update):
++    """Strict whole-file framing check; injectable CRC updater for CPU protocol fixtures."""
++    result = {'status': 'running', 'format': 'TFRecord', 'expected_file': event_fp,
++        'records': 0, 'bytes': 0, 'complete_eof': False, 'crc32c_verified': False,
++        'max_record_bytes': MAX_EVENT_RECORD_BYTES, 'largest_record_bytes': 0, 'diagnostics': []}
++    digest, offset, record_offset = hashlib.sha256(), 0, 0
++
++    def problem(code, failure_offset, **details):
++        result['diagnostics'].append(dict(problem=code, offset=failure_offset,
++            record_index=result['records'], record_offset=record_offset, **details))
++        raise ValueError(code + ' at byte ' + str(failure_offset))
++
++    try:
++        path = regular(event_fp['path'])
++        before = path.stat()
++        with path.open('rb') as stream:
++            def take(length):
++                nonlocal offset
++                chunks, remaining = [], length
++                while remaining:
++                    chunk = stream.read(remaining)
++                    if not chunk:
++                        break
++                    digest.update(chunk); offset += len(chunk)
++                    chunks.append(chunk); remaining -= len(chunk)
++                return b''.join(chunks)
++
++            while True:
++                record_offset = offset
++                length_bytes = take(8)
++                if not length_bytes:
++                    result['complete_eof'] = True
++                    break
++                if len(length_bytes) != 8:
++                    problem('truncated_length_header', record_offset, expected_bytes=8, actual_bytes=len(length_bytes))
++                length_crc = take(4)
++                if len(length_crc) != 4:
++                    problem('truncated_length_crc', record_offset + 8, expected_bytes=4, actual_bytes=len(length_crc))
++                stored = struct.unpack('<I', length_crc)[0]
++                calculated = masked_crc32c(crc_update(0, length_bytes))
++                if stored != calculated:
++                    problem('length_crc_mismatch', record_offset + 8, stored_crc=stored, calculated_crc=calculated)
++                length = struct.unpack('<Q', length_bytes)[0]
++                if length > MAX_EVENT_RECORD_BYTES or length > event_fp['bytes']:
++                    problem('record_length_exceeds_bound', record_offset, declared_length=length,
++                        maximum=MAX_EVENT_RECORD_BYTES, original_file_bytes=event_fp['bytes'])
++                remaining, crc = length, 0
++                while remaining:
++                    start = offset
++                    expected = min(remaining, 1048576)
++                    chunk = take(expected)
++                    if len(chunk) != expected:
++                        problem('truncated_payload', start, expected_bytes=expected, actual_bytes=len(chunk), declared_length=length)
++                    crc = crc_update(crc, chunk)
++                    remaining -= len(chunk)
++                crc_offset = offset
++                payload_crc = take(4)
++                if len(payload_crc) != 4:
++                    problem('truncated_payload_crc', crc_offset, expected_bytes=4, actual_bytes=len(payload_crc), declared_length=length)
++                stored, calculated = struct.unpack('<I', payload_crc)[0], masked_crc32c(crc)
++                if stored != calculated:
++                    problem('payload_crc_mismatch', crc_offset, stored_crc=stored, calculated_crc=calculated, declared_length=length)
++                result['records'] += 1
++                result['largest_record_bytes'] = max(result['largest_record_bytes'], length)
++        after = path.stat()
++        identity = lambda s: (s.st_dev, s.st_ino, s.st_size, s.st_mtime_ns, s.st_ctime_ns)
++        actual = {'path': str(path), 'bytes': offset, 'sha256': digest.hexdigest()}
++        if identity(before) != identity(after) or actual != event_fp:
++            problem('event_changed_or_whole_file_identity_mismatch', offset, actual_file=actual)
++        if not result['records']:
++            problem('no_complete_tfrecords', 0)
++        result.update(status='passed', bytes=offset, sha256=digest.hexdigest(), crc32c_verified=True)
++    except Exception as error:
++        if not result['diagnostics']:
++            result['diagnostics'].append({'problem': 'tfrecord_read_or_crc_error', 'offset': offset,
++                'record_index': result['records'], 'record_offset': record_offset,
++                'error': type(error).__name__ + ': ' + str(error)})
++        result.update(status='failed', bytes=offset, read_sha256=digest.hexdigest(),
++            error=type(error).__name__ + ': ' + str(error))
++    return result
++
++
+ def extract(report, contract, manifest, inputs):
+     kind, target = contract['kind'], TARGETS[contract['kind']]
+     report.update(kind=kind, stage='student-' + kind, target_iterations=target,
+@@ -150,11 +239,21 @@
+         native_terminal={key: manifest[key] for key in ('label', 'profile', 'status', 'returncode',
+             'checkpoint', 'checkpoint_iteration', 'checkpoint_sha256', 'finished_utc')},
+         run_directory=contract['run_directory'], native_run_directory=contract['native_run_directory'],
+-        required_core_tags=list(CORE_TAGS[kind]), events=[], scalars={}, tag_coverage={})
++        required_core_tags=list(CORE_TAGS[kind]), events=[], scalars={}, tag_coverage={}, event_integrity_complete=False)
+     from tensorboard.backend.event_processing.event_accumulator import EventAccumulator
++    from tensorboard.compat.tensorflow_stub import pywrap_tensorflow
++    report['event_integrity_checker'] = {'algorithm': 'TFRecord little-endian length/header/body masked CRC32C and exact whole-file EOF',
++        'crc_update_source': fingerprint(Path(pywrap_tensorflow.__file__).absolute()),
++        'max_record_bytes': MAX_EVENT_RECORD_BYTES, 'payload_chunk_bytes': 1048576}
+     for event, event_fp in zip(contract['events'], inputs[2:]):
+         record = dict(event_fp, native_path=event['native_path'], scalar_tags=[], parsed_scalar_samples=0)
+         report['events'].append(record)
++        integrity = verify_tfrecord(event_fp, pywrap_tensorflow.crc_update)
++        record['tfrecord_integrity'] = integrity
++        if integrity['status'] != 'passed':
++            report['diagnostics'].append({'problem': 'event_tfrecord_integrity_failed', 'path': event['path'],
++                'details': integrity['diagnostics']})
++            continue
+         try:
+             # Per-file loading plus disabled restart purge preserves original duplicates.
+             accumulator = EventAccumulator(event['path'], size_guidance={'scalars': 0}, purge_orphaned_data=False)
+@@ -187,6 +286,9 @@
+         require(fingerprint(original['path']) == original, 'Original input changed during extraction')
+     require(event_file_set(contract['run_directory']) == sorted(event['path'] for event in contract['events']), 'Event file-set changed during extraction')
+     report['input_files_unchanged'] = True
++    report['event_integrity_complete'] = (len(report['events']) == len(contract['events'])
++        and all(event['tfrecord_integrity']['status'] == 'passed' for event in report['events']))
++    require(report['event_integrity_complete'], 'Whole-file event integrity failed; exact offsets retained')
+     report['training_scalar_integrity_complete'] = not report['diagnostics']
+     report['conditional_tag_scope'] = 'Reward/episode tags are conditional; ppo_gate_mean is emitted only by the PPO update branch. Actual coverage/duplicates remain unmodified.'
+     report['raw_numeric_encoding'] = 'Nonfinite values are recorded as null plus their original repr and diagnostics; original event bytes remain the authoritative source.'
+--- cpu-v1/plot_student_learning_curves.py
++++ cpu-v2/plot_student_learning_curves.py
+@@ -98,6 +98,7 @@
+     kind = payload.get('kind')
+     require(kind in TARGETS and type(payload.get('schema_version')) is int and payload['schema_version'] == 1
+         and payload.get('phase') == 'student_training_scalars' and payload.get('status') == 'passed'
++        and payload.get('event_integrity_complete') is True
+         and payload.get('training_scalar_integrity_complete') is True and payload.get('input_files_unchanged') is True
+         and payload.get('stage') == 'student-' + kind and payload.get('target_iterations') == TARGETS[kind]
+         and payload.get('diagnostics') == [] and all(payload.get(key) is False for key in FALSE_FLAGS), 'Actual completed student scalar integrity report required')
+@@ -107,6 +108,15 @@
+     require(len(inputs) >= 3 and len({row['path'] for row in inputs}) == len(inputs)
+         and inputs[0] == payload['input_contract'] and inputs[1] == payload['native_manifest'], 'Extractor input contract/manifest inventory differs')
+     require(inputs[2:] == [{key: event[key] for key in ('path', 'bytes', 'sha256')} for event in payload['events']], 'Event inventory differs')
++    for event in payload['events']:
++        integrity = event.get('tfrecord_integrity', {})
++        expected = {key: event[key] for key in ('path', 'bytes', 'sha256')}
++        require(integrity.get('status') == 'passed' and integrity.get('format') == 'TFRecord'
++            and integrity.get('expected_file') == expected and integrity.get('bytes') == event['bytes']
++            and integrity.get('sha256') == event['sha256'] and type(integrity.get('records')) is int
++            and integrity['records'] > 0 and integrity.get('complete_eof') is True
++            and integrity.get('crc32c_verified') is True and integrity.get('diagnostics') == [],
++            'Each whole original event must pass framing/CRC/EOF before plotting')
+     for row in [*inputs, payload['extractor_source']]:
+         require(fingerprint(row['path']) == row, 'Original extractor/input changed before plotting')
+     scalars, coverage = payload['scalars'], payload['tag_coverage']
+@@ -130,6 +140,7 @@
+         'kind': kind, 'stage': payload['stage'], 'target_iterations': target,
+         'input': input_fp, 'plot_source': source, 'input_contract': payload['input_contract'],
+         'native_manifest': payload['native_manifest'], 'events': payload['events'],
++        'event_integrity_complete': True, 'event_integrity_checker': payload['event_integrity_checker'],
+         'input_files': [*inputs, input_fp], 'input_files_unchanged': False,
+         'tags': [dict({'tag': tag}, **coverage[tag]) for tag in plotted], 'figures': [],
+         'unplotted_actual_tags': sorted(set(scalars) - set(plotted)),
+--- cpu-v1/source-interface.json
++++ cpu-v2/source-interface.json
+@@ -1,40 +1,40 @@
+ {
+   "schema_version": 1,
+-  "status": "source_only_prepared_not_executed",
+-  "prepared_utc": "2026-10-13T04:44:21.892748+00:00",
++  "status": "source_only_v2_prepared_not_executed_pending_review",
++  "prepared_utc": "2026-10-13T04:58:33.684417+00:00",
+   "source_bindings": [
+     {
+       "origin": {
+-        "path": "outputs/research/official-full/teacher-high-climb-76-final-cpu-01/source/accept_teacher.py",
+-        "bytes": 19016,
+-        "sha256": "3023998a5e449cc7943f9d4e3c44d463f6780d1dd50465ea2961e3fb2d2ed062"
++        "path": "outputs/research/official-full/student-final-learning-curves-source-preparation-01/cpu/extract_student_scalars.py",
++        "bytes": 13404,
++        "sha256": "d25623f96926013aaf0d82cbb6131f477db47818b7f8791339c9461c14950cc0"
+       },
+       "frozen_original": {
+-        "path": "source-original/accept_teacher.py",
+-        "bytes": 19016,
+-        "sha256": "3023998a5e449cc7943f9d4e3c44d463f6780d1dd50465ea2961e3fb2d2ed062"
++        "path": "source-original/v1/extract_student_scalars.py",
++        "bytes": 13404,
++        "sha256": "d25623f96926013aaf0d82cbb6131f477db47818b7f8791339c9461c14950cc0"
+       },
+       "new": {
+         "path": "extract_student_scalars.py",
+-        "bytes": 13404,
+-        "sha256": "d25623f96926013aaf0d82cbb6131f477db47818b7f8791339c9461c14950cc0"
++        "bytes": 19320,
++        "sha256": "e8bf7156013e7c31200ab39c9511020ed17c2e6726d79bc368939b44b5507b12"
+       }
+     },
+     {
+       "origin": {
+-        "path": "outputs/research/official-full/teacher-high-climb-76-final-cpu-01/source/plot_learning_curves.py",
+-        "bytes": 7399,
+-        "sha256": "887ba33796d7395719b97bfaf8cb879d47ec45265515ef669c7245deec7fc554"
++        "path": "outputs/research/official-full/student-final-learning-curves-source-preparation-01/cpu/plot_student_learning_curves.py",
++        "bytes": 11373,
++        "sha256": "3915d8a7d7e1323f15e5986e1d193f12d2f766526599d41220469e64579974f1"
+       },
+       "frozen_original": {
+-        "path": "source-original/plot_learning_curves.py",
+-        "bytes": 7399,
+-        "sha256": "887ba33796d7395719b97bfaf8cb879d47ec45265515ef669c7245deec7fc554"
++        "path": "source-original/v1/plot_student_learning_curves.py",
++        "bytes": 11373,
++        "sha256": "3915d8a7d7e1323f15e5986e1d193f12d2f766526599d41220469e64579974f1"
+       },
+       "new": {
+         "path": "plot_student_learning_curves.py",
+-        "bytes": 11373,
+-        "sha256": "3915d8a7d7e1323f15e5986e1d193f12d2f766526599d41220469e64579974f1"
++        "bytes": 12268,
++        "sha256": "6a14cfa86df96199e575384c48466d44046b1a2fad8ce76c1427b7d5add7abd0"
+       }
+     }
+   ],
+@@ -146,7 +146,22 @@
+       "Loss/ppo_gate_mean"
+     ],
+     "conditional_integrity": "Actual samples/missing/duplicates/out-of-order retained; no synthesized samples; any nonfinite actual scalar still fails",
+-    "plotting": "Core+reward/episode and fine conditional PPO gate panels; actual raw points; moving averages restart at any gap/duplicate/decrease; all other actual tags remain in full scalars.json and unplotted_actual_tags"
++    "plotting": "Core+reward/episode and fine conditional PPO gate panels; actual raw points; moving averages restart at any gap/duplicate/decrease; all other actual tags remain in full scalars.json and unplotted_actual_tags",
++    "tfrecord_protocol": {
++      "function": "verify_tfrecord(event_fp, crc_update)",
++      "scope": "Strict whole-file preflight before EventAccumulator; CPU protocol fixtures may call this explicit function with the actual installed CRC updater after review",
++      "framing": [
++        "8-byte little-endian length",
++        "4-byte masked CRC32C of length",
++        "length bytes of payload, read in <=1048576-byte chunks with incremental CRC32C",
++        "4-byte masked CRC32C of payload",
++        "exact record boundary EOF"
++      ],
++      "record_payload_limit_bytes": 67108864,
++      "file_identity": "Every consumed original byte also feeds SHA256; complete count/SHA equals inputeventfp, stat dev/inode/size/mtime/ctime before-after stable",
++      "failure": "Any truncation, CRC mismatch, bound violation, incomplete EOF, I/O error or file identity change yields failed with byte offset/record index/record start; this event is not passed to EA. No early good prefix accepted.",
++      "implementation": "Reuse tensorboard.compat.tensorflow_stub.pywrap_tensorflow.crc_update only after CPU Docker guard; standard uint32 mask is explicit in this source, no extra dependency."
++    }
+   },
+   "report_contract": {
+     "extract": {
+@@ -169,7 +184,9 @@
+         "tag_coverage",
+         "training_scalar_integrity_complete",
+         "diagnostics",
+-        "input_files_unchanged"
++        "input_files_unchanged",
++        "event_integrity_complete",
++        "event_integrity_checker"
+       ],
+       "scalar_row": [
+         "step",
+@@ -190,7 +207,20 @@
+         "out_of_order",
+         "all_finite",
+         "required_core"
+-      ]
++      ],
++      "per_event_integrity": {
++        "status": "passed only after strict whole-file check",
++        "format": "TFRecord",
++        "expected_file": "same original event {path,bytes,sha256}",
++        "records": "positive integer",
++        "bytes": "whole original byte count",
++        "sha256": "whole original SHA256",
++        "complete_eof": true,
++        "crc32c_verified": true,
++        "max_record_bytes": 67108864,
++        "largest_record_bytes": "actual largest payload",
++        "diagnostics": "[] on pass; exact offset+record_index+record_offset details on failure"
++      }
+     },
+     "plot": {
+       "path": "/validation/plots/plot-report.json",
+@@ -209,7 +239,9 @@
+         "events",
+         "input_files",
+         "input_files_unchanged",
+-        "unplotted_actual_tags"
++        "unplotted_actual_tags",
++        "event_integrity_complete",
++        "event_integrity_checker"
+       ],
+       "figures": [
+         "/validation/plots/learning-curves.png",
+@@ -224,9 +256,11 @@
+     "actual_phase_exits": null,
+     "actual_Root_review": null,
+     "actual_independent_review": null,
+-    "execution_plan": "Root separately owns actual two-phase isolated CPU lifecycle and proof; source preparation is not execution evidence",
++    "execution_plan": "Root separately owns future actual protocol CPU fixtures/real existing-event check, then actual two-phase student extraction/plot lifecycle; all remain unexecuted here",
+     "expected_image": "sha256:2be18521015b2a84ef7a4442af9a94ef041a19feb9ce385ae15424b1dc158d8f",
+-    "isolation": "runc/networknone/GPUhidden; source/control/events RO and new validation RW; actual Docker inspect and source/input beforeafter must be bound by later Root execution/acceptance contract"
++    "isolation": "runc/networknone/GPUhidden; source/control/events RO and new validation RW; actual Docker inspect and source/input beforeafter must be bound by later Root execution/acceptance contract",
++    "actual_protocol_fixtures": null,
++    "actual_existing_event_verification": null
+   },
+   "limits": {
+     "imported_new_helpers": false,
+@@ -240,5 +274,32 @@
+     "official_schedule_complete": false,
+     "seven_PT_acceptance_verified": false,
+     "pt_onnx_numerical_parity_verified": false
+-  }
++  },
++  "version1": {
++    "source_manifest": {
++      "path": "outputs/research/official-full/student-final-learning-curves-source-preparation-01/cpu/source-manifest.json",
++      "bytes": 1727,
++      "sha256": "e32f98c60783903dabac9744a64a99f9be7fe78578db65e5c8b2ff9152c36d83"
++    },
++    "execution_approval": "withdrawn_due_to_EA_DataLoss_truncated_or_bad_CRC_tail_gap; original review preserved",
++    "withdrawal_addendum": {
++      "path": "source-original/v1/independent-review-addendum-01.json",
++      "bytes": 4040,
++      "sha256": "ff47ec4b7583ac508fd3a301a76d9175a9a80919b131a332630514656a21e7ce"
++    }
++  },
++  "protocol_sources": [
++    {
++      "url": "https://www.tensorflow.org/tutorials/load_data/tfrecord",
++      "scope": "Official framing/masked CRC32C reference; website version not pinned to the runtime image"
++    },
++    {
++      "url": "https://raw.githubusercontent.com/tensorflow/tensorboard/master/tensorboard/compat/tensorflow_stub/pywrap_tensorflow.py",
++      "scope": "Upstream master incremental crc_update and masking semantics; actual installed module fingerprint recorded only at future CPU execution"
++    },
++    {
++      "url": "https://raw.githubusercontent.com/tensorflow/tensorboard/master/tensorboard/backend/event_processing/event_file_loader.py",
++      "scope": "Upstream master RawEventFileLoader can stop on DataLossError; not an actual bad-event experiment or pinned-image inspection"
++    }
++  ]
+ }
+--- cpu-v1/README.md
++++ cpu-v2/README.md
+@@ -1,13 +1,20 @@
+-本目录仅为正式学生完整训练标量/曲线提供可审查 CPU 源码。没有实际事件、终态绑定、提取报告、图片、容器或通过结论；只做 AST 解析，未 import/执行两入口或科学包。future actual 路径和 SHA 在 source-interface.json 中为 null/类型说明，不能充作实际 input-contract。
++本目录是 student-final learning curves 的 CPU v2 源准备，尚待 Root/独立静态审查及未来真实 CPU 协议验证，未执行、未 import 新helper或科学包，未解析事件。cpu/ 原 v1 两源码及其全部历史原件保持不变；v1 初始审查结论因 EA 可吞掉坏尾部 DataLossError 的缺口已撤回未来执行批准，撤回addendum原字节保存在source-original/v1/。不能称v1已批准或v2运行通过。
+ 
+-extract_student_scalars.py 接受 --contract /control/input-contract.json --contract-sha256 <实际SHA> --output /validation/scalars.json。contract 精确字段见 source-interface.json：kind、原 native_manifest 指纹、native_run_directory、CPU run_directory 和 events 各原路径/bytes/SHA。native manifest 必须是该学生官方 passed / integer0 / 最终 iteration9999或29999，checkpoint.parent 与全部原 event basename 绑定同run。run_directory 必须是只读 /artifacts 映射，全部 events.out.tfevents.* 的实际集合必须与合同完全一致，不能漏掉第二个事件或把其它run混入。input-contract/native manifest/events/源码逐字节核验并在后验重核；Root未来另保存远端真实出处/稳定性及实际Docker执行证据，本文不代替这些证明。
++v2只增加完整 TFRecord framing/CRC/EOF 门卫和plot对应门卫，原kind/target/core tags、无purge多event提取、nonfinite合法JSON诊断、conditional reward/PPO-gate真覆盖与未来CLI均保持：
+ 
+-逐文件 EventAccumulator(size_guidance={'scalars':0}, purge_orphaned_data=False) 保留原重启/重复记录。纯学生要求 Loss/behavior、Loss/warmup_active 实际精确0..9999；fine要求两update分支共同输出的九个Loss标签实际精确0..29999（完整列表在源码/接口）。任何核心缺步、重复、越界、顺序异常、非finite不能passed。所有实际scalar tags及原row来源保留，不重命名，不去重，不补步。非finite写null和原repr+定位diagnostics，failed报告仍是allow_nan=False合法JSON；原events仍为权威原件。
++```text
++/opt/php/bin/train-python -B /code/extract_student_scalars.py --contract /control/input-contract.json --contract-sha256 <实际SHA> --output /validation/scalars.json
++/opt/php/bin/train-python -B /code/plot_student_learning_curves.py --input /validation/scalars.json --input-sha256 <实际提取报告SHA> --output /validation/plots
++```
+ 
+-Train/mean_reward、Train/mean_episode_length 条件写入，Loss/ppo_gate_mean仅PPO update分支输出；都记录真实覆盖、缺失、重复及顺序，缺样本不补齐。其它实际tags同样完整保留。任何tag的实际非finite仍拒绝通过。报告逐row保留source_event/event_sample_index，多文件按合同声明顺序读取；若核心原序列不能精确达到0..target-1则保留原问题并failed，不能重排/删旧event来获得passed。
++每原event先由 verify_tfrecord(event_fp, crc_update) 严格读到完整EOF：header为little-endian uint64 length，紧随4-byte masked CRC32C；然后读取完整body和4-byte masked body CRC32C。payload每次最多1MiB，逐块增量CRC/SHA，不把声明的大长度一次读入RAM；单record payload上限64MiB，声明长度也不能大于原文件bytes。任一短header/短CRC/短body、错误CRC、长度越界、额外坏尾、I/O错误、整文件SHA/bytes或stat变化均failed并保留准确byte offset/record_index/record_offset诊断；不会只采纳已经齐全的core前缀或EA warning。EOF必须正好落在完整record边界且至少有一条完整记录。
+ 
+-plot_student_learning_curves.py 接受 --input /validation/scalars.json --input-sha256 <实际提取报告SHA> --output /validation/plots [--window 25]，再次核精确核心序列、所有绑定输入/源码，输出 learning-curves.png、learning-curves.svg、plot-report.json。原采样点全部保留；均值线在缺步/重复/倒序处分段，绝不插值或跨缺失平滑。图包含核心loss、reward/episode及fine条件PPO gate；其余实际tags保留在完整scalars.json并以unplotted_actual_tags明示。
++CRC updater取自已有TensorBoard compat包，import发生在CPU Docker guard之后；mask公式由本源显式给出。未来实际报告记录安装模块文件指纹（event_integrity_checker.crc_update_source），该模块是固定Docker镜像的运行依赖，不是捏造的本次host安装验证。协议依据：[TensorFlow TFRecord格式](https://www.tensorflow.org/tutorials/load_data/tfrecord)、[TensorBoard compat CRC源码](https://raw.githubusercontent.com/tensorflow/tensorboard/master/tensorboard/compat/tensorflow_stub/pywrap_tensorflow.py)。这些upstream master引用只说明协议/故障语义，没有冒充已固定运行镜像版本或实际坏样本测试。
+ 
+-future Root执行器需另提供两phase实际wait0、正确image/runc/networknone/GPUhidden、原始start/finalinspect及自然stop0、源/输入前后相同、独立后验。两脚本在CPU Docker guard之后才导入TensorBoard/Matplotlib，不依赖host科学包。提取器只验标量完整性，绘图器只可视化这些实际值；quality/convergence/whole schedule/7PT/ONNX parity全部false。图或loss下降不能代替学生技能、58/1258物理case或全部官方流程验收。
++只有event完整性通过才逐file EventAccumulator(size_guidance={'scalars':0}, purge_orphaned_data=False)；不purge、不去重、不补步。纯核心Loss/behavior、Loss/warmup_active要求精确0..9999；fine九个共同核心Loss要求精确0..29999。所有实际scalar tags原row和来源保留，核心重复/缺步/越界/乱序及任一tag非finite不能passed。nonfinite原值写null+原repr+定位diagnostics，allow_nan=False合法failed报告。reward/episode、分支条件ppo_gate_mean仅报告真实覆盖/缺失/重复，不能硬补成target条数或称技能质量。
+ 
+-source-original保留已完成教师五阶段验收的直接原始accept_teacher.py与plot_learning_curves.py；minimal-delta保存两份完整unified diff及full.diff。新源删除教师PT/单ONNX/PPO配置验收功能，只保留并加强学生事件和曲线所需逻辑；native算法/模型/训练不改。原teacher文件、armed paired gate、H、项目docs/README/Git及正在运行的任务均不动。无科学重跑、网络或Docker操作。实际报告可较大，未来publication需将大JSON和event一同保真分块，不能丢原rows。
++scalars.json新增顶层event_integrity_complete和event_integrity_checker；每events[].tfrecord_integrity必须是passed/TFRecord、原expected_file、整bytes/SHA一致、正records、complete_eof=true、crc32c_verified=true、diagnostics=[]。失败事件保留已检查bytes/read_sha256及准确offset诊断，不称整体SHA完整通过。plotter逐event核这些字段后才写图；plot报告同时保留完整性结果。PNG/SVG、report路径及其它API见source-interface.json，未来真实inputcontract/events/CPU/Root/独立审查均null。
++
++source-original/v1是先前v1目录的逐原件快照（包括当时审查与撤回原件）；minimal-delta包含v1→v2两个源码、README及source-interface的完整unified diff，full.diff不包含自引用manifest生成差异。source-manifest逐bytes/SHA覆盖本目录静态依赖。这里只AST解析/字节核对，无协议fixture、无真实event解析、无Docker/SSH/训练/模型/GPU/科学重跑/H/Git/文档更改；Root未来会在隔离CPU容器实际验证协议和既有event，这不能假称正式学生训练/交付已经完成。
++
++所有图表/报告仍仅是训练标量完整性和可视化；convergence、policy quality、完整官方流程、7PT、ONNX parity均false。armed paired学生交付门卫完全不动。

@@ -1,0 +1,495 @@
+--- teacher-high-climb-76-final-cpu-01/source/accept_teacher.py
++++ student-final-learning-curves-source-preparation-01/cpu/extract_student_scalars.py
+@@ -1,290 +1,230 @@
+ #!/usr/bin/env python3
+-"""One completed high-climb-76 teacher: CPU checkpoint, scalar and ONNX binding.
+-
+-Execute each phase inside the unified research Docker. This does not run Isaac,
+-train, evaluate policy quality, or assert PT/ONNX numerical parity.
+-"""
++"""Read SHA-bound completed student TensorBoard events in CPU Docker only."""
+ from __future__ import annotations
+ 
+ import argparse
+-import copy
++from collections import Counter
+ import datetime as dt
+ import hashlib
+ import json
+ import math
+-from pathlib import Path
+-
+-ITERATION = 19999
+-TAGS = ('Train/mean_reward', 'Loss/Value', 'Loss/Surrogate', 'Loss/Entropy')
+-ARTIFACTS = {
+-    'model_19999.pt': (10345023, '654ba5619704da6b3d8a8f8f7b1ee60ab8d8a73efafc660f6706eb11f89f9e0e'),
+-    'model_19999.onnx': (420849957, 'b832ec0ddd4bf653d9dbc2de8657f5fe964a7a6bc9ae66b19a7bc955f68f44fc'),
+-    'holosoma_config.yaml': (30959, '7e5cc048dc2eaa24b13d24393abc1bbd2e911f4ebdde22262124850a8ba7f58a'),
+-    'events.out.tfevents.1791793401.pro5000-6.135317.0': (72561360, 'ca8621a8c9919f27c3bfd0e397ba4d425f3eb5904ed0f797e5eed5b6b6cd0478'),
+-    'model_00000.pt': (10345023, '40ae6c62cb29739a7bf5f12b62e41f152089940ca44470557f8ac6f202372736'),
++import os
++from pathlib import Path, PurePosixPath
++import re
++import stat
++
++TARGETS = {'pure': 10000, 'finetune': 30000}
++CORE_TAGS = {
++    'pure': ('Loss/behavior', 'Loss/warmup_active'),
++    'finetune': ('Loss/ppo_coef', 'Loss/warmup_active', 'Loss/learning_rate',
++                 'Loss/total_loss', 'Loss/surrogate_loss', 'Loss/value_loss',
++                 'Loss/behavior', 'Loss/entropy_mean', 'Loss/mean_kl'),
+ }
+-
+-
+-def require(value, message):
+-    if not value:
++CONDITIONAL_TAGS = ('Train/mean_reward', 'Train/mean_episode_length', 'Loss/ppo_gate_mean')
++FALSE_FLAGS = {key: False for key in ('quality_verified', 'convergence_verified',
++    'official_schedule_complete', 'seven_PT_acceptance_verified', 'pt_onnx_numerical_parity_verified')}
++
++
++def require(condition, message):
++    if not condition:
+         raise ValueError(message)
+ 
+ 
+-def fingerprint(path):
+-    path = Path(path).absolute()
+-    require(path.is_file() and not any(p.is_symlink() for p in (path, *path.parents)), 'Regular nonsymlink input required: ' + str(path))
+-    digest = hashlib.sha256()
++def strict_json(raw):
++    def pairs(items):
++        result = {}
++        for key, value in items:
++            require(key not in result, 'Duplicate JSON key: ' + key)
++            result[key] = value
++        return result
++    return json.loads(raw, object_pairs_hook=pairs,
++        parse_constant=lambda value: (_ for _ in ()).throw(ValueError('Nonfinite JSON: ' + value)))
++
++
++def regular(path):
++    path = Path(path)
++    require(path.is_absolute() and '..' not in path.parts, 'Absolute normalized input path required')
++    require(not any(p.is_symlink() for p in (path, *path.parents)), 'Input has a symlink component')
++    require(stat.S_ISREG(path.stat().st_mode), 'Regular input required: ' + str(path))
++    return path
++
++
++def fingerprint(path, raw=False):
++    path = regular(path)
++    before = path.stat()
++    digest, chunks = hashlib.sha256(), []
+     with path.open('rb') as stream:
+-        for block in iter(lambda: stream.read(8 * 1024 * 1024), b''):
+-            digest.update(block)
+-    return {'path': str(path), 'bytes': path.stat().st_size, 'sha256': digest.hexdigest()}
+-
+-
+-def artifact(directory, name):
+-    row = fingerprint(directory / name)
+-    size, sha = ARTIFACTS[name]
+-    require((row['bytes'], row['sha256']) == (size, sha), 'Artifact differs from actual completed cloud teacher: ' + name)
+-    return row
+-
+-
+-def read(path):
+-    return json.loads(Path(path).read_text(), parse_constant=lambda token: (_ for _ in ()).throw(ValueError('Nonfinite report JSON: ' + token)))
+-
+-
+-def check_unchanged(records):
+-    for row in records:
+-        require(fingerprint(row['path']) == row, 'Input changed during CPU acceptance: ' + row['path'])
+-
+-
+-def resolved_yaml_contract(yaml_config, saved_config):
+-    """Only the native PPOActor._process_module_config symbolic replacement."""
+-    path = '$.algo.config.module_dict.actor.output_dim'
+-    require(yaml_config['algo']['config']['module_dict']['actor']['output_dim'] == ['robot_action_dim']
+-            and saved_config['algo']['config']['module_dict']['actor']['output_dim'] == [29]
+-            and type(saved_config['algo']['config']['module_dict']['actor']['output_dim'][0]) is int,
+-            'Expected exact documented actor output_dim symbolic resolution')
+-    resolved = copy.deepcopy(yaml_config)
+-    resolved['algo']['config']['module_dict']['actor']['output_dim'] = [29]
+-    require(resolved == saved_config, 'PT config differs after the sole documented output_dim resolution; no other difference allowed')
+-    require(yaml_config != saved_config, 'This cohort must preserve the observed raw YAML/PT output_dim difference')
+-    return {'path': path, 'raw_yaml_value': ['robot_action_dim'], 'saved_pt_value': [29],
+-            'source': 'thirdparty/holosoma/src/holosoma/holosoma/agents/modules/ppo_modules.py:40-43 PPOActor._process_module_config',
+-            'scope': 'Single documented runtime output_dim resolution; all other configuration fields exactly equal'}
+-
+-
+-def config_contract(config):
+-    training, algo = config['training'], config['algo']
+-    cfg = algo['config']
+-    actor = config['observation']['groups']['actor_obs']
+-    control = config['robot']['control']
+-    expected_terms = {'actions', 'base_ang_vel', 'base_lin_vel', 'dof_pos', 'dof_vel',
+-                      'height_scan', 'motion_command', 'motion_ref_ori_b', 'motion_ref_pos_b'}
+-    require(training['num_envs'] == 4096 and training['seed'] == 42
+-            and training['name'] == 'teacher-high-climb-76'
+-            and training['registry_name'] == 'file:///data/assets/motions-high-climb-76', 'Official training identity differs')
+-    kwargs = training['preprocess_hook_kwargs']
+-    if isinstance(kwargs, str):
+-        kwargs = json.loads(kwargs)
+-    require(training['preprocess_hook'] == 'wbt_training.config_values.terrain:apply_terrain_preprocess'
+-            and kwargs == {'num_variants': 64, 'add_onpath_obstacle': True, 'obstacle_seed': 42}, 'Official terrain preprocessing differs')
+-    require(algo['_target_'] == 'holosoma.agents.ppo.ppo.PPO'
+-            and all(cfg[key] == value for key, value in {'num_learning_iterations': 20000, 'save_interval': 500,
+-                'num_steps_per_env': 24, 'num_mini_batches': 4, 'num_learning_epochs': 5}.items())
+-            and cfg['empirical_normalization'] is False, 'Official PPO schedule differs')
+-    require(set(actor['terms']) == expected_terms and actor['history_length'] == 1
+-            and control['action_scale'] == 1.0
+-            and control['action_scales_by_effort_limit_over_p_gain'] is False, 'Heightscan actor or action scaling differs')
+-    return {'algorithm': algo['_target_'], 'num_envs': 4096, 'seed': 42, 'registry': training['registry_name'],
+-            'preprocessing': kwargs, 'learning_iterations': 20000, 'save_interval': 500,
+-            'steps_per_env': 24, 'mini_batches': 4, 'epochs': 5, 'empirical_normalization': False,
+-            'actor_terms': sorted(expected_terms), 'actor_history': 1, 'actor_observation_dim': 449,
+-            'critic_observation_dim': 575, 'actions_dim': 29, 'action_scale': 1.0,
+-            'action_scales_by_effort_limit_over_p_gain': False}
+-
+-
+-def tensor_inventory(value, torch, path='$'):
+-    """Check every Tensor, while allowing legal scalar infinity in config bounds."""
+-    if isinstance(value, torch.Tensor):
+-        require(torch.isfinite(value).all().item(), 'Nonfinite checkpoint Tensor: ' + path)
+-        return [{'path': path, 'shape': list(value.shape), 'dtype': str(value.dtype), 'numel': value.numel()}]
+-    if isinstance(value, dict):
+-        return [item for key, child in value.items() for item in tensor_inventory(child, torch, path + '.' + str(key))]
+-    if isinstance(value, (list, tuple)):
+-        return [item for index, child in enumerate(value) for item in tensor_inventory(child, torch, path + '[' + str(index) + ']')]
+-    return []
+-
+-
+-def network_shapes(state, prefix, input_dim, output_dim, std, torch):
+-    shapes = {f'{prefix}.module.{layer}.{kind}': ([rows, columns] if kind == 'weight' else [rows])
+-              for layer, rows, columns in ((0, 512, input_dim), (2, 256, 512), (4, 128, 256), (6, output_dim, 128))
+-              for kind in ('weight', 'bias')}
+-    if std:
+-        shapes['std'] = [29]
+-    require(set(state) == set(shapes) and all(isinstance(state[key], torch.Tensor) and list(state[key].shape) == shape
+-            for key, shape in shapes.items()), 'Native actor/critic tensor keys or MLP dimensions differ: ' + prefix)
+-    return shapes
+-
+-
+-def optimizer_steps(state, torch):
+-    require(state['state'] and state['param_groups'], 'Empty optimizer state')
+-    steps = {}
+-    for key, entry in state['state'].items():
+-        require({'step', 'exp_avg', 'exp_avg_sq'} <= set(entry), 'Incomplete AdamW optimizer state')
+-        step = entry['step']
+-        if isinstance(step, torch.Tensor):
+-            require(step.numel() == 1, 'Nonscalar Adam step')
+-            step = step.item()
+-        require(type(step) in (int, float) and math.isfinite(step) and step >= 0 and int(step) == step, 'Invalid Adam step')
+-        steps[str(key)] = int(step)
+-    return steps
+-
+-
+-def checkpoint(args):
+-    import torch
+-    import yaml
+-    require(not torch.cuda.is_initialized(), 'CPU checkpoint phase must not initialize CUDA')
+-    current = artifact(args.artifacts, 'model_19999.pt')
+-    yaml_record = artifact(args.artifacts, 'holosoma_config.yaml')
+-    baseline_record = artifact(args.baseline.parent, 'model_00000.pt')
+-    require(Path(args.baseline).name == 'model_00000.pt', 'Iteration-zero native baseline required')
+-    value = torch.load(current['path'], map_location='cpu', weights_only=False)
+-    baseline = torch.load(baseline_record['path'], map_location='cpu', weights_only=False)
+-    required = {'actor_model_state_dict', 'critic_model_state_dict', 'actor_optimizer_state_dict',
+-                'critic_optimizer_state_dict', 'actor_obs_normalizer_state_dict', 'critic_obs_normalizer_state_dict',
+-                'iter', 'infos', 'experiment_config', 'iteration'}
+-    require(required <= set(value) and required <= set(baseline), 'Missing native PT fields')
+-    require(value['iter'] == value['iteration'] == ITERATION and baseline['iter'] == baseline['iteration'] == 0, 'Native checkpoint iteration differs')
+-    require(value['actor_obs_normalizer_state_dict'] is None and value['critic_obs_normalizer_state_dict'] is None, 'Disabled normalization must save both normalizers as None')
+-    tensors = tensor_inventory(value, torch)
+-    require(tensors, 'No checkpoint Tensors')
+-    tensor_inventory(baseline, torch)
+-    config = value['experiment_config']
+-    yaml_config = yaml.safe_load(Path(yaml_record['path']).read_text())
+-    resolution = resolved_yaml_contract(yaml_config, config)
+-    contract = config_contract(config)
+-    baseline_contract = config_contract(baseline['experiment_config'])
+-    require(baseline_contract == contract and baseline['experiment_config'] == config,
+-            'Same-run iteration-zero and final checkpoint full configurations must match')
+-    shapes = {}
+-    updates = {}
+-    for role, prefix, dim, out, std in (('actor', 'actor_module', 449, 29, True), ('critic', 'critic_module', 575, 1, False)):
+-        state, old = value[role + '_model_state_dict'], baseline[role + '_model_state_dict']
+-        shapes[role] = network_shapes(state, prefix, dim, out, std, torch)
+-        require(set(state) == set(old), 'Baseline/final network keys differ: ' + role)
+-        differences = []
+-        for key, tensor in state.items():
+-            require(tensor.shape == old[key].shape, 'Baseline/final network shape differs: ' + key)
+-            delta = tensor.to(torch.float64) - old[key].to(torch.float64)
+-            differences.append({'tensor': key, 'changed_elements': int(torch.count_nonzero(delta).item()),
+-                                'max_absolute_delta': float(delta.abs().max().item()), 'l2_delta': float(torch.linalg.vector_norm(delta).item())})
+-        require(any(row['changed_elements'] for row in differences), 'No actual baseline-to-final weight update: ' + role)
+-        before = optimizer_steps(baseline[role + '_optimizer_state_dict'], torch)
+-        after = optimizer_steps(value[role + '_optimizer_state_dict'], torch)
+-        require(set(before) == set(after) and all(after[key] > before[key] for key in before), 'Adam steps did not advance for all saved parameters: ' + role)
+-        updates[role] = {'tensors': differences, 'adam_baseline_steps_by_parameter': before,
+-                         'adam_final_steps_by_parameter': after, 'adam_baseline_unique_steps': sorted(set(before.values())),
+-                         'adam_final_unique_steps': sorted(set(after.values())),
+-                         'step_scope': 'Observed saved AdamW step values; no hardcoded 400000-step assertion'}
+-    require(not torch.cuda.is_initialized(), 'CUDA initialized during checkpoint inspection')
+-    check_unchanged([current, yaml_record, baseline_record])
+-    return {'checkpoint': current, 'yaml': yaml_record, 'baseline_checkpoint': baseline_record,
+-            'iteration': ITERATION, 'required_checkpoint_keys': sorted(required), 'actual_checkpoint_keys': sorted(value),
+-            'tensor_inventory': tensors, 'tensor_count': len(tensors), 'all_checkpoint_tensors_finite': True,
+-            'normalizers': {'actor': None, 'critic': None}, 'network_shapes': shapes, 'contract': contract,
+-            'raw_full_config_equal': False, 'resolved_yaml_full_config_equal': True,
+-            'yaml_runtime_resolution': resolution, 'experiment_config_json': json.dumps(config, sort_keys=True, allow_nan=True),
+-            'baseline_config_binding': {'full_config_equal': True, 'contract': baseline_contract,
+-                                        'source': 'Same high-climb-76 native run, remote before/after SHA and actual baseline ARTIFACTS pin'},
+-            'configuration_serialization': 'Original full config JSON stored as a string; legal scalar Infinity bounds retained, all checkpoint Tensors checked finite',
+-            'baseline_to_final_updates': updates, 'torch_version': torch.__version__, 'cuda_initialized': False}
+-
+-
+-def scalars(args):
++        for chunk in iter(lambda: stream.read(8388608), b''):
++            digest.update(chunk)
++            if raw:
++                chunks.append(chunk)
++    after = path.stat()
++    identity = lambda s: (s.st_dev, s.st_ino, s.st_size, s.st_mtime_ns, s.st_ctime_ns)
++    require(identity(before) == identity(after), 'Input changed while reading: ' + str(path))
++    record = {'path': str(path), 'bytes': after.st_size, 'sha256': digest.hexdigest()}
++    return (record, b''.join(chunks)) if raw else record
++
++
++def bound(record, raw=False):
++    require(isinstance(record, dict) and {'path', 'bytes', 'sha256'} <= set(record), 'Missing file fingerprint')
++    require(type(record['bytes']) is int and record['bytes'] > 0
++        and isinstance(record['sha256'], str) and re.fullmatch('[0-9a-f]{64}', record['sha256']), 'Invalid input fingerprint')
++    actual = fingerprint(record['path'], raw)
++    fp = actual[0] if raw else actual
++    require(fp == {key: record[key] for key in ('path', 'bytes', 'sha256')}, 'Input bytes/SHA mismatch: ' + record['path'])
++    return actual
++
++
++def cpu_only():
++    require(Path('/.dockerenv').is_file() and os.environ.get('CUDA_VISIBLE_DEVICES') == ''
++        and os.environ.get('NVIDIA_VISIBLE_DEVICES') == 'void', 'Use the isolated GPU-hidden CPU Docker entry point')
++    require(not list(Path('/dev').glob('nvidia[0-9]*')), 'CPU container exposes a GPU device')
++
++
++def event_file_set(directory):
++    directory = Path(directory)
++    require(directory.is_absolute() and '..' not in directory.parts
++        and not any(p.is_symlink() for p in (directory, *directory.parents)) and directory.is_dir(), 'Unsafe run directory')
++    paths = sorted(directory.glob('events.out.tfevents.*'))
++    for path in paths:
++        regular(path)
++    return [str(path) for path in paths]
++
++
++def admission(contract_path, expected_sha):
++    fp, raw = fingerprint(contract_path, True)
++    require(re.fullmatch('[0-9a-f]{64}', expected_sha) and fp['sha256'] == expected_sha, 'Input contract SHA differs')
++    contract = strict_json(raw)
++    require(type(contract.get('schema_version')) is int and contract['schema_version'] == 1
++        and contract.get('kind') in TARGETS, 'Unknown student contract')
++    kind, target = contract['kind'], TARGETS[contract['kind']]
++    manifest_fp, manifest_raw = bound(contract['native_manifest'], True)
++    manifest = strict_json(manifest_raw)
++    stage = 'student-' + kind
++    require(manifest.get('label') == stage and manifest.get('profile') == 'official'
++        and manifest.get('status') == 'passed' and type(manifest.get('returncode')) is int
++        and manifest['returncode'] == 0 and type(manifest.get('checkpoint_iteration')) is int
++        and manifest['checkpoint_iteration'] == target - 1 and manifest.get('finished_utc'), 'Actual final official native manifest required')
++    checkpoint = PurePosixPath(manifest['checkpoint'])
++    prefix = PurePosixPath('/outputs/official-full/official') / stage / 'PHP-research'
++    require(checkpoint.is_absolute() and '..' not in checkpoint.parts and checkpoint.is_relative_to(prefix)
++        and len(checkpoint.relative_to(prefix).parts) == 2 and str(checkpoint) == manifest['checkpoint']
++        and checkpoint.name == f'model_{target - 1:05d}.pt'
++        and re.fullmatch('[0-9a-f]{64}', manifest.get('checkpoint_sha256', '')), 'Native final checkpoint identity/path differs')
++    require(contract['native_run_directory'] == str(checkpoint.parent), 'Events are not bound to the final checkpoint run')
++    run = Path(contract['run_directory'])
++    require(run.is_absolute() and '..' not in run.parts and run.is_relative_to('/artifacts'), 'Run must be a read-only /artifacts mapping')
++    events = contract.get('events')
++    require(isinstance(events, list) and events, 'At least one actual event file required')
++    local_paths, native_paths, inputs = [], [], [fp, manifest_fp]
++    for event in events:
++        native = PurePosixPath(event['native_path'])
++        local = Path(event['path'])
++        require(native.parent == checkpoint.parent and '..' not in native.parts
++            and native.name.startswith('events.out.tfevents.') and str(native) == event['native_path']
++            and local == run / native.name, 'Event is not the original same-run basename/path')
++        inputs.append(bound(event))
++        local_paths.append(str(local)); native_paths.append(str(native))
++    require(len(set(local_paths)) == len(events) == len(set(native_paths)), 'Duplicate input event paths')
++    require(sorted(local_paths) == event_file_set(run), 'Actual run event file-set differs from the exact contract')
++    return contract, manifest, inputs
++
++
++def coverage(rows, target, required):
++    steps = [row['step'] for row in rows]
++    counts = Counter(steps)
++    finite = all(row['value'] is not None and row['wall_time'] is not None for row in rows)
++    return {'samples': len(rows), 'unique_steps': len(counts),
++        'first_step': min(steps) if steps else None, 'last_step': max(steps) if steps else None,
++        'missing_steps': [step for step in range(target) if step not in counts],
++        'duplicate_steps': [{'step': step, 'count': count} for step, count in sorted(counts.items()) if count > 1],
++        'out_of_range_steps': sorted(step for step in counts if step < 0 or step >= target),
++        'out_of_order': any(right < left for left, right in zip(steps, steps[1:])),
++        'all_finite': finite, 'required_core': required}
++
++
++def extract(report, contract, manifest, inputs):
++    kind, target = contract['kind'], TARGETS[contract['kind']]
++    report.update(kind=kind, stage='student-' + kind, target_iterations=target,
++        input_contract=inputs[0], native_manifest=inputs[1], input_files=inputs,
++        native_terminal={key: manifest[key] for key in ('label', 'profile', 'status', 'returncode',
++            'checkpoint', 'checkpoint_iteration', 'checkpoint_sha256', 'finished_utc')},
++        run_directory=contract['run_directory'], native_run_directory=contract['native_run_directory'],
++        required_core_tags=list(CORE_TAGS[kind]), events=[], scalars={}, tag_coverage={})
+     from tensorboard.backend.event_processing.event_accumulator import EventAccumulator
+-    event = artifact(args.artifacts, 'events.out.tfevents.1791793401.pro5000-6.135317.0')
+-    accumulator = EventAccumulator(event['path'], size_guidance={'scalars': 0})
+-    accumulator.Reload()
+-    values = {}
+-    for tag in TAGS:
+-        rows = accumulator.Scalars(tag)
+-        require(len(rows) == 20000 and [row.step for row in rows] == list(range(20000)), 'Full exact steps 0..19999 required: ' + tag)
+-        require(all(math.isfinite(row.value) and math.isfinite(row.wall_time) for row in rows), 'Nonfinite full TensorBoard tag: ' + tag)
+-        values[tag] = [{'step': int(row.step), 'wall_time': row.wall_time, 'value': row.value} for row in rows]
+-    check_unchanged([event])
+-    return {'event_file': event, 'scalars': values, 'required_tags': list(TAGS), 'samples_per_tag': 20000,
+-            'first_step': 0, 'last_step': ITERATION, 'stage': 'teacher-high-climb-76', 'stage_complete': True,
+-            'training_status': 'completed_20000_iterations', 'official_schedule_complete': False}
+-
+-
+-def bind(args):
+-    import yaml
+-    records = [fingerprint(args.checkpoint_report), fingerprint(args.scalars_report), fingerprint(args.onnx_report)]
+-    ckpt, scalar, onnx = (read(row['path']) for row in records)
+-    require(all(row['status'] == 'passed' for row in (ckpt, scalar, onnx)), 'All three actual CPU reports must pass')
+-    model = artifact(args.artifacts, 'model_19999.onnx')
+-    yaml_record = artifact(args.artifacts, 'holosoma_config.yaml')
+-    pt = artifact(args.artifacts, 'model_19999.pt')
+-    event = artifact(args.artifacts, 'events.out.tfevents.1791793401.pro5000-6.135317.0')
+-    require(ckpt['checkpoint'] == pt and ckpt['yaml'] == yaml_record and ckpt['iteration'] == ITERATION
+-            and scalar['event_file'] == event and scalar['stage_complete'] is True, 'Checkpoint/scalar reports bind other originals')
+-    config = json.loads(ckpt['experiment_config_json'])
+-    resolution = resolved_yaml_contract(yaml.safe_load(Path(yaml_record['path']).read_text()), config)
+-    require(ckpt['raw_full_config_equal'] is False and ckpt['resolved_yaml_full_config_equal'] is True
+-            and ckpt['yaml_runtime_resolution'] == resolution, 'Checkpoint must retain the actual raw YAML/PT difference')
+-    require(config == json.loads(onnx['metadata']['experiment_config'])
+-            and json.loads(onnx['metadata']['iteration']) == ITERATION, 'Original YAML/PT/ONNX full config or iteration mismatch')
+-    require(onnx['sha256'] == model['sha256'] and onnx['bytes'] == model['bytes']
+-            and onnx['self_contained'] is True and onnx['expected_observation_dim'] == 449
+-            and len(onnx['cases']) == 12
+-            and len([row for row in onnx['cases'] if row['observations'] == 'zeros']) == 6
+-            and len([row for row in onnx['cases'] if row['observations'] == 'random_normal']) == 6, 'Existing 12-case teacher ONNX CPU acceptance differs')
+-    for field, name, shape in (('inputs', 'obs', [1, 449]), ('outputs', 'actions', [1, 29])):
+-        matches = [row for row in onnx[field] if row['name'] == name]
+-        require(len(matches) == 1 and matches[0]['shape'] == shape and matches[0]['type'] == 'tensor(float)', 'Official ONNX tensor interface differs: ' + name)
+-    require(scalar['samples_per_tag'] == 20000 and set(scalar['scalars']) == set(TAGS), 'Full scalar report scope differs')
+-    for tag in TAGS:
+-        require([row['step'] for row in scalar['scalars'][tag]] == list(range(20000))
+-                and all(math.isfinite(row['value']) for row in scalar['scalars'][tag]), 'Full scalar report was truncated or changed: ' + tag)
+-    check_unchanged([*records, model, yaml_record, pt, event])
+-    return {'reports': records, 'artifacts': [pt, model, yaml_record, event], 'iteration': ITERATION,
+-            'raw_full_config_equal': False, 'full_config_equal_pt_onnx': True,
+-            'full_config_equal_pt_resolved_yaml': True, 'yaml_runtime_resolution': resolution,
+-            'teacher_onnx_cpu_cases': 12, 'onnx_self_contained': True,
+-            'observations': [1, 449], 'actions': [1, 29], 'stage_complete': True,
+-            'official_schedule_complete': False, 'pt_onnx_numerical_parity_verified': False,
+-            'convergence_verified': False, 'skills_verified': False}
++    for event, event_fp in zip(contract['events'], inputs[2:]):
++        record = dict(event_fp, native_path=event['native_path'], scalar_tags=[], parsed_scalar_samples=0)
++        report['events'].append(record)
++        try:
++            # Per-file loading plus disabled restart purge preserves original duplicates.
++            accumulator = EventAccumulator(event['path'], size_guidance={'scalars': 0}, purge_orphaned_data=False)
++            accumulator.Reload()
++            record['scalar_tags'] = list(accumulator.Tags()['scalars'])
++            for tag in record['scalar_tags']:
++                output = report['scalars'].setdefault(tag, [])
++                for index, item in enumerate(accumulator.Scalars(tag)):
++                    require(type(item.step) is int, 'Noninteger TensorBoard step')
++                    row = {'step': item.step, 'wall_time': float(item.wall_time), 'value': float(item.value),
++                        'source_event': event['path'], 'event_sample_index': index}
++                    for field in ('wall_time', 'value'):
++                        if not math.isfinite(row[field]):
++                            row[field + '_nonfinite_original'] = repr(row[field]); row[field] = None
++                            report['diagnostics'].append({'problem': 'nonfinite_scalar', 'tag': tag,
++                                'source_event': event['path'], 'event_sample_index': index, 'step': item.step, 'field': field})
++                    output.append(row); record['parsed_scalar_samples'] += 1
++        except Exception as error:
++            record['parse_error'] = type(error).__name__ + ': ' + str(error)
++            report['diagnostics'].append({'problem': 'event_parse_failed', 'path': event['path'], 'error': record['parse_error']})
++    tags = sorted(set(report['scalars']) | set(CORE_TAGS[kind]) | set(CONDITIONAL_TAGS))
++    for tag in tags:
++        rows = report['scalars'].get(tag, [])
++        info = coverage(rows, target, tag in CORE_TAGS[kind])
++        report['tag_coverage'][tag] = info
++        if tag in CORE_TAGS[kind] and (not info['all_finite'] or info['missing_steps']
++                or info['duplicate_steps'] or info['out_of_range_steps'] or [row['step'] for row in rows] != list(range(target))):
++            report['diagnostics'].append({'problem': 'core_steps_not_exact_finite_once_0_to_target_minus_1', 'tag': tag})
++    for original in inputs:
++        require(fingerprint(original['path']) == original, 'Original input changed during extraction')
++    require(event_file_set(contract['run_directory']) == sorted(event['path'] for event in contract['events']), 'Event file-set changed during extraction')
++    report['input_files_unchanged'] = True
++    report['training_scalar_integrity_complete'] = not report['diagnostics']
++    report['conditional_tag_scope'] = 'Reward/episode tags are conditional; ppo_gate_mean is emitted only by the PPO update branch. Actual coverage/duplicates remain unmodified.'
++    report['raw_numeric_encoding'] = 'Nonfinite values are recorded as null plus their original repr and diagnostics; original event bytes remain the authoritative source.'
++    require(report['training_scalar_integrity_complete'], 'Scalar integrity failed; original rows and diagnostics retained')
+ 
+ 
+ def main():
+     parser = argparse.ArgumentParser(description=__doc__)
+-    parser.add_argument('phase', choices=('checkpoint', 'scalars', 'bind'))
+-    parser.add_argument('--artifacts', type=Path, required=True)
++    parser.add_argument('--contract', type=Path, required=True)
++    parser.add_argument('--contract-sha256', required=True)
+     parser.add_argument('--output', type=Path, required=True)
+-    parser.add_argument('--baseline', type=Path)
+-    parser.add_argument('--checkpoint-report', type=Path)
+-    parser.add_argument('--scalars-report', type=Path)
+-    parser.add_argument('--onnx-report', type=Path)
+     args = parser.parse_args()
+-    require(not args.output.exists(), 'Use a fresh report path; prior evidence is immutable')
+-    require(args.phase != 'checkpoint' or args.baseline is not None, 'Checkpoint phase requires --baseline')
+-    require(args.phase != 'bind' or all((args.checkpoint_report, args.scalars_report, args.onnx_report)), 'Bind phase requires all three report paths')
+-    report = {'schema_version': 1, 'phase': args.phase, 'status': 'running', 'source': fingerprint(__file__),
+-              'started_utc': dt.datetime.now(dt.timezone.utc).isoformat(), 'quality_verified': False,
+-              'official_schedule_complete': False, 'convergence_verified': False,
+-              'pt_onnx_numerical_parity_verified': False,
+-              'scope': 'Completed fifth official high-climb-76 teacher CPU artifact acceptance; no policy rollout or claim that the whole official schedule completed'}
++    cpu_only()
++    require(args.output.is_absolute() and '..' not in args.output.parts and args.output.is_relative_to('/validation')
++        and not any(p.is_symlink() for p in (args.output, *args.output.parents)) and not args.output.exists(), 'Fresh /validation report path required')
++    source = fingerprint(Path(__file__).absolute())
++    report = {'schema_version': 1, 'phase': 'student_training_scalars', 'status': 'running',
++        'started_utc': dt.datetime.now(dt.timezone.utc).isoformat(), 'extractor_source': source,
++        'diagnostics': [], 'training_scalar_integrity_complete': False,
++        'scope': 'Original completed official student training scalar integrity only; no policy rollout, convergence, seven-PT acceptance or ONNX parity.', **FALSE_FLAGS}
++    failure = None
+     try:
+-        report.update(globals()[args.phase](args), status='passed')
+-    except BaseException as error:
+-        report.update(status='failed', error=f'{type(error).__name__}: {error}')
+-        raise
++        contract, manifest, inputs = admission(args.contract, args.contract_sha256)
++        extract(report, contract, manifest, inputs)
++        require(fingerprint(Path(__file__).absolute()) == source, 'Extractor source changed')
++        report['status'] = 'passed'
++    except Exception as error:
++        failure = error
++        report.update(status='failed', training_scalar_integrity_complete=False,
++            error=type(error).__name__ + ': ' + str(error))
+     finally:
+         report['finished_utc'] = dt.datetime.now(dt.timezone.utc).isoformat()
+         args.output.parent.mkdir(parents=True, exist_ok=True)
+         with args.output.open('x') as stream:
+-            json.dump(report, stream, indent=2, allow_nan=False); stream.write('\n')
+-        args.output.chmod(0o644)
+-    print(json.dumps({'phase': args.phase, 'status': report['status'], 'quality_verified': False}))
++            json.dump(report, stream, indent=2, ensure_ascii=False, allow_nan=False); stream.write('\n')
++    if failure is not None:
++        raise SystemExit(1)
++    print(json.dumps({'status': report['status'], 'stage': report['stage'], 'target_iterations': report['target_iterations']}))
+ 
+ 
+ if __name__ == '__main__':

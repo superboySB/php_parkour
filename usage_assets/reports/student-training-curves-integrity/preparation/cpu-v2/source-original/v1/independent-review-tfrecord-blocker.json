@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "status": "blocked_static_source_review_tfrecord_integrity_must_fix",
+  "reviewed_utc": "2026-10-13T04:52:02.789987+00:00",
+  "supersedes_execution_approval_of": {
+    "path": "outputs/research/official-full/student-final-learning-curves-source-preparation-01/cpu/independent-review.json",
+    "bytes": 4477,
+    "sha256": "d36423c17832441e9ff82f344de2ddbe303c2deb933e4ca465d03f4a9b747126"
+  },
+  "must_fix": [
+    {
+      "file": "extract_student_scalars.py",
+      "lines": [
+        160,
+        161
+      ],
+      "problem": "No strict raw TFRecord framing/length masked CRC32C/data masked CRC32C/exact EOF gate precedes EventAccumulator. Its underlying RawEventFileLoader can absorb DataLossError as end-of-stream; a CRC-damaged or truncated tail after all required core steps can therefore leave scalar completeness/diagnostics clean and report passed. SHA before/after only proves the same malformed input bytes were read.",
+      "basis": "Root independently inspected the installed official TensorBoard RawEventFileLoader behavior (DataLossError catch at source169-174); the v1 source reviewed here calls EventAccumulator/Reload without a prior strict framing/CRC/EOF check. No helper or corrupt-event experiment was run by this reviewer.",
+      "required_change": "Keep v1 immutable. In new v2, validate every source event record framing, both masked CRC32C fields and exact EOF fail-closed before scalar extraction; retain precise failed diagnostics and gate plotting on the actual strict-integrity proof."
+    }
+  ],
+  "source_fingerprints": [
+    {
+      "path": "outputs/research/official-full/student-final-learning-curves-source-preparation-01/cpu/extract_student_scalars.py",
+      "bytes": 13404,
+      "sha256": "d25623f96926013aaf0d82cbb6131f477db47818b7f8791339c9461c14950cc0"
+    },
+    {
+      "path": "outputs/research/official-full/student-final-learning-curves-source-preparation-01/cpu/plot_student_learning_curves.py",
+      "bytes": 11373,
+      "sha256": "3915d8a7d7e1323f15e5986e1d193f12d2f766526599d41220469e64579974f1"
+    },
+    {
+      "path": "outputs/research/official-full/student-final-learning-curves-source-preparation-01/cpu/source-manifest.json",
+      "bytes": 1727,
+      "sha256": "e32f98c60783903dabac9744a64a99f9be7fe78578db65e5c8b2ff9152c36d83"
+    }
+  ],
+  "future_v1_execution_approved": false,
+  "future_v2_review_required": true,
+  "scope": "One newly identified static source blocker. Original v1 independent report and all source/manifest bytes retained; this separate blocker supersedes its no-must-fix execution implication. Prior bounded-window terminal acceptance is unaffected.",
+  "helper_executed_or_imported": false,
+  "scientific_validation_executed": false,
+  "quality_verified": false,
+  "official_schedule_complete": false
+}

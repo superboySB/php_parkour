@@ -4,7 +4,7 @@
 
 算法、状态/动作/奖励/loss、数据格式与标签来源，以及 real2sim2real 的实现和验证边界见独立的 [technical_pipeline.md](technical_pipeline.md)。
 
-**当前进度（2026-10-13，北京时间）：五类官方教师均已完成20,000轮，最终checkpoint为19999；五份最终产物均已完成独立CPU验收。** 第四个low-climb-76于10月12日16:22:35、第五个high-climb-76于10月13日07:14:48完成原生训练；两份[低攀爬](usage_assets/reports/official-low-climb-76-final/index.md)/[高攀爬](usage_assets/reports/official-high-climb-76-final/index.md)公开包已生成。原顺序任务已进入纯DAgger学生训练，混合学生尚未完成；16阶段全日程、官方物理评估、云端888逐源尝试、最终自训学生58例和两学生各629配置均未完成。CPU有限性、训练记录完整或公开包恢复通过，不表示策略收敛、技能成功或真机验收。
+**当前进度（2026-10-13，北京时间）：五类官方教师均已完成20,000轮，最终checkpoint为19999；五份最终产物均已完成独立CPU验收。** 第四个low-climb-76于10月12日16:22:35、第五个high-climb-76于10月13日07:14:48完成原生训练；两份[低攀爬](usage_assets/reports/official-low-climb-76-final/index.md)/[高攀爬](usage_assets/reports/official-high-climb-76-final/index.md)公开包已生成。纯DAgger学生已于10月13日17:34:35完成10,000轮、最终checkpoint9999，混合学生已自动开始30,000轮训练；16阶段全日程、官方物理评估、云端888逐源尝试、最终自训学生58例和两学生各629配置均未完成。CPU有限性、训练记录完整或公开包恢复通过，不表示策略收敛、技能成功或真机验收。
 
 项目机器人是半球手的 Unitree G1，29 个关节。动作匹配有 17 种内置场景、29 个技能注册项；公开训练流程提供五类教师数据。动作数据库中的更多翻越技能并不自动成为公开深度策略掌握的技能。
 
@@ -13,6 +13,8 @@
 正式两学生后续1258例结果的[发布与恢复源码准备](usage_assets/reports/final-student-reference629-publication-preparation/index.md)已封存，包含真实帮助入口和缺前提`status`返回waiting的记录。它要求真实模型、同模型58例终态/60项ORT检查、新合同和完整原生/CPU退出证据齐备后才发布；当前正式结果及完整恢复尚未执行。包内92个固定工具路径的复制示例已在隔离目录实际跑通，并模拟Git下载后的权限，见[源码恢复实测](usage_assets/reports/final-student-reference629-publication-source-checks/index.md)。宿主仅使用Python标准库。
 
 用户已答复“没有”原始 motion_matching/mm_hs/FAR-pi 环境或历史参考输出。12项历史 raw-hash 失败继续保留，未刷新 golden 或跳过用例；现有原版/研究版数组对照不能替代缺失的历史基线。
+
+正式学生的原始TensorBoard事件和完整学习曲线另有[检查与归档工具](usage_assets/reports/student-training-curves-integrity/index.md)。纯DAgger的[完整10,000轮曲线和原件归档](usage_assets/reports/official-student-pure-training-curves/index.md)已通过实际CPU提取/绘图、公开包校验及全新目录无损恢复：43个tag共430,000条有限样本，每项完整覆盖0..9999。[从公开包重新提取和绘图](usage_assets/reports/official-student-pure-training-curves-replay/index.md)也已实际通过，完整数据逐项相等。混合学生的30,000轮最终曲线仍待真实终态。这些记录不证明模型质量、收敛或最终物理验收。
 
 ## 1. 机器、目录与环境
 

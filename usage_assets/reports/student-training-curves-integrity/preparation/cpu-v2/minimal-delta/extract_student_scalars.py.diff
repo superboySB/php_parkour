@@ -1,0 +1,145 @@
+--- cpu-v1/extract_student_scalars.py
++++ cpu-v2/extract_student_scalars.py
+@@ -12,6 +12,7 @@
+ from pathlib import Path, PurePosixPath
+ import re
+ import stat
++import struct
+ 
+ TARGETS = {'pure': 10000, 'finetune': 30000}
+ CORE_TAGS = {
+@@ -21,6 +22,7 @@
+                  'Loss/behavior', 'Loss/entropy_mean', 'Loss/mean_kl'),
+ }
+ CONDITIONAL_TAGS = ('Train/mean_reward', 'Train/mean_episode_length', 'Loss/ppo_gate_mean')
++MAX_EVENT_RECORD_BYTES = 64 * 1024 * 1024
+ FALSE_FLAGS = {key: False for key in ('quality_verified', 'convergence_verified',
+     'official_schedule_complete', 'seven_PT_acceptance_verified', 'pt_onnx_numerical_parity_verified')}
+ 
+@@ -143,6 +145,93 @@
+         'all_finite': finite, 'required_core': required}
+ 
+ 
++def masked_crc32c(crc):
++    crc &= 0xffffffff
++    return (((crc >> 15) | ((crc << 17) & 0xffffffff)) + 0xa282ead8) & 0xffffffff
++
++
++def verify_tfrecord(event_fp, crc_update):
++    """Strict whole-file framing check; injectable CRC updater for CPU protocol fixtures."""
++    result = {'status': 'running', 'format': 'TFRecord', 'expected_file': event_fp,
++        'records': 0, 'bytes': 0, 'complete_eof': False, 'crc32c_verified': False,
++        'max_record_bytes': MAX_EVENT_RECORD_BYTES, 'largest_record_bytes': 0, 'diagnostics': []}
++    digest, offset, record_offset = hashlib.sha256(), 0, 0
++
++    def problem(code, failure_offset, **details):
++        result['diagnostics'].append(dict(problem=code, offset=failure_offset,
++            record_index=result['records'], record_offset=record_offset, **details))
++        raise ValueError(code + ' at byte ' + str(failure_offset))
++
++    try:
++        path = regular(event_fp['path'])
++        before = path.stat()
++        with path.open('rb') as stream:
++            def take(length):
++                nonlocal offset
++                chunks, remaining = [], length
++                while remaining:
++                    chunk = stream.read(remaining)
++                    if not chunk:
++                        break
++                    digest.update(chunk); offset += len(chunk)
++                    chunks.append(chunk); remaining -= len(chunk)
++                return b''.join(chunks)
++
++            while True:
++                record_offset = offset
++                length_bytes = take(8)
++                if not length_bytes:
++                    result['complete_eof'] = True
++                    break
++                if len(length_bytes) != 8:
++                    problem('truncated_length_header', record_offset, expected_bytes=8, actual_bytes=len(length_bytes))
++                length_crc = take(4)
++                if len(length_crc) != 4:
++                    problem('truncated_length_crc', record_offset + 8, expected_bytes=4, actual_bytes=len(length_crc))
++                stored = struct.unpack('<I', length_crc)[0]
++                calculated = masked_crc32c(crc_update(0, length_bytes))
++                if stored != calculated:
++                    problem('length_crc_mismatch', record_offset + 8, stored_crc=stored, calculated_crc=calculated)
++                length = struct.unpack('<Q', length_bytes)[0]
++                if length > MAX_EVENT_RECORD_BYTES or length > event_fp['bytes']:
++                    problem('record_length_exceeds_bound', record_offset, declared_length=length,
++                        maximum=MAX_EVENT_RECORD_BYTES, original_file_bytes=event_fp['bytes'])
++                remaining, crc = length, 0
++                while remaining:
++                    start = offset
++                    expected = min(remaining, 1048576)
++                    chunk = take(expected)
++                    if len(chunk) != expected:
++                        problem('truncated_payload', start, expected_bytes=expected, actual_bytes=len(chunk), declared_length=length)
++                    crc = crc_update(crc, chunk)
++                    remaining -= len(chunk)
++                crc_offset = offset
++                payload_crc = take(4)
++                if len(payload_crc) != 4:
++                    problem('truncated_payload_crc', crc_offset, expected_bytes=4, actual_bytes=len(payload_crc), declared_length=length)
++                stored, calculated = struct.unpack('<I', payload_crc)[0], masked_crc32c(crc)
++                if stored != calculated:
++                    problem('payload_crc_mismatch', crc_offset, stored_crc=stored, calculated_crc=calculated, declared_length=length)
++                result['records'] += 1
++                result['largest_record_bytes'] = max(result['largest_record_bytes'], length)
++        after = path.stat()
++        identity = lambda s: (s.st_dev, s.st_ino, s.st_size, s.st_mtime_ns, s.st_ctime_ns)
++        actual = {'path': str(path), 'bytes': offset, 'sha256': digest.hexdigest()}
++        if identity(before) != identity(after) or actual != event_fp:
++            problem('event_changed_or_whole_file_identity_mismatch', offset, actual_file=actual)
++        if not result['records']:
++            problem('no_complete_tfrecords', 0)
++        result.update(status='passed', bytes=offset, sha256=digest.hexdigest(), crc32c_verified=True)
++    except Exception as error:
++        if not result['diagnostics']:
++            result['diagnostics'].append({'problem': 'tfrecord_read_or_crc_error', 'offset': offset,
++                'record_index': result['records'], 'record_offset': record_offset,
++                'error': type(error).__name__ + ': ' + str(error)})
++        result.update(status='failed', bytes=offset, read_sha256=digest.hexdigest(),
++            error=type(error).__name__ + ': ' + str(error))
++    return result
++
++
+ def extract(report, contract, manifest, inputs):
+     kind, target = contract['kind'], TARGETS[contract['kind']]
+     report.update(kind=kind, stage='student-' + kind, target_iterations=target,
+@@ -150,11 +239,21 @@
+         native_terminal={key: manifest[key] for key in ('label', 'profile', 'status', 'returncode',
+             'checkpoint', 'checkpoint_iteration', 'checkpoint_sha256', 'finished_utc')},
+         run_directory=contract['run_directory'], native_run_directory=contract['native_run_directory'],
+-        required_core_tags=list(CORE_TAGS[kind]), events=[], scalars={}, tag_coverage={})
++        required_core_tags=list(CORE_TAGS[kind]), events=[], scalars={}, tag_coverage={}, event_integrity_complete=False)
+     from tensorboard.backend.event_processing.event_accumulator import EventAccumulator
++    from tensorboard.compat.tensorflow_stub import pywrap_tensorflow
++    report['event_integrity_checker'] = {'algorithm': 'TFRecord little-endian length/header/body masked CRC32C and exact whole-file EOF',
++        'crc_update_source': fingerprint(Path(pywrap_tensorflow.__file__).absolute()),
++        'max_record_bytes': MAX_EVENT_RECORD_BYTES, 'payload_chunk_bytes': 1048576}
+     for event, event_fp in zip(contract['events'], inputs[2:]):
+         record = dict(event_fp, native_path=event['native_path'], scalar_tags=[], parsed_scalar_samples=0)
+         report['events'].append(record)
++        integrity = verify_tfrecord(event_fp, pywrap_tensorflow.crc_update)
++        record['tfrecord_integrity'] = integrity
++        if integrity['status'] != 'passed':
++            report['diagnostics'].append({'problem': 'event_tfrecord_integrity_failed', 'path': event['path'],
++                'details': integrity['diagnostics']})
++            continue
+         try:
+             # Per-file loading plus disabled restart purge preserves original duplicates.
+             accumulator = EventAccumulator(event['path'], size_guidance={'scalars': 0}, purge_orphaned_data=False)
+@@ -187,6 +286,9 @@
+         require(fingerprint(original['path']) == original, 'Original input changed during extraction')
+     require(event_file_set(contract['run_directory']) == sorted(event['path'] for event in contract['events']), 'Event file-set changed during extraction')
+     report['input_files_unchanged'] = True
++    report['event_integrity_complete'] = (len(report['events']) == len(contract['events'])
++        and all(event['tfrecord_integrity']['status'] == 'passed' for event in report['events']))
++    require(report['event_integrity_complete'], 'Whole-file event integrity failed; exact offsets retained')
+     report['training_scalar_integrity_complete'] = not report['diagnostics']
+     report['conditional_tag_scope'] = 'Reward/episode tags are conditional; ppo_gate_mean is emitted only by the PPO update branch. Actual coverage/duplicates remain unmodified.'
+     report['raw_numeric_encoding'] = 'Nonfinite values are recorded as null plus their original repr and diagnostics; original event bytes remain the authoritative source.'

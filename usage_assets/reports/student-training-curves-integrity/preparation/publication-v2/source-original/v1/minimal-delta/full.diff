@@ -1,0 +1,1167 @@
+--- source-original/draft/student_curves_archive.py
++++ student_curves_archive.py
+@@ -7,9 +7,11 @@
+ from __future__ import annotations
+ 
+ import argparse
++from collections import Counter
+ import gzip
+ import hashlib
+ import json
++import math
+ from pathlib import Path, PurePosixPath
+ import re
+ import shutil
+@@ -21,8 +23,9 @@
+ LIMIT = 25_000_000
+ BLOCK = 8 * 1024 * 1024
+ IMAGE = 'sha256:2be18521015b2a84ef7a4442af9a94ef041a19feb9ce385ae15424b1dc158d8f'
+-EXTRACT_SOURCE_SHA256 = None  # Fill only from the independently reviewed strict-TFRecord v2 freeze.
+-PLOT_SOURCE_SHA256 = None  # Unapproved v1 is deliberately not admitted.
++EXTRACT_SOURCE_SHA256 = 'e8bf7156013e7c31200ab39c9511020ed17c2e6726d79bc368939b44b5507b12'
++PLOT_SOURCE_SHA256 = '6a14cfa86df96199e575384c48466d44046b1a2fad8ce76c1427b7d5add7abd0'
++MAX_EVENT_RECORD_BYTES = 67_108_864
+ TARGETS = {'pure': 10000, 'finetune': 30000}
+ CORE = {
+     'pure': ['Loss/behavior', 'Loss/warmup_active'],
+@@ -33,6 +36,8 @@
+ CONDITIONAL = {'Train/mean_reward', 'Train/mean_episode_length', 'Loss/ppo_gate_mean'}
+ FALSE_FLAGS = ['quality_verified', 'convergence_verified', 'official_schedule_complete',
+                'seven_PT_acceptance_verified', 'pt_onnx_numerical_parity_verified']
++RAW_LOGS = {phase + '_' + stream for phase in ('create', 'attached', 'extract', 'plot')
++            for stream in ('stdout', 'stderr')}
+ ROLES = {'input_contract', 'scalars', 'plot_report', 'extract_source', 'plot_source',
+          'cpu_execution', 'cpu_phases', 'created_inspect', 'running_inspect',
+          'final_inspect', 'root_review', 'independent_review', 'publication_source'}
+@@ -69,8 +74,10 @@
+ 
+ 
+ def body(record):
++    require(isinstance(record, dict), 'Fingerprint object required')
+     require(type(record.get('bytes')) is int and record['bytes'] >= 0
+-            and re.fullmatch('[0-9a-f]{64}', record.get('sha256', '')),
++            and isinstance(record.get('sha256'), str)
++            and re.fullmatch('[0-9a-f]{64}', record['sha256']),
+             'Invalid fingerprint')
+     return {'bytes': record['bytes'], 'sha256': record['sha256']}
+ 
+@@ -133,7 +140,7 @@
+     contract_fp = fingerprint(contract_path)
+     require(contract_fp['sha256'] == contract_sha256, 'Acceptance contract SHA differs')
+     c = load(contract_path, contract_fp)
+-    require(c.get('schema_version') == 1
++    require(type(c.get('schema_version')) is int and c['schema_version'] == 1
+             and c.get('status') == 'reviewed_actual_student_learning_curves_cpu_acceptance'
+             and c.get('kind') in TARGETS and set(c.get('files', {})) == ROLES,
+             'Incomplete actual student curve acceptance contract')
+@@ -147,6 +154,9 @@
+ 
+     def retain(record, path=None):
+         requested = path or record['path']
++        body(record)
++        require(isinstance(requested, (str, Path)) and Path(requested).is_absolute(),
++                'Absolute host evidence provider required')
+         try:
+             path = regular(requested)
+         except FileNotFoundError as error:
+@@ -160,7 +170,9 @@
+         records[path] = actual
+         return path
+ 
+-    for record in [*c['files'].values(), *c['figures'].values()]:
++    require(isinstance(c.get('cpu_raw_logs'), dict) and set(c['cpu_raw_logs']) == RAW_LOGS,
++            'Actual create/attached/extract/plot original stdout and stderr fingerprints required')
++    for record in [*c['files'].values(), *c['figures'].values(), *c['cpu_raw_logs'].values()]:
+         retain(record)
+     require(regular(c['files']['publication_source']['path']) == regular(__file__),
+             'Reviewed publication source must be this exact file')
+@@ -182,21 +194,25 @@
+         require(value['Id'] == cid and value['Image'] == IMAGE, 'Own actual CPU identity/image differs')
+         cfg = value['HostConfig']
+         require(cfg['Runtime'] == 'runc' and cfg['NetworkMode'] == 'none'
+-                and cfg['DeviceRequests'] in (None, []) and cfg['NanoCpus'] == 2_000_000_000
++                and cfg['DeviceRequests'] in (None, []) and cfg.get('Devices') in (None, []) and cfg['NanoCpus'] == 2_000_000_000
+                 and cfg['Memory'] == 12 * 1024**3, 'Actual CPU isolation differs')
+         env = dict(item.split('=', 1) for item in value['Config']['Env'])
+         require(env.get('CUDA_VISIBLE_DEVICES') == '' and env.get('NVIDIA_VISIBLE_DEVICES') == 'void'
+                 and env.get('PYTHONDONTWRITEBYTECODE') == '1', 'GPU hidden/bytecode-off required')
++        require(value['Config']['Image'] == IMAGE, 'Container configured image must be the reviewed digest')
+         current = sorted(value['Mounts'], key=lambda item: item['Destination'])
+         require(len(current) == 4 and len({item['Destination'] for item in current}) == 4,
+                 'Four unique actual bind mounts required')
+         require({item['Destination']: item['RW'] for item in current}
+                 == {'/code': False, '/control': False, '/artifacts': False, '/validation': True}
+-                and all(item['Type'] == 'bind' for item in current), 'Three RO and one RW bind required')
++                and all(item['Type'] == 'bind' and Path(item['Source']).is_absolute()
++                        and '..' not in Path(item['Source']).parts for item in current), 'Three RO and one RW bind required')
+         if mounts is not None:
+             require(current == mounts, 'Inspect mount identity changed')
+         mounts = current
+     require(inspections[0]['State']['Status'] == 'created'
++            and inspections[0]['State']['Running'] is False
++            and inspections[1]['State']['Status'] == 'running'
+             and inspections[1]['State']['Running'] is True
+             and inspections[2]['State']['Status'] == 'exited'
+             and inspections[2]['State']['Running'] is False
+@@ -205,42 +221,107 @@
+             and all(value['Name'] == inspections[0]['Name'] for value in inspections),
+             'Actual created/live/naturally-exited CPU observations required')
+     namespace = [(Path(item['Destination']), Path(item['Source'])) for item in mounts]
++    copies = c.get('native_file_copies')
++    require(isinstance(copies, list), 'Explicit native-path to host-copy mappings required')
++    native_copies, used_copies = {}, set()
++    for item in copies:
++        native_path = item['native_path']
++        native = Path(native_path)
++        require(isinstance(native_path, str) and native.is_absolute() and str(native) == native_path
++                and '..' not in native.parts and native_path not in native_copies
++                and not any(native.is_relative_to(prefix) for prefix, _ in namespace),
++                'Unique canonical external native path required; cannot shadow actual mounts')
++        provider = retain(item['host_copy'])
++        native_copies[native_path] = (provider, body(item['host_copy']))
++
++    relative_copies, used_relative = {}, set()
++    require(isinstance(c.get('relative_file_copies', []), list), 'Relative provider mappings must be an array')
++    for item in c.get('relative_file_copies', []):
++        document = Path(item['document_path'])
++        reference = str(relative(item['relative_path']))
++        key = (str(document), reference)
++        require(document.is_absolute() and '..' not in document.parts and key not in relative_copies,
++                'Unique canonical document/relative-reference provider required')
++        relative_copies[key] = (retain(item['host_copy']), body(item['host_copy']))
+ 
+     def translate(path):
+         path = Path(path)
+         require(path.is_absolute() and '..' not in path.parts, 'Absolute safe evidence path required')
++        if str(path) in native_copies:
++            return native_copies[str(path)][0]
+         for prefix, provider in namespace:
+             if path.is_relative_to(prefix):
+                 return provider / path.relative_to(prefix)
+         return path
+ 
+     def bound(record, role=None):
++        if record['path'] in native_copies:
++            require(body(record) == native_copies[record['path']][1], 'Native fingerprint and host-copy bytes/SHA differ')
++            used_copies.add(record['path'])
+         path = retain(record, translate(record['path']))
+         if role:
+             require(path == regular(c['files'][role]['path']), 'Accepted producer binding differs: ' + role)
+         return path
+ 
+-    def references(value):
+-        if isinstance(value, dict):
+-            if {'path', 'bytes', 'sha256'} <= value.keys():
+-                bound(value)
+-            for item in value.values():
+-                references(item)
+-        elif isinstance(value, list):
+-            for item in value:
+-                references(item)
+-
+-    references(execution)
++    inspected_json = {regular(contract_path),
++                      *[regular(row['path']) for key, row in c['files'].items()
++                        if key not in {'extract_source', 'plot_source', 'publication_source'}]}
++
++    def references(value, document_path):
++        # Walk actual fingerprints, resolving relative manifest rows in their
++        # original JSON namespace. Descriptive JSON-schema strings are not pins.
++        pending = [(value, Path(document_path))]
++        while pending:
++            item, document = pending.pop()
++            if isinstance(item, dict):
++                if {'path', 'bytes', 'sha256'} <= item.keys() and (
++                        type(item['bytes']) is int or (isinstance(item['sha256'], str)
++                        and re.fullmatch('[0-9a-f]{64}', item['sha256']))):
++                    pin = item
++                    if not Path(item['path']).is_absolute():
++                        rel = relative(item['path'])
++                        key = (str(document), str(rel))
++                        if key in relative_copies:
++                            provider, expected_body = relative_copies[key]
++                            require(body(item) == expected_body, 'Relative original fingerprint and host-copy bytes/SHA differ')
++                            used_relative.add(key)
++                            pin = dict(item, path=str(provider))
++                        else:
++                            pin = dict(item, path=str(document.parent.joinpath(*rel.parts)))
++                    path = bound(pin)
++                    if (path.suffix.lower() == '.json' or Path(item['path']).suffix.lower() == '.json') and path not in inspected_json:
++                        inspected_json.add(path)
++                        pending.append((load(path, pin), Path(pin['path'])))
++                pending.extend((child, document) for child in item.values())
++            elif isinstance(item, list):
++                pending.extend((child, document) for child in item)
++
++    references(execution, c['files']['cpu_execution']['path'])
+     require(phases['status'] == 'passed' and phases['inputs_unchanged'] is True
+             and phases['inputs_before'] == phases['inputs_after']
+             and [row['phase'] for row in phases['phases']] == ['extract', 'plot']
+             and all(type(row['actual_wait_returncode']) is int and row['actual_wait_returncode'] == 0
+                     for row in phases['phases']), 'Two actual extract/plot phase0 receipts required')
+-    references(phases)
++    references(phases, c['files']['cpu_phases']['path'])
++
++    def inventory(value, description):
++        require(isinstance(value, list) and value, 'Nonempty actual fingerprint inventory required: ' + description)
++        paths = set()
++        for row in value:
++            path = str(bound(row))
++            require(path not in paths, 'Duplicate actual fingerprint inventory: ' + description)
++            paths.add(path)
++        return paths
++
++    source_paths = inventory(execution['source_before'], 'execution.source_before')
++    require({str(regular(c['files'][role]['path'])) for role in ('extract_source', 'plot_source')} <= source_paths,
++            'Actual source before/after must bind both accepted producers')
++    phase_input_paths = inventory(phases['inputs_before'], 'phases.inputs_before')
+     sc, pl, inp = files['scalars'], files['plot_report'], files['input_contract']
+-    require(sc['schema_version'] == 1 and sc['phase'] == 'student_training_scalars'
++    require(type(sc['schema_version']) is int and sc['schema_version'] == 1 and sc['phase'] == 'student_training_scalars'
+             and sc['status'] == 'passed' and sc['kind'] == kind and sc['stage'] == 'student-' + kind
+-            and sc['target_iterations'] == target and sc['training_scalar_integrity_complete'] is True
++            and type(sc['target_iterations']) is int and sc['target_iterations'] == target
++            and sc['training_scalar_integrity_complete'] is True
+             and sc['required_core_tags'] == CORE[kind] and sc['diagnostics'] == []
+             and sc['input_files_unchanged'] is True and sc['event_integrity_complete'] is True,
+             'Typed full scalar and strict event-integrity acceptance required')
+@@ -248,7 +329,7 @@
+             'Scalar/archive acceptance cannot claim model, quality, convergence or full schedule acceptance')
+     bound(sc['input_contract'], 'input_contract')
+     bound(sc['extractor_source'], 'extract_source')
+-    require(inp['schema_version'] == 1 and inp['kind'] == kind, 'Actual extractor input contract differs')
++    require(type(inp['schema_version']) is int and inp['schema_version'] == 1 and inp['kind'] == kind, 'Actual extractor input contract differs')
+     native_path = bound(inp['native_manifest'])
+     native = load(native_path, inp['native_manifest'])
+     require(native['status'] == 'passed' and type(native['returncode']) is int and native['returncode'] == 0
+@@ -256,13 +337,26 @@
+             and type(native['checkpoint_iteration']) is int and native['checkpoint_iteration'] == target - 1
+             and str(Path(native['checkpoint']).parent) == inp['native_run_directory'],
+             'Actual same-run official native manifest identity required')
++    checkpoint = PurePosixPath(native['checkpoint'])
++    prefix = PurePosixPath('/outputs/official-full/official') / ('student-' + kind) / 'PHP-research'
++    require(checkpoint.is_absolute() and '..' not in checkpoint.parts and str(checkpoint) == native['checkpoint']
++            and checkpoint.is_relative_to(prefix) and len(checkpoint.relative_to(prefix).parts) == 2
++            and checkpoint.name == 'model_' + str(target - 1).zfill(5) + '.pt'
++            and isinstance(native['checkpoint_sha256'], str)
++            and re.fullmatch('[0-9a-f]{64}', native['checkpoint_sha256'])
++            and isinstance(native['finished_utc'], str) and native['finished_utc'],
++            'Actual final native checkpoint path/SHA identity required; no model parsing')
+     require(sc['native_terminal'] == {key: native[key] for key in
+             ('label', 'profile', 'status', 'returncode', 'checkpoint', 'checkpoint_iteration',
+              'checkpoint_sha256', 'finished_utc')}, 'Scalar native identity subset differs')
++    require(sc['run_directory'] == inp['run_directory']
++            and sc['native_run_directory'] == inp['native_run_directory'], 'Scalar run identity differs')
+     bound(sc['native_manifest'])
+     require(body(sc['native_manifest']) == body(inp['native_manifest']), 'Scalar native manifest differs')
+     events = inp['events']
+-    require(events and len({row['path'] for row in events}) == len(events), 'Exact actual event set required')
++    require(isinstance(events, list) and events and len({row['path'] for row in events}) == len(events)
++            and len({row['native_path'] for row in events}) == len(events), 'Exact actual event set required')
++    require(Path(inp['run_directory']).is_relative_to('/artifacts'), 'Read-only artifact event run required')
+     run_dir = translate(inp['run_directory'])
+     require({str(path) for path in run_dir.glob('events.out.tfevents.*')}
+             == {str(translate(row['path'])) for row in events}, 'Actual same-run event file-set changed')
+@@ -278,57 +372,120 @@
+         require(integrity['status'] == 'passed' and integrity['format'] == 'TFRecord'
+                 and integrity['complete_eof'] is True and integrity['crc32c_verified'] is True
+                 and type(integrity['records']) is int and integrity['records'] > 0
++                and integrity['expected_file'] == {key: row[key] for key in ('path', 'bytes', 'sha256')}
++                and integrity['diagnostics'] == [] and integrity['max_record_bytes'] == MAX_EVENT_RECORD_BYTES
++                and type(integrity['largest_record_bytes']) is int
++                and 0 <= integrity['largest_record_bytes'] <= MAX_EVENT_RECORD_BYTES
+                 and body(integrity) == body(row), 'Strict same-whole-event TFRecord CRC/EOF proof required')
++    require({str(bound(row)) for row in sc['input_files']} <= phase_input_paths,
++            'Actual phase before/after must bind the complete extractor inputs')
+     require(sc['input_files'] == [sc['input_contract'], sc['native_manifest'],
+             *[{key: row[key] for key in ('path', 'bytes', 'sha256')} for row in events]],
+             'Full accepted extractor input inventory differs')
+-    for tag in CORE[kind]:
+-        coverage = sc['tag_coverage'][tag]
+-        unique = coverage['unique_steps']
+-        require((unique == target or unique == list(range(target))) and coverage['samples'] == target
+-                and coverage['first_step'] == 0 and coverage['last_step'] == target - 1
+-                and not any(coverage[key] for key in ('missing_steps', 'duplicate_steps', 'out_of_range_steps', 'out_of_order'))
+-                and coverage['all_finite'] is True and coverage['required_core'] is True,
+-                'Core scalar coverage incomplete: ' + tag)
+-    require(set(sc['tag_coverage']) == set(sc['scalars']) | set(CORE[kind]) | CONDITIONAL
+-            and all(row['all_finite'] is True for row in sc['tag_coverage'].values()), 'Actual tags must remain complete and finite')
+-    require(pl['status'] == 'rendered_student_training_curves' and pl['kind'] == kind
+-            and pl['stage'] == sc['stage'] and pl['target_iterations'] == target
++    checker = sc['event_integrity_checker']
++    require(checker['algorithm'] == 'TFRecord little-endian length/header/body masked CRC32C and exact whole-file EOF'
++            and checker['max_record_bytes'] == MAX_EVENT_RECORD_BYTES
++            and checker['payload_chunk_bytes'] == 1048576,
++            'Frozen v2 TFRecord checker parameters differ')
++    crc_source = checker['crc_update_source']
++    require(crc_source['path'] in native_copies
++            and Path(crc_source['path']).as_posix().endswith('/tensorboard/compat/tensorflow_stub/pywrap_tensorflow.py'),
++            'Actual installed CRC module needs its explicit original-byte host copy')
++    bound(crc_source)
++    scalar_rows, coverage = sc['scalars'], sc['tag_coverage']
++    require(isinstance(scalar_rows, dict) and isinstance(coverage, dict)
++            and set(coverage) == set(scalar_rows) | set(CORE[kind]) | CONDITIONAL,
++            'Every actual and conditional tag coverage must remain complete')
++    event_order = {row['path']: index for index, row in enumerate(events)}
++    event_counts = Counter()
++    actual_tags = set()
++    for event in sc['events']:
++        require(isinstance(event['scalar_tags'], list)
++                and all(isinstance(tag, str) for tag in event['scalar_tags'])
++                and len(set(event['scalar_tags'])) == len(event['scalar_tags']), 'Exact per-event scalar tag inventory required')
++        actual_tags.update(event['scalar_tags'])
++    require(set(scalar_rows) == actual_tags, 'Scalar tags differ from actual event inventories')
++    for tag in coverage:
++        rows = scalar_rows.get(tag, [])
++        require(isinstance(tag, str) and isinstance(rows, list), 'Original scalar row arrays required')
++        indices, previous_event, steps = Counter(), -1, []
++        for row in rows:
++            require(isinstance(row, dict) and set(row) == {'step', 'wall_time', 'value', 'source_event', 'event_sample_index'}
++                    and type(row['step']) is int and type(row['event_sample_index']) is int
++                    and all(type(row[field]) in (int, float) and math.isfinite(row[field])
++                            for field in ('value', 'wall_time'))
++                    and row['source_event'] in event_order, 'Typed finite original scalar sample required: ' + tag)
++            event = row['source_event']
++            require(event_order[event] >= previous_event and row['event_sample_index'] == indices[event]
++                    and tag in sc['events'][event_order[event]]['scalar_tags'], 'Original per-event scalar sequence/provenance differs')
++            previous_event = event_order[event]
++            indices[event] += 1
++            event_counts[event] += 1
++            steps.append(row['step'])
++        counts = Counter(steps)
++        expected_coverage = {'samples': len(rows), 'unique_steps': len(counts),
++            'first_step': min(steps) if steps else None, 'last_step': max(steps) if steps else None,
++            'missing_steps': [step for step in range(target) if step not in counts],
++            'duplicate_steps': [{'step': step, 'count': count} for step, count in sorted(counts.items()) if count > 1],
++            'out_of_range_steps': sorted(step for step in counts if step < 0 or step >= target),
++            'out_of_order': any(right < left for left, right in zip(steps, steps[1:])),
++            'all_finite': True, 'required_core': tag in CORE[kind]}
++        require(json.dumps(coverage[tag], sort_keys=True, allow_nan=False)
++                == json.dumps(expected_coverage, sort_keys=True, allow_nan=False), 'Coverage differs from preserved actual rows: ' + tag)
++        if tag in CORE[kind]:
++            require(steps == list(range(target)), 'Full ordered once-per-step actual core rows required: ' + tag)
++    require(all(type(event['parsed_scalar_samples']) is int
++                and event['parsed_scalar_samples'] == event_counts[event['path']] for event in sc['events']),
++            'Actual per-event scalar sample count differs')
++    plotted = [*CORE[kind], 'Train/mean_reward', 'Train/mean_episode_length']
++    if kind == 'finetune':
++        plotted.append('Loss/ppo_gate_mean')
++    require(type(pl['schema_version']) is int and pl['schema_version'] == 1
++            and pl['status'] == 'rendered_student_training_curves' and pl['kind'] == kind
++            and pl['stage'] == sc['stage'] and type(pl['target_iterations']) is int and pl['target_iterations'] == target
+             and pl['input_files_unchanged'] is True and pl['events'] == sc['events']
++            and pl['event_integrity_complete'] is True and pl['event_integrity_checker'] == checker
+             and pl['input_contract'] == sc['input_contract'] and pl['native_manifest'] == sc['native_manifest']
+-            and pl['input_files'] == [*sc['input_files'], pl['input']],
++            and pl['input_files'] == [*sc['input_files'], pl['input']]
++            and pl['tags'] == [dict({'tag': tag}, **coverage[tag]) for tag in plotted]
++            and pl['unplotted_actual_tags'] == sorted(set(scalar_rows) - set(plotted)),
+             'Actual matching plot acceptance required')
+     bound(pl['input'], 'scalars')
+     bound(pl['plot_source'], 'plot_source')
+     require(len(pl['figures']) == 2, 'Both actual plot figures required')
+     require({str(translate(row['path'])): body(row) for row in pl['figures']}
+             == {str(regular(row['path'])): body(row) for row in c['figures'].values()}, 'Plot figure originals differ')
+-    references(sc)
+-    references(pl)
++    references(sc, c['files']['scalars']['path'])
++    references(pl, c['files']['plot_report']['path'])
+     for phase, role in zip(phases['phases'], ('extract_source', 'plot_source')):
+-        matching = [arg for arg in phase['argv'] if isinstance(arg, str)
+-                    and Path(arg).name == Path(c['files'][role]['path']).name]
+-        require(len(matching) == 1 and translate(matching[0]) == regular(c['files'][role]['path']),
+-                'Actual phase argv does not bind accepted producer source')
+         argv = phase['argv']
+-        def argument(flag):
+-            require(argv.count(flag) == 1 and argv.index(flag) + 1 < len(argv),
+-                    'Actual producer argument missing/duplicated: ' + flag)
+-            return argv[argv.index(flag) + 1]
+-        if role == 'extract_source':
+-            require(translate(argument('--contract')) == regular(c['files']['input_contract']['path'])
+-                    and argument('--contract-sha256') == c['files']['input_contract']['sha256']
+-                    and translate(argument('--output')) == regular(c['files']['scalars']['path']),
+-                    'Actual extract argv input/output SHA binding differs')
+-        else:
+-            require(translate(argument('--input')) == regular(c['files']['scalars']['path'])
+-                    and argument('--input-sha256') == c['files']['scalars']['sha256']
+-                    and translate(argument('--output')) == regular(c['files']['plot_report']['path']).parent,
+-                    'Actual plot argv input/output SHA binding differs')
++        require(isinstance(argv, list) and all(isinstance(arg, str) for arg in argv)
++                and len(argv) >= 9 and argv[:2] == ['/opt/php/bin/train-python', '-B']
++                and translate(argv[2]) == regular(c['files'][role]['path']),
++                'Actual phase must execute the accepted script with the reviewed Python interpreter')
++        flags = ['--contract', '--contract-sha256', '--output'] if role == 'extract_source' else ['--input', '--input-sha256', '--output']
++        require(argv[3::2][:3] == flags and (len(argv) == 9 or
++                (role == 'plot_source' and len(argv) == 11 and argv[9] == '--window'
++                 and re.fullmatch('[1-9][0-9]*', argv[10]))), 'Unexpected actual phase arguments')
++        source_role, output_role = ('input_contract', 'scalars') if role == 'extract_source' else ('scalars', 'plot_report')
++        actual_output = regular(c['files'][output_role]['path'])
++        if role == 'plot_source':
++            actual_output = actual_output.parent
++        require(translate(argv[4]) == regular(c['files'][source_role]['path'])
++                and argv[6] == c['files'][source_role]['sha256']
++                and translate(argv[8]) == actual_output, 'Actual phase input/output SHA binding differs')
++        if role == 'plot_source':
++            window = int(argv[10]) if len(argv) == 11 else 25
++            require(pl['smoothing']['method'] == 'trailing arithmetic mean'
++                    and type(pl['smoothing']['window_samples']) is int
++                    and pl['smoothing']['window_samples'] == window, 'Actual plot smoothing arguments differ')
+     required_review_paths = {str(regular(c['files'][role]['path'])) for role in
+                              ('input_contract', 'scalars', 'plot_report', 'cpu_execution', 'cpu_phases',
+-                              'extract_source', 'plot_source')}
++                              'extract_source', 'plot_source', 'created_inspect', 'running_inspect',
++                              'final_inspect', 'publication_source')}
+     required_review_paths |= {str(regular(row['path'])) for row in c['figures'].values()}
++    required_review_paths |= {str(native_path), str(translate(crc_source['path']))}
++    required_review_paths |= {str(regular(row['path'])) for row in c['cpu_raw_logs'].values()}
+     for role in ('root_review', 'independent_review'):
+         review = files[role]
+         require(review.get('status') in ('passed', 'passed_readonly_postexecution_review',
+@@ -337,9 +494,16 @@
+         refs = review.get('evidence_fingerprints')
+         require(isinstance(refs, list) and required_review_paths <= {str(translate(row['path'])) for row in refs},
+                 'Review must bind actual scientific, execution, source and figure evidence')
+-        references(review)
++        for record in refs:
++            bound(record)
++        references(review, c['files'][role]['path'])
++    for role, document in files.items():
++        references(document, c['files'][role]['path'])
++    require(used_copies == set(native_copies) and used_relative == set(relative_copies),
++            'Unused native/relative host-copy mapping is not accepted evidence')
+     rows = [('acceptance/contract.json', contract_fp, False)]
+     rows += [('acceptance/' + role + Path(row['path']).suffix, row, False) for role, row in c['files'].items()]
++    rows += [('cpu-raw/' + role + '.raw', row, False) for role, row in c['cpu_raw_logs'].items()]
+     rows += [('figures/learning-curves.' + suffix, row, False) for suffix, row in c['figures'].items()]
+     rows += [('inputs/native-manifest.json', fingerprint(native_path), False)]
+     rows += [('inputs/events/' + str(index).zfill(4) + '/' + Path(row['path']).name,
+@@ -350,7 +514,7 @@
+     for index, (path, record) in enumerate(sorted(records.items(), key=lambda item: str(item[0]))):
+         if str(path) not in used:
+             rows.append(('referenced/' + str(index).zfill(5) + '/' + path.name, record, False))
+-    return c, sc, rows, records
++    return c, sc, rows, records, run_dir
+ 
+ 
+ class ChunkWriter:
+@@ -429,15 +593,23 @@
+ def decode_record(package, record, destination=None):
+     encoded_sha, original_sha = hashlib.sha256(), hashlib.sha256()
+     encoded_size = original_size = 0
++    gzip_header = bytearray()
++    body(record)
++    body(record['encoded'])
++    require(isinstance(record['chunks'], list), 'Ordered chunk array required')
+     decoder = zlib.decompressobj(31) if record['encoding'] == 'gzip' else None
+     require(record['encoding'] in ('raw', 'gzip')
+-            and (decoder is None or record['gzip_mtime'] == 0), 'Unsupported archive encoding')
++            and ((decoder is None and record['gzip_mtime'] is None)
++                 or (decoder is not None and type(record['gzip_mtime']) is int and record['gzip_mtime'] == 0)), 'Unsupported archive encoding')
+     for chunk in record['chunks']:
+         path = package.joinpath(*relative(chunk['path']).parts)
+-        require(chunk['offset'] == encoded_size and 0 < chunk['bytes'] <= LIMIT
++        require(type(chunk['offset']) is int and chunk['offset'] == encoded_size
++                and type(chunk['bytes']) is int and 0 < chunk['bytes'] <= LIMIT
+                 and body(fingerprint(path)) == body(chunk), 'Chunk offset, size or SHA differs')
+         with path.open('rb') as stream:
+             for data in iter(lambda: stream.read(BLOCK), b''):
++                if decoder and len(gzip_header) < 10:
++                    gzip_header.extend(data[:10 - len(gzip_header)])
+                 encoded_sha.update(data)
+                 encoded_size += len(data)
+                 pending = data
+@@ -451,6 +623,8 @@
+                         destination.write(output)
+         require(body(fingerprint(path)) == body(chunk), 'Chunk changed during restoration')
+     if decoder:
++        require(len(gzip_header) == 10 and gzip_header[:4] == b'\x1f\x8b\x08\x00'
++                and gzip_header[4:8] == b'\x00\x00\x00\x00', 'Exact no-name gzip mtime=0 header required')
+         output = decoder.flush()
+         original_size += len(output)
+         original_sha.update(output)
+@@ -465,26 +639,37 @@
+ 
+ def verify(package, manifest_sha256):
+     package = Path(package).absolute()
++    require(isinstance(manifest_sha256, str) and re.fullmatch('[0-9a-f]{64}', manifest_sha256),
++            'Explicit reviewed package manifest SHA required')
+     expected = fingerprint(package / 'evidence-manifest.json')
++    require(expected['bytes'] <= LIMIT, 'Manifest itself exceeds the Git blob bound')
+     require(expected['sha256'] == manifest_sha256, 'Explicit package manifest SHA differs')
+     manifest = load(package / 'evidence-manifest.json', expected)
+-    require(manifest['status'] == 'completed_student_learning_curves_archive'
+-            and manifest['kind'] in TARGETS and manifest['quality_verified'] is False
+-            and manifest['official_schedule_complete'] is False, 'Actual scalar archive manifest required')
++    require(type(manifest['schema_version']) is int and manifest['schema_version'] == 1
++            and manifest['status'] == 'completed_student_learning_curves_archive'
++            and manifest['kind'] in TARGETS and all(manifest[flag] is False for flag in FALSE_FLAGS)
++            and type(manifest['restore_records']) is int and manifest['restore_records'] > 0 and manifest['raw_json_rewritten'] is False
++            and manifest['chunk_limit_bytes'] == LIMIT,  'Actual scalar archive manifest required')
+     paths = set()
+     for row in manifest['files']:
+         rel = str(relative(row['path']))
+-        require(rel not in paths and row['bytes'] <= LIMIT, 'Duplicate or over-limit Git blob')
++        require(rel != 'evidence-manifest.json' and rel not in paths
++                and type(row['bytes']) is int and 0 <= row['bytes'] <= LIMIT, 'Duplicate or over-limit Git blob')
+         paths.add(rel)
+         require(body(fingerprint(package / rel)) == body(row), 'Package bytes changed: ' + rel)
+     require({str(path.relative_to(package)) for path in package.rglob('*') if path.is_file()}
+             == paths | {'evidence-manifest.json'}
+             and not any(path.is_symlink() for path in package.rglob('*')), 'Exact package file-set differs')
++    require({'restore-map.json', 'summary.json', 'index.md', 'student_curves_archive.py'} <= paths,
++            'Sealed restore map, summary, index and helper required')
+     mapping = load(package / 'restore-map.json')
++    require(type(mapping['schema_version']) is int and mapping['schema_version'] == 1
++            and mapping['raw_json_rewritten'] is False and mapping['mode_restored_not_uid_gid'] is True,
++            'Exact original-byte restoration schema required')
+     logical = set()
+     for row in mapping['records']:
+         rel = str(relative(row['logical_path']))
+-        require(rel != 'restoration.json' and rel not in logical
++        require(rel != 'restoration.json' and not rel.startswith('restoration.json/') and rel not in logical
+                 and type(row['mode']) is int and 0 <= row['mode'] <= 0o777,
+                 'Duplicate restore path or unsupported mode')
+         require(not any(rel.startswith(other + '/') or other.startswith(rel + '/') for other in logical),
+@@ -492,13 +677,16 @@
+         logical.add(rel)
+         require(all(str(relative(chunk['path'])) in paths for chunk in row['chunks']), 'Unsealed restore chunk')
+         decode_record(package, row)
++    accepted = [row for row in mapping['records'] if row['logical_path'] == 'acceptance/contract.json']
++    require(len(accepted) == 1 and accepted[0]['sha256'] == manifest['acceptance_contract_sha256'],
++            'Restorable original acceptance contract must match the sealed acceptance SHA')
+     require(mapping['status'] == 'original_byte_restore_map' and len(logical) == manifest['restore_records'],
+             'Restore record count differs')
+     return manifest, mapping
+ 
+ 
+ def publish(args):
+-    c, scalars, inputs, expected = admit(args.contract, args.contract_sha256)
++    c, scalars, inputs, expected, event_directory = admit(args.contract, args.contract_sha256)
+     output = fresh(args.output, [Path(row['path']).parent for _, row, _ in inputs])
+     output.mkdir(exist_ok=False)
+     try:
+@@ -545,6 +733,8 @@
+             + '[校验与恢复源码](student_curves_archive.py)\n\n'
+             + '用已审源码 student_curves_archive.py 的 verify/restore 子命令，显式传本manifest SHA；'
+             + 'restore只向全新目录恢复原bytes及mode，不改JSON内部原绝对路径，不运行科学任务。\n')
++        require({str(path) for path in event_directory.glob('events.out.tfevents.*')}
++                == {row['path'] for _, row, event in inputs if event}, 'Original event file-set changed before archive seal')
+         for row in expected.values():
+             require(body(fingerprint(row['path'])) == body(row), 'Accepted source changed before seal')
+         for row in mapping:
+@@ -560,7 +750,9 @@
+         manifest = {'schema_version': 1, 'status': 'completed_student_learning_curves_archive',
+                     'kind': c['kind'], 'acceptance_contract_sha256': args.contract_sha256,
+                     'restore_records': len(mapping), 'chunk_limit_bytes': LIMIT, 'files': files,
+-                    'raw_json_rewritten': False, 'quality_verified': False, 'official_schedule_complete': False}
++                    'raw_json_rewritten': False, **{flag: False for flag in FALSE_FLAGS}}
++        require(len((json.dumps(manifest, ensure_ascii=False, indent=2, allow_nan=False) + '\n').encode()) <= LIMIT,
++                'Manifest itself exceeds 25MB')
+         save(output / 'evidence-manifest.json', manifest)  # Only successful seal, always last.
+         return {'status': manifest['status'], 'package': str(output),
+                 'manifest': fingerprint(output / 'evidence-manifest.json'), 'files': len(files) + 1}
+--- source-original/draft/NOTES.md
++++ NOTES.md
+@@ -2,10 +2,11 @@
+ 
+ 本目录只编写并静态解析源码。没有调用 CLI、读取 TensorBoard event 内容、启动科学阶段、Docker、SSH、浏览器或 GPU；没有实际接受合同、正式学生曲线包、恢复成功收据。原训练、32 文件选择性 fetch、armed waiter、58/629 门卫均未修改。两类学生的未来实际产物必须分别独立验收、分别出版。
+ 
+-`student_curves_archive.py` 仅使用宿主 Python 标准库，没有子进程或联网入口。科学提取及 Matplotlib 绘图在统一 Docker 内执行。旧 `cpu/` v1 不能准入：EventAccumulator 可能吞掉截断事件；出版依赖将绑定相邻 `cpu-v2/` 的严格 TFRecord 长度/CRC32C/完整 EOF 验证源码，待其最终 freeze：
++`student_curves_archive.py` 仅使用宿主 Python 标准库，没有子进程或联网入口。科学提取及 Matplotlib 绘图在统一 Docker 内执行。旧 `cpu/` v1 不能准入：EventAccumulator 可能吞掉截断事件；出版依赖将绑定相邻 `cpu-v2/` 的严格 TFRecord 长度/CRC32C/完整 EOF 验证源码，已冻结版本：
+ 
+-- `extract_student_scalars.py`：最终 v2 SHA 尚待源码冻结，未填不允许出版。
+-- `plot_student_learning_curves.py`：最终 v2 SHA 尚待源码冻结，未填不允许出版。
++- `extract_student_scalars.py`：19,320 B，SHA `e8bf7156013e7c31200ab39c9511020ed17c2e6726d79bc368939b44b5507b12`。
++- `plot_student_learning_curves.py`：12,268 B，SHA `6a14cfa86df96199e575384c48466d44046b1a2fad8ce76c1427b7d5add7abd0`。
++- v2 `source-manifest.json`：4,141 B，SHA `0a652313753768928296cc34632698f794548fb718a33f51e9b8848a9dd0daf8`。只按字节核对，不改动冻结目录。
+ 
+ 沿用教师归档的原字节保护、`gzip(mtime=0)`、连续分块和 whole SHA 思路；这是新学生报告 schema 的实现，不导入旧 publisher，也不把教师的四个 loss 或任意 `status=passed` 当作学生验收。
+ 
+@@ -27,13 +28,13 @@
+ | `root_review`, `independent_review` | 实际后验全文，`must_fix=[]`、通过状态及 `evidence_fingerprints`；自身全部 fingerprint 引用逐项核验 |
+ | `publication_source` | 实际调用的本归档源码自身，绝对路径与 `__file__` 相同、SHA 精确匹配 |
+ 
+-另有 `figures`，键恰为 `png`、`svg`，各绑定真实原件 fingerprint。两个 review 的通过状态只接受 `passed`、`passed_readonly_postexecution_review` 或 `passed_student_learning_curves_postexecution_review`；这不是孤立门卫。两份 review 的 evidence 必须至少覆盖实际输入合同、scalars、plot report、host execution、phase report、两源码和两图，所有自身引用都核 current SHA。Root 工具会话/父 wait 的实际证据也应由 review 纳入；本工具不会把用户填入的工具编号伪称 OS 观测。
++另有 `figures`，键恰为 `png`、`svg`，各绑定真实原件 fingerprint。必填`cpu_raw_logs`键恰为`create_stdout/create_stderr/attached_stdout/attached_stderr/extract_stdout/extract_stderr/plot_stdout/plot_stderr`，各是实际原始日志fingerprint（空stderr也按实际0B/SHA绑定并保留）；两review均须覆盖全部八份原件。两个 review 的通过状态只接受 `passed`、`passed_readonly_postexecution_review` 或 `passed_student_learning_curves_postexecution_review`；这不是孤立门卫。两份 review 的 evidence 必须至少覆盖实际输入合同、scalars、plot report、host execution、phase report、两源码和两图，所有自身引用都核 current SHA。两review还必须覆盖三inspect、本publisher源码、原native manifest和实际CRC模块hostcopy。Root 工具会话/父 wait 的实际证据也应由 review 纳入；本工具不会把用户填入的工具编号伪称 OS 观测。
+ 
+ CPU inspect 固定为已验统一镜像 `sha256:2be18521015b2a84ef7a4442af9a94ef041a19feb9ce385ae15424b1dc158d8f`，runc、network none、无 GPU DeviceRequests、GPU hidden、2 CPU/12 GiB。四个实际 bind 为 `/code`、`/control`、`/artifacts` 只读以及 `/validation` 可写；根据这些真实 Mounts 翻译原报告中的容器路径，不重写原报告。Root/独审的 fingerprint 引用须有实际本地字节提供者，远端历史位置可作为纯 `native_path` 来源字符串保留，不能冒充本地可读取的文件。
+ 
+-实际 phase argv 必须绑定两源码、对应输入及 SHA、对应输出。提取报告必须有实际原生 `official/passed/int0` manifest 和 final checkpoint iteration 9999（pure）或29999（finetune），全部事件属于同一实际 run。该 manifest 只是曲线来源身份门卫，不扩大为本工具独立证明的训练/模型质量。
++实际 `source_before/source_after` 是非空fingerprint数组，至少覆盖两producer；`inputs_before/inputs_after`是非空fingerprint数组，至少覆盖输入合同、native manifest和全部原events。两份前后数组逐项相等且全部实际字节重新核SHA。实际 phase argv必须从 `/opt/php/bin/train-python -B` 开始，第三参数就是相应受审源码；其后仅接受约定输入、输入SHA、输出参数，plot可在末尾另给正整数`--window`。提取报告必须有实际原生 `official/passed/int0` manifest 和 final checkpoint iteration 9999（pure）或29999（finetune），全部事件属于同一实际 run。该 manifest 只是曲线来源身份门卫，不扩大为本工具独立证明的训练/模型质量。
+ 
+-纯学生核心 tag 是 `Loss/behavior`、`Loss/warmup_active`，各按序恰好0..9999；混合学生九个核心 loss 按序恰好0..29999，详见源码 `CORE`。缺步、重复、越界、乱序或任何非有限 scalar 均拒绝。顶层 `event_integrity_complete=true` 且每件原 event 的 TFRecord 验证须有同一 whole bytes/SHA、正 record 数、长度/CRC32C 和完整 EOF，通过记录不能由 EventAccumulator 成功读取替代。奖励/episode、PPO gate 等 conditional tag 的真实缺步/重复等诊断不被补齐；全部实际 tag 和逐样本 JSON 保留。两种图的输入/figure/source SHA 都必须与实际报告一致。
++纯学生核心 tag 是 `Loss/behavior`、`Loss/warmup_active`，各按序恰好0..9999；混合学生九个核心 loss 按序恰好0..29999，详见源码 `CORE`。缺步、重复、越界、乱序或任何非有限 scalar 均拒绝。顶层 `event_integrity_complete=true` 且每件原 event 的 TFRecord 验证须有同一 whole bytes/SHA、正 record 数、长度/CRC32C 和完整 EOF，同时核`expected_file`、空diagnostics、67,108,864 B记录上限和实际largest_record_bytes。通过记录不能由 EventAccumulator 成功读取替代。所有scalar row逐条核严格整数step/index、finite值、原event/tag、逐event连续sample index，coverage从原rows复算；core原rows本身必须按序恰好全range，不能只提交一个passed摘要。plot必须原样绑定相同`event_integrity_checker`、完整events、plotted tags和unplotted实际tags。奖励/episode、PPO gate 等 conditional tag 的真实缺步/重复等诊断不被补齐；全部实际 tag 和逐样本 JSON 保留。两种图的输入/figure/source SHA 都必须与实际报告一致。
+ 
+ ## 未来 CLI
+ 
+@@ -61,6 +62,20 @@
+ 
+ 原始 events，以及任何超过25MB的 JSON/SVG/PNG/其他证据，都以 `gzip(mtime=0)` 保存；所有归档体使用连续 ≤25,000,000 B 的块，每块独立 SHA、offset、整件编码 SHA和原始 SHA。普通 PNG/SVG 另有直接可读的原字节预览；大图仍完整归档，index 明确提示先无损恢复查看，不丢弃、不重编码或伪造替代图。相同内容可共享字节块，恢复仍按每条路径自己的 mode。manifest 每条依赖都≤25MB，可避免 Git 100MB blob 上限；Git 不保留完整读写权限，因此包校验按 bytes/SHA，mode 只由 restore-map 重建。
+ 
+-Root/独审、CPU原始stdout/stderr、输入/source及其他 review fingerprint 引用闭包一并原字节归档。需要的原始 events 若尚未取得，出版会拒绝并不创建结果目录；应由独立只读 transfer 提供准确 native path、whole SHA/bytes 原件，本工具不下载、不猜事件名、不制造替代 event。完整出版成功后，events 可从 Git 包离线无损恢复。
++Root/独审、CPU原始stdout/stderr、输入/source及其他 review fingerprint 引用闭包一并原字节归档。所有已加载合同/inspect/报告及每份被fingerprint引用的`.json`继续扫描嵌套引用，至传递闭包结束；每个引用核真实whole bytes/SHA，循环只共享同一实际pin，不跳过后代依赖。原文档中相对清单path默认按该文档原目录解析；遇到repo-relative出处等不同命名空间时，只能由未来接受合同可选`relative_file_copies`数组精确指定`document_path`、`relative_path`、`host_copy`，核同一whole bytes/SHA且必须真正使用，不能猜基目录。JSON schema中用于说明的`bytes/sha256`描述字符串不是实际fingerprint，不能替代任一强制门卫的真实pin。对非`.json`原始stdout/raw/源码只归档原字节，不猜其中语义。需要的原始 events 若尚未取得，出版会拒绝并不创建结果目录；应由独立只读 transfer 提供准确 native path、whole SHA/bytes 原件，本工具不下载、不猜事件名、不制造替代 event。完整出版成功后，events 可从 Git 包离线无损恢复。
+ 
+ 本包只证明已接受的 scalar 完整性、实际曲线及归档恢复合同。`quality/convergence/official_schedule_complete/seven_PT_acceptance/PT_ONNX_parity` 始终为 false；图形走势不是收敛或技能验收。
++
++## v2 installed CRC模块与原路径
++
++接受合同新增必填`native_file_copies`数组。每项是`native_path`（真实容器/历史原绝对路径）和`host_copy`（实际宿主绝对`path`、整数`bytes`、`sha256`）。`scalars.event_integrity_checker.crc_update_source`必须在该数组有精确映射；其原path/bytes/SHA不能删掉或替换为hostcopy。hostcopy必须是未来实际CPU中installed `tensorboard/compat/tensorflow_stub/pywrap_tensorflow.py`原字节的只读取得副本，不是网上下载的新版本。核原fingerprint==hostcopy whole bytes/SHA之后才解析引用；两review都必须覆盖该源。所有映射必须实际使用，禁止重复native_path或覆盖四个真实bind。示意字段只在`source-interface.json`中作为schema描述，不生成实际合同。
++
++## 直接源码与概念出处
++
++`source-original/draft/`保留本轮接手时的直接未freeze草稿，SHA/bytes见`source-interface.json`。`minimal-delta/`保存对该直接草稿的完整源码与NOTES差异；`full.diff`是全部两文件差异的串接，没有省略。新接口/清单/静态检查资料是新增文件，详见source-only manifest。
++
++教师概念祖先是`outputs/research/official-full/teacher-high-climb-76-final-publication-binding-01/publish.py`和`replay.py`，本目录只冻结其原字节到`source-original/teacher-conceptual-ancestor/`供来源审阅。借鉴原件SHA、mtime0 gzip、连续chunk与wholeSHA无损恢复思路，没有import、调用其Docker replay入口；学生合同、13roles、二phase、三inspect、core/conditional coverage和独立verify/restore是新的实现，不能把差异描述成只换label。CPU-v2最终五份源码/接口/清单/README原件也保存在`source-original/cpu-v2/`，只作字节出处。
++
++## 当前验证边界
++
++当前只做AST、stdlib import白名单/禁止调用的静态核对、原件和diff字节核对。`publish/verify/restore`均未运行；因此没有实际package manifest、运行通过或restore成功声明。需要Root与独立静态审阅后，未来真实学生结束、CPU二phase/三inspect/完整EOF CRC及双方后验完成，再生成actual acceptance-contract并执行。任何缺文件、缺pin或gate失败都拒绝准入；fresh输出父目录需已存在，不能与输入原件目录互为祖先。gzip头和wholeSHA离线核验不证明科学收敛或模型质量。
+--- /dev/null
++++ source-interface.json
+@@ -0,0 +1,463 @@
++{
++  "schema_version": 1,
++  "status": "source_only_prepared_not_executed_pending_Root_and_independent_static_review",
++  "prepared_utc": "2026-10-13T05:17:32.242400+00:00",
++  "publication_source": {
++    "path": "student_curves_archive.py",
++    "bytes": 49379,
++    "sha256": "512a7c3a7fd38e70ff8a5c760b8be6c086e7c696ebae2f6fcf41ab03faeb58b3"
++  },
++  "direct_ancestry": [
++    {
++      "origin_at_handoff": "outputs/research/official-full/student-final-learning-curves-source-preparation-01/publication/student_curves_archive.py",
++      "frozen_original": {
++        "path": "source-original/draft/student_curves_archive.py",
++        "bytes": 35126,
++        "sha256": "66d4ecc36c46742156676569c2a78b707ba74b9c0d0717c16b32ae08600e3c0f"
++      },
++      "new": {
++        "path": "student_curves_archive.py",
++        "bytes": 49379,
++        "sha256": "512a7c3a7fd38e70ff8a5c760b8be6c086e7c696ebae2f6fcf41ab03faeb58b3"
++      }
++    },
++    {
++      "origin_at_handoff": "outputs/research/official-full/student-final-learning-curves-source-preparation-01/publication/NOTES.md",
++      "frozen_original": {
++        "path": "source-original/draft/NOTES.md",
++        "bytes": 7822,
++        "sha256": "f3029d7349cf26acdf23833cf8f809c4bf1d4eb0668556e76094a1383e1be6cb"
++      },
++      "new": {
++        "path": "NOTES.md",
++        "bytes": 12371,
++        "sha256": "a1007062411ddd4283162f56d76f605f9be6d3832e67198fc61c8fd42bca515a"
++      }
++    }
++  ],
++  "conceptual_ancestry": [
++    {
++      "origin": {
++        "path": "outputs/research/official-full/teacher-high-climb-76-final-publication-binding-01/publish.py",
++        "bytes": 17875,
++        "sha256": "e49b9cdb5ec69f6412e0d87afc988e18affa7c3b9e25bf85551280f71339935f"
++      },
++      "frozen_original": {
++        "path": "source-original/teacher-conceptual-ancestor/publish.py",
++        "bytes": 17875,
++        "sha256": "e49b9cdb5ec69f6412e0d87afc988e18affa7c3b9e25bf85551280f71339935f"
++      },
++      "scope": "Concepts only: raw evidence fingerprints, mtime0 gzip, continuous chunks, whole-SHA restore; no import, execution or label-only claim"
++    },
++    {
++      "origin": {
++        "path": "outputs/research/official-full/teacher-high-climb-76-final-publication-binding-01/replay.py",
++        "bytes": 12846,
++        "sha256": "9c434edfdce34f3d1862fadc142e12780747555e0f9df22736ea7cb50913300b"
++      },
++      "frozen_original": {
++        "path": "source-original/teacher-conceptual-ancestor/replay.py",
++        "bytes": 12846,
++        "sha256": "9c434edfdce34f3d1862fadc142e12780747555e0f9df22736ea7cb50913300b"
++      },
++      "scope": "Concepts only: raw evidence fingerprints, mtime0 gzip, continuous chunks, whole-SHA restore; no import, execution or label-only claim"
++    }
++  ],
++  "cpu_v2_producers": [
++    {
++      "origin": {
++        "path": "outputs/research/official-full/student-final-learning-curves-source-preparation-01/cpu-v2/extract_student_scalars.py",
++        "bytes": 19320,
++        "sha256": "e8bf7156013e7c31200ab39c9511020ed17c2e6726d79bc368939b44b5507b12"
++      },
++      "frozen_original": {
++        "path": "source-original/cpu-v2/extract_student_scalars.py",
++        "bytes": 19320,
++        "sha256": "e8bf7156013e7c31200ab39c9511020ed17c2e6726d79bc368939b44b5507b12"
++      }
++    },
++    {
++      "origin": {
++        "path": "outputs/research/official-full/student-final-learning-curves-source-preparation-01/cpu-v2/plot_student_learning_curves.py",
++        "bytes": 12268,
++        "sha256": "6a14cfa86df96199e575384c48466d44046b1a2fad8ce76c1427b7d5add7abd0"
++      },
++      "frozen_original": {
++        "path": "source-original/cpu-v2/plot_student_learning_curves.py",
++        "bytes": 12268,
++        "sha256": "6a14cfa86df96199e575384c48466d44046b1a2fad8ce76c1427b7d5add7abd0"
++      }
++    },
++    {
++      "origin": {
++        "path": "outputs/research/official-full/student-final-learning-curves-source-preparation-01/cpu-v2/source-manifest.json",
++        "bytes": 4141,
++        "sha256": "0a652313753768928296cc34632698f794548fb718a33f51e9b8848a9dd0daf8"
++      },
++      "frozen_original": {
++        "path": "source-original/cpu-v2/source-manifest.json",
++        "bytes": 4141,
++        "sha256": "0a652313753768928296cc34632698f794548fb718a33f51e9b8848a9dd0daf8"
++      }
++    },
++    {
++      "origin": {
++        "path": "outputs/research/official-full/student-final-learning-curves-source-preparation-01/cpu-v2/source-interface.json",
++        "bytes": 12573,
++        "sha256": "4483feca47bcb3e6a69bf6bc3bc852f258de1de5bd7653e989eb42aa5ec721ee"
++      },
++      "frozen_original": {
++        "path": "source-original/cpu-v2/source-interface.json",
++        "bytes": 12573,
++        "sha256": "4483feca47bcb3e6a69bf6bc3bc852f258de1de5bd7653e989eb42aa5ec721ee"
++      }
++    },
++    {
++      "origin": {
++        "path": "outputs/research/official-full/student-final-learning-curves-source-preparation-01/cpu-v2/README.md",
++        "bytes": 4282,
++        "sha256": "e4724f5cbde8afe4e70c7978e1532e8349eea98130ad74ac81b63658c609d1a3"
++      },
++      "frozen_original": {
++        "path": "source-original/cpu-v2/README.md",
++        "bytes": 4282,
++        "sha256": "e4724f5cbde8afe4e70c7978e1532e8349eea98130ad74ac81b63658c609d1a3"
++      }
++    }
++  ],
++  "cli": {
++    "publish": [
++      "python3",
++      "-S",
++      "-B",
++      "student_curves_archive.py",
++      "publish",
++      "--contract",
++      "<actual-host-acceptance-contract>",
++      "--contract-sha256",
++      "<reviewed-actual-contract-SHA256>",
++      "--output",
++      "<fresh-separate-package>"
++    ],
++    "verify": [
++      "python3",
++      "-S",
++      "-B",
++      "<package>/student_curves_archive.py",
++      "verify",
++      "--package",
++      "<package>",
++      "--manifest-sha256",
++      "<reviewed-package-manifest-SHA256>"
++    ],
++    "restore": [
++      "python3",
++      "-S",
++      "-B",
++      "<package>/student_curves_archive.py",
++      "restore",
++      "--package",
++      "<package>",
++      "--manifest-sha256",
++      "<reviewed-package-manifest-SHA256>",
++      "--output",
++      "<fresh-separate-restored-directory>"
++    ]
++  },
++  "future_actual_acceptance_contract": {
++    "schema_version": "strict integer 1",
++    "status": "reviewed_actual_student_learning_curves_cpu_acceptance",
++    "kind": [
++      "pure",
++      "finetune"
++    ],
++    "files": {
++      "cpu_execution": {
++        "path": "actual absolute nonsymlink host provider",
++        "bytes": "actual nonnegative strict integer",
++        "sha256": "reviewed actual whole SHA256"
++      },
++      "cpu_phases": {
++        "path": "actual absolute nonsymlink host provider",
++        "bytes": "actual nonnegative strict integer",
++        "sha256": "reviewed actual whole SHA256"
++      },
++      "created_inspect": {
++        "path": "actual absolute nonsymlink host provider",
++        "bytes": "actual nonnegative strict integer",
++        "sha256": "reviewed actual whole SHA256"
++      },
++      "extract_source": {
++        "path": "actual absolute nonsymlink host provider",
++        "bytes": "actual nonnegative strict integer",
++        "sha256": "reviewed actual whole SHA256"
++      },
++      "final_inspect": {
++        "path": "actual absolute nonsymlink host provider",
++        "bytes": "actual nonnegative strict integer",
++        "sha256": "reviewed actual whole SHA256"
++      },
++      "independent_review": {
++        "path": "actual absolute nonsymlink host provider",
++        "bytes": "actual nonnegative strict integer",
++        "sha256": "reviewed actual whole SHA256"
++      },
++      "input_contract": {
++        "path": "actual absolute nonsymlink host provider",
++        "bytes": "actual nonnegative strict integer",
++        "sha256": "reviewed actual whole SHA256"
++      },
++      "plot_report": {
++        "path": "actual absolute nonsymlink host provider",
++        "bytes": "actual nonnegative strict integer",
++        "sha256": "reviewed actual whole SHA256"
++      },
++      "plot_source": {
++        "path": "actual absolute nonsymlink host provider",
++        "bytes": "actual nonnegative strict integer",
++        "sha256": "reviewed actual whole SHA256"
++      },
++      "publication_source": {
++        "path": "actual absolute nonsymlink host provider",
++        "bytes": "actual nonnegative strict integer",
++        "sha256": "reviewed actual whole SHA256"
++      },
++      "root_review": {
++        "path": "actual absolute nonsymlink host provider",
++        "bytes": "actual nonnegative strict integer",
++        "sha256": "reviewed actual whole SHA256"
++      },
++      "running_inspect": {
++        "path": "actual absolute nonsymlink host provider",
++        "bytes": "actual nonnegative strict integer",
++        "sha256": "reviewed actual whole SHA256"
++      },
++      "scalars": {
++        "path": "actual absolute nonsymlink host provider",
++        "bytes": "actual nonnegative strict integer",
++        "sha256": "reviewed actual whole SHA256"
++      }
++    },
++    "figures": {
++      "png": {
++        "path": "actual original host figure",
++        "bytes": "actual strict integer",
++        "sha256": "actual whole SHA256"
++      },
++      "svg": {
++        "path": "actual original host figure",
++        "bytes": "actual strict integer",
++        "sha256": "actual whole SHA256"
++      }
++    },
++    "native_file_copies": [
++      {
++        "native_path": "exact original absolute installed CRC-module or external evidence path; cannot shadow actual binds",
++        "host_copy": {
++          "path": "actual absolute original-byte hostcopy",
++          "bytes": "actual strict integer",
++          "sha256": "same whole SHA as original native fingerprint"
++        }
++      }
++    ],
++    "required_crc_mapping": "scalars.event_integrity_checker.crc_update_source must have explicit native_file_copies mapping; same path/bytes/SHA retained unmodified in original scalars and plot report. Missing/unused mappings reject.",
++    "not_created": true,
++    "cpu_raw_logs": {
++      "create_stdout": {
++        "path": "actual original absolute host raw log; empty actual stderr allowed",
++        "bytes": "actual nonnegative strict integer",
++        "sha256": "actual whole SHA256"
++      },
++      "create_stderr": {
++        "path": "actual original absolute host raw log; empty actual stderr allowed",
++        "bytes": "actual nonnegative strict integer",
++        "sha256": "actual whole SHA256"
++      },
++      "attached_stdout": {
++        "path": "actual original absolute host raw log; empty actual stderr allowed",
++        "bytes": "actual nonnegative strict integer",
++        "sha256": "actual whole SHA256"
++      },
++      "attached_stderr": {
++        "path": "actual original absolute host raw log; empty actual stderr allowed",
++        "bytes": "actual nonnegative strict integer",
++        "sha256": "actual whole SHA256"
++      },
++      "extract_stdout": {
++        "path": "actual original absolute host raw log; empty actual stderr allowed",
++        "bytes": "actual nonnegative strict integer",
++        "sha256": "actual whole SHA256"
++      },
++      "extract_stderr": {
++        "path": "actual original absolute host raw log; empty actual stderr allowed",
++        "bytes": "actual nonnegative strict integer",
++        "sha256": "actual whole SHA256"
++      },
++      "plot_stdout": {
++        "path": "actual original absolute host raw log; empty actual stderr allowed",
++        "bytes": "actual nonnegative strict integer",
++        "sha256": "actual whole SHA256"
++      },
++      "plot_stderr": {
++        "path": "actual original absolute host raw log; empty actual stderr allowed",
++        "bytes": "actual nonnegative strict integer",
++        "sha256": "actual whole SHA256"
++      }
++    },
++    "relative_file_copies_optional": [
++      {
++        "document_path": "exact original absolute path of fingerprinted JSON document",
++        "relative_path": "exact safe relative path from original document; no reinterpretation",
++        "host_copy": {
++          "path": "actual absolute original-byte provider",
++          "bytes": "same strict integer original size",
++          "sha256": "same original whole SHA256"
++        }
++      }
++    ]
++  },
++  "actual_cpu_contract": {
++    "image": "sha256:2be18521015b2a84ef7a4442af9a94ef041a19feb9ce385ae15424b1dc158d8f",
++    "isolation": "runc, network none, no DeviceRequests or Devices, CUDA_VISIBLE_DEVICES empty, NVIDIA_VISIBLE_DEVICES void, PYTHONDONTWRITEBYTECODE 1, NanoCpus 2000000000, Memory 12884901888",
++    "mounts": {
++      "/code": "RO",
++      "/control": "RO",
++      "/artifacts": "RO",
++      "/validation": "RW"
++    },
++    "inspects": "created+not running, live/running, final/exited/not running/exit0; same full ID,image,config image,name,mounts,started timestamp",
++    "host_execution": "strict integer create0, attached-child actual wait0, actual container exit0, running false, source_unchanged true, nonempty identical source_before/source_after fingerprint lists covering both producers",
++    "phases": "ordered exactly extract then plot; strict integer actual_wait_returncode0 each, inputs_unchanged true, nonempty identical inputs_before/inputs_after lists covering contract/native manifest/all events",
++    "extract_argv": [
++      "/opt/php/bin/train-python",
++      "-B",
++      "/code/extract_student_scalars.py",
++      "--contract",
++      "<actual-bound-contract>",
++      "--contract-sha256",
++      "<actual-whole-SHA>",
++      "--output",
++      "<actual-scalars>"
++    ],
++    "plot_argv": [
++      "/opt/php/bin/train-python",
++      "-B",
++      "/code/plot_student_learning_curves.py",
++      "--input",
++      "<actual-bound-scalars>",
++      "--input-sha256",
++      "<actual-whole-SHA>",
++      "--output",
++      "<actual-plot-directory>",
++      "[--window positive_integer]"
++    ],
++    "producer_sha_pins": {
++      "EXTRACT_SOURCE_SHA256": "e8bf7156013e7c31200ab39c9511020ed17c2e6726d79bc368939b44b5507b12",
++      "PLOT_SOURCE_SHA256": "6a14cfa86df96199e575384c48466d44046b1a2fad8ce76c1427b7d5add7abd0"
++    }
++  },
++  "scalar_contract": {
++    "targets": {
++      "pure": 10000,
++      "finetune": 30000
++    },
++    "core": {
++      "pure": [
++        "Loss/behavior",
++        "Loss/warmup_active"
++      ],
++      "finetune": [
++        "Loss/ppo_coef",
++        "Loss/warmup_active",
++        "Loss/learning_rate",
++        "Loss/total_loss",
++        "Loss/surrogate_loss",
++        "Loss/value_loss",
++        "Loss/behavior",
++        "Loss/entropy_mean",
++        "Loss/mean_kl"
++      ]
++    },
++    "conditional_tags": [
++      "Loss/ppo_gate_mean",
++      "Train/mean_episode_length",
++      "Train/mean_reward"
++    ],
++    "gate": "Recompute all tag coverage from every preserved original scalar row; strict integer ordered core steps exact 0..target-1; finite numeric value/wall_time; original event/tag plus per-event contiguous sample index; exact event sample counts/tag inventories; no filling or deduplication. Original event file set is rechecked again before successful archive seal.",
++    "native_terminal": "same-run official/passed/strict returncode0; final iteration target-1, canonical final model path+SHA; source identity only, no model bytes parsed",
++    "tfrecord": "Every original event binds expected_file, original whole bytes/SHA, positive record count, exact EOF and CRC32C true, empty diagnostics, 67108864 record limit and valid largest size; checker algorithm/payload 1048576 and explicit actual installed CRC source fingerprint.",
++    "plot": "exact scalar/input/native/events/checker/figures SHA bindings, true event_integrity_complete, exact plotted coverage and unplotted actual tags, smoothing window bound to actual argv"
++  },
++  "postexecution_reviews": {
++    "both_required": [
++      "root_review",
++      "independent_review"
++    ],
++    "allowed_statuses": [
++      "passed",
++      "passed_readonly_postexecution_review",
++      "passed_student_learning_curves_postexecution_review"
++    ],
++    "must_fix": [],
++    "minimum_fingerprint_coverage": [
++      "input_contract",
++      "scalars",
++      "plot_report",
++      "cpu_execution",
++      "cpu_phases",
++      "extract_source",
++      "plot_source",
++      "created_inspect",
++      "running_inspect",
++      "final_inspect",
++      "publication_source",
++      "png",
++      "svg",
++      "native_manifest",
++      "actual_CRC_module_hostcopy",
++      "create_stdout",
++      "create_stderr",
++      "attached_stdout",
++      "attached_stderr",
++      "extract_stdout",
++      "extract_stderr",
++      "plot_stdout",
++      "plot_stderr"
++    ],
++    "closure": "Every fingerprint nested in all loaded JSON documents and every subsequently fingerprinted .json is read through the pinned provider and recursively traversed to exhaustion. Raw stdout/stderr/source/event remain original bytes. All external native paths need real accessible byte providers. Reports and JSON absolute paths are never rewritten. Relative manifest references default to the original JSON directory, with exact document_path/relative_path to host_copy overrides only through reviewed relative_file_copies. Descriptive JSON-schema strings are not actual fingerprints; mandatory receipt/review fingerprints are separately validated."
++  },
++  "archive_contract": {
++    "limit_bytes": 25000000,
++    "encoding": "Original events always gzip; every other original >25000000 bytes gzip; mtime=0/no original filename header; all encoded bodies continuous chunks <=25000000 bytes.",
++    "integrity": "Per-chunk offset/bytes/SHA, encoded whole SHA and decoded original whole SHA; exact package file set; manifest itself <=25000000 bytes; duplicate/path/symlink checks; full preflight verify before restore mkdir.",
++    "originals": "Original events, native manifest, scalar rows/all actual tags, two figures, acceptance contract, 13roles, sources/CRC hostcopy, execution/phases/three inspections, actual Root and independent reviews and full fingerprint closure. Eight original CPU create/attached/extract/plot stdout/stderr logs are mandatory.",
++    "preview": "Only original figures <=25000000 bytes copied directly; original small PNG embeds offline. Large original PNG/SVG is fully archived with explicit index restore instruction.",
++    "restore": "Fresh separate directory only; copies each logical original bytes and own ordinary mode, never hardlinks; no uid/gid; no original absolute JSON paths rewritten; success restoration.json only after full verification.",
++    "publication_seal": "successful evidence-manifest.json written last; failure keeps partial without claiming success; no retry, deletion, download, subprocess, Docker or scientific phase"
++  },
++  "future_runtime": {
++    "actual_student_events": null,
++    "actual_acceptance_contract": null,
++    "actual_cpu_execution": null,
++    "actual_cpu_phases": null,
++    "actual_Root_postexecution": null,
++    "actual_independent_postexecution": null,
++    "actual_package": null,
++    "actual_verify": null,
++    "actual_restore": null
++  },
++  "limits": {
++    "source_only": true,
++    "AST_and_bytes_only": true,
++    "entrypoints_imported_or_invoked": false,
++    "events_or_models_parsed": false,
++    "network_SSH_Docker_browser_used": false,
++    "frozen_cpu_or_original_project_files_changed": false,
++    "armed_pair16stages_7PTCPU_4ONNX_28JSON_gate_changed": false,
++    "quality_verified": false,
++    "convergence_verified": false,
++    "official_schedule_complete": false,
++    "seven_PT_acceptance_verified": false,
++    "pt_onnx_numerical_parity_verified": false
++  }
++}
+--- /dev/null
++++ static-validation.json
+@@ -0,0 +1,80 @@
++{
++  "schema_version": 1,
++  "status": "AST_and_byte_checks_recorded_no_entrypoint_execution",
++  "source": {
++    "path": "student_curves_archive.py",
++    "bytes": 49379,
++    "sha256": "512a7c3a7fd38e70ff8a5c760b8be6c086e7c696ebae2f6fcf41ab03faeb58b3"
++  },
++  "stdlib_imports": [
++    "__future__",
++    "argparse",
++    "collections",
++    "gzip",
++    "hashlib",
++    "json",
++    "math",
++    "pathlib",
++    "re",
++    "shutil",
++    "stat",
++    "sys",
++    "zlib"
++  ],
++  "functions": [
++    "require",
++    "regular",
++    "signature",
++    "fingerprint",
++    "body",
++    "pairs",
++    "load",
++    "save",
++    "relative",
++    "fresh",
++    "inspect_document",
++    "admit",
++    "archive_record",
++    "decode_record",
++    "verify",
++    "publish",
++    "restore",
++    "main"
++  ],
++  "cpu_v2_frozen_pins_verified": [
++    {
++      "path": "outputs/research/official-full/student-final-learning-curves-source-preparation-01/cpu-v2/extract_student_scalars.py",
++      "bytes": 19320,
++      "sha256": "e8bf7156013e7c31200ab39c9511020ed17c2e6726d79bc368939b44b5507b12"
++    },
++    {
++      "path": "outputs/research/official-full/student-final-learning-curves-source-preparation-01/cpu-v2/plot_student_learning_curves.py",
++      "bytes": 12268,
++      "sha256": "6a14cfa86df96199e575384c48466d44046b1a2fad8ce76c1427b7d5add7abd0"
++    },
++    {
++      "path": "outputs/research/official-full/student-final-learning-curves-source-preparation-01/cpu-v2/source-manifest.json",
++      "bytes": 4141,
++      "sha256": "0a652313753768928296cc34632698f794548fb718a33f51e9b8848a9dd0daf8"
++    }
++  ],
++  "direct_draft_preserved": [
++    {
++      "path": "source-original/draft/student_curves_archive.py",
++      "bytes": 35126,
++      "sha256": "66d4ecc36c46742156676569c2a78b707ba74b9c0d0717c16b32ae08600e3c0f"
++    },
++    {
++      "path": "source-original/draft/NOTES.md",
++      "bytes": 7822,
++      "sha256": "f3029d7349cf26acdf23833cf8f809c4bf1d4eb0668556e76094a1383e1be6cb"
++    }
++  ],
++  "snapshots_byte_equal": true,
++  "target_entrypoints_imported": false,
++  "target_entrypoints_executed": false,
++  "events_models_parsed": false,
++  "runtime_fixtures_executed": false,
++  "independent_readonly_advice": "Delegated publication_static_audit completed two read-only AST/byte audits; its latest audited predecessor was 49140B SHA 7aba58964c35bf7b180847cd4a791644f21c1c990a0f4d19cfdfcd85295391a3. Current delta additionally checks original relative .json suffix when hostcopy is renamed and rechecks event directory exact file set before seal. Formal Root and independent final review remain required.",
++  "remaining": "Root and independent static review, then future actual student data/execution/postreviews/acceptance contract, then real publish/verify/restore. No placeholder passed artifacts created."
++}

@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "status": "not_approved_v1_missing_strict_TFRecord_integrity_gate",
+  "reviewed_utc": "2026-10-13T04:54:22.082273+00:00",
+  "source_manifest": {
+    "path": "outputs/research/official-full/student-final-learning-curves-source-preparation-01/cpu/source-manifest.json",
+    "bytes": 1727,
+    "sha256": "e32f98c60783903dabac9744a64a99f9be7fe78578db65e5c8b2ff9152c36d83"
+  },
+  "reviewed_full_current_sources": [
+    {
+      "path": "outputs/research/official-full/student-final-learning-curves-source-preparation-01/cpu/extract_student_scalars.py",
+      "bytes": 13404,
+      "sha256": "d25623f96926013aaf0d82cbb6131f477db47818b7f8791339c9461c14950cc0"
+    },
+    {
+      "path": "outputs/research/official-full/student-final-learning-curves-source-preparation-01/cpu/plot_student_learning_curves.py",
+      "bytes": 11373,
+      "sha256": "3915d8a7d7e1323f15e5986e1d193f12d2f766526599d41220469e64579974f1"
+    },
+    {
+      "path": "outputs/research/official-full/student-final-learning-curves-source-preparation-01/cpu/source-interface.json",
+      "bytes": 9008,
+      "sha256": "9936ba3c491df19f8bae2f1100e973a84c0be9625990232eb0bbccad2e7dca5f"
+    },
+    {
+      "path": "outputs/research/official-full/student-final-learning-curves-source-preparation-01/cpu/README.md",
+      "bytes": 3807,
+      "sha256": "65d1852009f56af56549112daf5a089db69ac0fae96083ea67879bb2b986fed7"
+    }
+  ],
+  "all_nine_dependency_SHA_verified": true,
+  "AST_only": true,
+  "source_review_tools": [
+    "889f6d",
+    "924eac",
+    "0de6b3"
+  ],
+  "original_ancestor_full_diff_read_by_Root": false,
+  "full_diff_not_needed_for_rejecting_current_source": true,
+  "initial_independent_static_review": {
+    "path": "outputs/research/official-full/student-final-learning-curves-source-preparation-01/cpu/independent-review.json",
+    "bytes": 4477,
+    "sha256": "d36423c17832441e9ff82f344de2ddbe303c2deb933e4ca465d03f4a9b747126"
+  },
+  "must_fix": [
+    {
+      "issue": "EventAccumulator can silently stop at a truncated or CRC-corrupt trailing TFRecord after all required core steps already appeared. Current extractor has no strict framing/CRC/EOF verification and may mark scalar integrity complete despite discarded trailing records.",
+      "evidence": "Official upstream RawEventFileLoader.Load catches DataLossError and breaks; compat record reader raises DataLossError for corrupt CRC and truncated header/body. Root did not execute bad samples or inspect the pinned image copy.",
+      "required_change": "Preserve v1 and create revised source with strict streaming TFRecord header/body masked CRC32C, record length/offset and complete EOF validation before extraction; failed diagnostics retained. Plot/acceptance must require these whole-file proofs.",
+      "upstream_sources": [
+        "https://raw.githubusercontent.com/tensorflow/tensorboard/master/tensorboard/backend/event_processing/event_file_loader.py",
+        "https://raw.githubusercontent.com/tensorflow/tensorboard/master/tensorboard/compat/tensorflow_stub/pywrap_tensorflow.py",
+        "https://www.tensorflow.org/tutorials/load_data/tfrecord"
+      ]
+    }
+  ],
+  "scope_boundaries": [
+    "Upstream source data-flow finding only, not empirical confirmation of the future pinned Docker library version.",
+    "No import/execution of new scientific helpers, no event parsing, no synthetic native completion or model result.",
+    "Same-run binding, exact core steps, nonfinite diagnostics, conditional coverage and gaps in plotting were inspected; they do not compensate for missing file-integrity proof.",
+    "Large fine SVG and scalar JSON may exceed25MB; future publication must archive all large items losslessly, as communicated to its author."
+  ],
+  "future_v2_path": "outputs/research/official-full/student-final-learning-curves-source-preparation-01/cpu-v2",
+  "future_source_execution_approved": false,
+  "original_sources_and_jobs_modified": false,
+  "goal_status": "active"
+}

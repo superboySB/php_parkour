@@ -1,0 +1,244 @@
+{
+  "schema_version": 1,
+  "status": "source_only_prepared_not_executed",
+  "prepared_utc": "2026-10-13T04:44:21.892748+00:00",
+  "source_bindings": [
+    {
+      "origin": {
+        "path": "outputs/research/official-full/teacher-high-climb-76-final-cpu-01/source/accept_teacher.py",
+        "bytes": 19016,
+        "sha256": "3023998a5e449cc7943f9d4e3c44d463f6780d1dd50465ea2961e3fb2d2ed062"
+      },
+      "frozen_original": {
+        "path": "source-original/accept_teacher.py",
+        "bytes": 19016,
+        "sha256": "3023998a5e449cc7943f9d4e3c44d463f6780d1dd50465ea2961e3fb2d2ed062"
+      },
+      "new": {
+        "path": "extract_student_scalars.py",
+        "bytes": 13404,
+        "sha256": "d25623f96926013aaf0d82cbb6131f477db47818b7f8791339c9461c14950cc0"
+      }
+    },
+    {
+      "origin": {
+        "path": "outputs/research/official-full/teacher-high-climb-76-final-cpu-01/source/plot_learning_curves.py",
+        "bytes": 7399,
+        "sha256": "887ba33796d7395719b97bfaf8cb879d47ec45265515ef669c7245deec7fc554"
+      },
+      "frozen_original": {
+        "path": "source-original/plot_learning_curves.py",
+        "bytes": 7399,
+        "sha256": "887ba33796d7395719b97bfaf8cb879d47ec45265515ef669c7245deec7fc554"
+      },
+      "new": {
+        "path": "plot_student_learning_curves.py",
+        "bytes": 11373,
+        "sha256": "3915d8a7d7e1323f15e5986e1d193f12d2f766526599d41220469e64579974f1"
+      }
+    }
+  ],
+  "static_algorithm_references": [
+    {
+      "path": "thirdparty/holosoma/src/holosoma/holosoma/agents/distillation/distillation.py",
+      "bytes": 26325,
+      "sha256": "f8a01a1f5c7058ec2f832ea483a484b8dccb1e793f0cb9a8112c9acf8650495a",
+      "lines": "336-341;383-398",
+      "role": "Static tag/schema explanation only; runtime scientific packages come from separately inspected CPU image"
+    },
+    {
+      "path": "thirdparty/holosoma/src/holosoma/holosoma/agents/distillation_ppo/distillation_ppo.py",
+      "bytes": 50836,
+      "sha256": "cb90b00a16b8749358610f48a87ff5c12ab22326f8a72c81595966c9cb01f8f9",
+      "lines": "544-573;576-594;699-718",
+      "role": "Static tag/schema explanation only; runtime scientific packages come from separately inspected CPU image"
+    },
+    {
+      "path": "thirdparty/holosoma/src/holosoma/holosoma/agents/modules/logging_utils.py",
+      "bytes": 16233,
+      "sha256": "4ad7864ec212bedbc8601da373992f0b7281e175260c781d5ff7b31ca5b2f22e",
+      "lines": "310-340",
+      "role": "Static tag/schema explanation only; runtime scientific packages come from separately inspected CPU image"
+    },
+    {
+      "path": "wbt_training/training_runs/setup_env.sh",
+      "bytes": 4916,
+      "sha256": "742bee1d774255d9bb0da94b9d27064383fae89abb811d3c3845b66f00f70b2d",
+      "lines": "16-20",
+      "role": "Static tag/schema explanation only; runtime scientific packages come from separately inspected CPU image"
+    }
+  ],
+  "extract_cli": [
+    "/opt/php/bin/train-python",
+    "-B",
+    "/code/extract_student_scalars.py",
+    "--contract",
+    "/control/input-contract.json",
+    "--contract-sha256",
+    "<actual-input-contract-SHA>",
+    "--output",
+    "/validation/scalars.json"
+  ],
+  "plot_cli": [
+    "/opt/php/bin/train-python",
+    "-B",
+    "/code/plot_student_learning_curves.py",
+    "--input",
+    "/validation/scalars.json",
+    "--input-sha256",
+    "<actual-extract-report-SHA>",
+    "--output",
+    "/validation/plots"
+  ],
+  "future_input_contract": {
+    "actual_path": null,
+    "actual_sha256": null,
+    "schema": {
+      "schema_version": "integer1",
+      "kind": "pure or finetune",
+      "native_manifest": {
+        "path": "actual regular CPU path to original manifest",
+        "bytes": "positive integer actual size",
+        "sha256": "actual original manifest SHA256"
+      },
+      "native_run_directory": "exact manifest.checkpoint parent /outputs/official-full/official/student-KIND/PHP-research/RUN",
+      "run_directory": "actual readonly /artifacts mapping of the same run events",
+      "events": [
+        {
+          "path": "run_directory/original event basename",
+          "bytes": "actual positive integer",
+          "sha256": "actual original event SHA256",
+          "native_path": "native_run_directory/original event basename"
+        }
+      ]
+    }
+  },
+  "gates": {
+    "targets": {
+      "pure": 10000,
+      "finetune": 30000
+    },
+    "required_core_tags": {
+      "pure": [
+        "Loss/behavior",
+        "Loss/warmup_active"
+      ],
+      "finetune": [
+        "Loss/ppo_coef",
+        "Loss/warmup_active",
+        "Loss/learning_rate",
+        "Loss/total_loss",
+        "Loss/surrogate_loss",
+        "Loss/value_loss",
+        "Loss/behavior",
+        "Loss/entropy_mean",
+        "Loss/mean_kl"
+      ]
+    },
+    "native_manifest": "label matches kind, profile official, passed, integer returncode0, integer checkpoint iteration target-1, exact same-run native final PT path and SHA",
+    "event_files": "exact same-run flat event basenames, no symlink, unique native/local paths, all bytes/SHA/stat stable and exact full events.out.tfevents.* set before/after",
+    "event_reading": "each file EventAccumulator scalar0 + purge_orphaned_data=False, all actual scalar tags retained; no restart purge/dedup/interpolation",
+    "core_integrity": "finite value+wall_time; exactly ordered once-per-step 0..target-1; missing, duplicate, extra or out-of-order core steps fail closed",
+    "nonfinite_diagnostics": "Original event bytes retained; failed JSON uses null plus original repr and exact source_event/sample-index/step. allow_nan=False.",
+    "conditional_tags": [
+      "Train/mean_reward",
+      "Train/mean_episode_length",
+      "Loss/ppo_gate_mean"
+    ],
+    "conditional_integrity": "Actual samples/missing/duplicates/out-of-order retained; no synthesized samples; any nonfinite actual scalar still fails",
+    "plotting": "Core+reward/episode and fine conditional PPO gate panels; actual raw points; moving averages restart at any gap/duplicate/decrease; all other actual tags remain in full scalars.json and unplotted_actual_tags"
+  },
+  "report_contract": {
+    "extract": {
+      "path": "/validation/scalars.json",
+      "schema_version": 1,
+      "phase": "student_training_scalars",
+      "status": "passed only after actual CPU invocation and all original scalar gates",
+      "keys": [
+        "kind",
+        "stage",
+        "target_iterations",
+        "input_contract",
+        "native_manifest",
+        "native_terminal",
+        "events",
+        "extractor_source",
+        "input_files",
+        "scalars",
+        "required_core_tags",
+        "tag_coverage",
+        "training_scalar_integrity_complete",
+        "diagnostics",
+        "input_files_unchanged"
+      ],
+      "scalar_row": [
+        "step",
+        "wall_time",
+        "value",
+        "source_event",
+        "event_sample_index",
+        "optional <value|wall_time>_nonfinite_original"
+      ],
+      "tag_coverage": [
+        "samples",
+        "unique_steps",
+        "first_step",
+        "last_step",
+        "missing_steps",
+        "duplicate_steps",
+        "out_of_range_steps",
+        "out_of_order",
+        "all_finite",
+        "required_core"
+      ]
+    },
+    "plot": {
+      "path": "/validation/plots/plot-report.json",
+      "schema_version": 1,
+      "status": "rendered_student_training_curves only after actual plotting and before/after source/input hashes pass",
+      "keys": [
+        "kind",
+        "stage",
+        "target_iterations",
+        "input",
+        "plot_source",
+        "figures",
+        "tags",
+        "input_contract",
+        "native_manifest",
+        "events",
+        "input_files",
+        "input_files_unchanged",
+        "unplotted_actual_tags"
+      ],
+      "figures": [
+        "/validation/plots/learning-curves.png",
+        "/validation/plots/learning-curves.svg"
+      ]
+    }
+  },
+  "future_runtime": {
+    "actual_events": null,
+    "actual_native_terminal": null,
+    "actual_CPU_execute": null,
+    "actual_phase_exits": null,
+    "actual_Root_review": null,
+    "actual_independent_review": null,
+    "execution_plan": "Root separately owns actual two-phase isolated CPU lifecycle and proof; source preparation is not execution evidence",
+    "expected_image": "sha256:2be18521015b2a84ef7a4442af9a94ef041a19feb9ce385ae15424b1dc158d8f",
+    "isolation": "runc/networknone/GPUhidden; source/control/events RO and new validation RW; actual Docker inspect and source/input beforeafter must be bound by later Root execution/acceptance contract"
+  },
+  "limits": {
+    "imported_new_helpers": false,
+    "invoked_new_helpers": false,
+    "SSH_or_Docker_or_model_or_event_parse": false,
+    "AST_only": true,
+    "training_or_source_modified": false,
+    "armed_pair_gate_modified": false,
+    "quality_verified": false,
+    "convergence_verified": false,
+    "official_schedule_complete": false,
+    "seven_PT_acceptance_verified": false,
+    "pt_onnx_numerical_parity_verified": false
+  }
+}

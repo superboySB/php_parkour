@@ -1,0 +1,491 @@
+--- source-original/v1/student_curves_archive.py
++++ student_curves_archive.py
+@@ -174,6 +174,8 @@
+             'Actual create/attached/extract/plot original stdout and stderr fingerprints required')
+     for record in [*c['files'].values(), *c['figures'].values(), *c['cpu_raw_logs'].values()]:
+         retain(record)
++    require(len({str(regular(row['path'])) for row in c['cpu_raw_logs'].values()}) == len(RAW_LOGS),
++            'Eight distinct original CPU raw-log paths required; equal empty stderr hashes are allowed')
+     require(regular(c['files']['publication_source']['path']) == regular(__file__),
+             'Reviewed publication source must be this exact file')
+     files = {key: load(value['path'], value) for key, value in c['files'].items()
+@@ -194,8 +196,11 @@
+         require(value['Id'] == cid and value['Image'] == IMAGE, 'Own actual CPU identity/image differs')
+         cfg = value['HostConfig']
+         require(cfg['Runtime'] == 'runc' and cfg['NetworkMode'] == 'none'
++                and cfg['Privileged'] is False
+                 and cfg['DeviceRequests'] in (None, []) and cfg.get('Devices') in (None, []) and cfg['NanoCpus'] == 2_000_000_000
+                 and cfg['Memory'] == 12 * 1024**3, 'Actual CPU isolation differs')
++        require(value['State']['OOMKilled'] is False and value['State']['Error'] == '',
++                'Actual CPU inspect must be free of OOM kill and runtime error')
+         env = dict(item.split('=', 1) for item in value['Config']['Env'])
+         require(env.get('CUDA_VISIBLE_DEVICES') == '' and env.get('NVIDIA_VISIBLE_DEVICES') == 'void'
+                 and env.get('PYTHONDONTWRITEBYTECODE') == '1', 'GPU hidden/bytecode-off required')
+@@ -262,6 +267,31 @@
+         if role:
+             require(path == regular(c['files'][role]['path']), 'Accepted producer binding differs: ' + role)
+         return path
++
++    def bind_raw_log(record, role):
++        path = bound(record)
++        accepted = c['cpu_raw_logs'][role]
++        require(path == regular(accepted['path']) and body(record) == body(accepted),
++                'Actual receipt raw-log provider/path/whole-SHA differs: ' + role)
++        return path
++
++    host_logs = execution['cpu_raw_logs']
++    require(isinstance(host_logs, dict)
++            and set(host_logs) == {'create_stdout', 'create_stderr', 'attached_stdout', 'attached_stderr'},
++            'Actual host execution must fingerprint exactly its create/attached stdout and stderr')
++    for role, record in host_logs.items():
++        bind_raw_log(record, role)
++    for phase in phases['phases']:
++        require(phase['phase'] in ('extract', 'plot'), 'Only actual extract/plot phase logs are accepted')
++        for stream in ('stdout', 'stderr'):
++            bind_raw_log(phase[stream], phase['phase'] + '_' + stream)
++    create_stdout = regular(c['cpu_raw_logs']['create_stdout']['path'])
++    before = signature(create_stdout)
++    raw_cid = create_stdout.read_bytes()
++    require(signature(create_stdout) == before
++            and {'bytes': len(raw_cid), 'sha256': hashlib.sha256(raw_cid).hexdigest()}
++                == body(c['cpu_raw_logs']['create_stdout'])
++            and raw_cid.strip() == cid.encode('ascii'), 'Actual create stdout must contain the same full container ID')
+ 
+     inspected_json = {regular(contract_path),
+                       *[regular(row['path']) for key, row in c['files'].items()
+@@ -499,6 +529,7 @@
+         references(review, c['files'][role]['path'])
+     for role, document in files.items():
+         references(document, c['files'][role]['path'])
++    references(c, regular(contract_path))
+     require(used_copies == set(native_copies) and used_relative == set(relative_copies),
+             'Unused native/relative host-copy mapping is not accepted evidence')
+     rows = [('acceptance/contract.json', contract_fp, False)]
+--- source-original/v1/NOTES.md
++++ NOTES.md
+@@ -1,6 +1,8 @@
+-# 正式学生训练曲线归档：仅源码准备
++# 正式学生训练曲线归档 v2：仅源码准备
+ 
+ 本目录只编写并静态解析源码。没有调用 CLI、读取 TensorBoard event 内容、启动科学阶段、Docker、SSH、浏览器或 GPU；没有实际接受合同、正式学生曲线包、恢复成功收据。原训练、32 文件选择性 fetch、armed waiter、58/629 门卫均未修改。两类学生的未来实际产物必须分别独立验收、分别出版。
++
++本v2只修补v1的日志归属绑定、inspect状态与接受合同自身引用闭包；v1静态独审指出这些must-fix，未获得执行准入，完整原字节保存在`source-original/v1/`。
+ 
+ `student_curves_archive.py` 仅使用宿主 Python 标准库，没有子进程或联网入口。科学提取及 Matplotlib 绘图在统一 Docker 内执行。旧 `cpu/` v1 不能准入：EventAccumulator 可能吞掉截断事件；出版依赖将绑定相邻 `cpu-v2/` 的严格 TFRecord 长度/CRC32C/完整 EOF 验证源码，已冻结版本：
+ 
+@@ -28,9 +30,9 @@
+ | `root_review`, `independent_review` | 实际后验全文，`must_fix=[]`、通过状态及 `evidence_fingerprints`；自身全部 fingerprint 引用逐项核验 |
+ | `publication_source` | 实际调用的本归档源码自身，绝对路径与 `__file__` 相同、SHA 精确匹配 |
+ 
+-另有 `figures`，键恰为 `png`、`svg`，各绑定真实原件 fingerprint。必填`cpu_raw_logs`键恰为`create_stdout/create_stderr/attached_stdout/attached_stderr/extract_stdout/extract_stderr/plot_stdout/plot_stderr`，各是实际原始日志fingerprint（空stderr也按实际0B/SHA绑定并保留）；两review均须覆盖全部八份原件。两个 review 的通过状态只接受 `passed`、`passed_readonly_postexecution_review` 或 `passed_student_learning_curves_postexecution_review`；这不是孤立门卫。两份 review 的 evidence 必须至少覆盖实际输入合同、scalars、plot report、host execution、phase report、两源码和两图，所有自身引用都核 current SHA。两review还必须覆盖三inspect、本publisher源码、原native manifest和实际CRC模块hostcopy。Root 工具会话/父 wait 的实际证据也应由 review 纳入；本工具不会把用户填入的工具编号伪称 OS 观测。
++另有 `figures`，键恰为 `png`、`svg`，各绑定真实原件 fingerprint。必填`cpu_raw_logs`键恰为`create_stdout/create_stderr/attached_stdout/attached_stderr/extract_stdout/extract_stderr/plot_stdout/plot_stderr`，各是实际原始日志fingerprint（空stderr也按实际0B/SHA绑定并保留）；两review均须覆盖全部八份原件。八个canonical原日志path必须各不相同，空stderr可有同一SHA。host `execution.cpu_raw_logs`键恰为create/attached四项，每个phase有实际`stdout`、`stderr` fingerprint；各经实际provider映射后的canonical path及whole bytes/SHA必须逐项等于合同8项。`create_stdout`原字节经stat/wholeSHA核对后`.strip()`必须恰好为同一full container ID。两个 review 的通过状态只接受 `passed`、`passed_readonly_postexecution_review` 或 `passed_student_learning_curves_postexecution_review`；这不是孤立门卫。两份 review 的 evidence 必须至少覆盖实际输入合同、scalars、plot report、host execution、phase report、两源码和两图，所有自身引用都核 current SHA。两review还必须覆盖三inspect、本publisher源码、原native manifest和实际CRC模块hostcopy。Root 工具会话/父 wait 的实际证据也应由 review 纳入；本工具不会把用户填入的工具编号伪称 OS 观测。
+ 
+-CPU inspect 固定为已验统一镜像 `sha256:2be18521015b2a84ef7a4442af9a94ef041a19feb9ce385ae15424b1dc158d8f`，runc、network none、无 GPU DeviceRequests、GPU hidden、2 CPU/12 GiB。四个实际 bind 为 `/code`、`/control`、`/artifacts` 只读以及 `/validation` 可写；根据这些真实 Mounts 翻译原报告中的容器路径，不重写原报告。Root/独审的 fingerprint 引用须有实际本地字节提供者，远端历史位置可作为纯 `native_path` 来源字符串保留，不能冒充本地可读取的文件。
++CPU inspect 固定为已验统一镜像 `sha256:2be18521015b2a84ef7a4442af9a94ef041a19feb9ce385ae15424b1dc158d8f`，runc、network none、无 GPU DeviceRequests/Devices、`Privileged=false`、GPU hidden、2 CPU/12 GiB；三inspect都要求`State.OOMKilled=false`、`State.Error=""`。四个实际 bind 为 `/code`、`/control`、`/artifacts` 只读以及 `/validation` 可写；根据这些真实 Mounts 翻译原报告中的容器路径，不重写原报告。Root/独审的 fingerprint 引用须有实际本地字节提供者，远端历史位置可作为纯 `native_path` 来源字符串保留，不能冒充本地可读取的文件。
+ 
+ 实际 `source_before/source_after` 是非空fingerprint数组，至少覆盖两producer；`inputs_before/inputs_after`是非空fingerprint数组，至少覆盖输入合同、native manifest和全部原events。两份前后数组逐项相等且全部实际字节重新核SHA。实际 phase argv必须从 `/opt/php/bin/train-python -B` 开始，第三参数就是相应受审源码；其后仅接受约定输入、输入SHA、输出参数，plot可在末尾另给正整数`--window`。提取报告必须有实际原生 `official/passed/int0` manifest 和 final checkpoint iteration 9999（pure）或29999（finetune），全部事件属于同一实际 run。该 manifest 只是曲线来源身份门卫，不扩大为本工具独立证明的训练/模型质量。
+ 
+@@ -41,7 +43,7 @@
+ 以下变量只能填写未来实际生成并审核的文件及 SHA；不是可现在执行的成功案例。
+ 
+ ```bash
+-PUB=outputs/research/official-full/student-final-learning-curves-source-preparation-01/publication/student_curves_archive.py
++PUB=outputs/research/official-full/student-final-learning-curves-source-preparation-01/publication-v2/student_curves_archive.py
+ python3 -S -B "$PUB" publish \
+   --contract "$ACTUAL_ACCEPTANCE_CONTRACT" \
+   --contract-sha256 "$REVIEWED_ACCEPTANCE_SHA256" \
+@@ -62,7 +64,7 @@
+ 
+ 原始 events，以及任何超过25MB的 JSON/SVG/PNG/其他证据，都以 `gzip(mtime=0)` 保存；所有归档体使用连续 ≤25,000,000 B 的块，每块独立 SHA、offset、整件编码 SHA和原始 SHA。普通 PNG/SVG 另有直接可读的原字节预览；大图仍完整归档，index 明确提示先无损恢复查看，不丢弃、不重编码或伪造替代图。相同内容可共享字节块，恢复仍按每条路径自己的 mode。manifest 每条依赖都≤25MB，可避免 Git 100MB blob 上限；Git 不保留完整读写权限，因此包校验按 bytes/SHA，mode 只由 restore-map 重建。
+ 
+-Root/独审、CPU原始stdout/stderr、输入/source及其他 review fingerprint 引用闭包一并原字节归档。所有已加载合同/inspect/报告及每份被fingerprint引用的`.json`继续扫描嵌套引用，至传递闭包结束；每个引用核真实whole bytes/SHA，循环只共享同一实际pin，不跳过后代依赖。原文档中相对清单path默认按该文档原目录解析；遇到repo-relative出处等不同命名空间时，只能由未来接受合同可选`relative_file_copies`数组精确指定`document_path`、`relative_path`、`host_copy`，核同一whole bytes/SHA且必须真正使用，不能猜基目录。JSON schema中用于说明的`bytes/sha256`描述字符串不是实际fingerprint，不能替代任一强制门卫的真实pin。对非`.json`原始stdout/raw/源码只归档原字节，不猜其中语义。需要的原始 events 若尚未取得，出版会拒绝并不创建结果目录；应由独立只读 transfer 提供准确 native path、whole SHA/bytes 原件，本工具不下载、不猜事件名、不制造替代 event。完整出版成功后，events 可从 Git 包离线无损恢复。
++Root/独审、CPU原始stdout/stderr、输入/source及其他 review fingerprint 引用闭包一并原字节归档。出版acceptance contract自身（含额外嵌套实际fingerprints）、所有已加载输入合同/inspect/报告及每份被fingerprint引用的`.json`继续扫描嵌套引用，至传递闭包结束；每个引用核真实whole bytes/SHA，循环只共享同一实际pin，不跳过后代依赖。原文档中相对清单path默认按该文档原目录解析；遇到repo-relative出处等不同命名空间时，只能由未来接受合同可选`relative_file_copies`数组精确指定`document_path`、`relative_path`、`host_copy`，核同一whole bytes/SHA且必须真正使用，不能猜基目录。JSON schema中用于说明的`bytes/sha256`描述字符串不是实际fingerprint，不能替代任一强制门卫的真实pin。对非`.json`原始stdout/raw/源码只归档原字节，不猜其中语义。需要的原始 events 若尚未取得，出版会拒绝并不创建结果目录；应由独立只读 transfer 提供准确 native path、whole SHA/bytes 原件，本工具不下载、不猜事件名、不制造替代 event。完整出版成功后，events 可从 Git 包离线无损恢复。
+ 
+ 本包只证明已接受的 scalar 完整性、实际曲线及归档恢复合同。`quality/convergence/official_schedule_complete/seven_PT_acceptance/PT_ONNX_parity` 始终为 false；图形走势不是收敛或技能验收。
+ 
+@@ -72,10 +74,14 @@
+ 
+ ## 直接源码与概念出处
+ 
+-`source-original/draft/`保留本轮接手时的直接未freeze草稿，SHA/bytes见`source-interface.json`。`minimal-delta/`保存对该直接草稿的完整源码与NOTES差异；`full.diff`是全部两文件差异的串接，没有省略。新接口/清单/静态检查资料是新增文件，详见source-only manifest。
++`source-original/v1/`保留本v2的直接冻结v1源码、NOTES、接口、清单、全部出处和独审原件，SHA/bytes见`source-interface.json`。`minimal-delta/`保存对该直接草稿的完整源码与NOTES差异；`full.diff`是全部两文件差异的串接，没有省略。新接口/清单/静态检查资料是新增文件，详见source-only manifest。
+ 
+-教师概念祖先是`outputs/research/official-full/teacher-high-climb-76-final-publication-binding-01/publish.py`和`replay.py`，本目录只冻结其原字节到`source-original/teacher-conceptual-ancestor/`供来源审阅。借鉴原件SHA、mtime0 gzip、连续chunk与wholeSHA无损恢复思路，没有import、调用其Docker replay入口；学生合同、13roles、二phase、三inspect、core/conditional coverage和独立verify/restore是新的实现，不能把差异描述成只换label。CPU-v2最终五份源码/接口/清单/README原件也保存在`source-original/cpu-v2/`，只作字节出处。
++教师概念祖先是`outputs/research/official-full/teacher-high-climb-76-final-publication-binding-01/publish.py`和`replay.py`，本目录只冻结其原字节到`source-original/v1/source-original/teacher-conceptual-ancestor/`供来源审阅。借鉴原件SHA、mtime0 gzip、连续chunk与wholeSHA无损恢复思路，没有import、调用其Docker replay入口；学生合同、13roles、二phase、三inspect、core/conditional coverage和独立verify/restore是新的实现，不能把差异描述成只换label。CPU-v2最终五份源码/接口/清单/README原件也保存在`source-original/v1/source-original/cpu-v2/`，只作字节出处。
+ 
+ ## 当前验证边界
+ 
+ 当前只做AST、stdlib import白名单/禁止调用的静态核对、原件和diff字节核对。`publish/verify/restore`均未运行；因此没有实际package manifest、运行通过或restore成功声明。需要Root与独立静态审阅后，未来真实学生结束、CPU二phase/三inspect/完整EOF CRC及双方后验完成，再生成actual acceptance-contract并执行。任何缺文件、缺pin或gate失败都拒绝准入；fresh输出父目录需已存在，不能与输入原件目录互为祖先。gzip头和wholeSHA离线核验不证明科学收敛或模型质量。
++
++## v1 → v2 最小修订范围
++
++本v2的完整差异仅覆盖四个现行文件（publisher源码、NOTES、接口、静态记录）；`minimal-delta/full.diff`按文件串接全部差异。`source-original/v1/`完整保留v1当时所有文件，包含被独审指出must-fix的报告。未改v1或冻结CPU-v2，不增加运行器、科学阶段或通用监控行为。当前独立protocol单phase与正式学生extract/plot两phase出版无关，不在本工具中伪称正式输入或actual acceptance。
+--- source-original/v1/source-interface.json
++++ source-interface.json
+@@ -1,37 +1,45 @@
+ {
+   "schema_version": 1,
+-  "status": "source_only_prepared_not_executed_pending_Root_and_independent_static_review",
+-  "prepared_utc": "2026-10-13T05:17:32.242400+00:00",
++  "status": "source_only_v2_prepared_not_executed_pending_Root_and_independent_static_review",
++  "prepared_utc": "2026-10-13T05:31:40.016137+00:00",
+   "publication_source": {
+     "path": "student_curves_archive.py",
+-    "bytes": 49379,
+-    "sha256": "512a7c3a7fd38e70ff8a5c760b8be6c086e7c696ebae2f6fcf41ab03faeb58b3"
++    "bytes": 51232,
++    "sha256": "068c13d5e8e61a7e7a4b80b2813a96ac617efee408674e9fe1f65a498b50dcc2"
+   },
+   "direct_ancestry": [
+     {
+-      "origin_at_handoff": "outputs/research/official-full/student-final-learning-curves-source-preparation-01/publication/student_curves_archive.py",
+-      "frozen_original": {
+-        "path": "source-original/draft/student_curves_archive.py",
+-        "bytes": 35126,
+-        "sha256": "66d4ecc36c46742156676569c2a78b707ba74b9c0d0717c16b32ae08600e3c0f"
++      "origin": {
++        "path": "outputs/research/official-full/student-final-learning-curves-source-preparation-01/publication/student_curves_archive.py",
++        "bytes": 49379,
++        "sha256": "512a7c3a7fd38e70ff8a5c760b8be6c086e7c696ebae2f6fcf41ab03faeb58b3"
++      },
++      "frozen_original": {
++        "path": "source-original/v1/student_curves_archive.py",
++        "bytes": 49379,
++        "sha256": "512a7c3a7fd38e70ff8a5c760b8be6c086e7c696ebae2f6fcf41ab03faeb58b3"
+       },
+       "new": {
+         "path": "student_curves_archive.py",
+-        "bytes": 49379,
+-        "sha256": "512a7c3a7fd38e70ff8a5c760b8be6c086e7c696ebae2f6fcf41ab03faeb58b3"
+-      }
+-    },
+-    {
+-      "origin_at_handoff": "outputs/research/official-full/student-final-learning-curves-source-preparation-01/publication/NOTES.md",
+-      "frozen_original": {
+-        "path": "source-original/draft/NOTES.md",
+-        "bytes": 7822,
+-        "sha256": "f3029d7349cf26acdf23833cf8f809c4bf1d4eb0668556e76094a1383e1be6cb"
++        "bytes": 51232,
++        "sha256": "068c13d5e8e61a7e7a4b80b2813a96ac617efee408674e9fe1f65a498b50dcc2"
++      }
++    },
++    {
++      "origin": {
++        "path": "outputs/research/official-full/student-final-learning-curves-source-preparation-01/publication/NOTES.md",
++        "bytes": 12371,
++        "sha256": "a1007062411ddd4283162f56d76f605f9be6d3832e67198fc61c8fd42bca515a"
++      },
++      "frozen_original": {
++        "path": "source-original/v1/NOTES.md",
++        "bytes": 12371,
++        "sha256": "a1007062411ddd4283162f56d76f605f9be6d3832e67198fc61c8fd42bca515a"
+       },
+       "new": {
+         "path": "NOTES.md",
+-        "bytes": 12371,
+-        "sha256": "a1007062411ddd4283162f56d76f605f9be6d3832e67198fc61c8fd42bca515a"
++        "bytes": 13726,
++        "sha256": "29b013bcae544d4ad7666e03cdfcd61dc1fb5273a5eacfdce776abea4fa0a1e5"
+       }
+     }
+   ],
+@@ -43,7 +51,7 @@
+         "sha256": "e49b9cdb5ec69f6412e0d87afc988e18affa7c3b9e25bf85551280f71339935f"
+       },
+       "frozen_original": {
+-        "path": "source-original/teacher-conceptual-ancestor/publish.py",
++        "path": "source-original/v1/source-original/teacher-conceptual-ancestor/publish.py",
+         "bytes": 17875,
+         "sha256": "e49b9cdb5ec69f6412e0d87afc988e18affa7c3b9e25bf85551280f71339935f"
+       },
+@@ -56,7 +64,7 @@
+         "sha256": "9c434edfdce34f3d1862fadc142e12780747555e0f9df22736ea7cb50913300b"
+       },
+       "frozen_original": {
+-        "path": "source-original/teacher-conceptual-ancestor/replay.py",
++        "path": "source-original/v1/source-original/teacher-conceptual-ancestor/replay.py",
+         "bytes": 12846,
+         "sha256": "9c434edfdce34f3d1862fadc142e12780747555e0f9df22736ea7cb50913300b"
+       },
+@@ -71,7 +79,7 @@
+         "sha256": "e8bf7156013e7c31200ab39c9511020ed17c2e6726d79bc368939b44b5507b12"
+       },
+       "frozen_original": {
+-        "path": "source-original/cpu-v2/extract_student_scalars.py",
++        "path": "source-original/v1/source-original/cpu-v2/extract_student_scalars.py",
+         "bytes": 19320,
+         "sha256": "e8bf7156013e7c31200ab39c9511020ed17c2e6726d79bc368939b44b5507b12"
+       }
+@@ -83,7 +91,7 @@
+         "sha256": "6a14cfa86df96199e575384c48466d44046b1a2fad8ce76c1427b7d5add7abd0"
+       },
+       "frozen_original": {
+-        "path": "source-original/cpu-v2/plot_student_learning_curves.py",
++        "path": "source-original/v1/source-original/cpu-v2/plot_student_learning_curves.py",
+         "bytes": 12268,
+         "sha256": "6a14cfa86df96199e575384c48466d44046b1a2fad8ce76c1427b7d5add7abd0"
+       }
+@@ -95,7 +103,7 @@
+         "sha256": "0a652313753768928296cc34632698f794548fb718a33f51e9b8848a9dd0daf8"
+       },
+       "frozen_original": {
+-        "path": "source-original/cpu-v2/source-manifest.json",
++        "path": "source-original/v1/source-original/cpu-v2/source-manifest.json",
+         "bytes": 4141,
+         "sha256": "0a652313753768928296cc34632698f794548fb718a33f51e9b8848a9dd0daf8"
+       }
+@@ -107,7 +115,7 @@
+         "sha256": "4483feca47bcb3e6a69bf6bc3bc852f258de1de5bd7653e989eb42aa5ec721ee"
+       },
+       "frozen_original": {
+-        "path": "source-original/cpu-v2/source-interface.json",
++        "path": "source-original/v1/source-original/cpu-v2/source-interface.json",
+         "bytes": 12573,
+         "sha256": "4483feca47bcb3e6a69bf6bc3bc852f258de1de5bd7653e989eb42aa5ec721ee"
+       }
+@@ -119,7 +127,7 @@
+         "sha256": "e4724f5cbde8afe4e70c7978e1532e8349eea98130ad74ac81b63658c609d1a3"
+       },
+       "frozen_original": {
+-        "path": "source-original/cpu-v2/README.md",
++        "path": "source-original/v1/source-original/cpu-v2/README.md",
+         "bytes": 4282,
+         "sha256": "e4724f5cbde8afe4e70c7978e1532e8349eea98130ad74ac81b63658c609d1a3"
+       }
+@@ -314,11 +322,12 @@
+           "sha256": "same original whole SHA256"
+         }
+       }
+-    ]
++    ],
++    "cpu_raw_log_binding": "Exactly eight distinct canonical original provider paths. execution.cpu_raw_logs has four create/attached fingerprints; phases[extract|plot].stdout and .stderr bind the other four. All match contract provider path+whole bytes/SHA. create stdout stripped original bytes equal execution full CID."
+   },
+   "actual_cpu_contract": {
+     "image": "sha256:2be18521015b2a84ef7a4442af9a94ef041a19feb9ce385ae15424b1dc158d8f",
+-    "isolation": "runc, network none, no DeviceRequests or Devices, CUDA_VISIBLE_DEVICES empty, NVIDIA_VISIBLE_DEVICES void, PYTHONDONTWRITEBYTECODE 1, NanoCpus 2000000000, Memory 12884901888",
++    "isolation": "runc, network none, no DeviceRequests or Devices, CUDA_VISIBLE_DEVICES empty, NVIDIA_VISIBLE_DEVICES void, PYTHONDONTWRITEBYTECODE 1, NanoCpus 2000000000, Memory 12884901888; HostConfig.Privileged strictly false; all three State.OOMKilled strictly false and State.Error empty string",
+     "mounts": {
+       "/code": "RO",
+       "/control": "RO",
+@@ -326,8 +335,8 @@
+       "/validation": "RW"
+     },
+     "inspects": "created+not running, live/running, final/exited/not running/exit0; same full ID,image,config image,name,mounts,started timestamp",
+-    "host_execution": "strict integer create0, attached-child actual wait0, actual container exit0, running false, source_unchanged true, nonempty identical source_before/source_after fingerprint lists covering both producers",
+-    "phases": "ordered exactly extract then plot; strict integer actual_wait_returncode0 each, inputs_unchanged true, nonempty identical inputs_before/inputs_after lists covering contract/native manifest/all events",
++    "host_execution": "strict integer create0, attached-child actual wait0, actual container exit0, running false, source_unchanged true, nonempty identical source_before/source_after fingerprint lists covering both producers Mandatory execution.cpu_raw_logs has exactly create_stdout/create_stderr/attached_stdout/attached_stderr fingerprints; each mapped canonical provider path and whole bytes/SHA equals its acceptance-contract cpu_raw_logs role; original create_stdout bytes.strip() equals the same full container ID, with read stat/whole-SHA stability.",
++    "phases": "ordered exactly extract then plot; strict integer actual_wait_returncode0 each, inputs_unchanged true, nonempty identical inputs_before/inputs_after lists covering contract/native manifest/all events Each phase contains stdout and stderr actual fingerprints; ordered extract/plot stream providers, canonical paths and whole bytes/SHA bind the respective contract roles. All eight original canonical raw-log paths differ; empty stderr may have equal hashes.",
+     "extract_argv": [
+       "/opt/php/bin/train-python",
+       "-B",
+@@ -424,7 +433,7 @@
+       "plot_stdout",
+       "plot_stderr"
+     ],
+-    "closure": "Every fingerprint nested in all loaded JSON documents and every subsequently fingerprinted .json is read through the pinned provider and recursively traversed to exhaustion. Raw stdout/stderr/source/event remain original bytes. All external native paths need real accessible byte providers. Reports and JSON absolute paths are never rewritten. Relative manifest references default to the original JSON directory, with exact document_path/relative_path to host_copy overrides only through reviewed relative_file_copies. Descriptive JSON-schema strings are not actual fingerprints; mandatory receipt/review fingerprints are separately validated."
++    "closure": "Every fingerprint nested in all loaded JSON documents and every subsequently fingerprinted .json is read through the pinned provider and recursively traversed to exhaustion. Raw stdout/stderr/source/event remain original bytes. All external native paths need real accessible byte providers. Reports and JSON absolute paths are never rewritten. Relative manifest references default to the original JSON directory, with exact document_path/relative_path to host_copy overrides only through reviewed relative_file_copies. Descriptive JSON-schema strings are not actual fingerprints; mandatory receipt/review fingerprints are separately validated. The publication acceptance contract itself is traversed before unused provider mappings are rejected, so all of its extra nested actual fingerprints are also sealed."
+   },
+   "archive_contract": {
+     "limit_bytes": 25000000,
+@@ -459,5 +468,127 @@
+     "official_schedule_complete": false,
+     "seven_PT_acceptance_verified": false,
+     "pt_onnx_numerical_parity_verified": false
++  },
++  "publication_version": 2,
++  "version1": {
++    "publication_source": {
++      "path": "outputs/research/official-full/student-final-learning-curves-source-preparation-01/publication/student_curves_archive.py",
++      "bytes": 49379,
++      "sha256": "512a7c3a7fd38e70ff8a5c760b8be6c086e7c696ebae2f6fcf41ab03faeb58b3"
++    },
++    "source_manifest": {
++      "path": "outputs/research/official-full/student-final-learning-curves-source-preparation-01/publication/source-manifest.json",
++      "bytes": 3455,
++      "sha256": "56439a0ebf21c01be3589497530e1e25cc9c6a4948e0e3df5e57b0dc46a9167c"
++    },
++    "frozen_original_directory": "source-original/v1",
++    "execution_approval": "withheld_pending_raw_log_receipt_binding_inspect_state_and_acceptance_contract_closure_fixes",
++    "preserved_original_files": [
++      {
++        "path": "source-original/v1/NOTES.md",
++        "bytes": 12371,
++        "sha256": "a1007062411ddd4283162f56d76f605f9be6d3832e67198fc61c8fd42bca515a"
++      },
++      {
++        "path": "source-original/v1/independent-review.json",
++        "bytes": 4446,
++        "sha256": "ab0eee9bf490b2406b22c5bbb6a1a1e5eb2045ea4012aabfb27f1d0ca7332d1d"
++      },
++      {
++        "path": "source-original/v1/minimal-delta/NOTES.md.diff",
++        "bytes": 12100,
++        "sha256": "f29983615a26f01893ce347909957256fe33d99d9239ae35ece4ad3008f3b764"
++      },
++      {
++        "path": "source-original/v1/minimal-delta/full.diff",
++        "bytes": 72051,
++        "sha256": "c04c46627fbe1252fd4a7fb2de4db95942ed5531877d18bea569b7e48cdb84d5"
++      },
++      {
++        "path": "source-original/v1/minimal-delta/source-interface.json.diff",
++        "bytes": 19763,
++        "sha256": "c386113478eedc454dcda38678798118de5486b6f0b9d1633419eac73a6aada7"
++      },
++      {
++        "path": "source-original/v1/minimal-delta/static-validation.json.diff",
++        "bytes": 2889,
++        "sha256": "c0b78b4ae01a210a94f60af4869f375eba5d87dab0ca3f4c3c2e2a603cd6fd7c"
++      },
++      {
++        "path": "source-original/v1/minimal-delta/student_curves_archive.py.diff",
++        "bytes": 37299,
++        "sha256": "ade29fb90cd2f81c1f82ac1db8d4b1e8334766122586de7047a78afc6d5b345f"
++      },
++      {
++        "path": "source-original/v1/root-review.json",
++        "bytes": 2305,
++        "sha256": "3805b779f6817eedb7cce6717f51e41bd3748e2643a74d95e29b348ee2596820"
++      },
++      {
++        "path": "source-original/v1/source-interface.json",
++        "bytes": 19242,
++        "sha256": "64040193244943d8c19a81e680341d376efe748d573fb75d5fb7966d5d812133"
++      },
++      {
++        "path": "source-original/v1/source-manifest.json",
++        "bytes": 3455,
++        "sha256": "56439a0ebf21c01be3589497530e1e25cc9c6a4948e0e3df5e57b0dc46a9167c"
++      },
++      {
++        "path": "source-original/v1/source-original/cpu-v2/README.md",
++        "bytes": 4282,
++        "sha256": "e4724f5cbde8afe4e70c7978e1532e8349eea98130ad74ac81b63658c609d1a3"
++      },
++      {
++        "path": "source-original/v1/source-original/cpu-v2/extract_student_scalars.py",
++        "bytes": 19320,
++        "sha256": "e8bf7156013e7c31200ab39c9511020ed17c2e6726d79bc368939b44b5507b12"
++      },
++      {
++        "path": "source-original/v1/source-original/cpu-v2/plot_student_learning_curves.py",
++        "bytes": 12268,
++        "sha256": "6a14cfa86df96199e575384c48466d44046b1a2fad8ce76c1427b7d5add7abd0"
++      },
++      {
++        "path": "source-original/v1/source-original/cpu-v2/source-interface.json",
++        "bytes": 12573,
++        "sha256": "4483feca47bcb3e6a69bf6bc3bc852f258de1de5bd7653e989eb42aa5ec721ee"
++      },
++      {
++        "path": "source-original/v1/source-original/cpu-v2/source-manifest.json",
++        "bytes": 4141,
++        "sha256": "0a652313753768928296cc34632698f794548fb718a33f51e9b8848a9dd0daf8"
++      },
++      {
++        "path": "source-original/v1/source-original/draft/NOTES.md",
++        "bytes": 7822,
++        "sha256": "f3029d7349cf26acdf23833cf8f809c4bf1d4eb0668556e76094a1383e1be6cb"
++      },
++      {
++        "path": "source-original/v1/source-original/draft/student_curves_archive.py",
++        "bytes": 35126,
++        "sha256": "66d4ecc36c46742156676569c2a78b707ba74b9c0d0717c16b32ae08600e3c0f"
++      },
++      {
++        "path": "source-original/v1/source-original/teacher-conceptual-ancestor/publish.py",
++        "bytes": 17875,
++        "sha256": "e49b9cdb5ec69f6412e0d87afc988e18affa7c3b9e25bf85551280f71339935f"
++      },
++      {
++        "path": "source-original/v1/source-original/teacher-conceptual-ancestor/replay.py",
++        "bytes": 12846,
++        "sha256": "9c434edfdce34f3d1862fadc142e12780747555e0f9df22736ea7cb50913300b"
++      },
++      {
++        "path": "source-original/v1/static-validation.json",
++        "bytes": 2751,
++        "sha256": "f83970279d09746d8e4b92dbb64e679242249a44f3e4806bab650c0fe68d0389"
++      },
++      {
++        "path": "source-original/v1/student_curves_archive.py",
++        "bytes": 49379,
++        "sha256": "512a7c3a7fd38e70ff8a5c760b8be6c086e7c696ebae2f6fcf41ab03faeb58b3"
++      }
++    ]
+   }
+ }
+--- source-original/v1/static-validation.json
++++ static-validation.json
+@@ -1,10 +1,11 @@
+ {
+   "schema_version": 1,
+   "status": "AST_and_byte_checks_recorded_no_entrypoint_execution",
++  "publication_version": 2,
+   "source": {
+     "path": "student_curves_archive.py",
+-    "bytes": 49379,
+-    "sha256": "512a7c3a7fd38e70ff8a5c760b8be6c086e7c696ebae2f6fcf41ab03faeb58b3"
++    "bytes": 51232,
++    "sha256": "068c13d5e8e61a7e7a4b80b2813a96ac617efee408674e9fe1f65a498b50dcc2"
+   },
+   "stdlib_imports": [
+     "__future__",
+@@ -41,40 +42,26 @@
+     "restore",
+     "main"
+   ],
+-  "cpu_v2_frozen_pins_verified": [
+-    {
+-      "path": "outputs/research/official-full/student-final-learning-curves-source-preparation-01/cpu-v2/extract_student_scalars.py",
+-      "bytes": 19320,
+-      "sha256": "e8bf7156013e7c31200ab39c9511020ed17c2e6726d79bc368939b44b5507b12"
+-    },
+-    {
+-      "path": "outputs/research/official-full/student-final-learning-curves-source-preparation-01/cpu-v2/plot_student_learning_curves.py",
+-      "bytes": 12268,
+-      "sha256": "6a14cfa86df96199e575384c48466d44046b1a2fad8ce76c1427b7d5add7abd0"
+-    },
+-    {
+-      "path": "outputs/research/official-full/student-final-learning-curves-source-preparation-01/cpu-v2/source-manifest.json",
+-      "bytes": 4141,
+-      "sha256": "0a652313753768928296cc34632698f794548fb718a33f51e9b8848a9dd0daf8"
+-    }
++  "v1_source": {
++    "path": "outputs/research/official-full/student-final-learning-curves-source-preparation-01/publication/student_curves_archive.py",
++    "bytes": 49379,
++    "sha256": "512a7c3a7fd38e70ff8a5c760b8be6c086e7c696ebae2f6fcf41ab03faeb58b3"
++  },
++  "v1_originals_preserved_byte_exact": true,
++  "minimal_delta_checks": [
++    "Eight canonical original raw-log paths must differ",
++    "Host create/attached four receipt fingerprints bind contract provider/path/wholeSHA",
++    "Extract/plot phase stdout/stderr fingerprints bind their contract roles",
++    "Create stdout exact fullCID content after stat/wholeSHA check",
++    "All three inspect Privileged false/OOMKilled false/Error empty",
++    "Acceptance contract itself participates in complete fingerprint closure"
+   ],
+-  "direct_draft_preserved": [
+-    {
+-      "path": "source-original/draft/student_curves_archive.py",
+-      "bytes": 35126,
+-      "sha256": "66d4ecc36c46742156676569c2a78b707ba74b9c0d0717c16b32ae08600e3c0f"
+-    },
+-    {
+-      "path": "source-original/draft/NOTES.md",
+-      "bytes": 7822,
+-      "sha256": "f3029d7349cf26acdf23833cf8f809c4bf1d4eb0668556e76094a1383e1be6cb"
+-    }
+-  ],
+-  "snapshots_byte_equal": true,
++  "independent_readonly_advice": "Delegated publication_static_audit AST/byte review found no new runtime-structure must-fix in exact 51232B SHA068c13d5e8e61a7e7a4b80b2813a96ac617efee408674e9fe1f65a498b50dcc2; formal Root and validation reviews remain required.",
+   "target_entrypoints_imported": false,
+   "target_entrypoints_executed": false,
+   "events_models_parsed": false,
+   "runtime_fixtures_executed": false,
+-  "independent_readonly_advice": "Delegated publication_static_audit completed two read-only AST/byte audits; its latest audited predecessor was 49140B SHA 7aba58964c35bf7b180847cd4a791644f21c1c990a0f4d19cfdfcd85295391a3. Current delta additionally checks original relative .json suffix when hostcopy is renamed and rechecks event directory exact file set before seal. Formal Root and independent final review remain required.",
+-  "remaining": "Root and independent static review, then future actual student data/execution/postreviews/acceptance contract, then real publish/verify/restore. No placeholder passed artifacts created."
++  "network_SSH_Docker_browser_used": false,
++  "actual_protocol_single_phase_used_as_formalcurve_input": false,
++  "remaining": "Root and independent v2 static review; future real official student data, two-phase lifecycle and postexecution reviews, actual acceptance contract, real publish/verify/restore. No placeholder passed or actual receipts generated."
+ }

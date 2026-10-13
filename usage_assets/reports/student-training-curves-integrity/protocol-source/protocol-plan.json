@@ -1,0 +1,247 @@
+{
+  "schema_version": 1,
+  "status": "source_prepared_not_executed_pending_review",
+  "phase": "tfrecord_protocol_validation",
+  "prepared_utc": "2026-10-13T05:14:02.832103+00:00",
+  "sources": [
+    {
+      "source": {
+        "path": "outputs/research/official-full/student-final-learning-curves-source-preparation-01/cpu-v2/extract_student_scalars.py",
+        "bytes": 19320,
+        "sha256": "e8bf7156013e7c31200ab39c9511020ed17c2e6726d79bc368939b44b5507b12"
+      },
+      "retained": {
+        "path": "source-original/extract_student_scalars.py",
+        "bytes": 19320,
+        "sha256": "e8bf7156013e7c31200ab39c9511020ed17c2e6726d79bc368939b44b5507b12"
+      }
+    },
+    {
+      "source": {
+        "path": "outputs/research/official-full/student-final-learning-curves-source-preparation-01/cpu-v2/source-manifest.json",
+        "bytes": 4141,
+        "sha256": "0a652313753768928296cc34632698f794548fb718a33f51e9b8848a9dd0daf8"
+      },
+      "retained": {
+        "path": "source-original/source-manifest.json",
+        "bytes": 4141,
+        "sha256": "0a652313753768928296cc34632698f794548fb718a33f51e9b8848a9dd0daf8"
+      }
+    },
+    {
+      "source": {
+        "path": "outputs/research/official-full/student-final-learning-curves-source-preparation-01/cpu-v2/independent-review.json",
+        "bytes": 5164,
+        "sha256": "3c25a23a3494dea3c7432f67e3128aee96b773d098182557ebbc4c6ec48e9b35"
+      },
+      "retained": {
+        "path": "source-original/independent-review.json",
+        "bytes": 5164,
+        "sha256": "3c25a23a3494dea3c7432f67e3128aee96b773d098182557ebbc4c6ec48e9b35"
+      }
+    }
+  ],
+  "harness_source": {
+    "path": "validate_protocol.py",
+    "bytes": 13332,
+    "sha256": "33eb8d71a0e1d0798f3dc18c3b9c8a6d2a295584d3641545283046d598e85043"
+  },
+  "future_cli": [
+    "/opt/php/bin/train-python",
+    "-B",
+    "/code/validate_protocol.py",
+    "--extractor",
+    "/code/source-original/extract_student_scalars.py",
+    "--extractor-sha256",
+    "e8bf7156013e7c31200ab39c9511020ed17c2e6726d79bc368939b44b5507b12",
+    "--event",
+    "/artifacts/events.out.tfevents.1791793401.pro5000-6.135317.0",
+    "--event-bytes",
+    "72561360",
+    "--event-sha256",
+    "ca8621a8c9919f27c3bfd0e397ba4d425f3eb5904ed0f797e5eed5b6b6cd0478",
+    "--output",
+    "/validation/protocol.json"
+  ],
+  "root_provided_real_event": {
+    "host_path": "/home/dzp/projects/php_parkour/outputs/research/official-full/teacher-high-climb-76-final-01/artifacts/events.out.tfevents.1791793401.pro5000-6.135317.0",
+    "container_path": "/artifacts/events.out.tfevents.1791793401.pro5000-6.135317.0",
+    "bytes": 72561360,
+    "sha256": "ca8621a8c9919f27c3bfd0e397ba4d425f3eb5904ed0f797e5eed5b6b6cd0478",
+    "scope": "Root-provided existing teacher artifact; not read/hashed/parsed by this preparation turn. Future harness checks the actual full original file."
+  },
+  "runtime": {
+    "expected_image": "sha256:2be18521015b2a84ef7a4442af9a94ef041a19feb9ce385ae15424b1dc158d8f",
+    "host_lifecycle_owner": "Root; this package includes no Docker/SSH/host executor",
+    "isolation": "runc/networknone/GPUhidden/2CPU12GB; readonly /code and /artifacts; new empty RW /validation",
+    "phase_count": 1,
+    "imports": "Only stdlib at module top level. TensorBoard RecordWriter/compat CRC imports occur after CPU guard, source admission and fresh output checks. V2 loaded from exact SHA-verified bytes under a private non-main module; only verify_tfrecord is called.",
+    "no_student_extract_or_plot": true,
+    "code_mount": "Mount this preparation directory as /code RO; the byteexact v2 source is /code/source-original/extract_student_scalars.py, so no nonexistent nested file mountpoint is assumed."
+  },
+  "synthetic_protocol_fixture_cases": [
+    {
+      "name": "synthetic_protocol_fixture/valid_single_record",
+      "expected_status": "passed",
+      "expected_problem": null
+    },
+    {
+      "name": "synthetic_protocol_fixture/valid_multiple_including_empty_payload",
+      "expected_status": "passed",
+      "expected_problem": null
+    },
+    {
+      "name": "synthetic_protocol_fixture/valid_multichunk_payload",
+      "expected_status": "passed",
+      "expected_problem": null
+    },
+    {
+      "name": "synthetic_protocol_fixture/truncated_header_1_byte",
+      "expected_status": "failed",
+      "expected_problem": "truncated_length_header"
+    },
+    {
+      "name": "synthetic_protocol_fixture/truncated_header_7_bytes",
+      "expected_status": "failed",
+      "expected_problem": "truncated_length_header"
+    },
+    {
+      "name": "synthetic_protocol_fixture/truncated_length_crc",
+      "expected_status": "failed",
+      "expected_problem": "truncated_length_crc"
+    },
+    {
+      "name": "synthetic_protocol_fixture/truncated_body",
+      "expected_status": "failed",
+      "expected_problem": "truncated_payload"
+    },
+    {
+      "name": "synthetic_protocol_fixture/truncated_body_crc",
+      "expected_status": "failed",
+      "expected_problem": "truncated_payload_crc"
+    },
+    {
+      "name": "synthetic_protocol_fixture/flipped_length_crc",
+      "expected_status": "failed",
+      "expected_problem": "length_crc_mismatch"
+    },
+    {
+      "name": "synthetic_protocol_fixture/flipped_body_crc",
+      "expected_status": "failed",
+      "expected_problem": "payload_crc_mismatch"
+    },
+    {
+      "name": "synthetic_protocol_fixture/flipped_body_byte",
+      "expected_status": "failed",
+      "expected_problem": "payload_crc_mismatch"
+    },
+    {
+      "name": "synthetic_protocol_fixture/valid_prefix_then_1_byte_bad_tail",
+      "expected_status": "failed",
+      "expected_problem": "truncated_length_header"
+    },
+    {
+      "name": "synthetic_protocol_fixture/valid_prefix_then_7_byte_bad_tail",
+      "expected_status": "failed",
+      "expected_problem": "truncated_length_header"
+    },
+    {
+      "name": "synthetic_protocol_fixture/valid_prefix_then_bad_record_length_crc",
+      "expected_status": "failed",
+      "expected_problem": "length_crc_mismatch"
+    },
+    {
+      "name": "synthetic_protocol_fixture/valid_prefix_then_bad_record_body_crc",
+      "expected_status": "failed",
+      "expected_problem": "payload_crc_mismatch"
+    },
+    {
+      "name": "synthetic_protocol_fixture/declared_length_above_64MiB",
+      "expected_status": "failed",
+      "expected_problem": "record_length_exceeds_bound"
+    },
+    {
+      "name": "synthetic_protocol_fixture/declared_length_exceeds_original_file",
+      "expected_status": "failed",
+      "expected_problem": "record_length_exceeds_bound"
+    },
+    {
+      "name": "synthetic_protocol_fixture/whole_file_sha_mismatch",
+      "expected_status": "failed",
+      "expected_problem": "event_changed_or_whole_file_identity_mismatch"
+    },
+    {
+      "name": "synthetic_protocol_fixture/whole_file_size_mismatch",
+      "expected_status": "failed",
+      "expected_problem": "event_changed_or_whole_file_identity_mismatch"
+    },
+    {
+      "name": "synthetic_protocol_fixture/empty_file",
+      "expected_status": "failed",
+      "expected_problem": "no_complete_tfrecords"
+    }
+  ],
+  "known_vectors_planned": [
+    {
+      "name": "CRC32C_123456789",
+      "expected_hex": "0xe3069283"
+    },
+    {
+      "name": "CRC32C_incremental_1234_56789",
+      "expected_hex": "0xe3069283"
+    },
+    {
+      "name": "masked_CRC32C_empty",
+      "expected_hex": "0xa282ead8"
+    }
+  ],
+  "report_schema": {
+    "path": "/validation/protocol.json",
+    "schema_version": 1,
+    "phase": "tfrecord_protocol_validation",
+    "status": "passed_protocol_validation or failed_protocol_validation",
+    "keys": [
+      "harness_source",
+      "extractor_source",
+      "original_teacher_event",
+      "runtime_sources",
+      "known_vectors",
+      "synthetic_protocol_fixture_cases",
+      "real_teacher_event",
+      "input_sources_before",
+      "input_sources_after",
+      "input_sources_unchanged"
+    ],
+    "case_outcome": "Expected failed record protocol cases must actually fail with the exact expected problem/offset/complete-prefix record count; outcome_matches_expected reflects test expectation, not student success",
+    "runtime_sources": "Actual installed pywrap_tensorflow.py and record_writer.py source original fp plus exact /validation/runtime-sources basename copies",
+    "scope": "Only raw record framing/CRC/whole-file checks; no protobuf/scalar inspection, native manifest, training or model inference"
+  },
+  "official_API_reference": {
+    "url": "https://raw.githubusercontent.com/tensorflow/tensorboard/master/tensorboard/summary/writer/record_writer.py",
+    "scope": "Upstream master RecordWriter(filelike).write(payload)/flush API; not claimed as the pinned runtime image. Installed source body is captured at actual CPU invocation."
+  },
+  "future_actual": {
+    "Root_source_review": null,
+    "independent_source_review": null,
+    "Docker_launch": null,
+    "actual_CPU_parent_exit": null,
+    "protocol_report": null,
+    "real_event_protocol_result": null
+  },
+  "checks_performed_this_turn": {
+    "AST_parse_only": true,
+    "byteexact_original_copy": true,
+    "new_helper_imported_or_invoked": false,
+    "fixture_generated_or_executed": false,
+    "real_event_read_or_parsed": false,
+    "SSH_Docker_science_or_GPU": false,
+    "H_Git_docs_or_original_controls_modified": false
+  },
+  "limits": {
+    "student_training_scalars_verified": false,
+    "student_training_completed": false,
+    "official_schedule_complete": false,
+    "quality_verified": false,
+    "convergence_verified": false
+  }
+}

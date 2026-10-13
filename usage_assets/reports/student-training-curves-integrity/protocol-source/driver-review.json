@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "status": "blocked_readonly_static_protocol_host_driver_review",
+  "reviewed_utc": "2026-10-13T05:24:38.295927+00:00",
+  "source": {
+    "path": "outputs/research/official-full/student-final-learning-curves-protocol-preparation-01/run_owned_cpu.py",
+    "bytes": 9559,
+    "sha256": "391ba90980bac1b800e4469dffa6c020ada1540a940569a41f43edd18a6b02f8"
+  },
+  "must_fix": [
+    {
+      "file": "run_owned_cpu.py",
+      "lines": [
+        113,
+        119,
+        124,
+        145,
+        150
+      ],
+      "problem": "Once subprocess.Popen starts the own attached Docker child, inspect-live can raise before process.wait. The outer exception handler then writes failed execution and returns without collecting that actual child wait. This is a real exception-control-flow gap, not proof that any child currently leaked.",
+      "required_change": "Guarantee process.wait and original attached stdout/stderr/returncode recording in a finally region for every successfully created attached child, even if intermediate inspect fails. Retain the original inspect failure and failed status. Wait for natural completion; no kill, remove, restart or retry is required."
+    }
+  ],
+  "checks": {
+    "stdlib_top_level_and_AST_only": true,
+    "fixed2be_runc_networknone_2CPU12GiB_GPU_hidden_create_argv": true,
+    "fixed_harness_manifest_and_original_teacher_event_SHA_gates": true,
+    "readonly_code_exact_event_and_fresh_RW_validation": true,
+    "three_created_live_final_inspect_intent_and_owner_token_CID": true,
+    "protocol20cases3vectors1teacher_event_only_False_student_science_flags": true,
+    "no_signal_kill_remove_retry_command": true
+  },
+  "future_driver_execution_approved": false,
+  "helper_imported_or_executed": false,
+  "Docker_or_network_used": false,
+  "scientific_validation_executed": false,
+  "scope": "Only the new protocol host wrapper. The independently reviewed protocol harness itself is unchanged and has no static must-fix. Actual resources have not been started by this review."
+}

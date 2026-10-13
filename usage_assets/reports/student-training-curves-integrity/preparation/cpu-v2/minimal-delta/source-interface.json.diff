@@ -1,0 +1,177 @@
+--- cpu-v1/source-interface.json
++++ cpu-v2/source-interface.json
+@@ -1,40 +1,40 @@
+ {
+   "schema_version": 1,
+-  "status": "source_only_prepared_not_executed",
+-  "prepared_utc": "2026-10-13T04:44:21.892748+00:00",
++  "status": "source_only_v2_prepared_not_executed_pending_review",
++  "prepared_utc": "2026-10-13T04:58:33.684417+00:00",
+   "source_bindings": [
+     {
+       "origin": {
+-        "path": "outputs/research/official-full/teacher-high-climb-76-final-cpu-01/source/accept_teacher.py",
+-        "bytes": 19016,
+-        "sha256": "3023998a5e449cc7943f9d4e3c44d463f6780d1dd50465ea2961e3fb2d2ed062"
++        "path": "outputs/research/official-full/student-final-learning-curves-source-preparation-01/cpu/extract_student_scalars.py",
++        "bytes": 13404,
++        "sha256": "d25623f96926013aaf0d82cbb6131f477db47818b7f8791339c9461c14950cc0"
+       },
+       "frozen_original": {
+-        "path": "source-original/accept_teacher.py",
+-        "bytes": 19016,
+-        "sha256": "3023998a5e449cc7943f9d4e3c44d463f6780d1dd50465ea2961e3fb2d2ed062"
++        "path": "source-original/v1/extract_student_scalars.py",
++        "bytes": 13404,
++        "sha256": "d25623f96926013aaf0d82cbb6131f477db47818b7f8791339c9461c14950cc0"
+       },
+       "new": {
+         "path": "extract_student_scalars.py",
+-        "bytes": 13404,
+-        "sha256": "d25623f96926013aaf0d82cbb6131f477db47818b7f8791339c9461c14950cc0"
++        "bytes": 19320,
++        "sha256": "e8bf7156013e7c31200ab39c9511020ed17c2e6726d79bc368939b44b5507b12"
+       }
+     },
+     {
+       "origin": {
+-        "path": "outputs/research/official-full/teacher-high-climb-76-final-cpu-01/source/plot_learning_curves.py",
+-        "bytes": 7399,
+-        "sha256": "887ba33796d7395719b97bfaf8cb879d47ec45265515ef669c7245deec7fc554"
++        "path": "outputs/research/official-full/student-final-learning-curves-source-preparation-01/cpu/plot_student_learning_curves.py",
++        "bytes": 11373,
++        "sha256": "3915d8a7d7e1323f15e5986e1d193f12d2f766526599d41220469e64579974f1"
+       },
+       "frozen_original": {
+-        "path": "source-original/plot_learning_curves.py",
+-        "bytes": 7399,
+-        "sha256": "887ba33796d7395719b97bfaf8cb879d47ec45265515ef669c7245deec7fc554"
++        "path": "source-original/v1/plot_student_learning_curves.py",
++        "bytes": 11373,
++        "sha256": "3915d8a7d7e1323f15e5986e1d193f12d2f766526599d41220469e64579974f1"
+       },
+       "new": {
+         "path": "plot_student_learning_curves.py",
+-        "bytes": 11373,
+-        "sha256": "3915d8a7d7e1323f15e5986e1d193f12d2f766526599d41220469e64579974f1"
++        "bytes": 12268,
++        "sha256": "6a14cfa86df96199e575384c48466d44046b1a2fad8ce76c1427b7d5add7abd0"
+       }
+     }
+   ],
+@@ -146,7 +146,22 @@
+       "Loss/ppo_gate_mean"
+     ],
+     "conditional_integrity": "Actual samples/missing/duplicates/out-of-order retained; no synthesized samples; any nonfinite actual scalar still fails",
+-    "plotting": "Core+reward/episode and fine conditional PPO gate panels; actual raw points; moving averages restart at any gap/duplicate/decrease; all other actual tags remain in full scalars.json and unplotted_actual_tags"
++    "plotting": "Core+reward/episode and fine conditional PPO gate panels; actual raw points; moving averages restart at any gap/duplicate/decrease; all other actual tags remain in full scalars.json and unplotted_actual_tags",
++    "tfrecord_protocol": {
++      "function": "verify_tfrecord(event_fp, crc_update)",
++      "scope": "Strict whole-file preflight before EventAccumulator; CPU protocol fixtures may call this explicit function with the actual installed CRC updater after review",
++      "framing": [
++        "8-byte little-endian length",
++        "4-byte masked CRC32C of length",
++        "length bytes of payload, read in <=1048576-byte chunks with incremental CRC32C",
++        "4-byte masked CRC32C of payload",
++        "exact record boundary EOF"
++      ],
++      "record_payload_limit_bytes": 67108864,
++      "file_identity": "Every consumed original byte also feeds SHA256; complete count/SHA equals inputeventfp, stat dev/inode/size/mtime/ctime before-after stable",
++      "failure": "Any truncation, CRC mismatch, bound violation, incomplete EOF, I/O error or file identity change yields failed with byte offset/record index/record start; this event is not passed to EA. No early good prefix accepted.",
++      "implementation": "Reuse tensorboard.compat.tensorflow_stub.pywrap_tensorflow.crc_update only after CPU Docker guard; standard uint32 mask is explicit in this source, no extra dependency."
++    }
+   },
+   "report_contract": {
+     "extract": {
+@@ -169,7 +184,9 @@
+         "tag_coverage",
+         "training_scalar_integrity_complete",
+         "diagnostics",
+-        "input_files_unchanged"
++        "input_files_unchanged",
++        "event_integrity_complete",
++        "event_integrity_checker"
+       ],
+       "scalar_row": [
+         "step",
+@@ -190,7 +207,20 @@
+         "out_of_order",
+         "all_finite",
+         "required_core"
+-      ]
++      ],
++      "per_event_integrity": {
++        "status": "passed only after strict whole-file check",
++        "format": "TFRecord",
++        "expected_file": "same original event {path,bytes,sha256}",
++        "records": "positive integer",
++        "bytes": "whole original byte count",
++        "sha256": "whole original SHA256",
++        "complete_eof": true,
++        "crc32c_verified": true,
++        "max_record_bytes": 67108864,
++        "largest_record_bytes": "actual largest payload",
++        "diagnostics": "[] on pass; exact offset+record_index+record_offset details on failure"
++      }
+     },
+     "plot": {
+       "path": "/validation/plots/plot-report.json",
+@@ -209,7 +239,9 @@
+         "events",
+         "input_files",
+         "input_files_unchanged",
+-        "unplotted_actual_tags"
++        "unplotted_actual_tags",
++        "event_integrity_complete",
++        "event_integrity_checker"
+       ],
+       "figures": [
+         "/validation/plots/learning-curves.png",
+@@ -224,9 +256,11 @@
+     "actual_phase_exits": null,
+     "actual_Root_review": null,
+     "actual_independent_review": null,
+-    "execution_plan": "Root separately owns actual two-phase isolated CPU lifecycle and proof; source preparation is not execution evidence",
++    "execution_plan": "Root separately owns future actual protocol CPU fixtures/real existing-event check, then actual two-phase student extraction/plot lifecycle; all remain unexecuted here",
+     "expected_image": "sha256:2be18521015b2a84ef7a4442af9a94ef041a19feb9ce385ae15424b1dc158d8f",
+-    "isolation": "runc/networknone/GPUhidden; source/control/events RO and new validation RW; actual Docker inspect and source/input beforeafter must be bound by later Root execution/acceptance contract"
++    "isolation": "runc/networknone/GPUhidden; source/control/events RO and new validation RW; actual Docker inspect and source/input beforeafter must be bound by later Root execution/acceptance contract",
++    "actual_protocol_fixtures": null,
++    "actual_existing_event_verification": null
+   },
+   "limits": {
+     "imported_new_helpers": false,
+@@ -240,5 +274,32 @@
+     "official_schedule_complete": false,
+     "seven_PT_acceptance_verified": false,
+     "pt_onnx_numerical_parity_verified": false
+-  }
++  },
++  "version1": {
++    "source_manifest": {
++      "path": "outputs/research/official-full/student-final-learning-curves-source-preparation-01/cpu/source-manifest.json",
++      "bytes": 1727,
++      "sha256": "e32f98c60783903dabac9744a64a99f9be7fe78578db65e5c8b2ff9152c36d83"
++    },
++    "execution_approval": "withdrawn_due_to_EA_DataLoss_truncated_or_bad_CRC_tail_gap; original review preserved",
++    "withdrawal_addendum": {
++      "path": "source-original/v1/independent-review-addendum-01.json",
++      "bytes": 4040,
++      "sha256": "ff47ec4b7583ac508fd3a301a76d9175a9a80919b131a332630514656a21e7ce"
++    }
++  },
++  "protocol_sources": [
++    {
++      "url": "https://www.tensorflow.org/tutorials/load_data/tfrecord",
++      "scope": "Official framing/masked CRC32C reference; website version not pinned to the runtime image"
++    },
++    {
++      "url": "https://raw.githubusercontent.com/tensorflow/tensorboard/master/tensorboard/compat/tensorflow_stub/pywrap_tensorflow.py",
++      "scope": "Upstream master incremental crc_update and masking semantics; actual installed module fingerprint recorded only at future CPU execution"
++    },
++    {
++      "url": "https://raw.githubusercontent.com/tensorflow/tensorboard/master/tensorboard/backend/event_processing/event_file_loader.py",
++      "scope": "Upstream master RawEventFileLoader can stop on DataLossError; not an actual bad-event experiment or pinned-image inspection"
++    }
++  ]
+ }

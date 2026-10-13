@@ -1,0 +1,34 @@
+--- cpu-v1/plot_student_learning_curves.py
++++ cpu-v2/plot_student_learning_curves.py
+@@ -98,6 +98,7 @@
+     kind = payload.get('kind')
+     require(kind in TARGETS and type(payload.get('schema_version')) is int and payload['schema_version'] == 1
+         and payload.get('phase') == 'student_training_scalars' and payload.get('status') == 'passed'
++        and payload.get('event_integrity_complete') is True
+         and payload.get('training_scalar_integrity_complete') is True and payload.get('input_files_unchanged') is True
+         and payload.get('stage') == 'student-' + kind and payload.get('target_iterations') == TARGETS[kind]
+         and payload.get('diagnostics') == [] and all(payload.get(key) is False for key in FALSE_FLAGS), 'Actual completed student scalar integrity report required')
+@@ -107,6 +108,15 @@
+     require(len(inputs) >= 3 and len({row['path'] for row in inputs}) == len(inputs)
+         and inputs[0] == payload['input_contract'] and inputs[1] == payload['native_manifest'], 'Extractor input contract/manifest inventory differs')
+     require(inputs[2:] == [{key: event[key] for key in ('path', 'bytes', 'sha256')} for event in payload['events']], 'Event inventory differs')
++    for event in payload['events']:
++        integrity = event.get('tfrecord_integrity', {})
++        expected = {key: event[key] for key in ('path', 'bytes', 'sha256')}
++        require(integrity.get('status') == 'passed' and integrity.get('format') == 'TFRecord'
++            and integrity.get('expected_file') == expected and integrity.get('bytes') == event['bytes']
++            and integrity.get('sha256') == event['sha256'] and type(integrity.get('records')) is int
++            and integrity['records'] > 0 and integrity.get('complete_eof') is True
++            and integrity.get('crc32c_verified') is True and integrity.get('diagnostics') == [],
++            'Each whole original event must pass framing/CRC/EOF before plotting')
+     for row in [*inputs, payload['extractor_source']]:
+         require(fingerprint(row['path']) == row, 'Original extractor/input changed before plotting')
+     scalars, coverage = payload['scalars'], payload['tag_coverage']
+@@ -130,6 +140,7 @@
+         'kind': kind, 'stage': payload['stage'], 'target_iterations': target,
+         'input': input_fp, 'plot_source': source, 'input_contract': payload['input_contract'],
+         'native_manifest': payload['native_manifest'], 'events': payload['events'],
++        'event_integrity_complete': True, 'event_integrity_checker': payload['event_integrity_checker'],
+         'input_files': [*inputs, input_fp], 'input_files_unchanged': False,
+         'tags': [dict({'tag': tag}, **coverage[tag]) for tag in plotted], 'figures': [],
+         'unplotted_actual_tags': sorted(set(scalars) - set(plotted)),

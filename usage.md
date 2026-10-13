@@ -4,7 +4,15 @@
 
 学习流程、输入输出、数据/label 来源与 real2sim2real 实现细节见独立的 [technical_pipeline.md](technical_pipeline.md)。
 
-**当前进度（2026-10-13，北京时间）：五类官方教师均已完成20,000轮，最终checkpoint为19999；五份最终产物均已完成独立CPU验收。** 第四个low-climb-76于10月12日16:22:35、第五个high-climb-76于10月13日07:14:48完成原生训练；两份[低攀爬](usage_assets/reports/official-low-climb-76-final/index.md)/[高攀爬](usage_assets/reports/official-high-climb-76-final/index.md)公开包已生成。原顺序任务已进入纯DAgger学生训练，混合学生尚未完成；16阶段全日程、官方物理评估、云端888逐源尝试、最终自训学生58例和两学生各629配置均未完成。CPU有限性、训练记录完整或公开包恢复通过，不表示策略收敛、技能成功或真机验收。
+新增[TensorBoard原始日志完整性实测与正式学生曲线工具](usage_assets/reports/student-training-curves-integrity/index.md)：独立CPU Docker正常退出0，20个正常/损坏协议案例、3个CRC标准向量，以及真实教师事件的1,040,001条记录全部符合预期。
+
+纯DAgger的[完整10,000轮曲线与原件归档](usage_assets/reports/official-student-pure-training-curves/index.md)现已实际通过CPU提取、绘图、公开包校验和全新目录恢复。原事件30,454,498 B含430,001条完整CRC记录；43个tag共430,000条有限标量，均完整覆盖step0..9999。两项核心loss、奖励和回合长度没有缺步或重复；原始值与25样本后向均值分别显示，未删除后期loss上升或奖励下降的实际数据。混合学生30,000轮的最终曲线仍待原生终态；记录完整不等于收敛或技能质量。
+
+![正式纯DAgger学生完整10000轮原始训练曲线](usage_assets/reports/official-student-pure-training-curves/figures/learning-curves.png)
+
+[从公开包完整重放](usage_assets/reports/official-student-pure-training-curves-replay/index.md)已实际恢复原输入和四份代码，在新CPU容器中重新提取、绘图，两个阶段及容器均正常退出0。43个tag的全部430,000行、coverage、原生身份与事件元数据和原结果逐项相等；新时间戳、来源SHA及完整新标量压缩另存，原包未改写。
+
+**当前进度（2026-10-13，北京时间）：五类官方教师均已完成20,000轮，最终checkpoint为19999；五份最终产物均已完成独立CPU验收。** 第四个low-climb-76于10月12日16:22:35、第五个high-climb-76于10月13日07:14:48完成原生训练；两份[低攀爬](usage_assets/reports/official-low-climb-76-final/index.md)/[高攀爬](usage_assets/reports/official-high-climb-76-final/index.md)公开包已生成。纯DAgger学生已于10月13日17:34:35完成10,000轮、最终checkpoint9999，混合学生已自动开始30,000轮训练；16阶段全日程、官方物理评估、云端888逐源尝试、最终自训学生58例和两学生各629配置均未完成。CPU有限性、训练记录完整或公开包恢复通过，不表示策略收敛、技能成功或真机验收。
 
 **历史进度快照（2026-10-11 17:39 UTC）：官方教师已完成3/5，locomotion、low-step与high-step各完成20,000轮及最终CPU验收；整套复现尚未完成。** 三者均使用4096环境、64地形变体、seed/obstacle_seed 42，最终checkpoint为`model_19999.pt`。high-step于17:10 UTC自然完成，原顺序任务自动进入low-climb-76；17:12 UTC真实阶段快照确认该第四教师已开始运行。其余两教师、两学生、官方物理评估、888逐源尝试及最终自训学生58例仍待完成。公开ONNX的全629逐帧闭环结果已另行出版，不能代替正式自训学生验收。[首教师历史最终产物与CPU验收](usage_assets/reports/official-locomotion-final/index.md)及首次失败记录保持原样。
 

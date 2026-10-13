@@ -1,0 +1,63 @@
+--- source-original/v1/student_curves_archive.py
++++ student_curves_archive.py
+@@ -174,6 +174,8 @@
+             'Actual create/attached/extract/plot original stdout and stderr fingerprints required')
+     for record in [*c['files'].values(), *c['figures'].values(), *c['cpu_raw_logs'].values()]:
+         retain(record)
++    require(len({str(regular(row['path'])) for row in c['cpu_raw_logs'].values()}) == len(RAW_LOGS),
++            'Eight distinct original CPU raw-log paths required; equal empty stderr hashes are allowed')
+     require(regular(c['files']['publication_source']['path']) == regular(__file__),
+             'Reviewed publication source must be this exact file')
+     files = {key: load(value['path'], value) for key, value in c['files'].items()
+@@ -194,8 +196,11 @@
+         require(value['Id'] == cid and value['Image'] == IMAGE, 'Own actual CPU identity/image differs')
+         cfg = value['HostConfig']
+         require(cfg['Runtime'] == 'runc' and cfg['NetworkMode'] == 'none'
++                and cfg['Privileged'] is False
+                 and cfg['DeviceRequests'] in (None, []) and cfg.get('Devices') in (None, []) and cfg['NanoCpus'] == 2_000_000_000
+                 and cfg['Memory'] == 12 * 1024**3, 'Actual CPU isolation differs')
++        require(value['State']['OOMKilled'] is False and value['State']['Error'] == '',
++                'Actual CPU inspect must be free of OOM kill and runtime error')
+         env = dict(item.split('=', 1) for item in value['Config']['Env'])
+         require(env.get('CUDA_VISIBLE_DEVICES') == '' and env.get('NVIDIA_VISIBLE_DEVICES') == 'void'
+                 and env.get('PYTHONDONTWRITEBYTECODE') == '1', 'GPU hidden/bytecode-off required')
+@@ -262,6 +267,31 @@
+         if role:
+             require(path == regular(c['files'][role]['path']), 'Accepted producer binding differs: ' + role)
+         return path
++
++    def bind_raw_log(record, role):
++        path = bound(record)
++        accepted = c['cpu_raw_logs'][role]
++        require(path == regular(accepted['path']) and body(record) == body(accepted),
++                'Actual receipt raw-log provider/path/whole-SHA differs: ' + role)
++        return path
++
++    host_logs = execution['cpu_raw_logs']
++    require(isinstance(host_logs, dict)
++            and set(host_logs) == {'create_stdout', 'create_stderr', 'attached_stdout', 'attached_stderr'},
++            'Actual host execution must fingerprint exactly its create/attached stdout and stderr')
++    for role, record in host_logs.items():
++        bind_raw_log(record, role)
++    for phase in phases['phases']:
++        require(phase['phase'] in ('extract', 'plot'), 'Only actual extract/plot phase logs are accepted')
++        for stream in ('stdout', 'stderr'):
++            bind_raw_log(phase[stream], phase['phase'] + '_' + stream)
++    create_stdout = regular(c['cpu_raw_logs']['create_stdout']['path'])
++    before = signature(create_stdout)
++    raw_cid = create_stdout.read_bytes()
++    require(signature(create_stdout) == before
++            and {'bytes': len(raw_cid), 'sha256': hashlib.sha256(raw_cid).hexdigest()}
++                == body(c['cpu_raw_logs']['create_stdout'])
++            and raw_cid.strip() == cid.encode('ascii'), 'Actual create stdout must contain the same full container ID')
+ 
+     inspected_json = {regular(contract_path),
+                       *[regular(row['path']) for key, row in c['files'].items()
+@@ -499,6 +529,7 @@
+         references(review, c['files'][role]['path'])
+     for role, document in files.items():
+         references(document, c['files'][role]['path'])
++    references(c, regular(contract_path))
+     require(used_copies == set(native_copies) and used_relative == set(relative_copies),
+             'Unused native/relative host-copy mapping is not accepted evidence')
+     rows = [('acceptance/contract.json', contract_fp, False)]
