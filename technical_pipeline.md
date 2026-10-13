@@ -2,7 +2,9 @@
 
 本文解释当前 `research` 分支的实际实现：每个模块接收什么、产生什么、监督信号从哪里来，以及训练得到的动作如何进入机器人控制器。配置与命令见 [note.md](note.md)，真实运行结果、录像与失败记录见 [usage.md](usage.md)。本文件独立于 README。
 
-截至 2026-10-11 17:39 UTC，官方教师已完成3/5：locomotion、low-step与high-step各完成20,000轮及最终CPU验收；原顺序任务已自然进入low-climb-76。公开ONNX的全629逐帧闭环也已完成CPU后验并出版；其余两教师、两学生、官方物理评估、888逐源尝试及最终自训学生58例尚未全部完成。本文的算法说明来自源码和实际实验，不表示完整日程、策略技能质量或真机验收已经完成。
+**当前进度（2026-10-13，北京时间）：五类官方教师均已完成20,000轮，最终checkpoint为19999；五份最终产物均已完成独立CPU验收。** 第四个low-climb-76于10月12日16:22:35、第五个high-climb-76于10月13日07:14:48完成原生训练；两份[低攀爬](usage_assets/reports/official-low-climb-76-final/index.md)/[高攀爬](usage_assets/reports/official-high-climb-76-final/index.md)公开包已生成。原顺序任务已进入纯DAgger学生训练，混合学生尚未完成；16阶段全日程、官方物理评估、云端888逐源尝试、最终自训学生58例和两学生各629配置均未完成。CPU有限性、训练记录完整或公开包恢复通过，不表示策略收敛、技能成功或真机验收。
+
+历史快照（2026-10-11 17:39 UTC）：官方教师当时完成3/5：locomotion、low-step与high-step各完成20,000轮及最终CPU验收；原顺序任务已自然进入low-climb-76。公开ONNX的全629逐帧闭环也已完成CPU后验并出版；其余两教师、两学生、官方物理评估、888逐源尝试及最终自训学生58例尚未全部完成。本文的算法说明来自源码和实际实验，不表示完整日程、策略技能质量或真机验收已经完成。
 
 **验收范围补充：** 原58例对每个正式学生只测试12个平地方向项（各8秒）和17个代表场景项（固定前进各10秒）；17场景名称全选却仍有612/629配置未选，9个所选参考长于10秒，low-speed roll参考还含backward code11。后续另以原15维50Hz逐帧指令各执行全629（合计1258例/2516worker），不改变原58判据，也不把NPY变体与OBJ配置混为同一轴。[源码准备、实际waiting与恢复合同](usage_assets/reports/final-student-reference629-preparation/index.md)只证明准备及只读分支可用，未来真实模型/58后验/CPU计划/新合同仍待绑定和审查，未产生新的科学结果；公开ONNX扫描不能替代正式模型，quality/course保持false。
 
@@ -554,7 +556,11 @@ startup default pose bias同时修改qtarget中心与观测`q−default`基准�
 
 第二个low-step教师的[最终产物与五阶段CPU验收](usage_assets/reports/official-low-step-final/index.md)也已通过：原生训练于2026-10-11 05:16 UTC完成，08:14 UTC隔离CPU进程及容器实际退出0。`iter/iteration=19999`，完整PT有68个有限tensor；actor输入449维、critic输入575维、动作29维，同run的iter0全配置与最终PT相等，权重变化且Adam计数20→400,000。四条TensorBoard tag各保留20,000个有限样本。原ONNX内嵌参考表`T=1,643,264`，12项CPU测试仅覆盖两种合成观测与六个时间索引，并未逐帧对照全部外部参考数据或评估56个source clip的物理技能。YAML仍只允许`actor.output_dim`中`robot_action_dim→29`这一项原生解析，其余全配置精确比较；PT与ONNX配置完全相等不等于两者动作数值parity。[checkpoint](usage_assets/reports/official-low-step-final/cpu-01/validation/checkpoint.json)、[ONNX](usage_assets/reports/official-low-step-final/cpu-01/validation/onnx.json)和[绑定报告](usage_assets/reports/official-low-step-final/cpu-01/validation/bind.json)明确保留`quality/convergence/PT-ONNX parity=false`。参考表行数也不是独立动作数量或课程成功数。 [公开恢复入口的实际复跑记录](usage_assets/reports/official-low-step-final-replay/index.md)另行封存：恢复输入SHA与原件一致，五阶段及容器再次实际退出0；原验收包保持不变。
 
-第三个high-step教师于2026-10-11 17:10:20 UTC自然完成20,000轮，最终checkpoint为19999；原顺序任务已进入low-climb-76。17:27 UTC，[high-step最终产物与五阶段CPU验收](usage_assets/reports/official-high-step-final/index.md)的checkpoint、scalars、ONNX、bind、plots均实际退出0，容器自然退出0。68个tensor有限，actor/critic输入449/575维、动作29维，同run的iter0/最终PT全配置相等，权重更新且Adam计数20→400,000；iter0已经过第一轮优化。四条TensorBoard tag各有20,000个有限样本；原442,848,025-byte ONNX通过12项CPU检查，参考表`T=1,696,832`。12项仅为两种合成观测×六个时间索引，T也不是独立动作数或课程成功数。YAML仍只允许`robot_action_dim→29`这一项原生解析，PT与ONNX内嵌全配置精确相等；`quality/convergence/PT-ONNX parity=false`。[公开恢复入口的实际复跑](usage_assets/reports/official-high-step-final-replay/index.md)已用无损还原的同一输入再次实际通过五阶段与容器退出0，原封存验收包保持原字节。官方教师已完成 **3/5**，其余两教师、两学生、官方物理评估、888逐源尝试及最终自训学生58例仍待完成。
+第三个high-step教师于2026-10-11 17:10:20 UTC自然完成20,000轮，最终checkpoint为19999；原顺序任务已进入low-climb-76。17:27 UTC，[high-step最终产物与五阶段CPU验收](usage_assets/reports/official-high-step-final/index.md)的checkpoint、scalars、ONNX、bind、plots均实际退出0，容器自然退出0。68个tensor有限，actor/critic输入449/575维、动作29维，同run的iter0/最终PT全配置相等，权重更新且Adam计数20→400,000；iter0已经过第一轮优化。四条TensorBoard tag各有20,000个有限样本；原442,848,025-byte ONNX通过12项CPU检查，参考表`T=1,696,832`。12项仅为两种合成观测×六个时间索引，T也不是独立动作数或课程成功数。YAML仍只允许`robot_action_dim→29`这一项原生解析，PT与ONNX内嵌全配置精确相等；`quality/convergence/PT-ONNX parity=false`。[公开恢复入口的实际复跑](usage_assets/reports/official-high-step-final-replay/index.md)已用无损还原的同一输入再次实际通过五阶段与容器退出0，原封存验收包保持原字节。上述2026-10-11历史快照中，官方教师当时完成 **3/5**，其余两教师及后续任务当时仍待完成；当前五教师完成状态见本文开头。
+
+第四个[low-climb-76最终包](usage_assets/reports/official-low-climb-76-final/index.md)和第五个[high-climb-76最终包](usage_assets/reports/official-high-climb-76-final/index.md)的实际五阶段CPU验收也均退出0，原生训练完成时间分别为北京时间2026-10-12 16:22:35、10-13 07:14:48。两份PT各68个tensor有限，4096环境、64variants、seed/obstacle_seed42及449/575/29维契约逐份核对；同run的iter0→19999完整保存配置一致、权重有限非零变化、Adam step20→400,000，四条TB tag各20,000个有限样本。各自12项ORT通过，原ONNX参考表分别为2,100,096与1,612,224帧，不能把图内帧数解释成技能数量或课程成功数。PT↔ONNX仅证明内嵌全配置一致，未进行动作数值parity；`quality/convergence/parity/full=false`。
+
+[高攀爬公开恢复入口实际复跑](usage_assets/reports/official-high-climb-76-final-replay/index.md)已还原同一输入并再次完成五阶段与容器自然退出0；[低攀爬公开replay实际复跑](usage_assets/reports/official-low-climb-76-final-replay/index.md)也已还原同一五份输入，通过五阶段与容器自然退出0；完整事件、标量科学字段及原ONNX报告与首轮一致，独立回执已封存。两份[低攀爬曲线](usage_assets/reports/official-low-climb-76-final/cpu-01/validation/plots/learning-curves.png)/[高攀爬曲线](usage_assets/reports/official-high-climb-76-final/cpu-01/validation/plots/learning-curves.png)保留真实原值与25样本后向均值，不据此宣称收敛。旧teacher-only PID只观察为absent，未取得其OS wait/返回码，不能从缺失推断自然退出或整个官方日程完成。
 
 真实续训也已分别验收教师、纯DAgger和DAgger+PPO：[6次原生训练及原始产物](usage_assets/reports/native-resume-acceptance/index.md)。每类先运行target2，保存iter0/1，再从iter1恢复到target4，最终保存iter3。原生循环会再次执行已保存的index1，所以这次是baseline两轮加resume三轮，不能理解成总共仅四次rollout。教师Adam步数40→60→100，两个学生16→24→40；恢复后的权重产生有限非零变化，冻结教师张量保持一致，新的TensorBoard样本、最终ONNX和已达目标skip均实测通过。混合学生早期std学习率为零，验收要求其参数保持原值而优化器计数继续推进。
 
@@ -569,7 +575,7 @@ startup default pose bias同时修改qtarget中心与观测`q−default`基准�
 | 统一容器与云端同步 | 一个镜像、本地/云端相同 Config/RootFS 指纹、完整镜像离线传输、内容校验源码快照、SSH 密钥登录 | 环境与传输已验证；主机和服务器未安装项目依赖 |
 | 动作生成 | 17 场景、629 配置，28 个独立 traversal executor；公开资产 296 对 native 数据 | 运动学生成与格式通路通过，不等于策略学会全部技能 |
 | 原生训练接口 | 既有22/22有界阶段、13次权重检查；另6次真实teacher/pure/finetune baseline与resume | 加载、优化器连续更新、TensorBoard、ONNX、skip通过；smoke不代表官方日程或收敛完成 |
-| 正式训练 | 五教师各 20000 轮、纯学生 10000、混合学生 30000 的原顺序 driver | locomotion/low-step/high-step已完成20000轮及最终CPU验收，教师3/5；low-climb-76在训，整套日程与官方物理评估未完成 |
+| 正式训练 | 五教师各 20000 轮、纯学生 10000、混合学生 30000 的原顺序日程 | 五教师5/5均完成20000轮及最终CPU验收；纯学生在训，混合学生未完成，16阶段日程、官方物理评估与最终模型闭环未完成 |
 | 云端 PT 回传本地 | iteration 19 pilot 与正式 iteration 500 都真实加载，在 16GiB 卡运行 64env×250step | 模型传输与 Isaac 推理通路通过；两次均 `quality_verified=false` |
 | 逐原始源片段验收 | 296 对输入逐项校验、后续116项目标CPU回归；原3次Isaac尝试加新RO资产合同1次实测 | teacher500为158策略步，两种student smoke各21步后失败；0片段完成，尚未跑完296源×三策略 |
 | 发布学生的固定指令 sim2sim | 原生 ONNX、DDS、深度 SHM、PD；12个有效command及17场景全部629配置的恒定前进扫描 | 新SDK12command的24worker/12视频通过；恒定前进全629原始rollout、1258worker及629全片解码也通过，[完整结果](usage_assets/reports/sim2sim-full629-sdk018-recovered/index.md)保留全部阈值事件，未确认技能成功 |
@@ -591,6 +597,8 @@ startup default pose bias同时修改qtarget中心与观测`q−default`基准�
 首次真实尝试发现 WBT 的 `reset_all → init_buffers` 清零 relative body target，下一步却先 termination/reward/log、后 `command.step` 刷新目标；这使三个片段在策略开始前误终止。独立工具仅在 warmup 前提取原生 `MotionCommand.step` 的同一对齐公式，刷新两个缓存，保留公式/文件 SHA 和缓存前后值，并核对时间、采样 ID、边界及 RNG 不变。没有推进后回写时钟或放宽失败条件，也没有更换云端训练源码。修复后相同PT和完整源进入158/21/21个实际策略步，随后真正跟踪失败，尚无片段完成。[前后真实结果与原生公式推导](usage_assets/reports/source-coverage-pilot/summary.md)。旧64env报告统计的是策略阶段，不含这些warmup误终止；其原始数值保留。
 
 CPU 测试也保留实际边界：根目录/训练 289 项通过；motion matching 213 项通过、12 个历史 raw-hash 比较失败，未跳过或重写 golden。基线比较中 36 个语义数组逐字节一致，九项不变量通过；仍不能将该 legacy suite 写成全绿。详细原始测试与基线差异见 [usage 的测试记录](usage.md#8-全量测试同步与结果来源)。
+
+用户已答复“没有”原始 motion_matching/mm_hs/FAR-pi 环境或历史参考输出。12项历史 raw-hash 失败继续保留，未刷新 golden 或跳过用例；现有原版/研究版数组对照不能替代缺失的历史基线。
 
 后续需要等七个正式模型实际训练结束，核验最终 PT/ONNX 与配置/专家来源，再检查长 rollout 和逐源 clip / 场景覆盖。顶层 `motion_id=0` 与学生的 expert ID 都不足以证明 296 源片或正式自训策略的场景覆盖；公开ONNX的两批629扫描不能替代这项验收。真实硬件还需独立完成相机 producer、IMU/外参/默认角核对及实机验收，之后才能宣称此次 real2sim2real 的最后一段已经完成。
 

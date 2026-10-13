@@ -1,0 +1,99 @@
+--- /home/dzp/projects/php_parkour/outputs/research/official-full/teacher-low-climb-76-final-cpu-preparation-02/source-original/firstcpu02/source/accept_teacher.py
++++ /home/dzp/projects/php_parkour/outputs/research/official-full/teacher-low-climb-76-final-cpu-01/source/accept_teacher.py
+@@ -1,5 +1,5 @@
+ #!/usr/bin/env python3
+-"""One completed locomotion teacher: CPU checkpoint, scalar and ONNX binding.
++"""One completed low-climb-76 teacher: CPU checkpoint, scalar and ONNX binding.
+ 
+ Execute each phase inside the unified research Docker. This does not run Isaac,
+ train, evaluate policy quality, or assert PT/ONNX numerical parity.
+@@ -17,10 +17,11 @@
+ ITERATION = 19999
+ TAGS = ('Train/mean_reward', 'Loss/Value', 'Loss/Surrogate', 'Loss/Entropy')
+ ARTIFACTS = {
+-    'model_19999.pt': (10345023, 'b3bec5154ffe126ef364c9617d39d167289a8e0645dbbfa2354a3908dcc2973c'),
+-    'model_19999.onnx': (1183810764, '7255943ae7cdfae4a8371659865a0774709e6898c3d052ea6ceda5f89c9056c7'),
+-    'holosoma_config.yaml': (30950, 'f582724c0dccb26cd91e27591534020200ce64124fb4138e32fd6bea145afce3'),
+-    'events.out.tfevents.1791606211.pro5000-6.47700.0': (72561360, '503cd5a80058818ef3bdbe7f2634f3f109169eeb8c9c72f07c6ca84756bbe00a'),
++    'model_19999.pt': (10345023, 'ae7573e3d94ec77b679af87d2adbad7d847e9577da45b64554ffe74e6aabf19e'),
++    'model_19999.onnx': (547696678, '152adedc9f6d73c44a6810070fc8b32966665f711b6ccb89ff68e9ccd8cc33c9'),
++    'holosoma_config.yaml': (30956, 'e0e1460f7f3dcd3df72d48130b8e4ce51bd704929af988a82254164fadb6b5e3'),
++    'events.out.tfevents.1791738674.pro5000-6.114168.0': (72561360, '10b050eeb3b513bb0657d4577773b3f1fdba4da1c549e6b515dd2700efb17f6b'),
++    'model_00000.pt': (10345023, 'b76b04239810fcca1ccdcc4378db547480864ba6e656fd6c46a4d5f1e9f3339e'),
+ }
+ 
+ 
+@@ -79,8 +80,8 @@
+     expected_terms = {'actions', 'base_ang_vel', 'base_lin_vel', 'dof_pos', 'dof_vel',
+                       'height_scan', 'motion_command', 'motion_ref_ori_b', 'motion_ref_pos_b'}
+     require(training['num_envs'] == 4096 and training['seed'] == 42
+-            and training['name'] == 'teacher-locomotion'
+-            and training['registry_name'] == 'file:///data/assets/motions-locomotion', 'Official training identity differs')
++            and training['name'] == 'teacher-low-climb-76'
++            and training['registry_name'] == 'file:///data/assets/motions-low-climb-76', 'Official training identity differs')
+     kwargs = training['preprocess_hook_kwargs']
+     if isinstance(kwargs, str):
+         kwargs = json.loads(kwargs)
+@@ -144,7 +145,7 @@
+     require(not torch.cuda.is_initialized(), 'CPU checkpoint phase must not initialize CUDA')
+     current = artifact(args.artifacts, 'model_19999.pt')
+     yaml_record = artifact(args.artifacts, 'holosoma_config.yaml')
+-    baseline_record = fingerprint(args.baseline)
++    baseline_record = artifact(args.baseline.parent, 'model_00000.pt')
+     require(Path(args.baseline).name == 'model_00000.pt', 'Iteration-zero native baseline required')
+     value = torch.load(current['path'], map_location='cpu', weights_only=False)
+     baseline = torch.load(baseline_record['path'], map_location='cpu', weights_only=False)
+@@ -161,6 +162,9 @@
+     yaml_config = yaml.safe_load(Path(yaml_record['path']).read_text())
+     resolution = resolved_yaml_contract(yaml_config, config)
+     contract = config_contract(config)
++    baseline_contract = config_contract(baseline['experiment_config'])
++    require(baseline_contract == contract and baseline['experiment_config'] == config,
++            'Same-run iteration-zero and final checkpoint full configurations must match')
+     shapes = {}
+     updates = {}
+     for role, prefix, dim, out, std in (('actor', 'actor_module', 449, 29, True), ('critic', 'critic_module', 575, 1, False)):
+@@ -189,13 +193,15 @@
+             'normalizers': {'actor': None, 'critic': None}, 'network_shapes': shapes, 'contract': contract,
+             'raw_full_config_equal': False, 'resolved_yaml_full_config_equal': True,
+             'yaml_runtime_resolution': resolution, 'experiment_config_json': json.dumps(config, sort_keys=True, allow_nan=True),
++            'baseline_config_binding': {'full_config_equal': True, 'contract': baseline_contract,
++                                        'source': 'Same low-climb-76 native run, remote before/after SHA and actual baseline ARTIFACTS pin'},
+             'configuration_serialization': 'Original full config JSON stored as a string; legal scalar Infinity bounds retained, all checkpoint Tensors checked finite',
+             'baseline_to_final_updates': updates, 'torch_version': torch.__version__, 'cuda_initialized': False}
+ 
+ 
+ def scalars(args):
+     from tensorboard.backend.event_processing.event_accumulator import EventAccumulator
+-    event = artifact(args.artifacts, 'events.out.tfevents.1791606211.pro5000-6.47700.0')
++    event = artifact(args.artifacts, 'events.out.tfevents.1791738674.pro5000-6.114168.0')
+     accumulator = EventAccumulator(event['path'], size_guidance={'scalars': 0})
+     accumulator.Reload()
+     values = {}
+@@ -206,7 +212,7 @@
+         values[tag] = [{'step': int(row.step), 'wall_time': row.wall_time, 'value': row.value} for row in rows]
+     check_unchanged([event])
+     return {'event_file': event, 'scalars': values, 'required_tags': list(TAGS), 'samples_per_tag': 20000,
+-            'first_step': 0, 'last_step': ITERATION, 'stage': 'teacher-locomotion', 'stage_complete': True,
++            'first_step': 0, 'last_step': ITERATION, 'stage': 'teacher-low-climb-76', 'stage_complete': True,
+             'training_status': 'completed_20000_iterations', 'official_schedule_complete': False}
+ 
+ 
+@@ -218,7 +224,7 @@
+     model = artifact(args.artifacts, 'model_19999.onnx')
+     yaml_record = artifact(args.artifacts, 'holosoma_config.yaml')
+     pt = artifact(args.artifacts, 'model_19999.pt')
+-    event = artifact(args.artifacts, 'events.out.tfevents.1791606211.pro5000-6.47700.0')
++    event = artifact(args.artifacts, 'events.out.tfevents.1791738674.pro5000-6.114168.0')
+     require(ckpt['checkpoint'] == pt and ckpt['yaml'] == yaml_record and ckpt['iteration'] == ITERATION
+             and scalar['event_file'] == event and scalar['stage_complete'] is True, 'Checkpoint/scalar reports bind other originals')
+     config = json.loads(ckpt['experiment_config_json'])
+@@ -266,7 +272,7 @@
+               'started_utc': dt.datetime.now(dt.timezone.utc).isoformat(), 'quality_verified': False,
+               'official_schedule_complete': False, 'convergence_verified': False,
+               'pt_onnx_numerical_parity_verified': False,
+-              'scope': 'Completed first official locomotion teacher CPU artifact acceptance; no policy rollout or claim that the whole official schedule completed'}
++              'scope': 'Completed fourth official low-climb-76 teacher CPU artifact acceptance; no policy rollout or claim that the whole official schedule completed'}
+     try:
+         report.update(globals()[args.phase](args), status='passed')
+     except BaseException as error:

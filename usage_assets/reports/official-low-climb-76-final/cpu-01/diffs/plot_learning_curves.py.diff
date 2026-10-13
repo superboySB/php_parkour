@@ -1,0 +1,52 @@
+--- /home/dzp/projects/php_parkour/outputs/research/official-full/teacher-low-climb-76-final-cpu-preparation-02/source-original/firstcpu02/source/plot_learning_curves.py
++++ /home/dzp/projects/php_parkour/outputs/research/official-full/teacher-low-climb-76-final-cpu-01/source/plot_learning_curves.py
+@@ -1,5 +1,5 @@
+ #!/usr/bin/env python3
+-"""Plot all 20000 logged iterations of the first teacher; CPU Docker only."""
++"""Plot all 20000 logged iterations of the fourth low-climb-76 teacher; CPU Docker only."""
+ from __future__ import annotations
+ 
+ import argparse
+@@ -52,10 +52,10 @@
+     script = fingerprint(__file__)
+     payload = json.loads(args.input.read_text(), parse_constant=lambda value: (_ for _ in ()).throw(ValueError(value)))
+     if (payload.get('status') != 'passed' or payload.get('phase') != 'scalars'
+-            or payload.get('stage') != 'teacher-locomotion' or payload.get('stage_complete') is not True
++            or payload.get('stage') != 'teacher-low-climb-76' or payload.get('stage_complete') is not True
+             or payload.get('samples_per_tag') != 20000 or payload.get('official_schedule_complete') is not False
+             or payload.get('quality_verified') is not False):
+-        raise ValueError('The actual completed first-teacher scalars report is required')
++        raise ValueError('The actual completed fourth-teacher scalars report is required')
+     mapping = payload['scalars']
+     if not isinstance(mapping, dict):
+         raise ValueError('Expected a tag-to-scalar-list mapping')
+@@ -98,23 +98,23 @@
+         axis.set_ylabel(ylabel)
+         axis.grid(alpha=.18)
+         axis.legend(loc='best', fontsize=8, frameon=False)
+-    fig.suptitle('Official locomotion teacher — first 20000-iteration stage completed', fontsize=18, y=.98)
+-    fig.text(.5, .933, 'FIRST TEACHER COMPLETED  |  WHOLE SCHEDULE UNFINISHED  |  QUALITY NOT VERIFIED',
++    fig.suptitle('Official low-climb-76 teacher — fourth 20000-iteration stage completed', fontsize=18, y=.98)
++    fig.text(.5, .933, 'FOURTH TEACHER COMPLETED  |  WHOLE SCHEDULE UNFINISHED  |  QUALITY NOT VERIFIED',
+              ha='center', fontsize=10, color='#9d4b24')
+     fig.text(.04, .018, f'All actual samples retained. Trailing window counts samples; early means use available samples. Source SHA256: {source["sha256"][:20]}…',
+              fontsize=8, color='#555555')
+     fig.tight_layout(rect=(0, .04, 1, .905))
+     png, svg = output/'learning-curves.png', output/'learning-curves.svg'
+-    fig.savefig(png, dpi=160, metadata={'Description': 'Completed first teacher; whole official schedule unfinished; quality not verified; source SHA256 '+source['sha256']})
+-    fig.savefig(svg, metadata={'Date': None, 'Description': 'Completed first teacher; whole official schedule unfinished; quality not verified; source SHA256 '+source['sha256']})
++    fig.savefig(png, dpi=160, metadata={'Description': 'Completed fourth low-climb-76 teacher; whole official schedule unfinished; quality not verified; source SHA256 '+source['sha256']})
++    fig.savefig(svg, metadata={'Date': None, 'Description': 'Completed fourth low-climb-76 teacher; whole official schedule unfinished; quality not verified; source SHA256 '+source['sha256']})
+     plt.close(fig)
+     if fingerprint(args.input) != source or fingerprint(__file__) != script:
+         raise ValueError('Input or plotting source changed during rendering')
+-    report = {'schema_version': 1, 'status': 'rendered_completed_first_teacher_curves',
++    report = {'schema_version': 1, 'status': 'rendered_completed_fourth_teacher_curves',
+               'rendered_utc': dt.datetime.now(dt.timezone.utc).isoformat(),
+               'training_status': 'completed_20000_iterations', 'stage_complete': True, 'official_schedule_complete': False,
+               'quality_verified': False, 'convergence_verified': False,
+-              'scope': 'All 20000 iterations of the first official locomotion teacher, from the actual full scalars report; whole official schedule unfinished; not rollout or parkour quality acceptance.',
++              'scope': 'All 20000 iterations of the fourth official low-climb-76 teacher, from the actual full scalars report; whole official schedule unfinished; not rollout or parkour quality acceptance.',
+               'input': source, 'plot_source': script, 'matplotlib': matplotlib.__version__,
+               'backend': matplotlib.get_backend(),
+               'cuda_visible_devices': os.environ.get('CUDA_VISIBLE_DEVICES'),

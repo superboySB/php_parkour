@@ -4,11 +4,15 @@
 
 算法、状态/动作/奖励/loss、数据格式与标签来源，以及 real2sim2real 的实现和验证边界见独立的 [technical_pipeline.md](technical_pipeline.md)。
 
+**当前进度（2026-10-13，北京时间）：五类官方教师均已完成20,000轮，最终checkpoint为19999；五份最终产物均已完成独立CPU验收。** 第四个low-climb-76于10月12日16:22:35、第五个high-climb-76于10月13日07:14:48完成原生训练；两份[低攀爬](usage_assets/reports/official-low-climb-76-final/index.md)/[高攀爬](usage_assets/reports/official-high-climb-76-final/index.md)公开包已生成。原顺序任务已进入纯DAgger学生训练，混合学生尚未完成；16阶段全日程、官方物理评估、云端888逐源尝试、最终自训学生58例和两学生各629配置均未完成。CPU有限性、训练记录完整或公开包恢复通过，不表示策略收敛、技能成功或真机验收。
+
 项目机器人是半球手的 Unitree G1，29 个关节。动作匹配有 17 种内置场景、29 个技能注册项；公开训练流程提供五类教师数据。动作数据库中的更多翻越技能并不自动成为公开深度策略掌握的技能。
 
 **验收范围补充：** 正式两学生的原58例包括每模型12个平地方向项（各8秒）及17个代表场景项（固定前进各10秒）；之后仍须分别执行原始逐帧参考指令全629配置，共1258例、2516个worker。公开ONNX的629结果不能替代正式自训学生。[全629源码准备与恢复门槛](usage_assets/reports/final-student-reference629-preparation/index.md)已审查，仅缺前提的只读`status`实际退出0并返回waiting；真实模型、同模型58终态及独立后验齐备后才生成两套CPU计划和新合同，再审查后执行。这项1258例尚未执行，技能/课程质量仍未成立。
 
 正式两学生后续1258例结果的[发布与恢复源码准备](usage_assets/reports/final-student-reference629-publication-preparation/index.md)已封存，包含真实帮助入口和缺前提`status`返回waiting的记录。它要求真实模型、同模型58例终态/60项ORT检查、新合同和完整原生/CPU退出证据齐备后才发布；当前正式结果及完整恢复尚未执行。包内92个固定工具路径的复制示例已在隔离目录实际跑通，并模拟Git下载后的权限，见[源码恢复实测](usage_assets/reports/final-student-reference629-publication-source-checks/index.md)。宿主仅使用Python标准库。
+
+用户已答复“没有”原始 motion_matching/mm_hs/FAR-pi 环境或历史参考输出。12项历史 raw-hash 失败继续保留，未刷新 golden 或跳过用例；现有原版/研究版数组对照不能替代缺失的历史基线。
 
 ## 1. 机器、目录与环境
 
@@ -267,7 +271,11 @@ ssh -p 22 -N -L 6007:127.0.0.1:6006 tencent-231
 
 low-step教师于2026-10-11 05:16 UTC完成同样的20,000轮，08:14 UTC五项隔离CPU阶段均实际退出0、容器退出0；当时官方教师已完成 **2/5**。[low-step最终验收包](usage_assets/reports/official-low-step-final/index.md)保存同run的iter0/19999 PT、传输SHA、复现入口和完整曲线：68个tensor有限，actor/critic输入维数449/575、动作29维，Adam计数由20推进至400,000，四条TensorBoard tag各20,000点，原ONNX的12项CPU检查通过。其参考表长度`T=1,643,264`，不是独立动作数量；仍只允许上述YAML单字段解析，PT与ONNX内嵌全配置精确相等。08:13 UTC阶段快照为high-step在训；其余三教师、两学生、官方物理评估、888逐源尝试和最终自训学生58例仍待完成，`quality/convergence/PT-ONNX parity=false`。 [公开恢复入口的实际复跑记录](usage_assets/reports/official-low-step-final-replay/index.md)另行封存：恢复输入SHA与原件一致，五阶段及容器再次实际退出0；原验收包保持不变。
 
-第三个high-step教师于2026-10-11 17:10:20 UTC自然完成20,000轮，最终checkpoint为19999；原顺序任务已进入low-climb-76。17:27 UTC，[high-step最终产物与五阶段CPU验收](usage_assets/reports/official-high-step-final/index.md)的checkpoint、scalars、ONNX、bind、plots均实际退出0，容器自然退出0。68个tensor有限，actor/critic输入449/575维、动作29维，同run的iter0/最终PT全配置相等，权重更新且Adam计数20→400,000；iter0已经过第一轮优化。四条TensorBoard tag各有20,000个有限样本；原442,848,025-byte ONNX通过12项CPU检查，参考表`T=1,696,832`。12项仅为两种合成观测×六个时间索引，T也不是独立动作数或课程成功数。YAML仍只允许`robot_action_dim→29`这一项原生解析，PT与ONNX内嵌全配置精确相等；`quality/convergence/PT-ONNX parity=false`。[公开恢复入口的实际复跑](usage_assets/reports/official-high-step-final-replay/index.md)已用无损还原的同一输入再次实际通过五阶段与容器退出0，原封存验收包保持原字节。官方教师已完成 **3/5**，其余两教师、两学生、官方物理评估、888逐源尝试及最终自训学生58例仍待完成。
+第三个high-step教师于2026-10-11 17:10:20 UTC自然完成20,000轮，最终checkpoint为19999；原顺序任务已进入low-climb-76。17:27 UTC，[high-step最终产物与五阶段CPU验收](usage_assets/reports/official-high-step-final/index.md)的checkpoint、scalars、ONNX、bind、plots均实际退出0，容器自然退出0。68个tensor有限，actor/critic输入449/575维、动作29维，同run的iter0/最终PT全配置相等，权重更新且Adam计数20→400,000；iter0已经过第一轮优化。四条TensorBoard tag各有20,000个有限样本；原442,848,025-byte ONNX通过12项CPU检查，参考表`T=1,696,832`。12项仅为两种合成观测×六个时间索引，T也不是独立动作数或课程成功数。YAML仍只允许`robot_action_dim→29`这一项原生解析，PT与ONNX内嵌全配置精确相等；`quality/convergence/PT-ONNX parity=false`。[公开恢复入口的实际复跑](usage_assets/reports/official-high-step-final-replay/index.md)已用无损还原的同一输入再次实际通过五阶段与容器退出0，原封存验收包保持原字节。上述2026-10-11历史快照中，官方教师当时完成 **3/5**，其余两教师及后续任务当时仍待完成；当前5/5状态见本文开头。
+
+第四、第五教师的最终证据分别见[low-climb-76](usage_assets/reports/official-low-climb-76-final/index.md)和[high-climb-76](usage_assets/reports/official-high-climb-76-final/index.md)。两者均为4096环境、64地形变体、seed/obstacle_seed42，PT的68个tensor有限，actor/critic/action维数449/575/29；同run的iter0→19999权重更新，Adam计数20→400,000，四条TensorBoard tag各20,000个有限样本。原ONNX分别为547,696,678 B、420,849,957 B，参考表分别有2,100,096帧、1,612,224帧，各通过12项ORT检查；参考表行数不是独立动作数或物理成功次数。原事件压缩归档、PT、配置和实际CPU报告在公开包中，ONNX按外部精确SHA取得。
+
+[高攀爬公开入口实际复跑](usage_assets/reports/official-high-climb-76-final-replay/index.md)已在新runc、无网、GPU隐藏容器中通过五阶段并自然退出0。[低攀爬公开入口实际复跑](usage_assets/reports/official-low-climb-76-final-replay/index.md)也已还原同一五份产物，五阶段、宿主attach wait与新隔离容器自然退出均为0，独立回执已封存；两份原公开包中“尚未执行出版/replay”是形成时快照，后续真实执行另封回执，不改原字节。`quality/convergence/PT-ONNX numerical parity/official-schedule-complete=false`。旧teacher-only PID此次仅观察为absent，无法推断其退出原因或OS返回码。
 
 评估入口 `eval-teachers` / `eval-student` 会生成 `quality.json`：checkpoint SHA、实际仿真时间、失败/超时 reset、跟踪误差、观察到的 motion IDs、录像 SHA 和本地 TensorBoard `Evaluation/*`。`--eval-steps` 控制本次有界 rollout 的步数。当前 MotionLoader 把源动作合并为一个 NPZ，顶层 ID 0 和 `available_clip_count=1` 不能直接统计原始片段覆盖；需要结合 `motion_ends` 和参考时间索引。不能从步数或录像数量推断遍历了整套动作。
 

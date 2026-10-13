@@ -1,0 +1,31 @@
+--- outputs/research/official-full/teacher-high-climb-76-final-publication-binding-01/source-original/index.md
++++ outputs/research/official-full/teacher-high-climb-76-final-publication-binding-01/index.md
+@@ -1,13 +1,21 @@
+-# 高攀爬教师最终证据：仅源准备，尚未出版
++# 高攀爬教师最终证据：CPU 已验，公开归档待执行
+ 
+-本页是未来第五位 `teacher-high-climb-76` 完整官方教师证据的待绑定模板。目前只完成 publisher/replay 源适配；未运行出版器、事件压缩还原或 public replay，未创建公开证据目录。原生终态、最终模型 SHA、TensorBoard 标量和曲线、CPU 五阶段及 root/独立后验结果均未由此准备验证。不能使用前四位教师的结果替代第五位教师本阶段。
++本页是第五位 `teacher-high-climb-76` 最终产物的出版准备快照，形成于实际 CPU 验收之后、publisher/public replay 执行之前。原生训练于 **2026-10-12 23:14:48 UTC（北京时间 10 月 13 日 07:14:48）**结束，官方 manifest 为 `passed`、整数返回码 0、最终 checkpoint iteration **19999**。此次实际观察已见五位教师训练 manifest 均通过；这不等于全部16阶段、两位学生或云端888评估完成。
+ 
+-未来允许出版前，root 必须从实际 `passed` / 整数返回码 0 / checkpoint iteration 19999 的本阶段 manifest 和稳定选择性 transfer 绑定五个同次训练原件（基线 PT、最终 PT、ONNX、YAML、唯一实际 event）。还必须绑定实际生成的 CPU contract/source proof、root/独立后验报告、五阶段回执、input-binding/scalars 报告、真实曲线图，以及本阶段新的 terminal Q 和单个 root terminal report。未知路径、字节数、SHA 和结果目前保持 null/false；绑定后需要新的完整源/输入复核，不能直接把本模板当已出版结论。
++最终 PT SHA 为 `654ba5619704da6b3d8a8f8f7b1ee60ab8d8a73efafc660f6706eb11f89f9e0e`。选择性 transfer 保留同次训练的基线 PT、最终 PT/ONNX、YAML 和唯一实际 TensorBoard event，共五个原件；前后 inventory 与本地来源指纹一致。原教师阶段 driver 已自然消失，只记录 absent，**没有观察其父进程 OS wait/exit code**。原 monitor 仍在实际观察中存活；详见[阶段转换证明](terminal-observation/root-terminal-transition-verification.json)。
+ 
+-完成未来绑定时，本页也须用本阶段真实报告更新并重新封存。CPU 数值检查不等于策略技能、物理稳定性、收敛或 PT↔ONNX 数值 parity，不能推出整个官方日程完成。
++[实际 CPU 五阶段](cpu-01/validation/phases.json) `checkpoint/scalars/onnx/bind/plots` 均真实返回0，[执行回执](cpu-01/host/execution.json)中的独立 runc 容器自然退出0；使用现有统一镜像 `sha256:2be18521015b2a84ef7a4442af9a94ef041a19feb9ce385ae15424b1dc158d8f`，无网、GPU隐藏、2 CPU/12 GiB、三只读输入挂载及一可写 validation 挂载。
+ 
+-原始 JSON 和日志保持原路径/字节；event 将以 gzip(mtime=0)保存，需要时连续切为 <=25,000,000 字节文件，并实际流式还原核 whole SHA/bytes。ONNX 不入 Git，external-onnx 合同必须记录本阶段实际 bytes/SHA/下载命令；没有预测模型大小或 event 名称。
++[Checkpoint 检查](cpu-01/validation/checkpoint.json)确认68个保存 tensor 全有限，actor/critic/action 维数 **449/575/29**；同次训练 iter0→19999 的完整保存配置一致，actor 9项、critic 8项参数均有非零更新，保存的 AdamW step 为 **20→400000**。iter0 是已经完成首轮优化的保存点，不是未训练随机初始化。[配置绑定](cpu-01/validation/bind.json)确认 PT↔ONNX 完整配置一致；YAML 仅允许实际源码解析的 `robot_action_dim→29` 单字段差异，其余配置严格相等。
+ 
+-未来发布时，最终 `artifacts/model_19999.pt` 和同次训练 `cpu-01/input/model_00000.pt` 必须显式 `git add -f`，再从 fresh Git archive 对照完整 evidence-manifest 核验，避免 *.pt 被忽略。
++[TensorBoard 原始标量](cpu-01/validation/scalars.json)的4个 tag 各有20,000个有限样本，真实 step 为0..19999。下图展示原始值与明确标注的25样本后向均值；不据此宣称收敛。
+ 
+-未来 replay 保留已有隔离合同：统一镜像 `sha256:2be18521015b2a84ef7a4442af9a94ef041a19feb9ce385ae15424b1dc158d8f`，runc/无网/GPUhidden、2 CPU/12 GiB、三个只读输入挂载和一个全新可写 validation 挂载，完全相同的五阶段 CPU 源码。实际调用前先核完整公开包、还原同字节 event/模型输入并核外部 ONNX SHA；本准备未执行这些动作。
++![第五教师完整训练曲线](cpu-01/validation/plots/learning-curves.png)
++
++[SVG](cpu-01/validation/plots/learning-curves.svg) · [绘图来源回执](cpu-01/validation/plots/plot-report.json) · [Root 后验](cpu-01/root-postexecution-verification.json) · [独立后验](cpu-01/independent-postexecution-review.json)
++
++[ONNX CPU 检查](cpu-01/validation/onnx.json)完成12个真实 ORT 推理案例，模型为自包含文件，实际参考表有 **1,612,224帧**。最终 ONNX 为 **420,849,957 B**，SHA `b832ec0ddd4bf653d9dbc2de8657f5fe964a7a6bc9ae66b19a7bc955f68f44fc`；模型不入 Git，[外部 ONNX 合同](external-onnx.json)保留原件取得路径与准确指纹。检查覆盖有限性、重复推理一致和参考表查值；**没有完成 PT↔ONNX 动作数值 parity、策略 rollout、技能质量或收敛验收**。quality/convergence/parity/official-schedule-complete 均为 false。
++
++本快照尚未运行出版器、事件压缩还原或 public replay。未来出版保持全部原始 JSON/日志字节；event 使用 gzip(mtime=0)及必要的连续≤25,000,000 B分块，并实际流式还原核对 whole SHA/bytes。[事件归档合同](tensorboard/event-archive.json)、[原路径映射](path-map.json)及[公开文件 manifest](evidence-manifest.json)由实际 publisher 生成。无原始云端训练、现行 waiter 或 GPU任务变更。
++
++出版后可用 `python3 -B usage_assets/reports/official-high-climb-76-final/replay.py verify` 校验公开包；完整 CPU replay 必须另用全新 output 和上述精确外部 ONNX，通过已有 replay `run` 入口执行并保留独立实际收据。本快照不声称 replay 已通过。最终 `artifacts/model_19999.pt` 与 `cpu-01/input/model_00000.pt` 需显式 force-add，并从 fresh Git archive 核验完整 manifest 与还原合同，避免被 `*.pt` 忽略。

@@ -1,0 +1,21 @@
+# 低攀爬教师最终证据：CPU 已验，公开归档待执行
+
+本页是第四位 `teacher-low-climb-76` 最终产物的出版准备快照，形成于实际 CPU 验收之后、publisher/public replay 执行之前。原生训练于 **2026-10-12 08:22:35 UTC（北京时间同日16:22:35）**结束，官方 manifest 为 `passed`、整数返回码0、最终 checkpoint iteration **19999**。此次实际观察已见五位教师训练 manifest 均通过；这不等于全部16阶段、两位学生或云端888评估完成。
+
+最终 PT SHA 为 `ae7573e3d94ec77b679af87d2adbad7d847e9577da45b64554ffe74e6aabf19e`。选择性 transfer 保留同次训练的基线 PT、最终 PT/ONNX、YAML 和唯一实际 TensorBoard event，共五个原件、**640,979,040 B**；前后 inventory 与本地来源指纹一致。实际观察旧 teacher-only PID absent，无法由此推断退出原因或 OS 返回码。原 monitor 仍在实际观察中存活；详见[阶段转换证明](terminal-observation/root-terminal-transition-verification.json)。
+
+[实际 CPU 五阶段](cpu-01/validation/phases.json) `checkpoint/scalars/onnx/bind/plots` 均真实返回0，[执行回执](cpu-01/host/execution.json)中的独立 runc 容器自然退出0；使用现有统一镜像 `sha256:2be18521015b2a84ef7a4442af9a94ef041a19feb9ce385ae15424b1dc158d8f`，无网、GPU隐藏、2 CPU/12 GiB、三只读输入挂载及一可写 validation 挂载。
+
+[Checkpoint 检查](cpu-01/validation/checkpoint.json)确认68个保存 tensor 全有限，actor/critic/action 维数 **449/575/29**；同次训练 iter0→19999 的完整保存配置一致，actor/critic 保存的 AdamW step 为 **20→400000**，模型参数有非零更新。iter0 是已经完成首轮优化的保存点，不是未训练随机初始化。[配置绑定](cpu-01/validation/bind.json)确认 PT↔ONNX 完整配置一致；YAML 仅允许实际源码解析的 `robot_action_dim→29` 单字段差异，其余配置严格相等。
+
+[TensorBoard 原始标量](cpu-01/validation/scalars.json)的4个 tag 各有20,000个有限样本，真实 step 为0..19999。下图展示原始值与明确标注的25样本后向均值；不据此宣称收敛。
+
+![第四教师完整训练曲线](cpu-01/validation/plots/learning-curves.png)
+
+[SVG](cpu-01/validation/plots/learning-curves.svg) · [绘图来源回执](cpu-01/validation/plots/plot-report.json) · [Root 后验](cpu-01/root-postexecution-verification.json) · [独立后验](cpu-01/independent-postexecution-review.json)
+
+[ONNX CPU 检查](cpu-01/validation/onnx.json)完成12个真实 ORT 推理案例，模型为自包含文件，实际参考表有 **2,100,096帧**。最终 ONNX 为 **547,696,678 B**，SHA `152adedc9f6d73c44a6810070fc8b32966665f711b6ccb89ff68e9ccd8cc33c9`；模型不入 Git，[外部 ONNX 合同](external-onnx.json)保留原件取得路径与准确指纹。检查覆盖有限性、重复推理一致和参考表查值；**没有完成 PT↔ONNX 动作数值 parity、策略 rollout、技能质量或收敛验收**。quality/convergence/parity/official-schedule-complete 均为 false。
+
+本快照尚未运行出版器、事件压缩还原或 public replay。未来出版保持全部原始 JSON/日志字节；event 使用 gzip(mtime=0)及必要的连续≤25,000,000 B分块，并实际流式还原核对 whole SHA/bytes。[事件归档合同](tensorboard/event-archive.json)、[原路径映射](path-map.json)及[公开文件 manifest](evidence-manifest.json)由实际 publisher 生成。无原始云端训练、现行 waiter 或 GPU任务变更。
+
+出版后可用 `python3 -B usage_assets/reports/official-low-climb-76-final/replay.py verify` 校验公开包；完整 CPU replay 必须另用全新 output 和上述精确外部 ONNX，通过已有 replay `run` 入口执行并保留独立实际收据。本快照不声称 replay 已通过。最终 `artifacts/model_19999.pt` 与 `cpu-01/input/model_00000.pt` 需显式 force-add，并从 fresh Git archive 核验完整 manifest 与还原合同，避免被 `*.pt` 忽略。
