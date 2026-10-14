@@ -1,0 +1,38 @@
+--- preparation-01/verify_gallery.py
++++ preparation-02/verify_gallery.py
+@@ -33,6 +33,26 @@
+     data = p.read_bytes()[:24]
+     require(data[:8] == b'\x89PNG\r\n\x1a\n' and data[12:16] == b'IHDR', 'Invalid PNG')
+     return list(struct.unpack('!II', data[16:24]))
++
++
++def connect_cdp(CDP, url):
++    # The exact borrowed handshake lacks an EOF check; bound construction here.
++    def expired(*_):
++        raise TimeoutError('CDP handshake deadline exceeded')
++    old_handler = signal.signal(signal.SIGALRM, expired)
++    old_timer = signal.setitimer(signal.ITIMER_REAL, 15)
++    client = CDP.__new__(CDP)
++    try:
++        CDP.__init__(client, url)
++        return client
++    except BaseException:
++        if getattr(client, 'socket', None):
++            client.socket.close()
++        raise
++    finally:
++        signal.setitimer(signal.ITIMER_REAL, 0)
++        signal.signal(signal.SIGALRM, old_handler)
++        signal.setitimer(signal.ITIMER_REAL, *old_timer)
+ 
+ 
+ def main():
+@@ -96,7 +116,7 @@
+                     try:
+                         with urlopen('http://127.0.0.1:' + str(port) + '/json/list', timeout=2) as response:
+                             target = next(t for t in json.load(response) if t.get('type') == 'page')
+-                        cdp = CDP(target['webSocketDebuggerUrl'])
++                        cdp = connect_cdp(CDP, target['webSocketDebuggerUrl'])
+                         cdp.socket.settimeout(20)
+                         break
+                     except (OSError, StopIteration):

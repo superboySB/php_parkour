@@ -12,7 +12,24 @@
 
 [从公开包完整重放](usage_assets/reports/official-student-pure-training-curves-replay/index.md)已实际恢复原输入和四份代码，在新CPU容器中重新提取、绘图，两个阶段及容器均正常退出0。43个tag的全部430,000行、coverage、原生身份与事件元数据和原结果逐项相等；新时间戳、来源SHA及完整新标量压缩另存，原包未改写。
 
-**当前进度（2026-10-13，北京时间）：五类官方教师均已完成20,000轮，最终checkpoint为19999；五份最终产物均已完成独立CPU验收。** 第四个low-climb-76于10月12日16:22:35、第五个high-climb-76于10月13日07:14:48完成原生训练；两份[低攀爬](usage_assets/reports/official-low-climb-76-final/index.md)/[高攀爬](usage_assets/reports/official-high-climb-76-final/index.md)公开包已生成。纯DAgger学生已于10月13日17:34:35完成10,000轮、最终checkpoint9999，混合学生已自动开始30,000轮训练；16阶段全日程、官方物理评估、云端888逐源尝试、最终自训学生58例和两学生各629配置均未完成。CPU有限性、训练记录完整或公开包恢复通过，不表示策略收敛、技能成功或真机验收。
+**当前进度（2026-10-14，北京时间）：五类官方教师均已完成20,000轮，最终checkpoint为19999；五份最终产物均已完成独立CPU验收。** 第四个low-climb-76于10月12日16:22:35、第五个high-climb-76于10月13日07:14:48完成原生训练；两份[低攀爬](usage_assets/reports/official-low-climb-76-final/index.md)/[高攀爬](usage_assets/reports/official-high-climb-76-final/index.md)公开包已生成。纯DAgger学生已于10月13日17:34:35完成10,000轮、最终checkpoint9999，混合学生正在运行30,000轮训练，10月14日23:12的原生日志记录为24,354轮；五类教师与纯学生的六项官方有界Isaac评估已完成，原始记录和160段视频已通过独立CPU核验；混合学生、16阶段全日程、云端888逐源尝试、最终自训学生58例和两学生各629配置仍待完成。CPU有限性、训练记录完整或公开包恢复通过，不表示策略收敛、技能成功或真机验收。
+
+[六项官方有界Isaac评估](usage_assets/reports/official-evaluations-six/index.md)均原生返回0；每项64环境、3000步、0.02秒控制周期，每环境60秒。独立CPU容器正常退出0，核对全部196份原件、六份事件的完整CRC/EOF、102个TensorBoard指标与160段原片的完整解码。原生manifest列出160段视频，其中148段进入较晚开始的quality时间筛选，另外12段较早视频也完整保留。
+
+| 最终checkpoint评估 | iter | failed resets | timeout | clip结束事件 | 原生视频／quality绑定 |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| teacher-locomotion | 19999 | 397 | 0 | 0 | 11／9 |
+| teacher-low-step | 19999 | 860 | 0 | 61 | 22／20 |
+| teacher-high-step | 19999 | 1766 | 0 | 0 | 32／30 |
+| teacher-low-climb-76 | 19999 | 815 | 0 | 0 | 19／17 |
+| teacher-high-climb-76 | 19999 | 1707 | 0 | 0 | 32／30 |
+| student-pure | 9999 | 2547 | 0 | 569 | 44／42 |
+
+failed reset来自terminated标记；clip结束事件排除同一步failed/timeout，不能当作独立源片段覆盖、技能通过或越障成功率。四个tracking指标各192,000样本及expert分组见原JSON。所有结果保持`quality_verified=false`；首次过严CPU环境检查的真实退出1也保留在包内。
+
+公开包入口也已在新CPU容器实际重放并正常退出0，全部102个标量、160段视频的metadata/帧数及六张PNG与原验收相同。[六项播放页的实际浏览器记录](usage_assets/reports/official-evaluations-six/browser/report.json)确认六段视频均可中点seek与实际播放，六张图片正常解码，Chrome自然退出0。
+
+[![六项官方有界评估的真实离线播放页](usage_assets/reports/official-evaluations-six/browser/playback.png)](usage_assets/reports/official-evaluations-six/playback.html)
 
 **历史进度快照（2026-10-11 17:39 UTC）：官方教师已完成3/5，locomotion、low-step与high-step各完成20,000轮及最终CPU验收；整套复现尚未完成。** 三者均使用4096环境、64地形变体、seed/obstacle_seed 42，最终checkpoint为`model_19999.pt`。high-step于17:10 UTC自然完成，原顺序任务自动进入low-climb-76；17:12 UTC真实阶段快照确认该第四教师已开始运行。其余两教师、两学生、官方物理评估、888逐源尝试及最终自训学生58例仍待完成。公开ONNX的全629逐帧闭环结果已另行出版，不能代替正式自训学生验收。[首教师历史最终产物与CPU验收](usage_assets/reports/official-locomotion-final/index.md)及首次失败记录保持原样。
 
@@ -73,7 +90,7 @@
 
 教师、纯DAgger和DAgger+PPO的[真实断点续训](usage_assets/reports/native-resume-acceptance/index.md)已完成：6次原生训练，历史3步加新15步完成原18步；优化器、权重更新、冻结专家、TensorBoard、最终ONNX与skip均通过。保存iter1后原生resume会重做index1，target4最终为iter3；这不是仅新增两轮或完整随机状态恢复。首次过严日志检查失败和一次GPU占用门卫拒绝均原样保留。
 
-历史记录：后台交接于14:37 UTC[替换为恢复生命周期版本](usage_assets/reports/final-student-delivery-waiter-recovered/index.md)，首次真实SSH仍为waiting，未fetch/prepare/native。当时官方五教师及后续任务仍待原任务完成；当前五教师已完成，纯学生在训，不能宣称全部复现结束。
+历史记录：后台交接于14:37 UTC[替换为恢复生命周期版本](usage_assets/reports/final-student-delivery-waiter-recovered/index.md)，首次真实SSH仍为waiting，未fetch/prepare/native。当时官方五教师及后续任务仍待原任务完成；当前五教师和纯学生训练已完成，混合学生仍在训练；六项已完成的有界评估见本文开头，整套复现尚未结束。
 
 先看真实结果：[新SDK全部12指令的正常退出复测与逐段视频](usage_assets/reports/sdk018-directions/summary.md)、[新SDK五个历史失败配置的视频与跌倒结果](usage_assets/reports/sdk018-native-pilot/summary.md)、[17 场景参考动作播放页](usage_assets/motion_matching/playback.html)、[旧17场景物理轨迹播放页](usage_assets/sim2sim/scenarios/playback.html)、[逐项原始报告](usage_assets/reports/)。参考动作来自生成数组，闭环录像来自公开 ONNX 策略驱动的 MuJoCo，训练录像来自实际 Isaac checkpoint；旧17场景页不证明完整正常退出。
 

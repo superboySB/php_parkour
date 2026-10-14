@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "kind": "source_review_context_addendum",
+  "created_utc": "2026-10-14T15:46:27.134666+00:00",
+  "static_review": {
+    "path": "independent-source-review.json",
+    "sha256": "e746f88d5ccc9d76874b9760465cbeac577d22ca07308722d48196e46987a33f",
+    "status": "no_must_fix_found_at_source_review"
+  },
+  "root_reported_subsequent_runtime": {
+    "status": "failed_at_cpu_guard_before_third_party_code",
+    "summary": "Root reports one actual CPU01 attempt naturally exited1 with unchanged inputs/source; absence of GPU devices and runc CPU isolation coexisted with globally visible /proc/driver/nvidia/gpus metadata.",
+    "source_condition": "and not state['nvidia_proc']",
+    "condition_scope": "Overstrict environmental assumption; proc metadata visibility alone does not imply a GPU device was passed to the container."
+  },
+  "review_scope_limit": "The original review inspected source and six native quality/YAML texts; it did not execute the candidate or inspect host proc visibility. The actual environment issue was identified only by the later attempt reported by Root.",
+  "runtime_evidence_independently_reviewed": false,
+  "candidate_executed_by_reviewer": false,
+  "candidate_imported_by_reviewer": false,
+  "original_review_preserved": true,
+  "next_review": "Review validator03 minimal guard diff independently; actual CPU evidence requires a separate requested review."
+}

@@ -1,0 +1,413 @@
+{
+  "schema_version": 1,
+  "review_kind": "independent_source_only_before_runtime",
+  "status": "no_must_fix_found",
+  "reviewer": "official_eval_runtime",
+  "created_utc": "2026-10-14T15:45:23.151204+00:00",
+  "scope": "Full validator02 source and validator01-to02 diff; exact embedded TFRecord verifier source segments vs original and pushed extractor; six actual quality JSON and saved training YAML text constraints inspected with stdlib only. Runtime outcomes require a separate actual CPU phase.",
+  "must_fix": [],
+  "unjustified_real_data_assumptions_found": [],
+  "candidate_executed": false,
+  "candidate_imported": false,
+  "docker_invoked": false,
+  "third_party_imported": false,
+  "runtime_evidence_reviewed": false,
+  "quality_verified": false,
+  "full": false,
+  "sources": [
+    {
+      "path": "outputs/research/official-full/official-evaluation-cpu-preparation-02/validate.py",
+      "bytes": 34778,
+      "sha256": "ebacc130c6d50269cb262bce576194ba9d56aa9925be31654fd1a6180bb6bb40"
+    },
+    {
+      "path": "outputs/research/official-full/official-evaluation-cpu-preparation-01/validate.py",
+      "bytes": 27477,
+      "sha256": "8df865ebf40b77375a29d211efc6fd20404abcc9002d90b0f96db8309d57fbb3"
+    },
+    {
+      "path": "scripts/research/student_training_curves/extract_student_scalars.py",
+      "bytes": 19320,
+      "sha256": "e8bf7156013e7c31200ab39c9511020ed17c2e6726d79bc368939b44b5507b12"
+    },
+    {
+      "path": "usage_assets/reports/student-training-curves-integrity/cpu-executor/extract_student_scalars.py",
+      "bytes": 19320,
+      "sha256": "e8bf7156013e7c31200ab39c9511020ed17c2e6726d79bc368939b44b5507b12"
+    },
+    {
+      "path": "outputs/research/official-full/official-evaluation-cpu-preparation-02/run_owned_cpu.py",
+      "bytes": 16989,
+      "sha256": "f70938355e4e36b0f7758c00e48da141d9707c684d04cd55709f15f80b1270fb"
+    }
+  ],
+  "contract": {
+    "path": "outputs/research/official-full/official-evaluation-transfer-01/control/input-contract.json",
+    "bytes": 121154,
+    "sha256": "4ca7fb20e21328235b1dd40def4852ceccc81cdd414782523adefd52cc05fb72"
+  },
+  "diff_review": {
+    "sha256": "0dcb515a621f19231ec3b524f2a72fff58faf7c483cead75a19f686af35de28a",
+    "changed_existing_functions": [
+      "check_quality",
+      "check_tensorboard",
+      "thumbnail",
+      "video"
+    ],
+    "added_functions": [
+      "masked_crc32c",
+      "regular",
+      "verify_tfrecord"
+    ],
+    "removed_functions": [],
+    "changes": [
+      "Reject unsupported clip ID/count range comparison while retaining sorted, unique, nonnegative integer motion IDs and explicit coverage limitation.",
+      "Add exact whole-original TFRecord framing, length/payload CRC32C, truncation/EOF, size/SHA and file identity gate before any EventAccumulator construction or reload.",
+      "Preserve complete original diagnostics; disable orphan purging; fingerprint installed CRC updater source before/after.",
+      "Constrain ffprobe/ffmpeg decode and thumbnail workers to one thread."
+    ]
+  },
+  "embedded_verifier": {
+    "exact_original_and_pushed_function_segments": {
+      "regular": {
+        "exact_source_segments_equal": true,
+        "ast_structures_equal": true,
+        "segment_sha256": "ce1a9cbe6952736093689c0f5ca2b886dad40b8b41626e5f1ca8a9e4bb2c88f9"
+      },
+      "masked_crc32c": {
+        "exact_source_segments_equal": true,
+        "ast_structures_equal": true,
+        "segment_sha256": "4eaaa55877a808130571c5d04bedea514a7312e81a7a61f5ab3ef8e72c85e7d4"
+      },
+      "verify_tfrecord": {
+        "exact_source_segments_equal": true,
+        "ast_structures_equal": true,
+        "segment_sha256": "2ba961e14477af952a23cfaf8a1384c2a1fa36afd47136c25e452fa64006bb3f"
+      }
+    },
+    "max_record_bytes_expression_matches_original": true,
+    "required_dependencies_present": [
+      "hashlib",
+      "Path",
+      "stat",
+      "struct",
+      "require",
+      "MAX_EVENT_RECORD_BYTES"
+    ]
+  },
+  "static_flow_findings": [
+    "CPU Docker guard precedes dynamic third-party imports and every child invocation.",
+    "Strict complete original CRC32C/EOF gate precedes EventAccumulator import, construction and Reload; scalar tolerance remains explicit at 1e-6 absolute/relative.",
+    "All six stage phases, all 160 full decodes, source/input before-after equality, and actual zero child waits are required for passed status.",
+    "Full decode requires positive equal probed/decoded frame counts, progress=end, positive dimensions and duration matching the native descriptor.",
+    "No checkpoint or model loading, training, new rollout, quality-threshold, convergence, schedule-completion or source-motion coverage assertion is introduced."
+  ],
+  "actual_text_constraints": [
+    {
+      "label": "eval-teacher-locomotion",
+      "quality": {
+        "path": "outputs/research/official-full/official-evaluation-transfer-01/artifacts/official-full/official/eval-teacher-locomotion/quality.json",
+        "bytes": 12673,
+        "sha256": "3ed70fef166448d212416e9d8cedf8b6cc772822578b187fc899c2b32ee00983"
+      },
+      "saved_yaml": {
+        "path": "outputs/research/official-full/official-evaluation-transfer-01/artifacts/official-full/official/eval-teacher-locomotion/PHP-research/20261012_231553-teacher-locomotion-eval/holosoma_config.yaml",
+        "bytes": 31085,
+        "sha256": "7f1b0dafda86ea6c9e8eb5246a779f61c13d4470a3ef2710d929b0f7ca3332f5"
+      },
+      "dimensions": {
+        "num_envs": 64,
+        "control_steps": 3000,
+        "seed": 42,
+        "global_metric_samples": 192000
+      },
+      "available_clip_count": 1,
+      "observed_clip_ids": [
+        0
+      ],
+      "observed_expert_ids": [
+        0
+      ],
+      "resets": {
+        "failed": 397,
+        "timeout": 0,
+        "per_environment_sums_match": true
+      },
+      "independent_weighted_mean_absolute_residuals": {
+        "motion/error_ref_pos": 0.0,
+        "motion/error_ref_rot": 0.0,
+        "motion/error_body_pos": 0.0,
+        "motion/error_joint_pos": 0.0
+      },
+      "yaml_text_fields": {
+        "checkpoint": "null",
+        "export_onnx": "false",
+        "max_eval_steps": "3000",
+        "num_envs": "64",
+        "registry_name": "file:///data/assets/motions-locomotion",
+        "seed": "42",
+        "teacher_checkpoint": "null"
+      },
+      "text_constraints_compatible": true
+    },
+    {
+      "label": "eval-teacher-low-step",
+      "quality": {
+        "path": "outputs/research/official-full/official-evaluation-transfer-01/artifacts/official-full/official/eval-teacher-low-step/quality.json",
+        "bytes": 20285,
+        "sha256": "f82c7628d570fe831eedff4e8cf725acd8e5d6e61ffbbb140c7d0bae9f50aaa0"
+      },
+      "saved_yaml": {
+        "path": "outputs/research/official-full/official-evaluation-transfer-01/artifacts/official-full/official/eval-teacher-low-step/PHP-research/20261012_231924-teacher-low-step-eval/holosoma_config.yaml",
+        "bytes": 31079,
+        "sha256": "325095ec232c314d7a810f1f84f640c0c60ff15d0ba3ad8afbf90db20261a006"
+      },
+      "dimensions": {
+        "num_envs": 64,
+        "control_steps": 3000,
+        "seed": 42,
+        "global_metric_samples": 192000
+      },
+      "available_clip_count": 1,
+      "observed_clip_ids": [
+        0
+      ],
+      "observed_expert_ids": [
+        0
+      ],
+      "resets": {
+        "failed": 860,
+        "timeout": 0,
+        "per_environment_sums_match": true
+      },
+      "independent_weighted_mean_absolute_residuals": {
+        "motion/error_ref_pos": 0.0,
+        "motion/error_ref_rot": 0.0,
+        "motion/error_body_pos": 0.0,
+        "motion/error_joint_pos": 0.0
+      },
+      "yaml_text_fields": {
+        "checkpoint": "null",
+        "export_onnx": "false",
+        "max_eval_steps": "3000",
+        "num_envs": "64",
+        "registry_name": "file:///data/assets/motions-low-step",
+        "seed": "42",
+        "teacher_checkpoint": "null"
+      },
+      "text_constraints_compatible": true
+    },
+    {
+      "label": "eval-teacher-high-step",
+      "quality": {
+        "path": "outputs/research/official-full/official-evaluation-transfer-01/artifacts/official-full/official/eval-teacher-high-step/quality.json",
+        "bytes": 31335,
+        "sha256": "22e2a615dea2bc0021516bbf7b15684592ce4c1626459e4e9387283b30e93323"
+      },
+      "saved_yaml": {
+        "path": "outputs/research/official-full/official-evaluation-transfer-01/artifacts/official-full/official/eval-teacher-high-step/PHP-research/20261012_232319-teacher-high-step-eval/holosoma_config.yaml",
+        "bytes": 31082,
+        "sha256": "b4ee28b1a8d7e8629b8c470ef9d5f1aa1583bfdceb4a02736c0038494e8421a0"
+      },
+      "dimensions": {
+        "num_envs": 64,
+        "control_steps": 3000,
+        "seed": 42,
+        "global_metric_samples": 192000
+      },
+      "available_clip_count": 1,
+      "observed_clip_ids": [
+        0
+      ],
+      "observed_expert_ids": [
+        0
+      ],
+      "resets": {
+        "failed": 1766,
+        "timeout": 0,
+        "per_environment_sums_match": true
+      },
+      "independent_weighted_mean_absolute_residuals": {
+        "motion/error_ref_pos": 0.0,
+        "motion/error_ref_rot": 0.0,
+        "motion/error_body_pos": 0.0,
+        "motion/error_joint_pos": 0.0
+      },
+      "yaml_text_fields": {
+        "checkpoint": "null",
+        "export_onnx": "false",
+        "max_eval_steps": "3000",
+        "num_envs": "64",
+        "registry_name": "file:///data/assets/motions-high-step",
+        "seed": "42",
+        "teacher_checkpoint": "null"
+      },
+      "text_constraints_compatible": true
+    },
+    {
+      "label": "eval-teacher-low-climb-76",
+      "quality": {
+        "path": "outputs/research/official-full/official-evaluation-transfer-01/artifacts/official-full/official/eval-teacher-low-climb-76/quality.json",
+        "bytes": 19329,
+        "sha256": "c3f836adfaf853d1367304c52b990e8bec67c6ce934bd7092e1cb8b6f1d55e78"
+      },
+      "saved_yaml": {
+        "path": "outputs/research/official-full/official-evaluation-transfer-01/artifacts/official-full/official/eval-teacher-low-climb-76/PHP-research/20261012_232707-teacher-low-climb-76-eval/holosoma_config.yaml",
+        "bytes": 31091,
+        "sha256": "3c6bacb2d3ad74299d2dfb5162748115ec46689e59d3571f28e75a08866bf985"
+      },
+      "dimensions": {
+        "num_envs": 64,
+        "control_steps": 3000,
+        "seed": 42,
+        "global_metric_samples": 192000
+      },
+      "available_clip_count": 1,
+      "observed_clip_ids": [
+        0
+      ],
+      "observed_expert_ids": [
+        0
+      ],
+      "resets": {
+        "failed": 815,
+        "timeout": 0,
+        "per_environment_sums_match": true
+      },
+      "independent_weighted_mean_absolute_residuals": {
+        "motion/error_ref_pos": 0.0,
+        "motion/error_ref_rot": 0.0,
+        "motion/error_body_pos": 0.0,
+        "motion/error_joint_pos": 0.0
+      },
+      "yaml_text_fields": {
+        "checkpoint": "null",
+        "export_onnx": "false",
+        "max_eval_steps": "3000",
+        "num_envs": "64",
+        "registry_name": "file:///data/assets/motions-low-climb-76",
+        "seed": "42",
+        "teacher_checkpoint": "null"
+      },
+      "text_constraints_compatible": true
+    },
+    {
+      "label": "eval-teacher-high-climb-76",
+      "quality": {
+        "path": "outputs/research/official-full/official-evaluation-transfer-01/artifacts/official-full/official/eval-teacher-high-climb-76/quality.json",
+        "bytes": 30960,
+        "sha256": "ad0123fa5f036fe1f5f88c2c774181536b7fad7e816cac3510580b1caa14d790"
+      },
+      "saved_yaml": {
+        "path": "outputs/research/official-full/official-evaluation-transfer-01/artifacts/official-full/official/eval-teacher-high-climb-76/PHP-research/20261012_233141-teacher-high-climb-76-eval/holosoma_config.yaml",
+        "bytes": 31094,
+        "sha256": "f2ef93377921fa267c287ca6c665da7d0b921a1f2a794d4516212d015b4c926c"
+      },
+      "dimensions": {
+        "num_envs": 64,
+        "control_steps": 3000,
+        "seed": 42,
+        "global_metric_samples": 192000
+      },
+      "available_clip_count": 1,
+      "observed_clip_ids": [
+        0
+      ],
+      "observed_expert_ids": [
+        0
+      ],
+      "resets": {
+        "failed": 1707,
+        "timeout": 0,
+        "per_environment_sums_match": true
+      },
+      "independent_weighted_mean_absolute_residuals": {
+        "motion/error_ref_pos": 0.0,
+        "motion/error_ref_rot": 0.0,
+        "motion/error_body_pos": 0.0,
+        "motion/error_joint_pos": 0.0
+      },
+      "yaml_text_fields": {
+        "checkpoint": "null",
+        "export_onnx": "false",
+        "max_eval_steps": "3000",
+        "num_envs": "64",
+        "registry_name": "file:///data/assets/motions-high-climb-76",
+        "seed": "42",
+        "teacher_checkpoint": "null"
+      },
+      "text_constraints_compatible": true
+    },
+    {
+      "label": "eval-student-pure",
+      "quality": {
+        "path": "outputs/research/official-full/official-evaluation-transfer-01/artifacts/official-full/official/eval-student-pure/quality.json",
+        "bytes": 44397,
+        "sha256": "364541bb4b770381cee64de89f56c471fe70f244bfc5793c7a577ad37e7b2268"
+      },
+      "saved_yaml": {
+        "path": "outputs/research/official-full/official-evaluation-transfer-01/artifacts/official-full/official/eval-student-pure/PHP-research/20261013_093516-student-pure-eval/holosoma_config.yaml",
+        "bytes": 32772,
+        "sha256": "b5783239da2c8cb9cb914a7f09917029a3c6b60b8066a52a17bdda3a351c3e45"
+      },
+      "dimensions": {
+        "num_envs": 64,
+        "control_steps": 3000,
+        "seed": 42,
+        "global_metric_samples": 192000
+      },
+      "available_clip_count": 1,
+      "observed_clip_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "observed_expert_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "resets": {
+        "failed": 2547,
+        "timeout": 0,
+        "per_environment_sums_match": true
+      },
+      "independent_weighted_mean_absolute_residuals": {
+        "motion/error_ref_pos": 1.0844009634691787e-08,
+        "motion/error_ref_rot": 3.8566067561696116e-09,
+        "motion/error_body_pos": 1.0665001659582174e-08,
+        "motion/error_joint_pos": 1.5805599584695074e-07
+      },
+      "yaml_text_fields": {
+        "checkpoint": "null",
+        "export_onnx": "false",
+        "max_eval_steps": "3000",
+        "num_envs": "64",
+        "registry_name": "file:///data/assets/motions-locomotion,file:///data/assets/motions-low-step,file:///data/assets/motions-high-step,file:///data/assets/motions-low-climb-76,file:///data/assets/motions-high-climb-76",
+        "seed": "42",
+        "teacher_checkpoint": "/outputs/official-full/official/teacher-locomotion/PHP-research/20261010_042104-teacher-locomotion-locomotion/model_19999.pt,/outputs/official-full/official/teacher-low-step/PHP-research/20261010_165257-teacher-low-step-locomotion/model_19999.pt,/outputs/official-full/official/teacher-high-step/PHP-research/20261011_051614-teacher-high-step-locomotion/model_19999.pt,/outputs/official-full/official/teacher-low-climb-76/PHP-research/20261011_171029-teacher-low-climb-76-locomotion/model_19999.pt,/outputs/official-full/official/teacher-high-climb-76/PHP-research/20261012_082244-teacher-high-climb-76-locomotion/model_19999.pt"
+      },
+      "text_constraints_compatible": true
+    }
+  ],
+  "original_clip_id_issue": {
+    "available_clip_count": 1,
+    "pure_observed_clip_ids": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "revision02_accepts_native_scope_without_cardinality_assumption": true
+  },
+  "all_reviewed_sources_and_text_inputs_unchanged_after_review": true,
+  "limitations": [
+    "Source and actual text consistency review only; no event parser, CRC library, YAML parser, ffprobe, ffmpeg, model or candidate code executed.",
+    "Actual Docker ownership/resources, natural exit, every child wait, whole-file CRC/EOF results, scalar reloads and complete media decoding remain for the authorized CPU runtime and separate evidence review."
+  ]
+}

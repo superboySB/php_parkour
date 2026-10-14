@@ -1,0 +1,71 @@
+{
+  "observed_utc": "2026-10-14T15:36:55.072543+00:00",
+  "status": "rejected_before_any_candidate_runtime",
+  "candidate_executed": false,
+  "actual_cpu_returncode": null,
+  "full_source_read_tool_chunks": [
+    "cefcfe",
+    "64ad9c",
+    "4d0458",
+    "62db26"
+  ],
+  "preserved_sources": [
+    {
+      "path": "outputs/research/official-full/official-evaluation-cpu-preparation-01/validate.py",
+      "bytes": 27477,
+      "sha256": "8df865ebf40b77375a29d211efc6fd20404abcc9002d90b0f96db8309d57fbb3"
+    },
+    {
+      "path": "outputs/research/official-full/official-evaluation-cpu-preparation-01/README.md",
+      "bytes": 4415,
+      "sha256": "432a59a9ba5266e092ee40deac2be3805372a3ce24bb53a79b74d1df356d8062"
+    },
+    {
+      "path": "outputs/research/official-full/official-evaluation-cpu-preparation-01/source-manifest.json",
+      "bytes": 1877,
+      "sha256": "565b8bab650bbdb617f52d0e531acb6dabb1e99e766322eb6712b2b5c1317ed8"
+    },
+    {
+      "path": "outputs/research/official-full/official-evaluation-cpu-preparation-01/run_owned_cpu.py",
+      "bytes": 16185,
+      "sha256": "7240d306ad613361d066d818e56b0efaa2d05a599301a29821a7a88782a4868b"
+    },
+    {
+      "path": "outputs/research/official-full/official-evaluation-cpu-preparation-01/run_owned_cpu.source-manifest.json",
+      "bytes": 644,
+      "sha256": "9cea55448a1794c69aa4d5a806a14503de788e5fced7a9fc7d9d12456ae64b7e"
+    }
+  ],
+  "findings": [
+    {
+      "severity": "must_fix",
+      "source": "validate.py/check_quality",
+      "problem": "Unsupported observed_clip_ids < available_clip_count assumption rejects genuine pure-student native quality. These fields must retain native semantics; no coercion or source artifact changes.",
+      "actual_quality": {
+        "path": "outputs/research/official-full/official-evaluation-transfer-01/artifacts/official-full/official/eval-student-pure/quality.json",
+        "bytes": 44397,
+        "sha256": "364541bb4b770381cee64de89f56c471fe70f244bfc5793c7a577ad37e7b2268",
+        "available_clip_count": 1,
+        "observed_clip_ids": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ]
+      }
+    },
+    {
+      "severity": "must_fix",
+      "source": "validate.py/check_tensorboard",
+      "problem": "EventAccumulator Reload alone may suppress TFRecord tail DataLossError. Strict original-record CRC/EOF scan required before event loading; reuse reviewed frozen student verifier."
+    },
+    {
+      "severity": "resource_adjustment",
+      "source": "ffmpeg CPU commands",
+      "problem": "Use explicit single-thread decode/thumbnail within bounded CPU/pids resources."
+    }
+  ],
+  "host_preliminary_freeze_discrepancy": "Author reported one bookkeeping-line move after preliminary SHA. Current host bytes and preliminary manifest both preserved; v2 must bind actual frozen new bytes.",
+  "next": "New sibling preparation-02, full source/diff review before owned actual CPU run. Original scientific artifacts unchanged."
+}

@@ -1,0 +1,206 @@
+--- outputs/research/official-full/official-evaluation-cpu-preparation-01/validate.py
++++ outputs/research/official-full/official-evaluation-cpu-preparation-02/validate.py
+@@ -8,6 +8,8 @@
+ import os
+ from pathlib import Path
+ import re
++import stat
++import struct
+ import subprocess
+ import sys
+ import time
+@@ -84,6 +86,105 @@
+             and state["NVIDIA_VISIBLE_DEVICES"] == "void" and not state["gpu_devices"]
+             and not state["nvidia_proc"], "CPU Docker guard failed: " + repr(state))
+     return state
++
++
++MAX_EVENT_RECORD_BYTES = 64 * 1024 * 1024
++TFRECORD_PROVENANCE = {'original_source': 'scripts/research/student_training_curves/extract_student_scalars.py', 'original_source_sha256': 'e8bf7156013e7c31200ab39c9511020ed17c2e6726d79bc368939b44b5507b12', 'copied_functions': ['regular', 'masked_crc32c', 'verify_tfrecord'], 'copied_function_block_sha256': '1ffc01312a4d580df3997bb048c5cae108fd91387fe1c9113616890156eda5d8', 'method': 'Exact function source copied without execution; dependencies: hashlib, Path, stat, struct, require, MAX_EVENT_RECORD_BYTES; runtime CRC updater is installed TensorBoard pywrap_tensorflow.crc_update.'}
++
++
++def regular(path):
++    path = Path(path)
++    require(path.is_absolute() and '..' not in path.parts, 'Absolute normalized input path required')
++    require(not any(p.is_symlink() for p in (path, *path.parents)), 'Input has a symlink component')
++    require(stat.S_ISREG(path.stat().st_mode), 'Regular input required: ' + str(path))
++    return path
++
++
++def masked_crc32c(crc):
++    crc &= 0xffffffff
++    return (((crc >> 15) | ((crc << 17) & 0xffffffff)) + 0xa282ead8) & 0xffffffff
++
++
++def verify_tfrecord(event_fp, crc_update):
++    """Strict whole-file framing check; injectable CRC updater for CPU protocol fixtures."""
++    result = {'status': 'running', 'format': 'TFRecord', 'expected_file': event_fp,
++        'records': 0, 'bytes': 0, 'complete_eof': False, 'crc32c_verified': False,
++        'max_record_bytes': MAX_EVENT_RECORD_BYTES, 'largest_record_bytes': 0, 'diagnostics': []}
++    digest, offset, record_offset = hashlib.sha256(), 0, 0
++
++    def problem(code, failure_offset, **details):
++        result['diagnostics'].append(dict(problem=code, offset=failure_offset,
++            record_index=result['records'], record_offset=record_offset, **details))
++        raise ValueError(code + ' at byte ' + str(failure_offset))
++
++    try:
++        path = regular(event_fp['path'])
++        before = path.stat()
++        with path.open('rb') as stream:
++            def take(length):
++                nonlocal offset
++                chunks, remaining = [], length
++                while remaining:
++                    chunk = stream.read(remaining)
++                    if not chunk:
++                        break
++                    digest.update(chunk); offset += len(chunk)
++                    chunks.append(chunk); remaining -= len(chunk)
++                return b''.join(chunks)
++
++            while True:
++                record_offset = offset
++                length_bytes = take(8)
++                if not length_bytes:
++                    result['complete_eof'] = True
++                    break
++                if len(length_bytes) != 8:
++                    problem('truncated_length_header', record_offset, expected_bytes=8, actual_bytes=len(length_bytes))
++                length_crc = take(4)
++                if len(length_crc) != 4:
++                    problem('truncated_length_crc', record_offset + 8, expected_bytes=4, actual_bytes=len(length_crc))
++                stored = struct.unpack('<I', length_crc)[0]
++                calculated = masked_crc32c(crc_update(0, length_bytes))
++                if stored != calculated:
++                    problem('length_crc_mismatch', record_offset + 8, stored_crc=stored, calculated_crc=calculated)
++                length = struct.unpack('<Q', length_bytes)[0]
++                if length > MAX_EVENT_RECORD_BYTES or length > event_fp['bytes']:
++                    problem('record_length_exceeds_bound', record_offset, declared_length=length,
++                        maximum=MAX_EVENT_RECORD_BYTES, original_file_bytes=event_fp['bytes'])
++                remaining, crc = length, 0
++                while remaining:
++                    start = offset
++                    expected = min(remaining, 1048576)
++                    chunk = take(expected)
++                    if len(chunk) != expected:
++                        problem('truncated_payload', start, expected_bytes=expected, actual_bytes=len(chunk), declared_length=length)
++                    crc = crc_update(crc, chunk)
++                    remaining -= len(chunk)
++                crc_offset = offset
++                payload_crc = take(4)
++                if len(payload_crc) != 4:
++                    problem('truncated_payload_crc', crc_offset, expected_bytes=4, actual_bytes=len(payload_crc), declared_length=length)
++                stored, calculated = struct.unpack('<I', payload_crc)[0], masked_crc32c(crc)
++                if stored != calculated:
++                    problem('payload_crc_mismatch', crc_offset, stored_crc=stored, calculated_crc=calculated, declared_length=length)
++                result['records'] += 1
++                result['largest_record_bytes'] = max(result['largest_record_bytes'], length)
++        after = path.stat()
++        identity = lambda s: (s.st_dev, s.st_ino, s.st_size, s.st_mtime_ns, s.st_ctime_ns)
++        actual = {'path': str(path), 'bytes': offset, 'sha256': digest.hexdigest()}
++        if identity(before) != identity(after) or actual != event_fp:
++            problem('event_changed_or_whole_file_identity_mismatch', offset, actual_file=actual)
++        if not result['records']:
++            problem('no_complete_tfrecords', 0)
++        result.update(status='passed', bytes=offset, sha256=digest.hexdigest(), crc32c_verified=True)
++    except Exception as error:
++        if not result['diagnostics']:
++            result['diagnostics'].append({'problem': 'tfrecord_read_or_crc_error', 'offset': offset,
++                'record_index': result['records'], 'record_offset': record_offset,
++                'error': type(error).__name__ + ': ' + str(error)})
++        result.update(status='failed', bytes=offset, read_sha256=digest.hexdigest(),
++            error=type(error).__name__ + ': ' + str(error))
++    return result
+ 
+ 
+ def records(stage):
+@@ -224,8 +325,9 @@
+             for x, n in zip(first, q["failed_resets_by_env"])), "first failure times invalid")
+     require(integer(q["clip_completions_excluding_failed_timeout_steps"])
+             and all(integer(x, 1) and x <= 3000 for x in q["ended_episode_lengths_steps"]), "invalid completion/episode counters")
+-    require(integer(q["available_clip_count"], 1) and q["observed_clip_ids"] == sorted(set(q["observed_clip_ids"]))
+-            and all(integer(x) and x < q["available_clip_count"] for x in q["observed_clip_ids"]), "invalid observed clip IDs")
++    require(integer(q["available_clip_count"], 1) and q["observed_clip_ids"]
++            and q["observed_clip_ids"] == sorted(set(q["observed_clip_ids"]))
++            and all(integer(x) for x in q["observed_clip_ids"]), "invalid native command motion IDs")
+     experts = q["observed_expert_ids"]
+     require(experts and experts == sorted(set(experts)) and all(integer(x) and x < len(identity["registries"]) for x in experts), "invalid expert IDs")
+     keys = {str(x) for x in experts}
+@@ -270,6 +372,7 @@
+     require(m["evaluation_tensorboard_events"] == q["tensorboard_events"] == [x["native_path"] for x in stage["events"]], "event paths changed")
+     return {"metrics": q["metrics"], "failed_resets": q["failed_resets"], "timeout_resets": q["timeout_resets"],
+             "observed_clip_ids": q["observed_clip_ids"], "available_clip_count": q["available_clip_count"],
++            "observed_clip_id_scope": "Native command.motion_ids; expert-balanced single-bundle sampling assigns expert IDs, so these are not bounded by motion_end_idx.numel() and do not establish source-motion coverage.",
+             "expert_registry_mapping": {str(x): identity["registries"][x] for x in experts},
+             "metrics_by_expert": q["metrics_by_expert"], "resets_by_expert": q["resets_by_expert"],
+             "quality_bound_videos": len(quality_videos), "native_described_only_videos": len(native_videos) - len(quality_videos)}
+@@ -294,8 +397,19 @@
+ 
+ 
+ def check_tensorboard(stage):
++    from tensorboard.compat.tensorflow_stub import pywrap_tensorflow
++    import tensorboard
++    integrity = {"checker_provenance": TFRECORD_PROVENANCE,
++                 "crc_update_source": fingerprint(Path(pywrap_tensorflow.__file__).absolute()),
++                 "events": []}
++    integrity_path = RESULTS / stage["label"] / "tensorboard-integrity.json"
++    for fp in stage["events"]:
++        event_fp = {key: fp[key] for key in ("path", "bytes", "sha256")}
++        integrity["events"].append(verify_tfrecord(event_fp, pywrap_tensorflow.crc_update))
++        save(integrity_path, integrity)
++    require(integrity["events"] and all(x["status"] == "passed" and x["complete_eof"] is True
++            and x["crc32c_verified"] is True for x in integrity["events"]), "strict whole-original TensorBoard TFRecord gate failed; see tensorboard-integrity.json")
+     from tensorboard.backend.event_processing.event_accumulator import EventAccumulator
+-    import tensorboard
+     q = read_json(stage["quality"]["path"])
+     expected = {"Evaluation/failed_resets": q["failed_resets"], "Evaluation/timeouts": q["timeout_resets"],
+                 "Evaluation/control_steps": q["control_steps"], "Evaluation/sim_seconds_per_env": q["sim_seconds_per_env"],
+@@ -305,7 +419,7 @@
+             expected["Evaluation/tracking_error/" + metric.removeprefix("motion/") + "/" + aggregate] = value[aggregate]
+     found = {}
+     for fp in stage["events"]:
+-        accumulator = EventAccumulator(fp["path"], size_guidance={"scalars": 0}).Reload()
++        accumulator = EventAccumulator(fp["path"], size_guidance={"scalars": 0}, purge_orphaned_data=False).Reload()
+         for tag in accumulator.Tags()["scalars"]:
+             if tag.startswith("Evaluation/"):
+                 require(tag not in found, "duplicated Evaluation tag across event files")
+@@ -315,7 +429,9 @@
+     for tag, values in found.items():
+         require(len(values) == 1 and values[0]["step"] == 3000 and finite(values[0]["wall_time"])
+                 and close(values[0]["value"], expected[tag], absolute=1e-6, relative=1e-6), "TensorBoard scalar/step mismatch: " + tag)
++    require(fingerprint(Path(pywrap_tensorflow.__file__).absolute()) == integrity["crc_update_source"], "installed CRC updater source changed")
+     return {"tensorboard_version": tensorboard.__version__, "matched_tags": sorted(found),
++            "event_integrity_complete": True, "event_integrity": integrity,
+             "absolute_tolerance": 1e-6, "relative_tolerance": 1e-6, "reason": "SummaryWriter scalar encoding uses float32"}
+ 
+ 
+@@ -342,10 +458,11 @@
+     folder.mkdir(exist_ok=True)
+     prefix = folder / (str(index).zfill(3) + "-" + Path(fp["path"]).stem)
+     result = {**fp, "status": "failed"}
+-    probe, raw = child(["ffprobe", "-v", "error", "-count_frames", "-select_streams", "v:0",
++    probe, raw = child(["ffprobe", "-v", "error", "-threads", "1", "-count_frames", "-select_streams", "v:0",
+                         "-show_streams", "-show_format", "-of", "json", fp["path"]], str(prefix) + ".ffprobe")
+-    decode, progress = child(["ffmpeg", "-nostdin", "-hide_banner", "-v", "error", "-xerror", "-i", fp["path"],
+-                              "-map", "0:v:0", "-vsync", "0", "-progress", "pipe:1", "-nostats", "-f", "null", "-"], str(prefix) + ".ffmpeg")
++    decode, progress = child(["ffmpeg", "-nostdin", "-hide_banner", "-v", "error", "-xerror", "-threads", "1",
++                              "-filter_threads", "1", "-i", fp["path"], "-map", "0:v:0", "-threads", "1",
++                              "-vsync", "0", "-progress", "pipe:1", "-nostats", "-f", "null", "-"], str(prefix) + ".ffmpeg")
+     result["ffprobe"], result["ffmpeg"] = probe, decode
+     try:
+         require(probe["returncode"] == decode["returncode"] == 0
+@@ -375,9 +492,10 @@
+     chosen = max(candidates, key=lambda x: x["declared_duration_seconds"])
+     require(chosen["status"] == "passed", "longest quality-bound original did not fully decode")
+     output = RESULTS / stage["label"] / "representative.png"
+-    result, _ = child(["ffmpeg", "-nostdin", "-hide_banner", "-v", "error", "-xerror", "-ss",
+-                       str(chosen["duration_seconds"] / 2), "-i", chosen["path"], "-map", "0:v:0",
+-                       "-frames:v", "1", "-y", str(output)], RESULTS / stage["label"] / "thumbnail.ffmpeg")
++    result, _ = child(["ffmpeg", "-nostdin", "-hide_banner", "-v", "error", "-xerror", "-threads", "1",
++                       "-filter_threads", "1", "-ss", str(chosen["duration_seconds"] / 2), "-i", chosen["path"],
++                       "-map", "0:v:0", "-threads", "1", "-frames:v", "1", "-y", str(output)],
++                      RESULTS / stage["label"] / "thumbnail.ffmpeg")
+     require(result["returncode"] == 0 and result["failure"] is None and output.is_file()
+             and output.stat().st_size > 0, "representative thumbnail failed")
+     return {"source_native_path": chosen["native_path"], "source_sha256": chosen["sha256"],

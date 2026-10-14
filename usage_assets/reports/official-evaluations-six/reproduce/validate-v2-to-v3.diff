@@ -1,0 +1,13 @@
+--- outputs/research/official-full/official-evaluation-cpu-preparation-02/validate.py
++++ outputs/research/official-full/official-evaluation-cpu-preparation-03/validate.py
+@@ -83,8 +83,8 @@
+              "nvidia_proc": Path("/proc/driver/nvidia/gpus").exists(),
+              "python": sys.executable, "python_version": sys.version}
+     require(state["dockerenv"] and state["CUDA_VISIBLE_DEVICES"] == ""
+-            and state["NVIDIA_VISIBLE_DEVICES"] == "void" and not state["gpu_devices"]
+-            and not state["nvidia_proc"], "CPU Docker guard failed: " + repr(state))
++            and state["NVIDIA_VISIBLE_DEVICES"] == "void" and not state["gpu_devices"],
++            "CPU Docker guard failed: " + repr(state))
+     return state
+ 
+ 

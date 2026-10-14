@@ -1,0 +1,107 @@
+{
+  "schema_version": 2,
+  "status": "prepared_source_only",
+  "candidate_executed": false,
+  "candidate_imported": false,
+  "quality_verified": false,
+  "full": false,
+  "source": {
+    "path": "outputs/research/official-full/official-evaluation-cpu-preparation-02/validate.py",
+    "bytes": 34778,
+    "sha256": "ebacc130c6d50269cb262bce576194ba9d56aa9925be31654fd1a6180bb6bb40"
+  },
+  "readme": {
+    "path": "outputs/research/official-full/official-evaluation-cpu-preparation-02/README.md",
+    "bytes": 6358,
+    "sha256": "5694b24536bdebc29c80f545f6f8f691c3fb42f013553b3169bfa98d1ea7efd2"
+  },
+  "supporting_files": [
+    {
+      "path": "outputs/research/official-full/official-evaluation-cpu-preparation-02/verifier-provenance.json",
+      "bytes": 594,
+      "sha256": "5e00b4c8dad030881f0654682ca747c867dcadfae4a9d9291e4d8818a94eca9f"
+    },
+    {
+      "path": "outputs/research/official-full/official-evaluation-cpu-preparation-02/actual-input-observations.json",
+      "bytes": 19289,
+      "sha256": "e178a03de2733f5111805591eda56ec8e3deeccfad0337ad8512de1b319c18ac"
+    },
+    {
+      "path": "outputs/research/official-full/official-evaluation-cpu-preparation-02/validate-v1-to-v2.diff",
+      "bytes": 13490,
+      "sha256": "0dcb515a621f19231ec3b524f2a72fff58faf7c483cead75a19f686af35de28a"
+    }
+  ],
+  "source_inputs_read_only": [
+    {
+      "path": "outputs/research/official-full/official-evaluation-inventory-01/stdout.raw",
+      "bytes": 250340,
+      "sha256": "abe973efa9d1d6051a75551c4b69b60ebd0c49aea9dafe4d3e5b795495667687"
+    },
+    {
+      "path": "outputs/research/official-full/official-evaluation-transfer-01/control/input-contract.json",
+      "bytes": 121154,
+      "sha256": "4ca7fb20e21328235b1dd40def4852ceccc81cdd414782523adefd52cc05fb72"
+    },
+    {
+      "path": "scripts/research/eval_quality.py",
+      "bytes": 12850,
+      "sha256": "5cbb7f483f2aacbf83633b45ccd99872be796a7322e7846d042de1f550bee17e"
+    },
+    {
+      "path": "scripts/research/student_training_curves/extract_student_scalars.py",
+      "bytes": 19320,
+      "sha256": "e8bf7156013e7c31200ab39c9511020ed17c2e6726d79bc368939b44b5507b12"
+    },
+    {
+      "path": "wbt_training/config_values/motion_command.py",
+      "bytes": 34416,
+      "sha256": "e338182452f9eb26e46db4fa445b4a1ec071334f478d5fcb0a54a08ef2563607"
+    }
+  ],
+  "interface": {
+    "contract": "/control/input-contract.json",
+    "artifacts": "/artifacts",
+    "results": "/results",
+    "cli_required": [
+      "--contract-sha256",
+      "--source-sha256"
+    ],
+    "files": 196,
+    "stages": 6,
+    "videos": 160,
+    "quality_bound_videos": 148,
+    "native_described_only_videos": 12,
+    "tensorboard_success_gate": [
+      "event_integrity_complete=true",
+      "event_integrity.events[].status=passed",
+      "event_integrity.events[].complete_eof=true",
+      "event_integrity.events[].crc32c_verified=true"
+    ]
+  },
+  "source_admission": {
+    "method": "stdlib ast.parse/read-only text and JSON inspection only; no candidate execution/import",
+    "syntax_valid": true,
+    "ast_node_count": 7045,
+    "exact_frozen_verifier_functions_verified": [
+      "regular",
+      "masked_crc32c",
+      "verify_tfrecord"
+    ],
+    "root_current_source_review": "Root reported full read of v2 source and host; no new must-fix before freeze. Runtime acceptance remains pending."
+  },
+  "v1_rejection": {
+    "original_source": {
+      "path": "outputs/research/official-full/official-evaluation-cpu-preparation-01/validate.py",
+      "bytes": 27477,
+      "sha256": "8df865ebf40b77375a29d211efc6fd20404abcc9002d90b0f96db8309d57fbb3"
+    },
+    "preserved_root_review": "outputs/research/official-full/official-evaluation-v1-root-review-01",
+    "must_fix": [
+      "Unsupported observed command motion ID < available motion bundle count assumption rejects actual pure student IDs0..4/count1.",
+      "EventAccumulator alone can silently ignore a corrupt TFRecord tail; strict CRC/EOF gate was missing."
+    ],
+    "earlier_static_review_is_not_runtime_evidence": true
+  },
+  "runtime_results_created": false
+}

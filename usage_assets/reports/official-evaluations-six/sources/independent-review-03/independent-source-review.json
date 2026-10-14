@@ -1,0 +1,72 @@
+{
+  "schema_version": 1,
+  "review_kind": "independent_source_only_minimal_guard_revision",
+  "status": "no_must_fix_found",
+  "reviewer": "official_eval_runtime",
+  "created_utc": "2026-10-14T15:47:55.122068+00:00",
+  "scope": "Independent exact text and AST comparison of frozen validator03 against fully reviewed02; guard predicate change only. Source review, no runtime evidence conclusion.",
+  "must_fix": [],
+  "validator_before": {
+    "path": "outputs/research/official-full/official-evaluation-cpu-preparation-02/validate.py",
+    "bytes": 34778,
+    "sha256": "ebacc130c6d50269cb262bce576194ba9d56aa9925be31654fd1a6180bb6bb40"
+  },
+  "validator_after": {
+    "path": "outputs/research/official-full/official-evaluation-cpu-preparation-03/validate.py",
+    "bytes": 34749,
+    "sha256": "86ad6bb0f41f60951b4a784285851525eb0efb2bf398da38cbe1ef8f71688ac4"
+  },
+  "exact_expected_text_replacement_only": true,
+  "ast_changed_functions": [
+    "guard"
+  ],
+  "ast_unchanged_outside_guard": true,
+  "guard_review": {
+    "state_visibility_record_unchanged": true,
+    "return_state_unchanged": true,
+    "retained_predicates": [
+      "dockerenv is present",
+      "CUDA_VISIBLE_DEVICES equals empty string",
+      "NVIDIA_VISIBLE_DEVICES equals void",
+      "no /dev/nvidia* or /dev/dri/render* devices"
+    ],
+    "removed_predicate_only": "not state[nvidia_proc]",
+    "rationale": "Root reported that globally visible proc driver metadata coexists with the owned runc container having no GPU devices or DeviceRequests. Keeping visibility in diagnostics while removing metadata absence as a required device-isolation condition avoids this environmental false failure."
+  },
+  "preserved_checks": [
+    "Exact embedded regular/masked_crc32c/verify_tfrecord segments and all CRC32C/whole EOF/identity gates remain byte-identical to02.",
+    "Native command.motion_ids remain sorted, unique, nonnegative and are not incorrectly bounded by available_clip_count.",
+    "All quality/YAML/native provenance,17scalar,160full-video-decode,6thumbnail,actual child wait and input/source immutability checks remain byte-identical.",
+    "Host remains byte-identical with runc, networknone,2CPU,12GiB, no privileged/devices/DeviceRequests and exact four source/input/output binds required."
+  ],
+  "host_copies": [
+    {
+      "name": "run_owned_cpu.py",
+      "sha256": "f70938355e4e36b0f7758c00e48da141d9707c684d04cd55709f15f80b1270fb",
+      "exact_revision02_copy": true
+    },
+    {
+      "name": "run_owned_cpu.source-manifest.json",
+      "sha256": "8e762fab09637bd031adf09b054192c1f0753470aa75fd4c499a3edba420be73",
+      "exact_revision02_copy": true
+    }
+  ],
+  "earlier_source_review": {
+    "path": "outputs/research/official-full/official-evaluation-source-independent-review-02/independent-source-review.json",
+    "sha256": "e746f88d5ccc9d76874b9760465cbeac577d22ca07308722d48196e46987a33f",
+    "reviewed_sources_contract_and_12_text_inputs_rechecked_unchanged": true,
+    "files_rechecked": 18
+  },
+  "diff_sha256": "5f245f7e73ecd3b7dee476e8ca410fbfca46a3b761381538dabc577389d0f942",
+  "candidate_executed": false,
+  "candidate_imported": false,
+  "docker_invoked": false,
+  "third_party_imported": false,
+  "runtime_evidence_reviewed": false,
+  "quality_verified": false,
+  "full": false,
+  "limitations": [
+    "The prior CPU01 guard failure is reported by Root; this review has not inspected that execution evidence.",
+    "Actual isolation, natural exit, CRC/scalar/decode outcomes and child wait evidence require the separately authorized CPU invocation and later evidence review."
+  ]
+}

@@ -4,7 +4,9 @@
 
 算法、状态/动作/奖励/loss、数据格式与标签来源，以及 real2sim2real 的实现和验证边界见独立的 [technical_pipeline.md](technical_pipeline.md)。
 
-**当前进度（2026-10-13，北京时间）：五类官方教师均已完成20,000轮，最终checkpoint为19999；五份最终产物均已完成独立CPU验收。** 第四个low-climb-76于10月12日16:22:35、第五个high-climb-76于10月13日07:14:48完成原生训练；两份[低攀爬](usage_assets/reports/official-low-climb-76-final/index.md)/[高攀爬](usage_assets/reports/official-high-climb-76-final/index.md)公开包已生成。纯DAgger学生已于10月13日17:34:35完成10,000轮、最终checkpoint9999，混合学生已自动开始30,000轮训练；16阶段全日程、官方物理评估、云端888逐源尝试、最终自训学生58例和两学生各629配置均未完成。CPU有限性、训练记录完整或公开包恢复通过，不表示策略收敛、技能成功或真机验收。
+**当前进度（2026-10-14，北京时间）：五类官方教师均已完成20,000轮，最终checkpoint为19999；五份最终产物均已完成独立CPU验收。** 第四个low-climb-76于10月12日16:22:35、第五个high-climb-76于10月13日07:14:48完成原生训练；两份[低攀爬](usage_assets/reports/official-low-climb-76-final/index.md)/[高攀爬](usage_assets/reports/official-high-climb-76-final/index.md)公开包已生成。纯DAgger学生已于10月13日17:34:35完成10,000轮、最终checkpoint9999，混合学生正在运行30,000轮训练，10月14日23:12的原生日志记录为24,354轮；五类教师与纯学生的六项官方有界Isaac评估已完成，原始记录和160段视频已通过独立CPU核验；混合学生、16阶段全日程、云端888逐源尝试、最终自训学生58例和两学生各629配置仍待完成。CPU有限性、训练记录完整或公开包恢复通过，不表示策略收敛、技能成功或真机验收。
+
+[六项官方有界评估的原始指标、图片、视频与离线重放](usage_assets/reports/official-evaluations-six/index.md)已保存：每项64环境×3000步，六份TensorBoard整文件CRC/EOF完整且102个指标与原JSON一致，160段原视频完整解码。原生失败reset及clip结束事件如实保留，不作为技能或课程成功率。包内提供已实际执行的CPU Docker重放命令，宿主无需安装包。
 
 项目机器人是半球手的 Unitree G1，29 个关节。动作匹配有 17 种内置场景、29 个技能注册项；公开训练流程提供五类教师数据。动作数据库中的更多翻越技能并不自动成为公开深度策略掌握的技能。
 
