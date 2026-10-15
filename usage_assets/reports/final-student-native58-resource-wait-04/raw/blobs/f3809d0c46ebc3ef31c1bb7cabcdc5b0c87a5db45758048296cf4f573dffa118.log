@@ -1,0 +1,241 @@
+{
+  "status": "completed",
+  "elapsed_seconds": 21.463943080001627,
+  "config": {
+    "models": "/data/assets/student",
+    "terrain": "custom",
+    "mesh": "/workspace/php_parkour/outputs/research/motion-matching/scenarios/low_speed_climb_76/forward_walk0.6s_step0.7s_terrain.obj",
+    "model_sha256": {
+      "depth_backbone.onnx": "10882be72a0579b484ae0b78fb272aa861e46b5db9c916e97d60108348d17a43",
+      "student.onnx": "21e32c992f1b438d4333f60d0f1790105aa94c599f2d2422311c89e6003e95b5"
+    },
+    "mesh_sha256": "caef86b7db9c4ac86430eba949985e030605a59118d6ec969103b1d7016cecae",
+    "commands": [
+      1
+    ],
+    "duration": 10.0,
+    "seconds_per_command": 10.0,
+    "record_policy": false,
+    "python_faulthandler": true,
+    "course_guide": false,
+    "settle_seconds": 3,
+    "startup_timeout": 180,
+    "seed": 42,
+    "gl": "egl",
+    "ort_threads": 1,
+    "egl_device_id": "0",
+    "wall_timeout": 413.0,
+    "scope": "native closed-loop rollout, not an assertion of skill success"
+  },
+  "worker_status_report": "worker-processes.json",
+  "worker_status_at_completion": {
+    "event": "workers_loop_complete",
+    "observed_unix": 1792049219.106686,
+    "elapsed_seconds": 21.463440486000763,
+    "workers": [
+      {
+        "role": "simulator",
+        "launch": [
+          "/opt/php/bin/train-python",
+          "/workspace/php_parkour/scripts/research/sim2sim.py",
+          "--worker",
+          "simulator",
+          "--output",
+          "/outputs/scenes17/low_speed_climb_76"
+        ],
+        "identity_at_spawn": {
+          "pid": 942,
+          "pid_namespace": "current container",
+          "observed_unix": 1792049197.6435893,
+          "proc_status": {
+            "Name": "train-python",
+            "Tgid": "942",
+            "Pid": "942",
+            "PPid": "941",
+            "NSpid": "942",
+            "Threads": "1"
+          },
+          "state": "R",
+          "process_group_id": 942,
+          "session_id": 942,
+          "start_time_clock_ticks": 2310667,
+          "cmdline": "/usr/bin/env bash /opt/php/bin/train-python /workspace/php_parkour/scripts/research/sim2sim.py --worker simulator --output /outputs/scenes17/low_speed_climb_76 "
+        },
+        "process_group": {
+          "process_group_id": 942,
+          "session_id": 942,
+          "source": "Popen start_new_session=True; private session/group leader PID",
+          "leader_identity": {
+            "pid": 942,
+            "start_time_clock_ticks": 2310667
+          },
+          "known_members": [
+            {
+              "pid": 942,
+              "start_time_clock_ticks": 2310667
+            },
+            {
+              "pid": 947,
+              "start_time_clock_ticks": 2310667
+            },
+            {
+              "pid": 976,
+              "start_time_clock_ticks": 2311213
+            },
+            {
+              "pid": 1012,
+              "start_time_clock_ticks": 2312669
+            }
+          ],
+          "retired": true,
+          "ownership_lost": false,
+          "ownership_state": "retired_empty",
+          "ownership_reason": null,
+          "live_members": [],
+          "ownership_verified": true
+        },
+        "returncode": 0,
+        "signal_number": null,
+        "signal_name": null,
+        "exit_code": 0,
+        "status": "exited",
+        "scope": "direct Popen process; wrappers may mask a native child signal"
+      },
+      {
+        "role": "inference",
+        "launch": [
+          "/opt/php/bin/inference-python",
+          "/workspace/php_parkour/scripts/research/sim2sim.py",
+          "--worker",
+          "inference",
+          "--output",
+          "/outputs/scenes17/low_speed_climb_76"
+        ],
+        "identity_at_spawn": {
+          "pid": 980,
+          "pid_namespace": "current container",
+          "observed_unix": 1792049203.2571888,
+          "proc_status": {
+            "Name": "inference-pytho",
+            "Tgid": "980",
+            "Pid": "980",
+            "PPid": "941",
+            "NSpid": "980",
+            "Threads": "1"
+          },
+          "state": "R",
+          "process_group_id": 980,
+          "session_id": 980,
+          "start_time_clock_ticks": 2311228,
+          "cmdline": "/usr/bin/env bash /opt/php/bin/inference-python /workspace/php_parkour/scripts/research/sim2sim.py --worker inference --output /outputs/scenes17/low_speed_climb_76 "
+        },
+        "process_group": {
+          "process_group_id": 980,
+          "session_id": 980,
+          "source": "Popen start_new_session=True; private session/group leader PID",
+          "leader_identity": {
+            "pid": 980,
+            "start_time_clock_ticks": 2311228
+          },
+          "known_members": [
+            {
+              "pid": 980,
+              "start_time_clock_ticks": 2311228
+            },
+            {
+              "pid": 995,
+              "start_time_clock_ticks": 2311333
+            }
+          ],
+          "retired": true,
+          "ownership_lost": false,
+          "ownership_state": "retired_empty",
+          "ownership_reason": null,
+          "live_members": [],
+          "ownership_verified": true
+        },
+        "returncode": 0,
+        "signal_number": null,
+        "signal_name": null,
+        "exit_code": 0,
+        "status": "exited",
+        "scope": "direct Popen process; wrappers may mask a native child signal"
+      }
+    ]
+  },
+  "simulation": {
+    "status": "completed",
+    "physics_steps": 7011,
+    "active_samples": 501,
+    "policy_simulation_seconds": 10.012,
+    "simulation_seconds": 14.022,
+    "wall_seconds": 15.57922567499918,
+    "physics_fps_measured": 450.02233633012463,
+    "displacement_xy_m": [
+      1.6345996856689453,
+      -0.109324588207528
+    ],
+    "path_length_xy_m": 2.0303182934931803,
+    "heading_change_deg": 31.87559073657934,
+    "minimum_pelvis_height_m": 0.6151974201202393,
+    "minimum_base_up_z": 0.8762346133589745,
+    "final_position_xyz_m": [
+      1.4625581502914429,
+      -0.10883374512195587,
+      0.6151974201202393
+    ],
+    "final_base_up_z": 0.8870850577950478,
+    "low_pelvis_detected": false,
+    "tilt_threshold_sample_seconds": 0.0,
+    "fall_detected": false,
+    "fall_criterion": "pelvis height < 0.4 m OR base upright cosine < 0.35 after gantry release",
+    "fall_detection_is_heuristic": true,
+    "gantry_disabled_during_policy": true
+  },
+  "inference": {
+    "status": "completed",
+    "ticks": 500,
+    "commands": [
+      {
+        "seconds": 0.012,
+        "code": 1,
+        "name": "forward"
+      }
+    ],
+    "control_period_simulation_seconds": 0.02,
+    "onnxruntime_intra_op_threads": 1,
+    "lifecycle": {
+      "damping_mode_active": true,
+      "policy_action_disabled": true
+    },
+    "transport": "official Unitree SDK DDS on lo; official depth shared memory",
+    "input": "automated injected commands"
+  },
+  "videos": [
+    "video/episode_0_1792049217.mp4"
+  ],
+  "quality_verified": false,
+  "obstacle_course_completion_verified": false,
+  "video_checks": [
+    {
+      "video": "video/episode_0_1792049217.mp4",
+      "probe": {
+        "programs": [],
+        "streams": [
+          {
+            "codec_name": "h264",
+            "width": 640,
+            "height": 360,
+            "avg_frame_rate": "50/1",
+            "nb_frames": "702"
+          }
+        ],
+        "format": {
+          "duration": "14.040000"
+        }
+      },
+      "thumbnail": "video/episode_0_1792049217.png"
+    }
+  ],
+  "survival_passed": true
+}

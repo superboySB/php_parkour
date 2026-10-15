@@ -1,0 +1,552 @@
+{
+  "status": "passed_readonly_native58_cpu_preparation_review",
+  "observed_utc": "2026-10-15T05:14:25.232352+00:00",
+  "reviewer_source": {
+    "path": "/home/dzp/projects/php_parkour/outputs/research/reproduction-20261015/review_native58_cpu_prepare.py",
+    "bytes": 6654,
+    "sha256": "d77e078137a9c70f4d023f1b707f9a57ee2408e1f806be1af02e13d503f66120"
+  },
+  "must_fix": [],
+  "plan": {
+    "path": "/home/dzp/projects/php_parkour/outputs/research/final-student-native58-delivery-recovered-01/host-plan.json",
+    "bytes": 33954,
+    "sha256": "7492d10937805770cc089801d5747eb2c66ce875ab847cc75cdadf758c7f5869"
+  },
+  "freeze": {
+    "path": "/home/dzp/projects/php_parkour/outputs/research/final-student-native58-delivery-recovered-01/freeze-manifest.json",
+    "bytes": 1242236,
+    "sha256": "5d2689555e01172e418c119479bdfdb6cf2a73853d6506b03d534e256647533b"
+  },
+  "frozen_files": 5241,
+  "actual_parent_wait": {
+    "path": "/home/dzp/projects/php_parkour/outputs/research/reproduction-20261015/student-native58-cpu-prepare-host-01/original-parent/process-exit.json",
+    "bytes": 1496,
+    "sha256": "eb3b8ded84fe5ef2bd84c180101d1f56037efe96a781316f8bb138c6ef185d2a"
+  },
+  "phases": [
+    {
+      "kind": "pure",
+      "ort_cases": 30,
+      "models": [
+        {
+          "path": "/data/assets/student/depth_backbone.onnx",
+          "bytes": 105254,
+          "sha256": "10882be72a0579b484ae0b78fb272aa861e46b5db9c916e97d60108348d17a43",
+          "inputs": [
+            {
+              "name": "depth_image",
+              "shape": [
+                1,
+                58,
+                87
+              ],
+              "dtype": "tensor(float)"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "depth_latent",
+              "shape": [
+                1,
+                32
+              ],
+              "dtype": "tensor(float)"
+            }
+          ],
+          "metadata": {
+            "run_path": ""
+          }
+        },
+        {
+          "path": "/data/assets/student/student.onnx",
+          "bytes": 2710180,
+          "sha256": "21e32c992f1b438d4333f60d0f1790105aa94c599f2d2422311c89e6003e95b5",
+          "inputs": [
+            {
+              "name": "obs",
+              "shape": [
+                1,
+                140
+              ],
+              "dtype": "tensor(float)"
+            },
+            {
+              "name": "time_step",
+              "shape": [
+                1,
+                1
+              ],
+              "dtype": "tensor(float)"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "actions",
+              "shape": [
+                1,
+                29
+              ],
+              "dtype": "tensor(float)"
+            },
+            {
+              "name": "joint_pos",
+              "shape": [
+                1,
+                29
+              ],
+              "dtype": "tensor(float)"
+            },
+            {
+              "name": "joint_vel",
+              "shape": [
+                1,
+                29
+              ],
+              "dtype": "tensor(float)"
+            },
+            {
+              "name": "body_pos_w",
+              "shape": [
+                1,
+                32,
+                3
+              ],
+              "dtype": "tensor(float)"
+            },
+            {
+              "name": "body_quat_w",
+              "shape": [
+                1,
+                32,
+                4
+              ],
+              "dtype": "tensor(float)"
+            },
+            {
+              "name": "body_lin_vel_w",
+              "shape": [
+                1,
+                32,
+                3
+              ],
+              "dtype": "tensor(float)"
+            },
+            {
+              "name": "body_ang_vel_w",
+              "shape": [
+                1,
+                32,
+                3
+              ],
+              "dtype": "tensor(float)"
+            }
+          ],
+          "metadata": {
+            "run_path": "",
+            "joint_names": "left_hip_pitch_joint,left_hip_roll_joint,left_hip_yaw_joint,left_knee_joint,left_ankle_pitch_joint,left_ankle_roll_joint,right_hip_pitch_joint,right_hip_roll_joint,right_hip_yaw_joint,right_knee_joint,right_ankle_pitch_joint,right_ankle_roll_joint,waist_yaw_joint,waist_roll_joint,waist_pitch_joint,left_shoulder_pitch_joint,left_shoulder_roll_joint,left_shoulder_yaw_joint,left_elbow_joint,left_wrist_roll_joint,left_wrist_pitch_joint,left_wrist_yaw_joint,right_shoulder_pitch_joint,right_shoulder_roll_joint,right_shoulder_yaw_joint,right_elbow_joint,right_wrist_roll_joint,right_wrist_pitch_joint,right_wrist_yaw_joint",
+            "action_scale": "1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000",
+            "default_joint_pos": "-0.312,0.000,0.000,0.669,-0.363,0.000,-0.312,0.000,0.000,0.669,-0.363,0.000,0.000,0.000,0.000,0.200,0.200,0.000,0.600,0.000,0.000,0.000,0.200,-0.200,0.000,0.600,0.000,0.000,0.000",
+            "joint_stiffness": "40.179,99.098,40.179,99.098,28.501,28.501,40.179,99.098,40.179,99.098,28.501,28.501,40.179,28.501,28.501,14.251,14.251,14.251,14.251,14.251,16.778,16.778,14.251,14.251,14.251,14.251,14.251,16.778,16.778",
+            "joint_damping": "2.558,6.309,2.558,6.309,1.814,1.814,2.558,6.309,2.558,6.309,1.814,1.814,2.558,1.814,1.814,0.907,0.907,0.907,0.907,0.907,1.068,1.068,0.907,0.907,0.907,0.907,0.907,1.068,1.068",
+            "kp": "40.179,99.098,40.179,99.098,28.501,28.501,40.179,99.098,40.179,99.098,28.501,28.501,40.179,28.501,28.501,14.251,14.251,14.251,14.251,14.251,16.778,16.778,14.251,14.251,14.251,14.251,14.251,16.778,16.778",
+            "kd": "2.558,6.309,2.558,6.309,1.814,1.814,2.558,6.309,2.558,6.309,1.814,1.814,2.558,1.814,1.814,0.907,0.907,0.907,0.907,0.907,1.068,1.068,0.907,0.907,0.907,0.907,0.907,1.068,1.068",
+            "command_names": "motion_command",
+            "observation_names": "actions,base_ang_vel,dof_pos,dof_vel,robot_anchor_projected_gravity,velocity_command,placeholder",
+            "anchor_body_name": "torso_link",
+            "body_names": "pelvis,left_hip_roll_link,left_knee_link,left_ankle_roll_link,right_hip_roll_link,right_knee_link,right_ankle_roll_link,torso_link,left_shoulder_roll_link,left_elbow_link,left_wrist_yaw_link,right_shoulder_roll_link,right_elbow_link,right_wrist_yaw_link"
+          }
+        }
+      ],
+      "pose": {
+        "status": "passed",
+        "native_joint_names": [
+          "left_hip_pitch_joint",
+          "left_hip_roll_joint",
+          "left_hip_yaw_joint",
+          "left_knee_joint",
+          "left_ankle_pitch_joint",
+          "left_ankle_roll_joint",
+          "right_hip_pitch_joint",
+          "right_hip_roll_joint",
+          "right_hip_yaw_joint",
+          "right_knee_joint",
+          "right_ankle_pitch_joint",
+          "right_ankle_roll_joint",
+          "waist_yaw_joint",
+          "waist_roll_joint",
+          "waist_pitch_joint",
+          "left_shoulder_pitch_joint",
+          "left_shoulder_roll_joint",
+          "left_shoulder_yaw_joint",
+          "left_elbow_joint",
+          "left_wrist_roll_joint",
+          "left_wrist_pitch_joint",
+          "left_wrist_yaw_joint",
+          "right_shoulder_pitch_joint",
+          "right_shoulder_roll_joint",
+          "right_shoulder_yaw_joint",
+          "right_elbow_joint",
+          "right_wrist_roll_joint",
+          "right_wrist_pitch_joint",
+          "right_wrist_yaw_joint"
+        ],
+        "model_joint_names": [
+          "left_hip_pitch_joint",
+          "left_hip_roll_joint",
+          "left_hip_yaw_joint",
+          "left_knee_joint",
+          "left_ankle_pitch_joint",
+          "left_ankle_roll_joint",
+          "right_hip_pitch_joint",
+          "right_hip_roll_joint",
+          "right_hip_yaw_joint",
+          "right_knee_joint",
+          "right_ankle_pitch_joint",
+          "right_ankle_roll_joint",
+          "waist_yaw_joint",
+          "waist_roll_joint",
+          "waist_pitch_joint",
+          "left_shoulder_pitch_joint",
+          "left_shoulder_roll_joint",
+          "left_shoulder_yaw_joint",
+          "left_elbow_joint",
+          "left_wrist_roll_joint",
+          "left_wrist_pitch_joint",
+          "left_wrist_yaw_joint",
+          "right_shoulder_pitch_joint",
+          "right_shoulder_roll_joint",
+          "right_shoulder_yaw_joint",
+          "right_elbow_joint",
+          "right_wrist_roll_joint",
+          "right_wrist_pitch_joint",
+          "right_wrist_yaw_joint"
+        ],
+        "native_to_model_permutation": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          24,
+          25,
+          26,
+          27,
+          28
+        ],
+        "max_default_pose_absolute_error": 0.0,
+        "export_metadata_rounding_tolerance": 0.000501,
+        "scope": "Native fixed observation order/config gains remain unchanged; metadata observation_names does not reorder native wire fields"
+      },
+      "container_id": "60e8aafa2f04291bf20b298844eb36a2bb7223535d0829db64703bf4499c9534",
+      "started_at": "2026-10-15T05:11:29.743601376Z",
+      "state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 0,
+        "Error": "",
+        "StartedAt": "2026-10-15T05:11:29.743601376Z",
+        "FinishedAt": "2026-10-15T05:11:52.394269185Z"
+      },
+      "fresh_inspect_argv": [
+        "docker",
+        "container",
+        "inspect",
+        "60e8aafa2f04291bf20b298844eb36a2bb7223535d0829db64703bf4499c9534"
+      ],
+      "actual_inspect_wait_returncode": 0,
+      "fresh_inspect_stdout": {
+        "path": "/home/dzp/projects/php_parkour/outputs/research/reproduction-20261015/native58-cpu-prepare-root-review-01/pure.inspect.stdout.raw",
+        "bytes": 15856,
+        "sha256": "4ec87b521d03729e475aae5a9583aacaa29ce3c59805a222c8668b58668828a1"
+      }
+    },
+    {
+      "kind": "finetune",
+      "ort_cases": 30,
+      "models": [
+        {
+          "path": "/data/assets/student/depth_backbone.onnx",
+          "bytes": 105254,
+          "sha256": "7133ae4aefcec6cc9bcfc275bed6e4248fe19955e932f672abee939e74d09616",
+          "inputs": [
+            {
+              "name": "depth_image",
+              "shape": [
+                1,
+                58,
+                87
+              ],
+              "dtype": "tensor(float)"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "depth_latent",
+              "shape": [
+                1,
+                32
+              ],
+              "dtype": "tensor(float)"
+            }
+          ],
+          "metadata": {
+            "run_path": ""
+          }
+        },
+        {
+          "path": "/data/assets/student/student.onnx",
+          "bytes": 14069083,
+          "sha256": "ce66b9c0d46066aa1945da61796b928953e7d6cc80609934a9a27343e1fc8277",
+          "inputs": [
+            {
+              "name": "obs",
+              "shape": [
+                1,
+                140
+              ],
+              "dtype": "tensor(float)"
+            },
+            {
+              "name": "time_step",
+              "shape": [
+                1,
+                1
+              ],
+              "dtype": "tensor(float)"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "actions",
+              "shape": [
+                1,
+                29
+              ],
+              "dtype": "tensor(float)"
+            },
+            {
+              "name": "joint_pos",
+              "shape": [
+                1,
+                29
+              ],
+              "dtype": "tensor(float)"
+            },
+            {
+              "name": "joint_vel",
+              "shape": [
+                1,
+                29
+              ],
+              "dtype": "tensor(float)"
+            },
+            {
+              "name": "body_pos_w",
+              "shape": [
+                1,
+                32,
+                3
+              ],
+              "dtype": "tensor(float)"
+            },
+            {
+              "name": "body_quat_w",
+              "shape": [
+                1,
+                32,
+                4
+              ],
+              "dtype": "tensor(float)"
+            },
+            {
+              "name": "body_lin_vel_w",
+              "shape": [
+                1,
+                32,
+                3
+              ],
+              "dtype": "tensor(float)"
+            },
+            {
+              "name": "body_ang_vel_w",
+              "shape": [
+                1,
+                32,
+                3
+              ],
+              "dtype": "tensor(float)"
+            }
+          ],
+          "metadata": {
+            "run_path": "",
+            "joint_names": "left_hip_pitch_joint,left_hip_roll_joint,left_hip_yaw_joint,left_knee_joint,left_ankle_pitch_joint,left_ankle_roll_joint,right_hip_pitch_joint,right_hip_roll_joint,right_hip_yaw_joint,right_knee_joint,right_ankle_pitch_joint,right_ankle_roll_joint,waist_yaw_joint,waist_roll_joint,waist_pitch_joint,left_shoulder_pitch_joint,left_shoulder_roll_joint,left_shoulder_yaw_joint,left_elbow_joint,left_wrist_roll_joint,left_wrist_pitch_joint,left_wrist_yaw_joint,right_shoulder_pitch_joint,right_shoulder_roll_joint,right_shoulder_yaw_joint,right_elbow_joint,right_wrist_roll_joint,right_wrist_pitch_joint,right_wrist_yaw_joint",
+            "action_scale": "1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000",
+            "default_joint_pos": "-0.312,0.000,0.000,0.669,-0.363,0.000,-0.312,0.000,0.000,0.669,-0.363,0.000,0.000,0.000,0.000,0.200,0.200,0.000,0.600,0.000,0.000,0.000,0.200,-0.200,0.000,0.600,0.000,0.000,0.000",
+            "joint_stiffness": "40.179,99.098,40.179,99.098,28.501,28.501,40.179,99.098,40.179,99.098,28.501,28.501,40.179,28.501,28.501,14.251,14.251,14.251,14.251,14.251,16.778,16.778,14.251,14.251,14.251,14.251,14.251,16.778,16.778",
+            "joint_damping": "2.558,6.309,2.558,6.309,1.814,1.814,2.558,6.309,2.558,6.309,1.814,1.814,2.558,1.814,1.814,0.907,0.907,0.907,0.907,0.907,1.068,1.068,0.907,0.907,0.907,0.907,0.907,1.068,1.068",
+            "kp": "40.179,99.098,40.179,99.098,28.501,28.501,40.179,99.098,40.179,99.098,28.501,28.501,40.179,28.501,28.501,14.251,14.251,14.251,14.251,14.251,16.778,16.778,14.251,14.251,14.251,14.251,14.251,16.778,16.778",
+            "kd": "2.558,6.309,2.558,6.309,1.814,1.814,2.558,6.309,2.558,6.309,1.814,1.814,2.558,1.814,1.814,0.907,0.907,0.907,0.907,0.907,1.068,1.068,0.907,0.907,0.907,0.907,0.907,1.068,1.068",
+            "command_names": "motion_command",
+            "observation_names": "actions,base_ang_vel,dof_pos,dof_vel,robot_anchor_projected_gravity,velocity_command,placeholder",
+            "anchor_body_name": "torso_link",
+            "body_names": "pelvis,left_hip_roll_link,left_knee_link,left_ankle_roll_link,right_hip_roll_link,right_knee_link,right_ankle_roll_link,torso_link,left_shoulder_roll_link,left_elbow_link,left_wrist_yaw_link,right_shoulder_roll_link,right_elbow_link,right_wrist_yaw_link"
+          }
+        }
+      ],
+      "pose": {
+        "status": "passed",
+        "native_joint_names": [
+          "left_hip_pitch_joint",
+          "left_hip_roll_joint",
+          "left_hip_yaw_joint",
+          "left_knee_joint",
+          "left_ankle_pitch_joint",
+          "left_ankle_roll_joint",
+          "right_hip_pitch_joint",
+          "right_hip_roll_joint",
+          "right_hip_yaw_joint",
+          "right_knee_joint",
+          "right_ankle_pitch_joint",
+          "right_ankle_roll_joint",
+          "waist_yaw_joint",
+          "waist_roll_joint",
+          "waist_pitch_joint",
+          "left_shoulder_pitch_joint",
+          "left_shoulder_roll_joint",
+          "left_shoulder_yaw_joint",
+          "left_elbow_joint",
+          "left_wrist_roll_joint",
+          "left_wrist_pitch_joint",
+          "left_wrist_yaw_joint",
+          "right_shoulder_pitch_joint",
+          "right_shoulder_roll_joint",
+          "right_shoulder_yaw_joint",
+          "right_elbow_joint",
+          "right_wrist_roll_joint",
+          "right_wrist_pitch_joint",
+          "right_wrist_yaw_joint"
+        ],
+        "model_joint_names": [
+          "left_hip_pitch_joint",
+          "left_hip_roll_joint",
+          "left_hip_yaw_joint",
+          "left_knee_joint",
+          "left_ankle_pitch_joint",
+          "left_ankle_roll_joint",
+          "right_hip_pitch_joint",
+          "right_hip_roll_joint",
+          "right_hip_yaw_joint",
+          "right_knee_joint",
+          "right_ankle_pitch_joint",
+          "right_ankle_roll_joint",
+          "waist_yaw_joint",
+          "waist_roll_joint",
+          "waist_pitch_joint",
+          "left_shoulder_pitch_joint",
+          "left_shoulder_roll_joint",
+          "left_shoulder_yaw_joint",
+          "left_elbow_joint",
+          "left_wrist_roll_joint",
+          "left_wrist_pitch_joint",
+          "left_wrist_yaw_joint",
+          "right_shoulder_pitch_joint",
+          "right_shoulder_roll_joint",
+          "right_shoulder_yaw_joint",
+          "right_elbow_joint",
+          "right_wrist_roll_joint",
+          "right_wrist_pitch_joint",
+          "right_wrist_yaw_joint"
+        ],
+        "native_to_model_permutation": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          24,
+          25,
+          26,
+          27,
+          28
+        ],
+        "max_default_pose_absolute_error": 0.0,
+        "export_metadata_rounding_tolerance": 0.000501,
+        "scope": "Native fixed observation order/config gains remain unchanged; metadata observation_names does not reorder native wire fields"
+      },
+      "container_id": "320e5bc62b18a2dca89970a0d6a6bc8b5768b4ea6c129256fb61bb79886d95c1",
+      "started_at": "2026-10-15T05:11:52.612373831Z",
+      "state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 0,
+        "Error": "",
+        "StartedAt": "2026-10-15T05:11:52.612373831Z",
+        "FinishedAt": "2026-10-15T05:12:12.28982062Z"
+      },
+      "fresh_inspect_argv": [
+        "docker",
+        "container",
+        "inspect",
+        "320e5bc62b18a2dca89970a0d6a6bc8b5768b4ea6c129256fb61bb79886d95c1"
+      ],
+      "actual_inspect_wait_returncode": 0,
+      "fresh_inspect_stdout": {
+        "path": "/home/dzp/projects/php_parkour/outputs/research/reproduction-20261015/native58-cpu-prepare-root-review-01/finetune.inspect.stdout.raw",
+        "bytes": 15871,
+        "sha256": "79e85c142ce105c6a3ebe56b3a6a83e5504a5ef781106fe0a4421547552cdbfe"
+      }
+    }
+  ],
+  "cpu_ort_cases": 60,
+  "native_started": false,
+  "gpu_started": false,
+  "scope": "Actual original CPU preparation only. Failed old delivery and historical boot mismatch retained. New host crossboot gate/actual native execution still required."
+}

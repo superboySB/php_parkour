@@ -1,0 +1,146 @@
+{
+  "status": "passed_actual_cpu_gif_derivation_full_decode",
+  "input": {
+    "path": "/workspace/php_parkour/outputs/research/reproduction-20261015/cloud888-first-boundary-preview-raw-01/raw-case/native/PHP-research/20261015_051005-teacher-locomotion-wholebodytrackingmanager/renderings_training/episode_4_1792041041.mp4",
+    "sha256": "bedc51955e5f861ad1ceef3babef6d3862940c192352bdb862b754eb973a5f95",
+    "bytes": 308435
+  },
+  "gif": {
+    "path": "/workspace/php_parkour/outputs/research/reproduction-20261015/local-checks/first-boundary-gif-01/source-boundary-preview.gif",
+    "sha256": "63c32b327ffb7bbd897169c1034f1db9350a3c714fc3260a86a01d4512af6749",
+    "bytes": 1580065,
+    "metadata": {
+      "programs": [],
+      "streams": [
+        {
+          "width": 480,
+          "height": 270,
+          "r_frame_rate": "8/1",
+          "nb_read_frames": "64"
+        }
+      ],
+      "format": {
+        "duration": "8.010000"
+      }
+    },
+    "start_seconds": 1.76,
+    "end_seconds_exclusive": 9.76
+  },
+  "commands": [
+    {
+      "argv": [
+        "ffmpeg",
+        "-nostdin",
+        "-v",
+        "error",
+        "-xerror",
+        "-threads",
+        "1",
+        "-hwaccel",
+        "none",
+        "-ss",
+        "1.76",
+        "-i",
+        "/workspace/php_parkour/outputs/research/reproduction-20261015/cloud888-first-boundary-preview-raw-01/raw-case/native/PHP-research/20261015_051005-teacher-locomotion-wholebodytrackingmanager/renderings_training/episode_4_1792041041.mp4",
+        "-t",
+        "8",
+        "-an",
+        "-sn",
+        "-dn",
+        "-filter_complex",
+        "fps=8,scale=480:270:flags=lanczos,split[a][b];[a]palettegen=stats_mode=diff[p];[b][p]paletteuse=dither=sierra2_4a",
+        "-filter_complex_threads",
+        "1",
+        "-threads",
+        "1",
+        "-loop",
+        "0",
+        "-n",
+        "/workspace/php_parkour/outputs/research/reproduction-20261015/local-checks/first-boundary-gif-01/source-boundary-preview.gif"
+      ],
+      "started_utc": "2026-10-15T05:27:59.214729+00:00",
+      "finished_utc": "2026-10-15T05:27:59.626449+00:00",
+      "actual_wait_returncode": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "ffprobe",
+        "-v",
+        "error",
+        "-select_streams",
+        "v:0",
+        "-count_frames",
+        "-show_entries",
+        "stream=nb_read_frames,width,height,r_frame_rate:format=duration",
+        "-of",
+        "json",
+        "/workspace/php_parkour/outputs/research/reproduction-20261015/local-checks/first-boundary-gif-01/source-boundary-preview.gif"
+      ],
+      "started_utc": "2026-10-15T05:27:59.626592+00:00",
+      "finished_utc": "2026-10-15T05:27:59.680795+00:00",
+      "actual_wait_returncode": 0,
+      "stdout_sha256": "671203e589d93b9bb675f785533f4ecc647afe97c9228fa9ad911def473bc15b",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "ffmpeg",
+        "-nostdin",
+        "-v",
+        "error",
+        "-xerror",
+        "-threads",
+        "1",
+        "-hwaccel",
+        "none",
+        "-i",
+        "/workspace/php_parkour/outputs/research/reproduction-20261015/local-checks/first-boundary-gif-01/source-boundary-preview.gif",
+        "-map",
+        "0:v:0",
+        "-an",
+        "-sn",
+        "-dn",
+        "-progress",
+        "pipe:1",
+        "-nostats",
+        "-f",
+        "null",
+        "-"
+      ],
+      "started_utc": "2026-10-15T05:27:59.681014+00:00",
+      "finished_utc": "2026-10-15T05:27:59.743040+00:00",
+      "actual_wait_returncode": 0,
+      "stdout_sha256": "47b5625340b5461f7da494475084340eaba27dfac1df7fcd160d494842fa012e",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "ffmpeg",
+        "-nostdin",
+        "-v",
+        "error",
+        "-xerror",
+        "-threads",
+        "1",
+        "-i",
+        "/workspace/php_parkour/outputs/research/reproduction-20261015/local-checks/first-boundary-gif-01/source-boundary-preview.gif",
+        "-vf",
+        "fps=0.5,scale=480:270,tile=4x1",
+        "-frames:v",
+        "1",
+        "-threads",
+        "1",
+        "-n",
+        "/workspace/php_parkour/outputs/research/reproduction-20261015/local-checks/first-boundary-gif-01/gif-contact-sheet.png"
+      ],
+      "started_utc": "2026-10-15T05:27:59.743216+00:00",
+      "finished_utc": "2026-10-15T05:27:59.816021+00:00",
+      "actual_wait_returncode": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "scope": "Derived preview only; original MP4 preserved. One source boundary, not a complete course or 888 terminal."
+}

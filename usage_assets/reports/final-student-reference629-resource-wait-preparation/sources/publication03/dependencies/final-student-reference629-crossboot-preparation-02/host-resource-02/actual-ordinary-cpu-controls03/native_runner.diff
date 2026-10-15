@@ -1,0 +1,44 @@
+--- prep01/native_runner.py
++++ prep02/native_runner.py
+@@ -14,6 +14,7 @@
+ import sys
+ import time
+ import traceback
++from types import ModuleType
+ import uuid
+ 
+ from support import HERE, IMAGE, GPU, LOCK, SOURCE_SHAS, verify_contract, check as check_record
+@@ -282,11 +283,28 @@
+             endpoint = json.loads(capture(['docker', 'context', 'inspect', context], 'docker-context-inspect').stdout)[0]['Endpoints']['docker']['Host']
+         require(endpoint.startswith('unix://'), 'Host birth observer requires local Unix Docker')
+         receipt['docker_endpoint'] = endpoint
+-        devices = capture(['nvidia-smi', '--query-gpu=uuid', '--format=csv,noheader'], 'gpu-identity').stdout.splitlines()
+-        require(devices.count(GPU) == 1, 'Exact GPU UUID is not uniquely present')
+-        compute = capture(['nvidia-smi', '--query-compute-apps=gpu_uuid,pid', '--format=csv,noheader,nounits'], 'gpu-idle-inside-lock').stdout
+-        require(not any(line.split(',')[0].strip() == GPU for line in compute.splitlines() if line.strip()),
+-                'GPU occupied; do not kill or interrupt another task')
++        # Host-only resource admission under the adapter's original held
++        # UUID flock, before creating any GPU container or native worker.
++        # Both kinds use this same real-clock bound; native/worker clocks below
++        # are unchanged. No other task can receive a signal here.
++        helper_path = HERE / 'reference629_gpu_resource_wait.py'
++        manifest = json.loads(Path(contract['preparation_manifest']['path']).read_text())
++        helper_rows = [row for row in manifest['files'] if row['path'] == 'reference629_gpu_resource_wait.py']
++        require(len(helper_rows) == 1, 'Frozen host resource helper is absent or duplicated')
++        helper_source = fp(helper_path)
++        require((helper_source['bytes'], helper_source['sha256']) ==
++                (helper_rows[0]['bytes'], helper_rows[0]['sha256']), 'Frozen host resource helper differs')
++        helper_raw = helper_path.read_bytes()
++        require(hashlib.sha256(helper_raw).hexdigest() == helper_source['sha256'],
++                'Host resource helper changed before loading')
++        helper = ModuleType('reference629_gpu_resource_wait')
++        helper.__file__ = str(helper_path)
++        exec(compile(helper_raw, str(helper_path), 'exec'), helper.__dict__)
++        receipt['host_resource_admission'] = helper.wait_for_idle(
++            lock.fileno(), LOCK, GPU, HOST / 'resource-admission', pending, helper_source,
++            wait_seconds=1800.0, poll_seconds=5.0)
++        receipt['host_resource_admission_receipt'] = fp(HOST / 'resource-admission/receipt.json')
++        persist()
+         mounts = [(OLD / 'source', '/workspace/php_parkour', True),
+                   (BASE / 'overlay', '/workspace/php_parkour/scripts/research', True),
+                   (OLD / 'inputs' / kind, '/data', True), (BASE / 'cache', '/data/cache', False),

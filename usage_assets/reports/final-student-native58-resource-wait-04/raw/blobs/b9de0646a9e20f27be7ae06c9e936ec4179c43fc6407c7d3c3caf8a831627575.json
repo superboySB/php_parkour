@@ -1,0 +1,88 @@
+{
+  "schema_version": 1,
+  "status": "passed",
+  "native_started": false,
+  "gpu_started": false,
+  "started_unix": 1792045644.3212926,
+  "source_sha256": "855d56494c662cbfcd19a96043b6f0baaa49a093f52c47b46a9005657e46bb0f",
+  "image_id": "sha256:2be18521015b2a84ef7a4442af9a94ef041a19feb9ce385ae15424b1dc158d8f",
+  "commands": [
+    {
+      "argv": [
+        "/opt/php/bin/train-python",
+        "/control/verify_snapshot_imports.py",
+        "--role",
+        "simulator",
+        "--plan",
+        "/preflight/import-plan.json",
+        "--output",
+        "/preflight/simulator.json"
+      ],
+      "returncode": 0,
+      "stdout": {
+        "path": "/preflight/simulator.stdout.log",
+        "sha256": "bcafbfa20179b4cc1fb186ea2235815f99546c7bc9056e07ac566aa1a0667009",
+        "bytes": 212
+      },
+      "stderr": {
+        "path": "/preflight/simulator.stderr.log",
+        "sha256": "0e8ef8ca7c5bb809e7d4a4c3fd095cee29d0c61c0654c0452d6a36826976bf8a",
+        "bytes": 212
+      }
+    },
+    {
+      "argv": [
+        "/opt/php/bin/inference-python",
+        "/control/verify_snapshot_imports.py",
+        "--role",
+        "inference",
+        "--plan",
+        "/preflight/import-plan.json",
+        "--output",
+        "/preflight/inference.json"
+      ],
+      "returncode": 0,
+      "stdout": {
+        "path": "/preflight/inference.stdout.log",
+        "sha256": "b269b26fdd190e1cdd7146a5ca6550b7c60bdb04c6347088233ec3a3b8dba7c2",
+        "bytes": 97
+      },
+      "stderr": {
+        "path": "/preflight/inference.stderr.log",
+        "sha256": "4c6f662de8dfba1506220c58a3e44dc70d38e5c14fd6f3d22fc2c7f6588bf3c1",
+        "bytes": 166
+      }
+    }
+  ],
+  "directions_plan_sha256": "e36882de2cf0f562d6b078f1431f0ba84e6f4fd9f5a232036d6ec6498280081c",
+  "scenes_plan_sha256": "e50c1b3f5de8383345c26a7e18ea648e99002be98017a8e3e3fb122ae225d08d",
+  "directions_cases": 12,
+  "scene_cases": 17,
+  "ort_cases": 30,
+  "dependencies": 376,
+  "selected_scene_case_ids": [
+    "random_locomotion:0035:cfg0035_stand_2.0s_run_forward_1.2s_stand_2.0s",
+    "low_speed_step:0000:forward_walk0.5s_step0s",
+    "high_speed_step:0000:run_forward_0.6s_step0s",
+    "low_speed_climb_58:0000:forward_walk0.5s_plat0s",
+    "high_speed_climb_58:0000:run_forward_0.6s_step0.1s",
+    "low_speed_climb_76:0000:forward_walk0.6s_step0.7s",
+    "high_speed_climb_76:0000:run_forward_0.6s_step0s",
+    "low_speed_climb_94:0000:forward_walk0.7s_step0.5s",
+    "high_speed_climb_94:0000:run_forward_0.6s_step0s",
+    "low_speed_roll_78:0000:roll_78",
+    "low_speed_roll_90:0000:roll_90_walk0.4s",
+    "high_speed_roll_134:0000:run_forward_0.5s_step1.0s",
+    "high_speed_hurdle:0000:run_forward_0.3s",
+    "high_speed_dash_vault:0000:run_forward_0.3s",
+    "high_speed_speed_vault:0000:run_forward_0.3s",
+    "high_speed_cat_vault:0000:run_forward_0.3s",
+    "high_speed_jump_35:0000:jump_35"
+  ],
+  "expected_policy_ticks": {
+    "directions": 400,
+    "scenes": 500
+  },
+  "quality_verified": false,
+  "finished_unix": 1792045657.8806381
+}

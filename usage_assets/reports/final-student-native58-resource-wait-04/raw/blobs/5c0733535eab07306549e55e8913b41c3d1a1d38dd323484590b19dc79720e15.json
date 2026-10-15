@@ -1,0 +1,69 @@
+{
+  "label": "teacher-low-step",
+  "profile": "official",
+  "started_utc": "2026-10-10T16:52:49.056222+00:00",
+  "command": [
+    "bash",
+    "/workspace/php_parkour/wbt_training/training_runs/run_terrain_teacher.sh",
+    "--training.headless",
+    "True",
+    "--training.num-envs",
+    "4096",
+    "--training.name",
+    "teacher-low-step",
+    "--training.project",
+    "PHP-research",
+    "--logger.base-dir",
+    "/outputs/official-full/official/teacher-low-step",
+    "--training.seed",
+    "42",
+    "--algo.config.num-learning-iterations",
+    "20000"
+  ],
+  "environment": {
+    "LOGGER": "tensorboard",
+    "NGPUS": "1",
+    "CUDA_VISIBLE_DEVICES": "0",
+    "HSSIM_PYTHON": "/opt/php/bin/train-python",
+    "REGISTRY": "file:///data/assets/motions-low-step"
+  },
+  "settings": {
+    "profile": "official",
+    "skills": [
+      "locomotion",
+      "low-step",
+      "high-step",
+      "low-climb-76",
+      "high-climb-76"
+    ],
+    "assets": "/data/assets",
+    "num_envs": null,
+    "iterations_target": 20000,
+    "registries": "file:///data/assets/motions-low-step",
+    "finetune": null,
+    "source_checkpoints": [],
+    "eval_steps": null,
+    "eval_quality_schema": null
+  },
+  "overrides": {
+    "num_envs": null,
+    "iterations_target": null
+  },
+  "quality_verified": false,
+  "scope": "official default training schedule; quality requires rollout evaluation",
+  "status": "passed",
+  "returncode": 0,
+  "finished_utc": "2026-10-11T05:16:04.682229+00:00",
+  "elapsed_seconds": 44595.62606278155,
+  "log": "/outputs/official-full/official/teacher-low-step-1791651169066878030.log",
+  "performance": {
+    "iteration_samples": 20000,
+    "median_collection_plus_learning_seconds": 2.008,
+    "measured_num_envs": 4096,
+    "estimate_scope": "Measured collection+learning only; excludes simulator initialization, exports/checkpoint writes and evaluation. No scaling to another environment count.",
+    "estimated_default_schedule_core_hours": 11.155555555555555
+  },
+  "checkpoint": "/outputs/official-full/official/teacher-low-step/PHP-research/20261010_165257-teacher-low-step-locomotion/model_19999.pt",
+  "checkpoint_iteration": 19999,
+  "checkpoint_sha256": "ff6912286a5b2a4d8d048dca5471b53935baecca4d06c3407af7201ef09153e6"
+}

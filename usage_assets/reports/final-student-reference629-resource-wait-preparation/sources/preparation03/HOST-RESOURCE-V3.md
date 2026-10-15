@@ -1,0 +1,10 @@
+# reference629 显式资源等待宿主控制 v3：源码准备
+
+本目录继承并保留已封48文件4e5e preparation；旧目录及原35科学依赖不修改。adapter、support、CPU准备、全部frozen/source-original科学字节保持。admission仅把旧crossboot parent reader换为native58_resource_wait_control.py，验收真实control04/e238/rootparent/全query raw、原9次gpu_idle、真实12h墙钟与同boot failed41资源释放；58科学、60ORT、pose、116worker/maps、58完整视频门卫保持原逻辑。
+
+native_runner仅更换创建GPU容器前的资源准入host块，加载唯一模块名reference629_gpu_resource_wait.py。沿用adapter已持有的同一UUID flock FD/规范inode/实际owner；每轮真实只读nvidia-smi identity与compute查询保留argv、stdout/stderr、Popen出生、pidfd、实际wait及空session。只有原GPU busy才按真实monotonic等待，默认1800秒、最大3600秒、每5秒观察、每query15秒；原worker/native/observer时钟与超时不变。
+query失败立即失败，无重试；过期晚观察即使实际rc0仍失败。超时/取消/诊断异常只清理本次已绑定pidfd或尚未reap的直接Popen只读客户端，有限TERM5→KILL5，保留真实负rc/首错/清理证据，绝不信号其他任务、PID组或worker。
+
+host-resource-02保存原48 manifest、改前runner/admission、准确patch与18普通CPU测试/actualwait0收据。完整53源候选与全部193个CPU原件另冻结在reproduction-20261015/reference629-host-resource-reviewed-candidate-02（d2ca manifest）；旧49e/17测试/c526源审与b2a候选完整保留，不追认旧审为新源通过。
+
+缺少真实完整58终态与独立postexecution review时status保持waiting。这里没有实际新629契约、CPUprepare、GPU执行或发布结果；root将显式审本preparation seal后，在真实58后验门卫通过后单独prepare，实际新契约另独立核验再允许execute。HOST-CONTROL-V2.md和原README仅作为历史上下文保留，以本v3入口及本次新seal为准。

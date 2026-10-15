@@ -1,0 +1,86 @@
+{
+  "label": "export-student-pure",
+  "profile": "official",
+  "started_utc": "2026-10-13T09:40:43.056077+00:00",
+  "command": [
+    "/isaac-sim/kit/python/bin/python3",
+    "-m",
+    "wbt_training.training_runs.export_distill_onnx",
+    "--training.checkpoint",
+    "/outputs/official-full/official/student-pure/PHP-research/20261012_233536-student-pure-locomotion/model_09999.pt",
+    "--training.registry-name",
+    "file:///data/assets/motions-locomotion,file:///data/assets/motions-low-step,file:///data/assets/motions-high-step,file:///data/assets/motions-low-climb-76,file:///data/assets/motions-high-climb-76",
+    "--training.num-envs",
+    "1",
+    "logger:disabled",
+    "--logger.base-dir",
+    "/outputs/official-full/official/export-student-pure"
+  ],
+  "environment": {
+    "LOGGER": "tensorboard",
+    "NGPUS": "1",
+    "CUDA_VISIBLE_DEVICES": "0",
+    "HSSIM_PYTHON": "/opt/php/bin/train-python"
+  },
+  "settings": {
+    "profile": "official",
+    "skills": [
+      "locomotion",
+      "low-step",
+      "high-step",
+      "low-climb-76",
+      "high-climb-76"
+    ],
+    "assets": "/data/assets",
+    "num_envs": null,
+    "iterations_target": null,
+    "registries": null,
+    "finetune": null,
+    "source_checkpoints": [
+      {
+        "path": "/outputs/official-full/official/student-pure/PHP-research/20261012_233536-student-pure-locomotion/model_09999.pt",
+        "sha256": "348423173b265a96436c3c14a011d97abefc6efdf60a4749e7ab58667a94a687"
+      }
+    ],
+    "eval_steps": null,
+    "eval_quality_schema": null
+  },
+  "overrides": {
+    "num_envs": null,
+    "iterations_target": null
+  },
+  "quality_verified": false,
+  "scope": "official default training schedule; quality requires rollout evaluation",
+  "resume_checkpoint": "/outputs/official-full/official/student-pure/PHP-research/20261012_233536-student-pure-locomotion/model_09999.pt",
+  "status": "passed",
+  "returncode": 0,
+  "finished_utc": "2026-10-13T09:41:11.560177+00:00",
+  "elapsed_seconds": 28.504197916947305,
+  "log": "/outputs/official-full/official/export-student-pure-1791884443066609340.log",
+  "onnx_bundle_directories": [
+    "/outputs/official-full/official/export-student-pure/PHP-research/20261013_094050-student-pure-export/model_09999"
+  ],
+  "onnx_validation_reports": [
+    {
+      "bundle": "/outputs/official-full/official/export-student-pure/PHP-research/20261013_094050-student-pure-export/model_09999",
+      "report": "/outputs/official-full/official/export-student-pure/onnx-validation-0.json"
+    }
+  ],
+  "artifact_fingerprints": [
+    {
+      "path": "/outputs/official-full/official/export-student-pure/PHP-research/20261013_094050-student-pure-export/model_09999/depth_backbone.onnx",
+      "sha256": "10882be72a0579b484ae0b78fb272aa861e46b5db9c916e97d60108348d17a43",
+      "bytes": 105254
+    },
+    {
+      "path": "/outputs/official-full/official/export-student-pure/PHP-research/20261013_094050-student-pure-export/model_09999/student.onnx",
+      "sha256": "21e32c992f1b438d4333f60d0f1790105aa94c599f2d2422311c89e6003e95b5",
+      "bytes": 2710180
+    },
+    {
+      "path": "/outputs/official-full/official/export-student-pure/onnx-validation-0.json",
+      "sha256": "b22f897ae4e98e9af9e341376a7e4b5b434c673e4e845e9f8170e84c5d7de7cb",
+      "bytes": 26723
+    }
+  ]
+}

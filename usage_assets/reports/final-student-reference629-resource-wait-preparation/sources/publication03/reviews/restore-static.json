@@ -1,0 +1,85 @@
+{
+  "schema_version": 1,
+  "status": "passed_readonly_static_restore_review",
+  "reviewed_at_utc": "2026-10-12T00:15:00.494953+00:00",
+  "must_fix": [],
+  "source_fingerprints": [
+    {
+      "path": "outputs/research/final-student-reference629-publication-preparation-01/restore.py",
+      "bytes": 17673,
+      "sha256": "0a31a96e3faeeb86e095a49fa5d39dd517b12c99734385016fbe08cb4ce86425"
+    },
+    {
+      "path": "outputs/research/final-student-reference629-publication-preparation-01/publisher.py",
+      "bytes": 34047,
+      "sha256": "2c73241af972d2b04789f67456dac2838d18f67b339f937a8759d09920edda55"
+    }
+  ],
+  "scope": "Frozen restore.py all322 lines, matched to frozen publisher2c732 actual Copies/archive, restore-map and complete manifest fields. No future package or recovery was executed.",
+  "checks": [
+    {
+      "lines": "73-98,162-195",
+      "result": "Strict JSON rejects duplicate keys/nonfinite literals; the very parsed manifest bytes are hashed and bound to the independently supplied SHA. Every sealed package file is regular, below100MB, SHA/bytes exact; recursive package set must equal manifest files plus manifest itself. Restore-map is parsed from its already bound bytes; complete publication count/quality flags and self-contained inventory set are checked."
+    },
+    {
+      "lines": "43-56,162-166,193-225",
+      "result": "Relative POSIX mapping paths reject absolute, traversal, backslash, NUL and noncanonical forms. Original_path must exactly equal fixed original workspace plus workspace_relative. Duplicate targets, file/ancestor conflicts, reserved receipt paths and package/output overlap are rejected; all filesystem ancestors and package entries reject symlinks. Fresh output parent must already exist."
+    },
+    {
+      "lines": "127-159,208-225",
+      "result": "Direct-file and shared blob aliases match publisher format. Every chunk descriptor is manifest-bound; original_relative, source alias, descriptor suffix and whole bytes/SHA agree. Each part is canonical ordinal six-digit path, positive at most25MB, contiguous offset, all nonfinal parts exactly25MB; actual per-part SHA/bytes and concatenated whole SHA/bytes are checked before creating output. All package chunk descriptors must be consumed by restore-map."
+    },
+    {
+      "lines": "226-238,317-318",
+      "result": "All manifest/package/restore-map/chunk/path/mode validation and final package-set recheck finish inside preflight, before exclusive output.mkdir. CLI only calls restore after successful preflight; no subprocess/scientific import or recovery side effect occurs in source-level preflight."
+    },
+    {
+      "lines": "234-279",
+      "result": "Fresh paths are opened xb, source body SHA is checked before/after each byte copy, target whole SHA/bytes are checked before final chmod. File modes are exact0..07777 with mode_octal agreement; uid/gid are rejected and never set. Copies create distinct files rather than hardlinks; restored file-set and modes are checked before sealing. Output and parent directories use0755; original directory modes are not claimed."
+    },
+    {
+      "lines": "280-308",
+      "result": "An incomplete marker is retained while copying. Success receipt is written pending and atomically renamed as the final filesystem operation only after all data checks; caught failure removes any success marker, records failed_partial_restore when diagnostic IO permits, retains partial bytes and re-raises without automatic retry. A diagnostic IO failure cannot manufacture success."
+    }
+  ],
+  "format_compatibility": {
+    "publisher_lines": "184-237,417-419,440-452",
+    "direct_storage": {
+      "kind": "file",
+      "path": "raw/blobs/<whole_sha><suffix>"
+    },
+    "chunk_storage": {
+      "kind": "chunks",
+      "path": "<blob>.chunks.json",
+      "restored_relative": "<blob>"
+    },
+    "chunk_descriptor_fields": [
+      "schema_version",
+      "original_relative",
+      "source",
+      "bytes",
+      "sha256",
+      "chunks"
+    ],
+    "restore_row_fields": [
+      "original_path",
+      "workspace_relative",
+      "bytes",
+      "sha256",
+      "mode",
+      "mode_octal",
+      "storage"
+    ],
+    "manifest": "evidence-manifest.json; complete_formal_pair_publication; original_inventory; relative files; bytes_excluding_manifest; exact counts; all_original_bytes_retained",
+    "result": "Actual publisher and restore schemas match, including SHA-deduplicated aliases with different original file modes."
+  },
+  "limitations": [
+    "Static read/AST only. Candidate/publisher were not imported, compiled or invoked; no CLI/test/helper, SSH/Docker/Git, science, subprocess or large asset read occurred.",
+    "Future actual package does not yet exist and has not been recovered. Later real package SHA/manifest verification and exclusive restoration must supply execution evidence separately.",
+    "File recovery keeps JSON/log/control/model bytes unchanged, including their original absolute path strings; it does not rewrite paths, run restored controls, restore uid/gid/image layers/drivers/hardware, or prove native/model/scientific quality.",
+    "A completed file-recovery receipt is distinct from an independently observed CLI parent-returncode. Science/native/GPU/quality flags remain false."
+  ],
+  "future_actual_restoration_verified": false,
+  "science_executed": false,
+  "quality_verified": false
+}

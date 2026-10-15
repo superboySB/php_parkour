@@ -1,0 +1,152 @@
+{
+  "schema_version": 1,
+  "status": "rejected_source_static_review_requires_two_corrections",
+  "reviewed_utc": "2026-10-12T00:09:57.748844+00:00",
+  "reviewer": "/root/runtime",
+  "scope": "Independent full read of the 494-line publisher; limited source reads of admission, its original58 admission, and pinned legacy renderer/restore interface. AST parsing only. This is not execution, publication, restoration, browser, model, physics, or terminal acceptance.",
+  "reviewed_sources": [
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/final-student-reference629-publication-preparation-01/publisher.py",
+      "bytes": 33295,
+      "sha256": "63f5ad40b1f24a47e8c3e953229c2897dae2ff88fe24d2f7f7bffb51c668a102"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/final-student-reference629-publication-preparation-01/admission.py",
+      "bytes": 36589,
+      "sha256": "ce387e23e4a599ca52c3f02661f7b1669474d81c3a9ed8850b61faf06e6b7a56"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/scripts/research/publish_full_scene_matrix.py",
+      "bytes": 77360,
+      "sha256": "35432cb8fb8cc46391dc855f51065aaa3ca017ee9ad57a808ded567be29b19ca"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/final-student-reference629-preparation-01/admission.py",
+      "bytes": 9226,
+      "sha256": "fefa4d1e4abc01811269c7a9292c4ce9728b7b1189a7c2d20581f40888519757"
+    }
+  ],
+  "must_fix": [
+    {
+      "id": "MF1",
+      "severity": "high",
+      "source": "/home/dzp/projects/php_parkour/outputs/research/final-student-reference629-publication-preparation-01/publisher.py",
+      "lines": [
+        77,
+        107
+      ],
+      "summary": "Bind preparation-manifest parsing to the exact bytes whose SHA was verified before loading admission.",
+      "evidence": "Lines81–82 fingerprint and verify the manifest, then line83 read_json opens it again. Dependent admission SHA comes from the second read; load_admission lines102–107 can exec those dependent bytes before publish later rechecks the original manifest fingerprint.",
+      "consequence": "A manifest change between the two reads breaks the reviewed-manifest→admission-code binding. A later rejection during inventory recheck cannot undo code already executed. No such change or execution is asserted here.",
+      "minimal_correction": "Read one raw manifest snapshot, compute/check its bytes and SHA, then duplicate-key/nonfinite strict-parse that same snapshot. Keep the original snapshot fingerprint as the copy expectation. Preserve this frozen rejected candidate."
+    },
+    {
+      "id": "MF2",
+      "severity": "low",
+      "source": "/home/dzp/projects/php_parkour/outputs/research/final-student-reference629-publication-preparation-01/publisher.py",
+      "lines": [
+        316,
+        325
+      ],
+      "summary": "Per-kind playback pages must link to the package-root evidence manifest.",
+      "evidence": "kind_page reuses legacy.make_page and changes titles/identity/recording text, but leaves its href=\"evidence-manifest.json\" unchanged. Pages are written at pure/playback.html and finetune/playback.html; the complete manifest is written only at package root, lines434–438.",
+      "consequence": "Both offline galleries expose a broken full-SHA-manifest link. This is a presentation/navigation defect and does not falsify worker or science acceptance.",
+      "minimal_correction": "Replace the one pinned renderer link with ../evidence-manifest.json, checking the expected occurrence count, without rewriting the raw legacy renderer."
+    }
+  ],
+  "other_static_checks": [
+    {
+      "area": "CLI and execution boundary",
+      "source_lines": [
+        11,
+        24,
+        457,
+        494
+      ],
+      "finding": "status/publish CLI uses only standard-library imports; this publisher has no subprocess, SSH, Docker, GPU, model-loading, or scientific-package invocation. Admission and its pure-reader private loading are explicit; no old parent receipt is synthesized."
+    },
+    {
+      "area": "Admission precedes public writes",
+      "source_lines": [
+        329,
+        369
+      ],
+      "finding": "Actual admit, exact ordered pure/finetune counts 2/1258/2516/2516/1258, pinned inventory, modes, exact file sets, output containment/freshness and media bounds all run before exclusive output.mkdir. The manifest raw binding defect is separately MF1."
+    },
+    {
+      "area": "Two model galleries and counts",
+      "source_lines": [
+        234,
+        325,
+        377,
+        412
+      ],
+      "finding": "Each kind builds629 cases and checks every named scenario count; each title and description uses its actual kind and plan model SHA table. Aggregate counts retain1258 cases,2516 workers/hostmaps,1258 full decodes. No quality, course, convergence, PT/ONNX parity or physical-hardware success is inferred."
+    },
+    {
+      "area": "Original evidence and first-attempt retention",
+      "source_lines": [
+        169,
+        231,
+        240,
+        247,
+        337,
+        375,
+        403,
+        405
+      ],
+      "finding": "All admission inventory paths are copied from the initially bound fingerprints, including actual models/fetch/provenance, 5184 source originals, original58 frozen source and evidence, both kind raw trees, native/CPU/observer/parent artifacts, and sealed original attempt files. Exactly one sealed attempt is required per case; no failed-attempt cleanup/retry occurs. Complete future inventory still depends on actual admission and is not verified by this source review."
+    },
+    {
+      "area": "Bounded storage and restoration metadata",
+      "source_lines": [
+        178,
+        229,
+        403,
+        405
+      ],
+      "finding": "Nonmedia originals over25,000,000 bytes are streamed into contiguous chunks no larger than25,000,000 bytes with offset/length/chunk SHA/whole SHA. Original media stays unmodified and must be below100,000,000 bytes; oversize media fails before creating output. Dedup stores all original path aliases and each original mode; no external source-body placeholder is used."
+    },
+    {
+      "area": "Modes and source stability",
+      "source_lines": [
+        111,
+        141,
+        169,
+        229,
+        354,
+        355,
+        414,
+        435
+      ],
+      "finding": "Modes bind before copy; source hashes/modes and exact tree file sets are checked before writing, for each copy, after copying/rendering, and before final sealing. Restore-map paths are derived from safe workspace-contained original paths, with explicit per-path mode, UID/GID excluded."
+    },
+    {
+      "area": "Completion and failure preservation",
+      "source_lines": [
+        414,
+        455
+      ],
+      "finding": "The final complete manifest is prepared under a pending name, then all original evidence is rechecked, and final rename is the last publication IO. Earlier failures retain the new partial directory, remove any complete manifest and attempt a failed-partial diagnostic. No originals or previous publication are deleted/overwritten."
+    }
+  ],
+  "limits": [
+    "No actual future formal pair contract, outer parent receipts, CPU/native results, publication bytes, browser behavior or restored workspace were accepted or generated.",
+    "Root is separately preparing a complete restore entrypoint; this review covers publisher restore-map/chunk metadata, not the pending restorer source or its actual run.",
+    "Media is bounded by the explicit100MB Git-blob gate; the25MB limit applies to large nonmedia raw chunks, not to every original media file.",
+    "Source-only review cannot establish runtime completeness or scientific success; those require actual final model delivery and separately reviewed real execution/publication evidence."
+  ],
+  "activity": {
+    "source_reading": true,
+    "ast_parse": true,
+    "module_import": false,
+    "helper_cli": false,
+    "tests": false,
+    "ssh": false,
+    "docker": false,
+    "science": false,
+    "git": false,
+    "original_or_active_source_modified": false
+  },
+  "candidate_preserved_sha256": "63f5ad40b1f24a47e8c3e953229c2897dae2ff88fe24d2f7f7bffb51c668a102"
+}

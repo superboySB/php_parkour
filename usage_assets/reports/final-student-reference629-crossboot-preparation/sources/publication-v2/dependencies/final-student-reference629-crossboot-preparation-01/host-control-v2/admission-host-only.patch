@@ -1,0 +1,49 @@
+--- v1/admission.py
++++ v2/admission.py
+@@ -25,21 +25,16 @@
+         rel=Path(item['relative']);require(not rel.is_absolute() and '..' not in rel.parts,'Unsafe58 freeze path')
+         a=fp(base/rel);require((a['bytes'],a['sha256'])==(item['bytes'],item['sha256']),'58 input/control/CPU receipt changed')
+         bound.append(a)
+-    # A completed JSON alone cannot establish the host's actual child wait.
++    # v2 host-only adaptation: verify the genuine e238 crossboot wrapper parent.
++    # Do not translate actual_wait_returncode/argv into the historical waiter schema.
+     exit_file=paths[2];require(fp(exit_file)['sha256']==args.native58_exit_sha256,'Actual58 parent wait SHA differs')
+-    exited=actual(exit_file)
+-    expected_argv=['/usr/bin/python3',str(base/'control/native58.py'),'run','--workspace',str(WORKSPACE),'--plan',str(base/'host-plan.json'),'--root-authorized-start']
+-    require(exited['argv']==expected_argv and type(exited['returncode']) is int and exited['returncode']==0
+-      and exited['remaining_session_members']==[] and 'finished_utc' in exited
+-      and not any(k in exited for k in ('error','cleanup_error','source_verification_error','session_diagnostic_error'))
+-      and exited['source_sha256']==exited['source_sha256_after'],'Missing actual frozen native58 run child wait0/session cleanup')
+-    ident=exited['child_identity'];require(ident['pid']==ident['pgid']==ident['sid'] and ident['start_time_clock_ticks']>0,'Actual58 child session/birth absent')
+-    expected_controls={'native58.py':'31ecc764ee2375f52a5c75582597f85c0d57a4607725db5cd3bac1cc6e7ebf43',
+-      'common.py':'bef9e7af9a67c9d10360145de7f6715cb167a8722fccb1e44aaaf4c7118371b2'}
+-    for name,digest in expected_controls.items():
+-        require(fp(base/'control'/name)['sha256']==digest and digest in exited['source_sha256'].values(), 'Actual58 parent/control source is not the reviewed one')
+-    for suffix,key in (('.stdout.log','stdout_sha256'),('.stderr.log','stderr_sha256')):
+-        f=exit_file.with_suffix(suffix);r=fp(f);bound.append(r);require(r['sha256']==exited[key],'Actual58 parent log changed')
++    actual(exit_file)
++    parent_reader_path=HERE/'native58_crossboot_control.py'
++    parent_reader=load(parent_reader_path,'final629_crossboot_actual_parent_gate')
++    bound.append(fp(parent_reader_path))
++    actual_parent=parent_reader.verify_actual_parent(base,exit_file,args.native58_exit_sha256)
++    require(actual_parent['actual_parent_wait']==fp(exit_file), 'Actual crossboot58 parent binding differs')
++    bound.extend(actual_parent['bound_files'])
+     result=actual(base/'host/launch-receipt.json')
+     require(result['status']=='completed' and result['plan_sha256']==plan['plan_sha256']
+       and result['cases']==58 and result['worker_exit0_empty_groups']==116
+@@ -85,7 +80,8 @@
+     review=actual(review_file)
+     require(review['status']=='passed_readonly_native58_postexecution_review' and review['must_fix']==[]
+       and review['native58_plan_sha256']==plan['plan_sha256'] and review['actual_parent_wait']==fp(exit_file)
+-      and review['image_id']==IMAGE and review['models']==origin['models'] and review['poses']==poses,
++      and review['image_id']==IMAGE and review['models']==origin['models'] and review['poses']==poses
++      and review['host_control']==actual_parent['host_control'],
+       'Independent58 postexecution admission is missing or refers to other inputs')
+     fingerprints=review['evidence_fingerprints']
+     for key in ('host/launch-receipt.json','host/cpu-pure/onnx.json','host/cpu-finetune/onnx.json',*[f'phases/{x["id"]}/cpu-final/summary.json' for x in plan['phases']]):
+@@ -96,4 +92,5 @@
+     require(len(unique)<=len(bound),'Invalid admission records')
+     return {'status':'ready','transfer':origin,'models':origin['models'],'poses':poses,'native58_base':str(base),
+       'native58_plan_sha256':plan['plan_sha256'],'actual_parent_wait':fp(exit_file),'independent_review':fp(review_file),
++      'host_control':actual_parent['host_control'],
+       'bound_files':list(unique.values()),'native_started':False,'gpu_started':False,'quality_verified':False}

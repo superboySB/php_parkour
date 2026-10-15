@@ -1,0 +1,18 @@
+--- prep01/admission.py
++++ prep02/admission.py
+@@ -25,12 +25,12 @@
+         rel=Path(item['relative']);require(not rel.is_absolute() and '..' not in rel.parts,'Unsafe58 freeze path')
+         a=fp(base/rel);require((a['bytes'],a['sha256'])==(item['bytes'],item['sha256']),'58 input/control/CPU receipt changed')
+         bound.append(a)
+-    # v2 host-only adaptation: verify the genuine e238 crossboot wrapper parent.
++    # v3 host-only adaptation: verify the genuine e238 resource-wait wrapper parent.
+     # Do not translate actual_wait_returncode/argv into the historical waiter schema.
+     exit_file=paths[2];require(fp(exit_file)['sha256']==args.native58_exit_sha256,'Actual58 parent wait SHA differs')
+     actual(exit_file)
+-    parent_reader_path=HERE/'native58_crossboot_control.py'
+-    parent_reader=load(parent_reader_path,'final629_crossboot_actual_parent_gate')
++    parent_reader_path=HERE/'native58_resource_wait_control.py'
++    parent_reader=load(parent_reader_path,'final629_resource_wait_actual_parent_gate')
+     bound.append(fp(parent_reader_path))
+     actual_parent=parent_reader.verify_actual_parent(base,exit_file,args.native58_exit_sha256)
+     require(actual_parent['actual_parent_wait']==fp(exit_file), 'Actual crossboot58 parent binding differs')

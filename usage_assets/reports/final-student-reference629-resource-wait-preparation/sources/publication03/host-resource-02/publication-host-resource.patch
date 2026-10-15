@@ -1,0 +1,63 @@
+--- pub01/admission.py
++++ pub02/admission.py
+@@ -21,8 +21,8 @@
+ from types import ModuleType, SimpleNamespace
+ 
+ ROOT = Path('/home/dzp/projects/php_parkour')
+-PREPARATION = ROOT/'outputs/research/final-student-reference629-crossboot-preparation-01'
+-PREPARATION_SHA = '4e5e24b7f266781b0f1cffccb4f781411a8d27598a82519f404062fa77d74cf5'
++PREPARATION = ROOT/'outputs/research/final-student-reference629-crossboot-preparation-02'
++PREPARATION_SHA = '9f32c251bcb25c3ed1fbe999bd49c8081a712ce0d6985a99f8ed6820c661af2b'
+ LAUNCHER = ROOT/'outputs/research/host_owned_launch.py'
+ LAUNCHER_SHA = 'e2384395eee2d8d574547ce5992ed163cce0060f554f654bec49ee3bc939ed15'
+ PUBLISHER = ROOT/'scripts/research/publish_full_scene_matrix.py'
+@@ -36,6 +36,7 @@
+ MATRIX_SHA = '599c75df14c5ac902d57f88bfd3d752317e332abce5751153bef8d20d8d0bb70'
+ OBSERVER_SHA = 'e2f8c31fc7136027ebd2d8ec6a973753d56a7a60fdd5434e741b0db4022f40d0'
+ FINALIZER_SHA = 'ef529f29d68d25beab780c56f20207df285d956231ab65335a0facb0362407bb'
++HOST_RESOURCE_READER_SHA = '94470c9d469ef570c1ef3551b0a600d21883963508b94f6c64c0547e082d97fa'
+ 
+ 
+ def require(value, message):
+@@ -143,7 +144,7 @@
+ def reviewed_modules(evidence, publisher_path):
+     """Load checked bytes without bytecode or executing live matrix imports."""
+     manifest = evidence.read(PREPARATION/'preparation-manifest.json', PREPARATION_SHA)
+-    require(len(manifest['files']) == 48, 'Exact reviewed crossboot preparation48 required')
++    require(len(manifest['files']) == 85, 'Exact reviewed resource-wait preparation85 required')
+     names = set()
+     for row in manifest['files']:
+         rel = Path(row['path'])
+@@ -484,7 +485,7 @@
+         require(support.verify_contract(contract_path, contract_sha256) == contract, 'Actual reviewed contract changed')
+         require(contract['preparation_manifest']['sha256'] == PREPARATION_SHA
+                 and contract['preparation_manifest']['path'] == str(PREPARATION/'preparation-manifest.json'),
+-                'Contract is not the frozen formal crossboot48 dependency preparation')
++                'Contract is not the frozen formal resource-wait85 dependency preparation')
+         prior = contract['admission']
+         require(evidence.fingerprint(PULL)['sha256'] == PULL_SHA, 'Actual selective transfer validator source changed')
+         args = SimpleNamespace(transfer=Path(prior['transfer']['destination']), native58_base=Path(prior['native58_base']),
+@@ -531,6 +532,14 @@
+                     and evidence.bound(item['cpu_launch']) == evidence.fingerprint(target/'launch.json'), 'Prepared CPU actual receipt mismatch')
+         kinds = [kind_admission(evidence, publisher, contract, kind, phase, start, process)
+                  for kind, phase in zip(KINDS, pair['phases'])]
++        # Additional host-only input admission; kind/science/worker/CPU blocks above are unchanged.
++        resource_reader_path = Path(__file__).with_name('reference629_resource_wait_admission.py')
++        require(evidence.fingerprint(resource_reader_path)['sha256'] == HOST_RESOURCE_READER_SHA,
++                'Reviewed hostresource receipt reader changed')
++        resource_reader = module_from_bytes(resource_reader_path, '_formal629_resource_receipt_reader', evidence)
++        host_resources = [resource_reader.verify(evidence, PREPARATION, contract, item, start, process) for item in kinds]
++        require(host_resources[0]['mutex_identity'] == host_resources[1]['mutex_identity'],
++                'Both kinds must retain the same original owner mutex inode')
+         for phase in pair['phases']:
+             require({key: phase[key] for key in ('cases', 'workers', 'host_maps', 'full_decodes')} ==
+                     {'cases': 629, 'workers': 1258, 'host_maps': 1258, 'full_decodes': 629}, 'Kind phase counts differ')
+@@ -545,7 +554,7 @@
+     return {'status': 'ready_for_separately_reviewed_publication', 'contract': contract,
+             'actual_parent_start': evidence.files[str(Path(parent_start).absolute())],
+             'actual_parent_exit': evidence.files[str(Path(parent_exit).absolute())], 'pair_receipt': pair,
+-            'kinds': kinds, 'inventory': list(evidence.files.values()),
++            'kinds': kinds, 'host_resource_admissions': host_resources, 'inventory': list(evidence.files.values()),
+             'expected_file_sets': {key: sorted(value) for key, value in evidence.trees.items()},
+             'counts': {'policies': 2, 'cases': 1258, 'workers': 2516, 'host_maps': 2516, 'full_decodes': 1258},
+             'quality_verified': False, 'obstacle_course_completion_verified': False,

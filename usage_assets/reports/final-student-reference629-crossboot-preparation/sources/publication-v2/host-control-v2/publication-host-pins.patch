@@ -1,0 +1,31 @@
+--- v1-publication/admission.py
++++ v2-publication/admission.py
+@@ -21,8 +21,8 @@
+ from types import ModuleType, SimpleNamespace
+ 
+ ROOT = Path('/home/dzp/projects/php_parkour')
+-PREPARATION = ROOT/'outputs/research/final-student-reference629-preparation-01'
+-PREPARATION_SHA = '481d54ee84d4b2d9c439580fe83d00927a44bfc8e2a11101b58862b536d49ce0'
++PREPARATION = ROOT/'outputs/research/final-student-reference629-crossboot-preparation-01'
++PREPARATION_SHA = '4e5e24b7f266781b0f1cffccb4f781411a8d27598a82519f404062fa77d74cf5'
+ LAUNCHER = ROOT/'outputs/research/host_owned_launch.py'
+ LAUNCHER_SHA = 'e2384395eee2d8d574547ce5992ed163cce0060f554f654bec49ee3bc939ed15'
+ PUBLISHER = ROOT/'scripts/research/publish_full_scene_matrix.py'
+@@ -143,7 +143,7 @@
+ def reviewed_modules(evidence, publisher_path):
+     """Load checked bytes without bytecode or executing live matrix imports."""
+     manifest = evidence.read(PREPARATION/'preparation-manifest.json', PREPARATION_SHA)
+-    require(len(manifest['files']) == 35, 'Exact reviewed preparation35 required')
++    require(len(manifest['files']) == 48, 'Exact reviewed crossboot preparation48 required')
+     names = set()
+     for row in manifest['files']:
+         rel = Path(row['path'])
+@@ -484,7 +484,7 @@
+         require(support.verify_contract(contract_path, contract_sha256) == contract, 'Actual reviewed contract changed')
+         require(contract['preparation_manifest']['sha256'] == PREPARATION_SHA
+                 and contract['preparation_manifest']['path'] == str(PREPARATION/'preparation-manifest.json'),
+-                'Contract is not the frozen formal35 dependency preparation')
++                'Contract is not the frozen formal crossboot48 dependency preparation')
+         prior = contract['admission']
+         require(evidence.fingerprint(PULL)['sha256'] == PULL_SHA, 'Actual selective transfer validator source changed')
+         args = SimpleNamespace(transfer=Path(prior['transfer']['destination']), native58_base=Path(prior['native58_base']),

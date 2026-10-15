@@ -1,0 +1,298 @@
+{
+  "status": "three_original_mp4_full_decodes_passed_contact_sheet_extracted",
+  "reviewer_source_sha256": "4b2ee5e2461b356b4fef81e7114af20dba94f58f773aa5de9c24ff5a767ec826",
+  "completion": {
+    "source_boundary_completed": true,
+    "policy_steps": 488,
+    "expected_policy_steps": 488,
+    "policy_frames_contiguous_from_one": true,
+    "failed_resets": 0,
+    "timeout_resets": 0,
+    "scope": "One original source, one terrain variant, seed42, first attempt. Frame0 is zero-action warmup; frameT-1 is a boundary sentinel. Not a complete obstacle course."
+  },
+  "videos": [
+    {
+      "path": "/workspace/php_parkour/outputs/research/reproduction-20261015/cloud888-first-boundary-preview-raw-01/raw-case/native/PHP-research/20261015_051005-teacher-locomotion-wholebodytrackingmanager/renderings_training/episode_1_1792041012.mp4",
+      "relative": "native/PHP-research/20261015_051005-teacher-locomotion-wholebodytrackingmanager/renderings_training/episode_1_1792041012.mp4",
+      "sha256": "39cf962a0cfeba1da4f85b6e8f534ad99ff7b6cc49e4615f495fb7ba8838d494",
+      "bytes": 2820,
+      "duration_seconds": 0.02,
+      "decoded_frames": 1,
+      "metadata": {
+        "programs": [],
+        "streams": [
+          {
+            "width": 640,
+            "height": 360,
+            "r_frame_rate": "50/1",
+            "nb_read_frames": "1"
+          }
+        ],
+        "format": {
+          "duration": "0.020000"
+        }
+      }
+    },
+    {
+      "path": "/workspace/php_parkour/outputs/research/reproduction-20261015/cloud888-first-boundary-preview-raw-01/raw-case/native/PHP-research/20261015_051005-teacher-locomotion-wholebodytrackingmanager/renderings_training/episode_3_1792041013.mp4",
+      "relative": "native/PHP-research/20261015_051005-teacher-locomotion-wholebodytrackingmanager/renderings_training/episode_3_1792041013.mp4",
+      "sha256": "4f218a441dde0aee45b398994e7c3dae876d14e2a207323967d8604ef395ed46",
+      "bytes": 22209,
+      "duration_seconds": 0.02,
+      "decoded_frames": 1,
+      "metadata": {
+        "programs": [],
+        "streams": [
+          {
+            "width": 640,
+            "height": 360,
+            "r_frame_rate": "50/1",
+            "nb_read_frames": "1"
+          }
+        ],
+        "format": {
+          "duration": "0.020000"
+        }
+      }
+    },
+    {
+      "path": "/workspace/php_parkour/outputs/research/reproduction-20261015/cloud888-first-boundary-preview-raw-01/raw-case/native/PHP-research/20261015_051005-teacher-locomotion-wholebodytrackingmanager/renderings_training/episode_4_1792041041.mp4",
+      "relative": "native/PHP-research/20261015_051005-teacher-locomotion-wholebodytrackingmanager/renderings_training/episode_4_1792041041.mp4",
+      "sha256": "bedc51955e5f861ad1ceef3babef6d3862940c192352bdb862b754eb973a5f95",
+      "bytes": 308435,
+      "duration_seconds": 9.78,
+      "decoded_frames": 489,
+      "metadata": {
+        "programs": [],
+        "streams": [
+          {
+            "width": 640,
+            "height": 360,
+            "r_frame_rate": "50/1",
+            "nb_read_frames": "489"
+          }
+        ],
+        "format": {
+          "duration": "9.780000"
+        }
+      }
+    }
+  ],
+  "chosen": {
+    "path": "/workspace/php_parkour/outputs/research/reproduction-20261015/cloud888-first-boundary-preview-raw-01/raw-case/native/PHP-research/20261015_051005-teacher-locomotion-wholebodytrackingmanager/renderings_training/episode_4_1792041041.mp4",
+    "relative": "native/PHP-research/20261015_051005-teacher-locomotion-wholebodytrackingmanager/renderings_training/episode_4_1792041041.mp4",
+    "sha256": "bedc51955e5f861ad1ceef3babef6d3862940c192352bdb862b754eb973a5f95",
+    "bytes": 308435,
+    "duration_seconds": 9.78,
+    "decoded_frames": 489,
+    "metadata": {
+      "programs": [],
+      "streams": [
+        {
+          "width": 640,
+          "height": 360,
+          "r_frame_rate": "50/1",
+          "nb_read_frames": "489"
+        }
+      ],
+      "format": {
+        "duration": "9.780000"
+      }
+    }
+  },
+  "commands": [
+    {
+      "argv": [
+        "ffprobe",
+        "-v",
+        "error",
+        "-select_streams",
+        "v:0",
+        "-count_frames",
+        "-show_entries",
+        "stream=nb_read_frames,width,height,r_frame_rate:format=duration",
+        "-of",
+        "json",
+        "/workspace/php_parkour/outputs/research/reproduction-20261015/cloud888-first-boundary-preview-raw-01/raw-case/native/PHP-research/20261015_051005-teacher-locomotion-wholebodytrackingmanager/renderings_training/episode_1_1792041012.mp4"
+      ],
+      "actual_wait_returncode": 0,
+      "stdout_sha256": "6e409c78aab61cb8cd3a1dff70679e0f45bf619ab54d034fa4e10ea2f87c4ed4",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "ffmpeg",
+        "-nostdin",
+        "-v",
+        "error",
+        "-xerror",
+        "-threads",
+        "1",
+        "-hwaccel",
+        "none",
+        "-i",
+        "/workspace/php_parkour/outputs/research/reproduction-20261015/cloud888-first-boundary-preview-raw-01/raw-case/native/PHP-research/20261015_051005-teacher-locomotion-wholebodytrackingmanager/renderings_training/episode_1_1792041012.mp4",
+        "-map",
+        "0:v:0",
+        "-an",
+        "-sn",
+        "-dn",
+        "-progress",
+        "pipe:1",
+        "-nostats",
+        "-f",
+        "null",
+        "-"
+      ],
+      "actual_wait_returncode": 0,
+      "stdout_sha256": "9c5f72bc4a32ea1ef0dcd5fdf033c611c3b602045f545164512436804598cd61",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "ffprobe",
+        "-v",
+        "error",
+        "-select_streams",
+        "v:0",
+        "-count_frames",
+        "-show_entries",
+        "stream=nb_read_frames,width,height,r_frame_rate:format=duration",
+        "-of",
+        "json",
+        "/workspace/php_parkour/outputs/research/reproduction-20261015/cloud888-first-boundary-preview-raw-01/raw-case/native/PHP-research/20261015_051005-teacher-locomotion-wholebodytrackingmanager/renderings_training/episode_3_1792041013.mp4"
+      ],
+      "actual_wait_returncode": 0,
+      "stdout_sha256": "6e409c78aab61cb8cd3a1dff70679e0f45bf619ab54d034fa4e10ea2f87c4ed4",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "ffmpeg",
+        "-nostdin",
+        "-v",
+        "error",
+        "-xerror",
+        "-threads",
+        "1",
+        "-hwaccel",
+        "none",
+        "-i",
+        "/workspace/php_parkour/outputs/research/reproduction-20261015/cloud888-first-boundary-preview-raw-01/raw-case/native/PHP-research/20261015_051005-teacher-locomotion-wholebodytrackingmanager/renderings_training/episode_3_1792041013.mp4",
+        "-map",
+        "0:v:0",
+        "-an",
+        "-sn",
+        "-dn",
+        "-progress",
+        "pipe:1",
+        "-nostats",
+        "-f",
+        "null",
+        "-"
+      ],
+      "actual_wait_returncode": 0,
+      "stdout_sha256": "9c5f72bc4a32ea1ef0dcd5fdf033c611c3b602045f545164512436804598cd61",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "ffprobe",
+        "-v",
+        "error",
+        "-select_streams",
+        "v:0",
+        "-count_frames",
+        "-show_entries",
+        "stream=nb_read_frames,width,height,r_frame_rate:format=duration",
+        "-of",
+        "json",
+        "/workspace/php_parkour/outputs/research/reproduction-20261015/cloud888-first-boundary-preview-raw-01/raw-case/native/PHP-research/20261015_051005-teacher-locomotion-wholebodytrackingmanager/renderings_training/episode_4_1792041041.mp4"
+      ],
+      "actual_wait_returncode": 0,
+      "stdout_sha256": "33d8a0892bd7dbfb91443fc969561eb20a68e9a34d980c5750a43780f8194590",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "ffmpeg",
+        "-nostdin",
+        "-v",
+        "error",
+        "-xerror",
+        "-threads",
+        "1",
+        "-hwaccel",
+        "none",
+        "-i",
+        "/workspace/php_parkour/outputs/research/reproduction-20261015/cloud888-first-boundary-preview-raw-01/raw-case/native/PHP-research/20261015_051005-teacher-locomotion-wholebodytrackingmanager/renderings_training/episode_4_1792041041.mp4",
+        "-map",
+        "0:v:0",
+        "-an",
+        "-sn",
+        "-dn",
+        "-progress",
+        "pipe:1",
+        "-nostats",
+        "-f",
+        "null",
+        "-"
+      ],
+      "actual_wait_returncode": 0,
+      "stdout_sha256": "010fa6c6b5b43b2b1e79b5f456a515bec4d33eb544c902a00d357b5e65dafa4d",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "ffmpeg",
+        "-nostdin",
+        "-v",
+        "error",
+        "-xerror",
+        "-threads",
+        "1",
+        "-i",
+        "/workspace/php_parkour/outputs/research/reproduction-20261015/cloud888-first-boundary-preview-raw-01/raw-case/native/PHP-research/20261015_051005-teacher-locomotion-wholebodytrackingmanager/renderings_training/episode_4_1792041041.mp4",
+        "-vf",
+        "fps=1,scale=320:180,tile=5x2",
+        "-frames:v",
+        "1",
+        "-threads",
+        "1",
+        "-n",
+        "/workspace/php_parkour/outputs/research/reproduction-20261015/local-checks/first-boundary-inspection-01/contact-sheet.png"
+      ],
+      "actual_wait_returncode": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "ffmpeg",
+        "-nostdin",
+        "-v",
+        "error",
+        "-xerror",
+        "-threads",
+        "1",
+        "-ss",
+        "5",
+        "-i",
+        "/workspace/php_parkour/outputs/research/reproduction-20261015/cloud888-first-boundary-preview-raw-01/raw-case/native/PHP-research/20261015_051005-teacher-locomotion-wholebodytrackingmanager/renderings_training/episode_4_1792041041.mp4",
+        "-vf",
+        "scale=640:-2",
+        "-frames:v",
+        "1",
+        "-threads",
+        "1",
+        "-n",
+        "/workspace/php_parkour/outputs/research/reproduction-20261015/local-checks/first-boundary-inspection-01/poster.png"
+      ],
+      "actual_wait_returncode": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "visual_review_performed": false,
+  "scope": "Single source only; not888 terminal or obstacle-course success."
+}
