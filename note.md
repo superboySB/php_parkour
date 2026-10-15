@@ -4,7 +4,22 @@
 
 算法、状态/动作/奖励/loss、数据格式与标签来源，以及 real2sim2real 的实现和验证边界见独立的 [technical_pipeline.md](technical_pipeline.md)。
 
-**当前进度（2026-10-14，北京时间）：五类官方教师均已完成20,000轮，最终checkpoint为19999；五份最终产物均已完成独立CPU验收。** 第四个low-climb-76于10月12日16:22:35、第五个high-climb-76于10月13日07:14:48完成原生训练；两份[低攀爬](usage_assets/reports/official-low-climb-76-final/index.md)/[高攀爬](usage_assets/reports/official-high-climb-76-final/index.md)公开包已生成。纯DAgger学生已于10月13日17:34:35完成10,000轮、最终checkpoint9999，混合学生正在运行30,000轮训练，10月14日23:12的原生日志记录为24,354轮；五类教师与纯学生的六项官方有界Isaac评估已完成，原始记录和160段视频已通过独立CPU核验；混合学生、16阶段全日程、云端888逐源尝试、最终自训学生58例和两学生各629配置仍待完成。CPU有限性、训练记录完整或公开包恢复通过，不表示策略收敛、技能成功或真机验收。
+**当前进度（2026-10-15，北京时间）：五教师、纯 DAgger 和 DAgger+PPO 学生的正式训练、评估及导出共 16 阶段均已完成。** 混合学生训练为完整 30,000 轮、最终编号 29999；[完整曲线](usage_assets/reports/official-student-finetune-training-curves/index.md)与[七项正式评估、191 段原视频](usage_assets/reports/official-evaluations-seven/index.md)已通过实际 CPU 检查。逐源 monitor 的 Docker 大小写诊断错误已修复并通过 171 项回归，原冻结科学源码与失败证据保留。[本次逐步复现及剩余链路](usage_assets/reports/reproduction-20261015/index.md)持续记录真实结果。
+
+最终两学生的[新完整58例](usage_assets/reports/final-student-native58-resource-wait-04/playback.html)已通过116个worker/宿主映射、全部原片完整解码、独立CPU后验、无损恢复和浏览器播放检查。两学生各629配置的CPU计划及独立合同审查已通过，合计1258次物理测试于16:09:47实际启动；云端888次逐源验证也在运行。执行完成与课程成功分别判断。
+
+| 要做的事 | 顺序入口 |
+| --- | --- |
+| 第一次复现 | [1. 机器与目录](#1-机器目录与环境) → [2. 构建](#2-首次克隆与构建) → [3. 资产校验](#3-下载与验证全部公开资产) |
+| 生成自己的训练数据 | [4. 动作匹配、可视化与自定义数据](#4-动作匹配可视化与自定义数据) |
+| 云端训练或继续已有任务 | [5. 同步环境](#5-服务器免密登录与完整镜像同步) → [6. 训练、蒸馏与恢复](#6-教师训练两种蒸馏与恢复)；已有正式 run 不重复训练 |
+| 部署与视频 | [7. 导出、回传与仿真闭环](#7-导出回传与仿真闭环)、[仿真视频预览](usage.md#仿真视频看实际行为) |
+| 检查完整性与限制 | [8. 验收与定位](#8-验收与定位问题)、[当前结果与原始证据](usage_assets/reports/reproduction-20261015/index.md) |
+
+<details>
+<summary>展开截至 2026-10-14 的验收范围与历史进度</summary>
+
+**历史进度（2026-10-14，北京时间）：五类官方教师均已完成20,000轮，最终checkpoint为19999；五份最终产物均已完成独立CPU验收。** 第四个low-climb-76于10月12日16:22:35、第五个high-climb-76于10月13日07:14:48完成原生训练；两份[低攀爬](usage_assets/reports/official-low-climb-76-final/index.md)/[高攀爬](usage_assets/reports/official-high-climb-76-final/index.md)公开包已生成。纯DAgger学生已于10月13日17:34:35完成10,000轮、最终checkpoint9999，混合学生正在运行30,000轮训练，10月14日23:12的原生日志记录为24,354轮；五类教师与纯学生的六项官方有界Isaac评估已完成，原始记录和160段视频已通过独立CPU核验；混合学生、16阶段全日程、云端888逐源尝试、最终自训学生58例和两学生各629配置仍待完成。CPU有限性、训练记录完整或公开包恢复通过，不表示策略收敛、技能成功或真机验收。
 
 [六项官方有界评估的原始指标、图片、视频与离线重放](usage_assets/reports/official-evaluations-six/index.md)已保存：每项64环境×3000步，六份TensorBoard整文件CRC/EOF完整且102个指标与原JSON一致，160段原视频完整解码。原生失败reset及clip结束事件如实保留，不作为技能或课程成功率。包内提供已实际执行的CPU Docker重放命令，宿主无需安装包。
 
@@ -17,6 +32,9 @@
 用户已答复“没有”原始 motion_matching/mm_hs/FAR-pi 环境或历史参考输出。12项历史 raw-hash 失败继续保留，未刷新 golden 或跳过用例；现有原版/研究版数组对照不能替代缺失的历史基线。
 
 正式学生的原始TensorBoard事件和完整学习曲线另有[检查与归档工具](usage_assets/reports/student-training-curves-integrity/index.md)。纯DAgger的[完整10,000轮曲线和原件归档](usage_assets/reports/official-student-pure-training-curves/index.md)已通过实际CPU提取/绘图、公开包校验及全新目录无损恢复：43个tag共430,000条有限样本，每项完整覆盖0..9999。[从公开包重新提取和绘图](usage_assets/reports/official-student-pure-training-curves-replay/index.md)也已实际通过，完整数据逐项相等。混合学生的30,000轮最终曲线仍待真实终态。这些记录不证明模型质量、收敛或最终物理验收。
+
+
+</details>
 
 ## 1. 机器、目录与环境
 
@@ -47,7 +65,7 @@ flowchart LR
 
 首个正式教师的验收包单独保存了最终PT及用于比较的iter0 PT；这是经过校验的小型复现输入。1.18GB原ONNX仍在本地忽略目录和云端，原TensorBoard事件按无损压缩保存，取回与还原见[最终教师验收说明](usage_assets/reports/official-locomotion-final/index.md)。
 
-当前本地默认`php-parkour:research`和`php-parkour-research`容器已实际采用SDK0.1.8新统一镜像`2be18521…`，doctor与恢复后的TensorBoard6006检查通过；原0.1.6镜像保留为`php-parkour:research-sdk016-retained`。云端完整新镜像也已加载为独立candidate tag，正在运行的官方训练仍保留原冻结镜像/源码直至结束。[本地接入回执](usage_assets/reports/sdk018-local-adoption/summary.md)、[远端完整包校验](usage_assets/reports/sdk018-canonical-upload/summary.md)。
+本地默认`php-parkour:research`和`php-parkour-research`已实际采用SDK0.1.8新统一镜像`2be18521…`，接入时doctor与TensorBoard6006检查通过；原0.1.6镜像保留为`php-parkour:research-sdk016-retained`。云端新镜像也已加载为独立candidate tag；已完成的官方训练及后续888逐源验收沿用原冻结镜像/源码，默认接入须等逐源终态和控制进程退出。[本地接入回执](usage_assets/reports/sdk018-local-adoption/summary.md)、[远端完整包校验](usage_assets/reports/sdk018-canonical-upload/summary.md)。
 
 ## 2. 首次克隆与构建
 
@@ -342,39 +360,40 @@ python3 scripts/research/cloud.py --detach exec bash -c \
 
 它依次完成五教师、最终教师 ONNX 检查、五教师质量评估、两种学生训练/质量评估/独立导出。同一输出目录有文件锁；重启会恢复有效 checkpoint，重新生成丢失或被改动的验收产物。训练保留 4096/2048 环境、官方迭代数和每 500 轮保存设置，质量评估单独使用 64 环境 × 3000 步。预计需多天；状态以各阶段 manifest 和原始日志为准。
 
-完成后的逐源验收由 [posttrain_coverage.py](scripts/research/posttrain_coverage.py) 衔接。先用`cloud.py sync`将最新代码同步为独立快照，保留正在训练的旧挂载；下列命令在服务器已有shell中执行，`PHP_COVERAGE_SOURCE_TREE`须填同步输出的64位SHA：
+完成后的逐源验收由 [posttrain_coverage.py](scripts/research/posttrain_coverage.py) 衔接。下面是首次创建独立批次的模板：先用`cloud.py sync`同步新快照，保留已有挂载；在服务器shell中填写新源码SHA和全新的输出名称。本仓库记录的`coverage-official-final-ro-assets-v2`已有单实例恢复任务，查看它时只用后文的只读状态命令。
 
 ```bash
 : "${PHP_COVERAGE_SOURCE_TREE:?请设为新的源码快照SHA}"
+: "${PHP_COVERAGE_COHORT:?请设为全新的coverage输出目录名称}"
 PHP_COVERAGE_ROOT=/diff/dzp_is_sb/php-parkour-research
 python3 "$PHP_COVERAGE_ROOT/source/$PHP_COVERAGE_SOURCE_TREE/scripts/research/posttrain_coverage.py" \
   dry-run --source-tree "$PHP_COVERAGE_SOURCE_TREE" \
-  --coverage-output "$PHP_COVERAGE_ROOT/outputs/coverage-official-final-ro-assets-v2"
+  --coverage-output "$PHP_COVERAGE_ROOT/outputs/$PHP_COVERAGE_COHORT"
 # 核对dry-run，再以前台watch或已有进程管理方式持续运行：
 python3 "$PHP_COVERAGE_ROOT/source/$PHP_COVERAGE_SOURCE_TREE/scripts/research/posttrain_coverage.py" \
   watch --source-tree "$PHP_COVERAGE_SOURCE_TREE" \
-  --coverage-output "$PHP_COVERAGE_ROOT/outputs/coverage-official-final-ro-assets-v2" --poll-seconds 60
+  --coverage-output "$PHP_COVERAGE_ROOT/outputs/$PHP_COVERAGE_COHORT" --poll-seconds 60
 ```
 
 `dry-run`只读状态。`watch`等待全部16阶段manifest、driver最终标记、所有训练/评估子进程退出和官方锁释放；随后用相同镜像启动无GPU、无网络的Docker，核对七个最终PT的真实配置、有限权重及学生内嵌五专家与教师逐tensor一致，再执行三套296源CPU预检。只有固定物理GPU 1的UUID确实空闲时，才启动无网络GPU Docker执行888个首次尝试；不改原训练容器或源码。每个失败、未完成和已完成记录均保留；中断后只有显式`--resume-interrupted`才续跑未尝试项，不重试已失败的技能。状态保存在服务器`outputs/coverage-official-final-ro-assets-v2/monitor-status.json`，逐源输出与官方训练目录分开；启动watch不等于完成这些测试。
 
-本次watch于北京时间2026-10-10 18:09升级到独立的`02bc1100…`源码快照，PID4074213，使用新的RO资产合同；原14:39部署的`8d9ee8a4…`watch与日志已按原字节归档。只向身份核验过的旧waiting进程发出一次pidfd SIGTERM，再启动新watch；正式训练的`0093aa40…`挂载、镜像和进程身份均未改变。当前只需读状态，勿重复启动；同服务器全局锁会拒绝第二个watch。
+历史部署：watch于北京时间2026-10-10 18:09升级到独立的`02bc1100…`源码快照，PID4074213，使用新的RO资产合同；原14:39部署的`8d9ee8a4…`watch与日志已按原字节归档。只向身份核验过的旧waiting进程发出一次pidfd SIGTERM，再启动新watch；正式训练的`0093aa40…`挂载、镜像和进程身份均未改变。该历史watch于2026-10-15因Docker诊断错误退出；本次已启动单实例恢复控制器，沿用相同输出目录与锁。只读状态命令仍适用，勿重复启动；[当前恢复记录](usage_assets/reports/reproduction-20261015/index.md)保存准确入口和新进程。
 
 ```bash
 ssh -p 22 -o BatchMode=yes -o PasswordAuthentication=no tencent-231 \
   cat /diff/dzp_is_sb/php-parkour-research/outputs/coverage-official-final-ro-assets-v2/monitor-status.json
 ```
 
-新源码/镜像校验、只读dry-run、旧进程出生身份、实际pidfd退出与新watch轮询回执见[本次升级证据](usage_assets/reports/posttrain-monitor-ro-assets-v2/summary.md)；[最初部署证据](usage_assets/reports/posttrain-monitor-deployment/summary.md)保留历史范围。当前等待正式训练完成，watch没有启动额外GPU作业。
+新源码/镜像校验、只读dry-run、旧进程出生身份、实际pidfd退出与新watch轮询回执见[本次升级证据](usage_assets/reports/posttrain-monitor-ro-assets-v2/summary.md)；[最初部署证据](usage_assets/reports/posttrain-monitor-deployment/summary.md)保留历史范围。这是旧watch的历史等待记录。正式16阶段及本次七PT/三套296源CPU预检现已完成，原CPU容器自然退出0；固定GPU容器已启动，逐源首次尝试仍在继续。
 
-本次正式 driver 已于北京时间 2026-10-10 12:20 用上述 `/outputs/official-full` 目录启动，当前无需重复启动。云端 TensorBoard 已以该目录为 `--logdir` 运行，本机 6007 转发也已实测 HTTP 200；打开 `http://127.0.0.1:6007/` 查看实时训练。上述 `/outputs/training` 示例适用于默认输出目录；已有服务时复用同一端口。可随时只读检查进度：
+历史启动：正式 driver 于北京时间 2026-10-10 12:20 用上述 `/outputs/official-full` 目录启动，16阶段现已完成。启动时TensorBoard以该目录为`--logdir`，本机6007转发实测HTTP200；这是当时的端口回执，复用前须检查当前服务和SSH转发。该目录现用于查看已完成训练曲线；上述`/outputs/training`示例适用于默认输出。原始日志可只读检查：
 
 ```bash
 python3 scripts/research/cloud.py exec tail -n 50 /outputs/official-full-driver.log
 python3 scripts/research/cloud.py exec cat /outputs/official-full/official/manifests/teacher-locomotion.json
 ```
 
-SSH 转发退出后，在本机重新运行 `ssh -p 22 -N -L 127.0.0.1:6007:127.0.0.1:6006 tencent-231` 即可。训练持续使用已核验的冻结源码；`cloud.py sync` 会创建新快照，不会替换运行中容器的源码挂载。最新启动证据见 [usage](usage.md#5-训练isaac-sim-评估与导出)。
+远端6006服务可用且本地6007空闲时，可在本机运行`ssh -p 22 -N -L 127.0.0.1:6007:127.0.0.1:6006 tencent-231`建立转发。此次训练全程使用已核验的冻结源码；`cloud.py sync`创建新快照，不会替换已有容器的挂载。历史启动证据见[usage](usage.md#5-训练isaac-sim-评估与导出)。
 
 研究分支让障碍预处理在未提供 `obstacle_seed` 时使用 `training.seed`，并写回保存配置。单 GPU 训练原入口已提前设种子；本修复主要保证独立评估、导出和直接调用 hook 时生成相同地形。显式障碍种子优先。回归实际比较了不同全局 RNG 状态下的地形/动作数组，以及原单 GPU 隐式 seed 42 与显式 seed 42 的几何一致性；这不保证完整训练或 checkpoint 恢复逐位相同，也不声称多 GPU 地形行为等价。
 
@@ -390,13 +409,15 @@ python3 scripts/research/cloud.py pull
 
 只需要正式学生部署模型时，使用[选择性回传工具](scripts/research/pull_final_students.py)，无须拉取整个训练输出。它只读检查16个官方阶段、七个最终PT来源、已成功的独立CPU检查容器及专家顺序；ready后只传两组配套ONNX和28份来源JSON。主机只使用标准库、现有SSH/rsync，不安装模型依赖。
 
+下面的手动 `fetch` 供独立交付使用。本次已实际回传 32 个文件并通过两学生共 60 项 ORT；[回传与模型恢复包](usage_assets/reports/reproduction-20261015/student-transfer-cpu-actual-02/README.md)保留全部来源。原等待器在 fetch 后被跨 boot 身份检查拦住并退出 1，原生仿真续做状态见[本次记录](usage_assets/reports/reproduction-20261015/index.md)，无需重复 fetch。
+
 ```bash
 python3 -B scripts/research/pull_final_students.py status
 # status为ready后执行；waiting时不会创建模型目录：
 python3 -B scripts/research/pull_final_students.py fetch
 ```
 
-目标为`outputs/research/final-student-transfer/<cohort>/initial/`，其中`models/pure/`与`models/finetune/`各有`student.onnx`和`depth_backbone.onnx`。工具校验远端前后身份、本地原文件集合及SHA，保留失败的partial目录；审阅失败后用新的`--attempt`，不会覆盖历史。它不运行ORT或仿真。初版15:26真实status为waiting，57项CPU检查通过；该记录保留为历史。更新后的77项检查与10:19真实状态见本文末段；最终两组模型尚未回传，更不能拿发布模型的629扫描代替自训模型验收。[初版检查证据](usage_assets/reports/final-student-transfer/summary.md)。
+目标为 `outputs/research/final-student-transfer/<cohort>/initial/`，其中 `models/pure/` 与 `models/finetune/` 各有 `student.onnx` 和 `depth_backbone.onnx`。工具校验远端前后身份、本地原文件集合及 SHA，保留失败的 partial 目录；审阅失败后用新的 `--attempt`，不会覆盖历史。它不运行 ORT 或仿真。初版 15:26 的 waiting、57 项检查及后续 77 项检查属于历史；本次两组最终模型已回传，新完整58例及独立CPU后验、无损恢复已通过，1258例在独立合同验收后实际运行中，见[本次原件](usage_assets/reports/reproduction-20261015/index.md)。公开模型的扫描不能替代这些正式模型结果。[初版检查证据](usage_assets/reports/final-student-transfer/summary.md)。
 
 先验证公开 ONNX 双图的结构、元数据和真实 CPU 推理：
 
@@ -462,7 +483,7 @@ docker exec php-parkour-research \
 
 完整逐帧批次于15:38 UTC在独立容器实际启动，[15:40固定见证](usage_assets/reports/reference629-native-start/index.md)保留当时4例完成、1例运行、0例执行失败及原始controller。原生宿主父进程已于20:19:24 UTC真实退出0，独立CPU后验父进程于20:21:45 UTC退出0，完整发布于20:23 UTC完成。终态原矩阵和父进程收据分别在`outputs/research/reference-native629-01/outputs/reference629/matrix.json`与`outputs/research/reference629-native-parent-01/process-exit.json`。
 
-[完整逐帧画廊](usage_assets/reports/reference629-full/playback.html)覆盖17场景、629配置的342,651帧，参考指令时长6,853.02秒；1258个worker正常退出、1258份宿主出生映射及629段原始MP4完整解码均通过。321例触发高度/倾斜阈值，308例未触发，`quality_verified=false`、`obstacle_course_completion_verified=false`。这是公开ONNX的指令执行与物理配置覆盖，不是越障成功或仍在训练的自训学生验收。[机器汇总](usage_assets/reports/reference629-full/summary.json)、[逐配置记录](usage_assets/reports/reference629-full/cases.json)和[完整SHA清单](usage_assets/reports/reference629-full/evidence-manifest.json)保留原始证据；实测物理计时合计6,858.676秒，与参考指令时长分别记录。
+[完整逐帧画廊](usage_assets/reports/reference629-full/playback.html)覆盖17场景、629配置的342,651帧，参考指令时长6,853.02秒；1258个worker正常退出、1258份宿主出生映射及629段原始MP4完整解码均通过。321例触发高度/倾斜阈值，308例未触发，`quality_verified=false`、`obstacle_course_completion_verified=false`。这是公开ONNX的指令执行与物理配置覆盖，不是越障成功，也不能替代正式自训学生验收。[机器汇总](usage_assets/reports/reference629-full/summary.json)、[逐配置记录](usage_assets/reports/reference629-full/cases.json)和[完整SHA清单](usage_assets/reports/reference629-full/evidence-manifest.json)保留原始证据；实测物理计时合计6,858.676秒，与参考指令时长分别记录。
 
 物理矩阵完整结束后，[CPU后验工具](scripts/research/validate_scene_matrix.py)会重新检查封存文件、每段实际帧数、原生worker退出、逐帧指令与录制NPZ，并用`ffmpeg -xerror`完整解码每个原始MP4。下例使用同一镜像另起CPU容器，源码、输入与原始输出只读，只写独立报告目录；保留生成计划时的源码和文件路径：
 
@@ -537,7 +558,7 @@ motion/inference 的 `pip check` 已通过。NVIDIA 基础训练环境仍有三�
 
 Isaac评估将URDF转换缓存写在`robot.asset.asset_root`下。源码只读时须把原始G1 URDF/mesh按SHA复制至独立可写数据目录，并传`--robot.asset.asset-root /outputs/<独立资产目录>/robots`；不要把Python源码改为可写来容纳缓存。本轮五非默认教师首次重载因该缓存路径失败、虽然父进程返回0却没有quality.json，原失败保留。[原始失败](usage_assets/reports/teacher-presets-reload-ro-failure/summary.md)。评估入口现拒绝复用旧报告，并在没有新有效报告时非零退出；14项CPU检查通过。[退出门卫源码与测试](usage_assets/reports/eval-quality-exit-guard/summary.md)。
 
-当前四模块联合CPU回归172项测试加19个子用例全部通过，精确源码和原始JUnit见[本轮联合记录](usage_assets/reports/worker-exit-integrated/review.json)。
+该次四模块联合CPU回归172项测试加19个子用例全部通过，精确源码和原始JUnit见[本轮联合记录](usage_assets/reports/worker-exit-integrated/review.json)。
 
 新的SDK0.1.8完整629批次已单独冻结3297份源码及1887份场景输入，合计5206文件SHA通过独立核验；同镜像runc/noGPU/network-none容器的all-configs计划、17场景CLI与两角色实际imports都通过，外层19项CPU检查通过。它使用独立目录和全容器残留进程门卫，保留原生默认单例wall413秒，不能resume旧批次。该[准备记录和计划SHA](usage_assets/reports/fresh629-sdk018-preparation/summary.md)只验准备阶段。后续已于10:02 UTC实际启动新版批次；10:10 UTC固定快照21 completed/1 running/607 planned，首两例完整退出和视频后验通过，其中第二例真实跌倒。[实际启动、固定快照与原片](usage_assets/reports/fresh629-start-first-two/summary.md)。该10:10历史快照当时尚未验收整批，最终恢复结果见本文末段。
 
@@ -555,21 +576,21 @@ Isaac评估将URDF转换缓存写在`robot.asset.asset_root`下。源码只读�
 
 真实只读源码单源验收已完成：原iter500教师初始化并执行158策略步后首次跟踪失败；完整920帧输入和cap920保留，35原资产及3356封存输入SHA不变。独立CPU后验、实际保存配置与三段视频全片解码通过。[真实RO源码/RW资产运行证据](usage_assets/reports/source-coverage-ro-assets-pilot/summary.md)。这证明初始化与评估流程可运行，技能质量仍为false。
 
-学生选择性回传入口现默认使用02bc源码与`coverage-official-final-ro-assets-v2`目录，`status`与`fetch`均支持显式`--coverage-output coverage-official-final-ro-assets-v2`。等待和就绪响应均核对源树、monitor SHA与coverage相对/绝对目录；ready还核对schema2共享资产合同。77/77 Docker CPU测试通过，10:19 UTC真实`status`返回waiting，16阶段仍阻塞、cpu_ready_present=false、transfer_started=false。[修改前后源码、精确命令与真实响应](usage_assets/reports/final-student-transfer-ro-assets-integration/summary.md)。先等待原官方driver，不以旧目录或中间PT替代最终模型。
+学生选择性回传入口默认使用02bc源码与`coverage-official-final-ro-assets-v2`目录，`status`与`fetch`均支持显式`--coverage-output coverage-official-final-ro-assets-v2`。等待和就绪响应均核对源树、monitor SHA与coverage相对/绝对目录；ready还核对schema2共享资产合同。77/77 Docker CPU测试通过；2026-10-10 10:19 UTC历史`status`为waiting、16阶段阻塞、cpu_ready_present=false、transfer_started=false。[修改前后源码、精确命令与历史响应](usage_assets/reports/final-student-transfer-ro-assets-integration/summary.md)。16阶段与真实CPU-ready现已通过，32文件实际回传和60项ORT也已完成；原waiter在fetch后因跨boot检查退出1，新的显式控制已启动58例原生验收。[当前链路与模型包](usage_assets/reports/reproduction-20261015/index.md)保留全部历史。
 
 ### 最终学生回传后的本地验收
 
 最终两学生的独立验收入口已冻结，47/47 Docker CPU控制面测试与真实缺fetch的waiting分支通过；真正completed fetch之后才准备模型、执行60项CPU ORT，再按pure12方向/pure17代表场景/finetune12方向/finetune17代表场景串行运行，共58例。要求116个worker正常退出且组为空、116份精确hostwriter出生映射和58原视频全片解码；正常退出仍不代表技能或课程成功。[源码、CLI、原失败与独立审查](usage_assets/reports/final-student-native58-preparation/summary.md)。这项自训模型验收与发布模型的全629扫描分别保留，不能互相替代。
 
-历史记录：本机于2026-10-10 11:03 UTC启动单实例交接程序PID1121672，55/55 Docker CPU测试及独立预启动审查通过。首次真实SSH status为waiting，16阶段阻塞，未fetch、未执行真实模型prepare或native。此后每600秒等待真正ready，仅回传4ONNX+28JSON；待现fresh629成功/停止、固定GPU mutex释放且GPU空闲，才由冻结入口串行执行上述步骤。[准确合同、启动argv/PID出生身份及首次原日志](usage_assets/reports/final-student-delivery-waiter/summary.md)。查看当前状态使用：
+历史记录：本机于2026-10-10 11:03 UTC启动单实例交接程序PID1121672，55/55 Docker CPU测试及独立预启动审查通过。首次真实SSH status为waiting，16阶段阻塞，未fetch、未执行真实模型prepare或native。此后每600秒等待真正ready，仅回传4ONNX+28JSON；待现fresh629成功/停止、固定GPU mutex释放且GPU空闲，才由冻结入口串行执行上述步骤。[准确合同、启动argv/PID出生身份及首次原日志](usage_assets/reports/final-student-delivery-waiter/summary.md)。查看该旧等待器的历史状态使用：
 
 ```bash
 python3 -m json.tool outputs/research/final-student-delivery-waiter-recovered-preparation-01/execution/state.json
 ```
 
-旧PID1121672已受控取消，当前已arm的恢复版等待器见本文末段；不要再次watch、手动fetch或同时另起final58。任何已开始步骤的失败/partial都保留并停止，不自动重试；需要取消时先核对启动收据的PID出生身份，再用SIGTERM等待自身清理。准备源码可从上述发布副本恢复，但不能覆盖活控制文件；final58还依赖原canonical context/source-manifest、1887生成输入、baseline/helper准确路径、指定镜像、真实completed fetch和现fresh629成功/释放收据，详见包内restore-map。这些控制面测试与waiting回执不计作正式训练或最终模型验收完成。
+旧PID1121672及其后两版等待器均已停止，历史替换过程见本文末段；本次全新执行目录与当前状态见[续做记录](usage_assets/reports/reproduction-20261015/index.md)；不要再次watch、手动fetch或同时另起final58。任何已开始步骤的失败/partial都保留并停止，不自动重试；需要取消时先核对启动收据的PID出生身份，再用SIGTERM等待自身清理。准备源码可从上述发布副本恢复，但不能覆盖活控制文件；final58还依赖原canonical context/source-manifest、1887生成输入、baseline/helper准确路径、指定镜像、真实completed fetch和现fresh629成功/释放收据，详见包内restore-map。这些控制面测试与waiting回执不计作正式训练或最终模型验收完成。
 
-### 当前隔离629批次的专用发布入口
+### 历史公开ONNX隔离629批次的专用发布入口
 
 [冻结适配器、80项最终CPU测试及独立审查](usage_assets/reports/fresh629-publication-preparation/summary.md)已完成。11:44 UTC针对真实运行中批次的status、prepare、publish均返回waiting/exit0，未建出版目录或partial stage、未启动额外仿真，Docker ID集合及原容器身份前后不变；root初次汇总的状态字段错误和修正后的原收据均保留。该接口只适用本次固定绝对cohort，须保留包内列明的原canonical context、5206冻结文件及全部原生输出。
 
@@ -590,7 +611,7 @@ python3 -B usage_assets/reports/fresh629-publication-preparation/adapter/publish
 
 2026-10-10 14:21 UTC，[629配置结果](usage_assets/reports/sim2sim-full629-sdk018-recovered/index.md)已完整出版：原629次原生rollout、1258正常worker和629原视频全片解码完成；监督会话143留下的四例host观察缺口以四次独立新attempt补验，原1250映射与8个旧缺口单独保存。实际633次attempt覆盖629唯一配置，所有容器均已停止。该恢复流程使用独立控制器，前面的旧严格publisher及其waiting回执保留历史含义，不能把原host receipt改写为正常0。原始证据、连续观察流分块和全部SHA均可从结果包复核；大型源码/生成输入的恢复前提单列在包内清单。
 
-可在上面的8088标准库服务中访问 `/reports/sim2sim-full629-sdk018-recovered/playback.html`，按场景、配置或阈值筛选全部结果。139例高度/倾斜事件都保留，490例未触发也不等于课程成功。
+在仓库根目录运行 `python3 scripts/research/serve_evidence.py` 后，可访问 `http://127.0.0.1:8088/usage_assets/reports/sim2sim-full629-sdk018-recovered/playback.html`，按场景、配置或阈值筛选全部结果。该标准库服务支持视频拖动定位；139例高度/倾斜事件都保留，490例未触发也不等于课程成功。
 
 [完整命名按键和Backspace结果](usage_assets/reports/native-keyboard-reset-allkeys/index.md)也已完成：424帧原生录制包含全部12个部署标签，物理重置前后完整状态、正常退出和原视频均保存。该记录的qpos仍包含零XYZ占位；按原plan恢复依赖后才能重跑原生GUI，不能直接将录制当作配对地形训练数据。
 
@@ -598,4 +619,4 @@ python3 -B usage_assets/reports/fresh629-publication-preparation/adapter/publish
 
 [教师及两类学生的续训实测](usage_assets/reports/native-resume-acceptance/index.md)已完成6次原生训练和全部18步证据检查。baseline target2保存iter1后，原生resume从index1再次更新，到target4保存iter3；教师optimizer40→60→100，学生16→24→40。结果包括PT/归档、真实TensorBoard事件、ONNX及skip验证；大文件按原字节分块，恢复方法和输入依赖在包内。它证明有界恢复通路，不等于正式七模型完成或随机/环境状态精确续接。
 
-14:37 UTC旧waiter1121672核对出生身份后仅对leader发送SIGTERM，自行保留受控取消的failed状态；此前没有fetch/prepare/run。共用锁inode未变，旧进程退出后才启动[恢复版交接](usage_assets/reports/final-student-delivery-waiter-recovered/index.md)。新PID2146113首次真实SSH为waiting，每600秒等待官方产物；不会因旧629宿主143而永久卡在原正常退出门卫。当前状态使用上面的新execution路径查看。控制源码和合同已冻结，不能覆盖活文件或同时启动第二份；最终58例仍未执行。
+14:37 UTC旧waiter1121672核对出生身份后仅对leader发送SIGTERM，自行保留受控取消的failed状态；此前没有fetch/prepare/run。共用锁inode未变，旧进程退出后才启动[恢复版交接](usage_assets/reports/final-student-delivery-waiter-recovered/index.md)。新PID2146113首次真实SSH为waiting，每600秒等待官方产物；不会因旧629宿主143而永久卡在原正常退出门卫。这是历史交接：后续SSH恢复版也已于2026-10-15凌晨受控停止，且fetch/prepare/run均未开始。本次使用全新执行目录继续原合同，准确状态与父进程退出收据见[2026-10-15续做记录](usage_assets/reports/reproduction-20261015/index.md)；不能重新覆盖旧execution或同时启动第二份。

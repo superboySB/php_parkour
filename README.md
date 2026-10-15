@@ -4,6 +4,18 @@ Research Docker workflow: [配置与运行手册](note.md) · [功能复现与�
 The `research` branch uses one image for local simulation and cloud training,
 local TensorBoard events and file registries; project packages are installed inside Docker.
 
+Research reproduction (2026-10-15): all 16 official training/evaluation/export
+stages have finished. See the [current audit](usage_assets/reports/reproduction-20261015/index.md),
+[full finetune learning curves](usage_assets/reports/official-student-finetune-training-curves/index.md),
+and [simulation video gallery](usage_assets/reproduction-20261015/media/playback.html).
+The final students' [complete 58-case gallery](usage_assets/reports/final-student-native58-resource-wait-04/playback.html)
+has passed independent CPU checks, lossless restoration and browser playback.
+The [completed flat-ground preview](usage_assets/reports/reproduction-20261015/source888-first-boundary-preview/playback.html)
+and [low-step preview](usage_assets/reports/reproduction-20261015/source888-first-lowstep-boundary-preview/playback.html)
+show final teachers reaching their source boundaries; the complete cohort is still running.
+Policy and obstacle-course success remain separate from execution checks.
+For local playback and seeking, run `python3 scripts/research/serve_evidence.py` and open `http://127.0.0.1:8088/usage_assets/reproduction-20261015/media/playback.html`.
+
 Zhen Wu\*, Xiaoyu Huang\*, Lujie Yang\*, Yuanhang Zhang, Xi Chen,
 Pieter Abbeel†, Rocky Duan†, Angjoo Kanazawa†, Carmelo Sferrazza†, Guanya Shi†, C. Karen Liu†
 

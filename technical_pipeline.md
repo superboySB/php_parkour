@@ -2,13 +2,15 @@
 
 本文解释当前 `research` 分支的实际实现：每个模块接收什么、产生什么、监督信号从哪里来，以及训练得到的动作如何进入机器人控制器。配置与命令见 [note.md](note.md)，真实运行结果、录像与失败记录见 [usage.md](usage.md)。本文件独立于 README。
 
-**当前进度（2026-10-13，北京时间）：五类官方教师均已完成20,000轮，最终checkpoint为19999；五份最终产物均已完成独立CPU验收。** 第四个low-climb-76于10月12日16:22:35、第五个high-climb-76于10月13日07:14:48完成原生训练；两份[低攀爬](usage_assets/reports/official-low-climb-76-final/index.md)/[高攀爬](usage_assets/reports/official-high-climb-76-final/index.md)公开包已生成。原顺序任务已进入纯DAgger学生训练，混合学生尚未完成；16阶段全日程、官方物理评估、云端888逐源尝试、最终自训学生58例和两学生各629配置均未完成。CPU有限性、训练记录完整或公开包恢复通过，不表示策略收敛、技能成功或真机验收。
+**当前进度（2026-10-15，北京时间）：五教师、两学生训练与评估/导出共16阶段均已完成。** 五教师各20,000轮、纯DAgger学生10,000轮、DAgger+PPO学生30,000轮；混合学生最终checkpoint29999。完整曲线、七项官方有界Isaac评估的191段视频及本次后续验收状态见[逐步复现记录](usage_assets/reports/reproduction-20261015/index.md)。最终学生[新完整58例](usage_assets/reports/final-student-native58-resource-wait-04/playback.html)和独立CPU后验、无损恢复、浏览器播放已通过；两学生各629配置的CPU计划和独立合同审查也已通过，1258次物理测试及逐源888验证实际运行中。训练记录完整和执行完成不等于策略收敛、技能或课程成功。
 
 历史快照（2026-10-11 17:39 UTC）：官方教师当时完成3/5：locomotion、low-step与high-step各完成20,000轮及最终CPU验收；原顺序任务已自然进入low-climb-76。公开ONNX的全629逐帧闭环也已完成CPU后验并出版；其余两教师、两学生、官方物理评估、888逐源尝试及最终自训学生58例尚未全部完成。本文的算法说明来自源码和实际实验，不表示完整日程、策略技能质量或真机验收已经完成。
 
-**验收范围补充：** 原58例对每个正式学生只测试12个平地方向项（各8秒）和17个代表场景项（固定前进各10秒）；17场景名称全选却仍有612/629配置未选，9个所选参考长于10秒，low-speed roll参考还含backward code11。后续另以原15维50Hz逐帧指令各执行全629（合计1258例/2516worker），不改变原58判据，也不把NPY变体与OBJ配置混为同一轴。[源码准备、实际waiting与恢复合同](usage_assets/reports/final-student-reference629-preparation/index.md)只证明准备及只读分支可用，未来真实模型/58后验/CPU计划/新合同仍待绑定和审查，未产生新的科学结果；公开ONNX扫描不能替代正式模型，quality/course保持false。
+**验收范围补充：** 原58例对每个正式学生只测试12个平地方向项（各8秒）和17个代表场景项（固定前进各10秒）；17场景名称全选却仍有612/629配置未选，9个所选参考长于10秒，low-speed roll参考还含backward code11。后续另以原15维50Hz逐帧指令各执行全629（合计1258例/2516worker），不改变原58判据，也不把NPY变体与OBJ配置混为同一轴。[新宿主源码与恢复入口](usage_assets/reports/final-student-reference629-resource-wait-preparation/README.md)保留85文件准备与206文件发布工具的独立审查；两套629 CPU计划及新合同已通过独立验收，16:09:47实际进入物理执行，见[当前原件](usage_assets/reports/reproduction-20261015/index.md)。公开ONNX扫描不能替代正式模型，quality/course保持false。
 
-正式模型结果的[发布/恢复接口源码](usage_assets/reports/final-student-reference629-publication-preparation/index.md)按实际双模型合同读取原生仿真、CPU后验与真实父退出记录。计划保留1258配置、2516个正常worker/宿主出生映射和1258段全片解码的原始证据；当前仅源码准备与有限CLI检查完成，另有[隔离源码复制实测](usage_assets/reports/final-student-reference629-publication-source-checks/index.md)。正式模型验收、完整结果发布及恢复尚未执行，不增加策略质量或实机结论。
+下文 Holosoma 源码链接固定到与本地逐字节一致的子模块提交 `4a0bf04`，可直接在 GitHub 阅读对应实现和行号。
+
+正式模型结果的[新版发布/恢复接口源码](usage_assets/reports/final-student-reference629-resource-wait-preparation/README.md)按实际双模型合同读取原生仿真、CPU后验与真实父退出记录。计划保留1258配置、2516个正常worker/宿主出生映射和1258段全片解码的原始证据；源码包的861个原件已[模拟Git权限实际恢复](usage_assets/reports/final-student-reference629-resource-wait-source-restore/README.md)。实际物理批次运行中，完整结果发布及恢复仍待真实终态，不增加策略质量或实机结论。
 
 北京时间15:48，旧629物理扫描已因SDK退出异常及父监督漏查最终worker退出码而有序中断，全部相关本地进程退出。原279项reported completed中也已发现崩溃日志，因此这些状态不能作为正常退出验收；修复监督和SDK后，原五个显式失败配置的新试跑已正常退出，新的fresh629已完成原629次rollout与四例独立观察补验，完整终态和历史观察缺口见[恢复后的结果包](usage_assets/reports/sim2sim-full629-sdk018-recovered/index.md)。[原状态及停止回执](usage_assets/reports/sim2sim-cohort-halt/summary.md)、[漏记崩溃实证](usage_assets/reports/worker-exit-completed-log-audit/report.md)、[新SDK五例闭环](usage_assets/reports/sdk018-native-pilot/summary.md)。下文带具体时间的运行快照均保留历史含义。
 
@@ -93,9 +95,9 @@ PHP 上游先把人类动作重定向到 29 DOF G1，再人工标注技能起止
 仓库包含两个不同入口：
 
 - [PHP database generator](motion_matching/motion_matching/generate_database.py#L182) 消费已经是 G1 的 `qpos=[wxyz,xyz,29 joints]`，做镜像、URDF运动学、重采样、速度/接触估计和二进制写盘；不训练网络。
-- [Holosoma retargeter](thirdparty/holosoma/src/holosoma_retargeting/holosoma_retargeting/src/interaction_mesh_retargeter.py#L65) 另有 SQP 风格 diffIK：输入人体世界关节 `human_joints:[T,J,3]`、人体/机器人映射与交互几何，线性化 Jacobian，最小化 interaction-mesh Laplacian 误差，并加脚约束、非穿透、关节限位与 trust region，由 CVXPY/CLARABEL 逐帧求解；示例保存 `qpos:[T,36]`、`human_joints` 和 `fps=30`。目标来自人体运动与几何约束，不是监督网络的人工动作 label。它是轨迹优化，本次没有执行这条原始人体数据路径。
+- [Holosoma retargeter](https://github.com/amazon-far/holosoma/blob/4a0bf04cde5930af5ed59da797568d32be972525/src/holosoma_retargeting/holosoma_retargeting/src/interaction_mesh_retargeter.py#L65) 另有 SQP 风格 diffIK：输入人体世界关节 `human_joints:[T,J,3]`、人体/机器人映射与交互几何，线性化 Jacobian，最小化 interaction-mesh Laplacian 误差，并加脚约束、非穿透、关节限位与 trust region，由 CVXPY/CLARABEL 逐帧求解；示例保存 `qpos:[T,36]`、`human_joints` 和 `fps=30`。目标来自人体运动与几何约束，不是监督网络的人工动作 label。它是轨迹优化，本次没有执行这条原始人体数据路径。
 
-独立 Holosoma retarget 示例内部/保存的 qpos 是 `[xyz,wxyz,joints]`（[源码](thirdparty/holosoma/src/holosoma_retargeting/holosoma_retargeting/examples/robot_retarget.py#L499)），PHP generator 却按 `[wxyz,xyz,joints]` 解析，不能因同为36列就直接混用。HuggingFace发布资产的布局也应按其数据卡分别确认。
+独立 Holosoma retarget 示例内部/保存的 qpos 是 `[xyz,wxyz,joints]`（[源码](https://github.com/amazon-far/holosoma/blob/4a0bf04cde5930af5ed59da797568d32be972525/src/holosoma_retargeting/holosoma_retargeting/examples/robot_retarget.py#L499)），PHP generator 却按 `[wxyz,xyz,joints]` 解析，不能因同为36列就直接混用。HuggingFace发布资产的布局也应按其数据卡分别确认。
 
 PHP内部数据库还增加了一个平面 Simulation root：31 bones 为 Simulation root、pelvis及29关节节点；这不等于 tracking 的30 bodies或native的32 bodies。Simulation root 的位置来自肩部均值投影到XY，朝向来自pelvis局部+X投影并平滑。`contact_states:[F,2]` 是左右踝世界速度 `<0.5` 后 median filter 的启发式标签，不是真实足底力测量。[数据库生成](motion_matching/motion_matching/generate_database.py#L231)
 
@@ -159,9 +161,9 @@ body_*_w        = 30个tracking bodies重排为32个native bodies
 
 新增`left/right_foot_contact_point`分别复制tracking body18/19的ankle_roll pose及velocity；不是额外测量点，也没有计算新的足底offset。`vel_cmd/motion_ends/motion_idxs`若存在则原样保留。tracking数值通常float32，converter主要数值输出float64；不做单位/坐标轴转换。[converter](wbt_training/training_runs/motion_convert.py#L69)、[固定关节/身体顺序](wbt_training/config_values/robot_config.py#L12)
 
-转换要求29DOF/30body、必需字段finite、正FPS及至少2帧；already-native36列输入会拒绝。目录模式只转换NPZ，不复制terrain NPY/OBJ。native磁盘quaternion仍为wxyz，训练MotionLoader读入后才变成运行时xyzw。[校验](wbt_training/training_runs/motion_convert.py#L44)、[loader](thirdparty/holosoma/src/holosoma/holosoma/managers/command/terms/wbt.py#L124)
+转换要求29DOF/30body、必需字段finite、正FPS及至少2帧；already-native36列输入会拒绝。目录模式只转换NPZ，不复制terrain NPY/OBJ。native磁盘quaternion仍为wxyz，训练MotionLoader读入后才变成运行时xyzw。[校验](wbt_training/training_runs/motion_convert.py#L44)、[loader](https://github.com/amazon-far/holosoma/blob/4a0bf04cde5930af5ed59da797568d32be972525/src/holosoma/holosoma/managers/command/terms/wbt.py#L124)
 
-**文件FPS不自动驱动训练重采样。** MotionLoader读取fps，但MotionCommand每个control tick仅推进一reference frame。当前50FPS数据与200Hz物理/decimation4的50Hz控制匹配；自定义非50FPS输入必须先重采样并验收，不能只保留fps字段就认为时钟对齐。[推进reference](thirdparty/holosoma/src/holosoma/holosoma/managers/command/terms/wbt.py#L1000)
+**文件FPS不自动驱动训练重采样。** MotionLoader读取fps，但MotionCommand每个control tick仅推进一reference frame。当前50FPS数据与200Hz物理/decimation4的50Hz控制匹配；自定义非50FPS输入必须先重采样并验收，不能只保留fps字段就认为时钟对齐。[推进reference](https://github.com/amazon-far/holosoma/blob/4a0bf04cde5930af5ed59da797568d32be972525/src/holosoma/holosoma/managers/command/terms/wbt.py#L1000)
 
 terrain的三种文件也不能互换：
 
@@ -226,7 +228,7 @@ no-heightscan移除289维地形oracle，剩余状态仍按原有term名字排序
 
 Actor 各项默认还叠加均匀噪声：角速度 ±0.2、线速度 ±0.5、关节位置 ±0.01、关节速度 ±0.5、参考相对旋转 ±0.05、参考相对位置 ±0.25。Critic 的外层噪声关闭。默认 eval 保留 actor 配置的外层噪声；`set_is_evaluating()` 不会自动关闭它。
 
-`height_scan` 的网格间距为 0.1m、范围 1.6×1.6m，yaw 对齐。实际 raycaster 挂在 pelvis，配置射线起点 z offset=20；读数按 `sensor_z - hit_z - 0.5` 计算。这是当前实现的数值契约，不能直接当作实机深度相机像素。源码：[教师观测配置](wbt_training/config_values/terrain.py#L112)、[排序与噪声](thirdparty/holosoma/src/holosoma/holosoma/managers/observation/manager.py#L130)、[观测物理定义](thirdparty/holosoma/src/holosoma/holosoma/managers/observation/terms/wbt.py)、[height scanner](thirdparty/holosoma/src/holosoma/holosoma/simulator/isaacsim/isaacsim.py#L464)。
+`height_scan` 的网格间距为 0.1m、范围 1.6×1.6m，yaw 对齐。实际 raycaster 挂在 pelvis，配置射线起点 z offset=20；读数按 `sensor_z - hit_z - 0.5` 计算。这是当前实现的数值契约，不能直接当作实机深度相机像素。源码：[教师观测配置](wbt_training/config_values/terrain.py#L112)、[排序与噪声](https://github.com/amazon-far/holosoma/blob/4a0bf04cde5930af5ed59da797568d32be972525/src/holosoma/holosoma/managers/observation/manager.py#L130)、[观测物理定义](https://github.com/amazon-far/holosoma/blob/4a0bf04cde5930af5ed59da797568d32be972525/src/holosoma/holosoma/managers/observation/terms/wbt.py)、[height scanner](https://github.com/amazon-far/holosoma/blob/4a0bf04cde5930af5ed59da797568d32be972525/src/holosoma/holosoma/simulator/isaacsim/isaacsim.py#L464)。
 
 ### 3.2 动作怎样驱动物理机器人
 
@@ -250,7 +252,7 @@ q_target = q_default + clip(action, -100, 100)    # action_scale = 1
 
 Isaac 默认物理步长 0.005s，即 **200Hz physics**；decimation=4，因此 **50Hz policy/control**。一个动作保持四个物理步。Isaac 用 implicit actuator，由引擎求解 PD 与约束；部署 MuJoCo 的 500Hz physics 是后文另一条路径。
 
-电机 builder 用自然频率 `ω=20π`、阻尼比 `ζ=2` 和 nominal armature 计算 `Kp=Iω²`、`Kd=2ζIω`，并设置 effort/velocity limits。典型 hip pitch/yaw 的 Kp/Kd 约 40.179/2.558，hip roll/knee 约 99.098/6.309，ankle 约 28.501/1.814。[动作目标实现](thirdparty/holosoma/src/holosoma/holosoma/managers/action/terms/joint_control.py#L15)、[电机参数与关节顺序](wbt_training/config_values/robot_config.py)、[Isaac 步长](thirdparty/holosoma/src/holosoma/holosoma/config_values/simulator.py#L36)。
+电机 builder 用自然频率 `ω=20π`、阻尼比 `ζ=2` 和 nominal armature 计算 `Kp=Iω²`、`Kd=2ζIω`，并设置 effort/velocity limits。典型 hip pitch/yaw 的 Kp/Kd 约 40.179/2.558，hip roll/knee 约 99.098/6.309，ankle 约 28.501/1.814。[动作目标实现](https://github.com/amazon-far/holosoma/blob/4a0bf04cde5930af5ed59da797568d32be972525/src/holosoma/holosoma/managers/action/terms/joint_control.py#L15)、[电机参数与关节顺序](wbt_training/config_values/robot_config.py)、[Isaac 步长](https://github.com/amazon-far/holosoma/blob/4a0bf04cde5930af5ed59da797568d32be972525/src/holosoma/holosoma/config_values/simulator.py#L36)。
 
 ### 3.3 奖励来自哪里
 
@@ -272,7 +274,7 @@ Isaac 默认物理步长 0.005s，即 **200Hz physics**；decimation=4，因此 
 
 训练 episode 默认最长 10s；原生 eval 使用单独的 `eval_overrides`，默认 timeout 为 100000s，有界验收另由 `max_eval_steps` 结束。BadTracking 在以下任一条件成立时终止：参考 anchor **三维位置 L2** 误差 >0.5m；参考/机器人投影重力 **z 分量差绝对值 >0.8**；四个 ankle/wrist 指定 body 中任一个**三维位置 L2** 误差 >0.5m。0.8 是该重力分量阈值，不能当作 0.8rad 的四元数角。到达 motion 边界还可触发参考重采样，和物理失败终止分别统计。
 
-源码：[地形奖励与终止配置](wbt_training/config_values/terrain.py#L290)、[继承的奖励权重](thirdparty/holosoma/src/holosoma/holosoma/config_values/wbt/g1/reward.py)、[奖励公式](thirdparty/holosoma/src/holosoma/holosoma/managers/reward/terms/wbt.py#L32)、[RewardManager 的 dt 因子](thirdparty/holosoma/src/holosoma/holosoma/managers/reward/manager.py#L126)、[BadTracking](thirdparty/holosoma/src/holosoma/holosoma/managers/termination/terms/wbt.py#L59)。
+源码：[地形奖励与终止配置](wbt_training/config_values/terrain.py#L290)、[继承的奖励权重](https://github.com/amazon-far/holosoma/blob/4a0bf04cde5930af5ed59da797568d32be972525/src/holosoma/holosoma/config_values/wbt/g1/reward.py)、[奖励公式](https://github.com/amazon-far/holosoma/blob/4a0bf04cde5930af5ed59da797568d32be972525/src/holosoma/holosoma/managers/reward/terms/wbt.py#L32)、[RewardManager 的 dt 因子](https://github.com/amazon-far/holosoma/blob/4a0bf04cde5930af5ed59da797568d32be972525/src/holosoma/holosoma/managers/reward/manager.py#L126)、[BadTracking](https://github.com/amazon-far/holosoma/blob/4a0bf04cde5930af5ed59da797568d32be972525/src/holosoma/holosoma/managers/termination/terms/wbt.py#L59)。
 
 ### 3.4 PPO 的样本与 loss
 
@@ -299,7 +301,7 @@ L_critic = 1.0·L_value
 
 这里 value MSE 没有额外的 0.5 系数。Actor/critic 分别用 AdamW，weight decay=0，初始 LR=1e-3，grad norm clip=1。KL 目标为 0.01；过大则 LR÷1.5，过小则 LR×1.5，边界为 1e-5..1e-2。默认 symmetry=False，因此 mirror loss 不加入本次目标。Loss 的梯度更新网络参数，不经过 Isaac 物理 dynamics 反向传播。
 
-源码：[PPO rollout、GAE 与 update](thirdparty/holosoma/src/holosoma/holosoma/agents/ppo/ppo.py#L387)、[本项目默认超参](wbt_training/config_values/experiment.py#L81)。
+源码：[PPO rollout、GAE 与 update](https://github.com/amazon-far/holosoma/blob/4a0bf04cde5930af5ed59da797568d32be972525/src/holosoma/holosoma/agents/ppo/ppo.py#L387)、[本项目默认超参](wbt_training/config_values/experiment.py#L81)。
 
 ## 4. 深度学生：输入、在线 label 与两种学习方式
 
@@ -326,7 +328,7 @@ Projected gravity 是机器人实际 anchor quaternion 逆旋转重力向量所�
 
 最后归一化为 `(depth-0.3)/2.7-0.5`；加噪后没有最终 range clamp，不能保证所有值严格在 `[-0.5,0.5]`。Depth group 的外层 `enable_noise=False` 不关闭上述 term 内部的随机处理，默认 eval 也保留这些内部处理。
 
-源码：[学生观测/延迟配置](wbt_training/config_values/depth_distillation.py#L50)、[深度处理实现](thirdparty/holosoma/src/holosoma/holosoma/managers/observation/terms/depth.py#L202)、[相机参数](thirdparty/holosoma/src/holosoma/holosoma/sensors/warp/camera_config/d435i_depth_config.py)、[实际 CNN](thirdparty/holosoma/src/holosoma/holosoma/agents/modules/depth_backbone.py#L50)。
+源码：[学生观测/延迟配置](wbt_training/config_values/depth_distillation.py#L50)、[深度处理实现](https://github.com/amazon-far/holosoma/blob/4a0bf04cde5930af5ed59da797568d32be972525/src/holosoma/holosoma/managers/observation/terms/depth.py#L202)、[相机参数](https://github.com/amazon-far/holosoma/blob/4a0bf04cde5930af5ed59da797568d32be972525/src/holosoma/holosoma/sensors/warp/camera_config/d435i_depth_config.py)、[实际 CNN](https://github.com/amazon-far/holosoma/blob/4a0bf04cde5930af5ed59da797568d32be972525/src/holosoma/holosoma/agents/modules/depth_backbone.py#L50)。
 
 ### 4.2 教师 label 在学生访问的状态上生成
 
@@ -352,7 +354,7 @@ L_BC = mean_(batch,29)((student_mean - frozen_teacher_action)²)
 
 Adam、LR=3e-4、grad norm clip=1，更新学生 MLP 与 depth CNN。默认 warmup=0，因此学生从开始就驱动物理环境，教师只提供在线 label；初始采样 std=0.001，该 std 不在纯 DAgger 优化器中。纯模式没有实际 critic、GAE、PPO 或 entropy loss；环境 reward 用于日志。
 
-源码：[pure 配置](wbt_training/config_values/experiment.py#L253)、[采样与 MSE update](thirdparty/holosoma/src/holosoma/holosoma/agents/distillation/distillation.py#L267)。
+源码：[pure 配置](wbt_training/config_values/experiment.py#L253)、[采样与 MSE update](https://github.com/amazon-far/holosoma/blob/4a0bf04cde5930af5ed59da797568d32be972525/src/holosoma/holosoma/agents/distillation/distillation.py#L267)。
 
 ### 4.4 DAgger + PPO
 
@@ -372,7 +374,7 @@ Value loss 不乘 `c_i` 或 gate；默认非 warmup 分支从第 0 轮就训练 
 
 TensorBoard 的 `behavior` 记录 `mean[(1-h_n)d_n]`，没有乘最终 coefficient 10；部分 surrogate/entropy 日志也是未 gate 的原始均值，不能直接将曲线数值相加当作实际 total loss。
 
-源码：[混合采样、系数与 loss](thirdparty/holosoma/src/holosoma/holosoma/agents/distillation_ppo/distillation_ppo.py#L369)、[独立 critic evaluate](thirdparty/holosoma/src/holosoma/holosoma/agents/modules/student_teacher_modules.py#L470)、[masked BC](wbt_training/utils/student_teacher.py#L190)。
+源码：[混合采样、系数与 loss](https://github.com/amazon-far/holosoma/blob/4a0bf04cde5930af5ed59da797568d32be972525/src/holosoma/holosoma/agents/distillation_ppo/distillation_ppo.py#L369)、[独立 critic evaluate](https://github.com/amazon-far/holosoma/blob/4a0bf04cde5930af5ed59da797568d32be972525/src/holosoma/holosoma/agents/modules/student_teacher_modules.py#L470)、[masked BC](wbt_training/utils/student_teacher.py#L190)。
 
 ## 5. 本仓库额外的 residual-driven PPO gate
 
@@ -386,13 +388,13 @@ TensorBoard 的 `behavior` 记录 `mean[(1-h_n)d_n]`，没有乘最终 coefficie
 
 因此默认 gate 范围为 `[0.5,1]`，在 `c=0.9` 后有效 PPO 权重为 0.45..0.9。较容易模仿的相位保留更多 BC；高残差相位给予更多 reward 优化压力。当前 bin 表按全局合并帧轴建立，未给 clip/expert 边界做隔离。
 
-Gate EMA/counters 是 detached 统计，当前不进入网络 checkpoint；BaseTask 的 env state 为空，common step/curriculum 进度也不恢复。Resume 能恢复模型、优化器和迭代调度，但 gate 会重新 warm up，curriculum common step 从零开始；它不保证完整统计状态或随机序列的精确续接。当前长训练保持冻结源码，未为写本文修改正在训练的 sampler。
+Gate EMA/counters 是 detached 统计，当前不进入网络 checkpoint；BaseTask 的 env state 为空，common step/curriculum 进度也不恢复。Resume 能恢复模型、优化器和迭代调度，但 gate 会重新 warm up，curriculum common step 从零开始；它不保证完整统计状态或随机序列的精确续接。此次已完成的官方长训练全程保持冻结源码，写本文时没有修改其sampler。
 
-源码：[gate 配置](wbt_training/config_values/depth_distillation.py#L216)、[EMA、分位数、向前取 max 与 gather](wbt_training/config_values/motion_command.py#L99)、[save/load 字段](thirdparty/holosoma/src/holosoma/holosoma/agents/distillation_ppo/distillation_ppo.py#L849)、[BaseTask env state](thirdparty/holosoma/src/holosoma/holosoma/envs/base_task/base_task.py#L217)。
+源码：[gate 配置](wbt_training/config_values/depth_distillation.py#L216)、[EMA、分位数、向前取 max 与 gather](wbt_training/config_values/motion_command.py#L99)、[save/load 字段](https://github.com/amazon-far/holosoma/blob/4a0bf04cde5930af5ed59da797568d32be972525/src/holosoma/holosoma/agents/distillation_ppo/distillation_ppo.py#L849)、[BaseTask env state](https://github.com/amazon-far/holosoma/blob/4a0bf04cde5930af5ed59da797568d32be972525/src/holosoma/holosoma/envs/base_task/base_task.py#L217)。
 
 ## 6. 从 PT 导出到 ONNX，再到关节控制
 
-教师 ONNX 与学生 ONNX 的契约不同。默认教师输入为 `obs(1,449)`（no-heightscan为`(1,160)`）、`time_step(1,1)`，输出 `actions(1,29)`、参考 `joint_pos/joint_vel(1,29)`、`ref_pos_xyz(1,3)`、`ref_quat_xyzw(1,4)`。教师 exporter 内嵌**整个合并 reference**，每帧 65 个 float32；正式 locomotion 的 71042×64=4546688 帧仅这些常量就占 1182138880 bytes，解释了约 1.18GB 的图文件。体积主要来自轨迹表，不能用来推断策略网络参数量。[教师 exporter](thirdparty/holosoma/src/holosoma/holosoma/utils/inference_helpers.py#L151)、[实际图与常量检查](usage_assets/reports/technical-audit/teacher-export-contract.json)。
+教师 ONNX 与学生 ONNX 的契约不同。默认教师输入为 `obs(1,449)`（no-heightscan为`(1,160)`）、`time_step(1,1)`，输出 `actions(1,29)`、参考 `joint_pos/joint_vel(1,29)`、`ref_pos_xyz(1,3)`、`ref_quat_xyzw(1,4)`。教师 exporter 内嵌**整个合并 reference**，每帧 65 个 float32；正式 locomotion 的 71042×64=4546688 帧仅这些常量就占 1182138880 bytes，解释了约 1.18GB 的图文件。体积主要来自轨迹表，不能用来推断策略网络参数量。[教师 exporter](https://github.com/amazon-far/holosoma/blob/4a0bf04cde5930af5ed59da797568d32be972525/src/holosoma/holosoma/utils/inference_helpers.py#L151)、[实际图与常量检查](usage_assets/reports/technical-audit/teacher-export-contract.json)。
 
 学生部署使用两个 ONNX 文件组成一条策略：depth backbone 把深度图编码成32维latent，student MLP把该latent与状态、指令一起映射到29维动作。它们不是两种可切换策略。`DepthDistillationPolicy` 校验恰好两个路径，两个session都使用 `CPUExecutionProvider`。
 
@@ -405,7 +407,7 @@ Gate EMA/counters 是 detached 统计，当前不进入网络 checkpoint；BaseT
 
 student的辅助输出为joint_pos/vel `(1,29)`，body_pos/lin_vel/ang_vel `(1,32,3)`、body_quat `(1,32,4)`；这里辅助四元数来自运行时数组，为 `xyzw`。当前exporter只嵌第一段reference。两种图的 `time_step` 都从 float32 转成整数并做参考表上界截断，只决定辅助 reference 输出，action 分支由 obs 计算。部署每tick给time_step=0，只用返回的第0项actions。reference输出不是控制器要求机器人逐帧replay的轨迹，也不能证明原片段覆盖。
 
-源码：[exporter.py:69–127](wbt_training/utils/exporter.py#L69)；[depth_distillation.py:189–258,483–520](thirdparty/holosoma/src/holosoma_inference/holosoma_inference/policies/depth_distillation.py#L189)。
+源码：[exporter.py:69–127](wbt_training/utils/exporter.py#L69)；[depth_distillation.py:189–258,483–520](https://github.com/amazon-far/holosoma/blob/4a0bf04cde5930af5ed59da797568d32be972525/src/holosoma_inference/holosoma_inference/policies/depth_distillation.py#L189)。
 
 部署输入的精确顺序如下。范围为Python半开区间；不能按旧发布metadata的声明顺序重排。
 
@@ -421,7 +423,7 @@ student的辅助输出为joint_pos/vel `(1,29)`，body_pos/lin_vel/ang_vel `(1,3
 
 前五项共93维；训练actor还含15维command，共108维，追加32维latent后为140。训练ObservationManager按名称字母序拼接；部署列表预先对齐，并关闭再次排序。当前发布ONNX的observation_names仍是旧声明顺序；本分支新exporter已写真实排序。
 
-源码：[depth_distillation.py:50–87](wbt_training/config_values/depth_distillation.py#L50)；[manager.py:159–171](thirdparty/holosoma/src/holosoma/holosoma/managers/observation/manager.py#L159)；[observation.py:177–218](thirdparty/holosoma/src/holosoma_inference/holosoma_inference/config/config_values/observation.py#L177)。
+源码：[depth_distillation.py:50–87](wbt_training/config_values/depth_distillation.py#L50)；[manager.py:159–171](https://github.com/amazon-far/holosoma/blob/4a0bf04cde5930af5ed59da797568d32be972525/src/holosoma/holosoma/managers/observation/manager.py#L159)；[observation.py:177–218](https://github.com/amazon-far/holosoma/blob/4a0bf04cde5930af5ed59da797568d32be972525/src/holosoma_inference/holosoma_inference/config/config_values/observation.py#L177)。
 
 29关节接口顺序为左腿6、右腿6、腰3、左臂7、右臂7。G1 preset的joint2motor/motor2joint是identity；模型顺序则以ONNX joint_names为准，policy构造robot→model与model→robot双向索引。观测q/dq进model order，上一action留在model order，发命令前再重排，向量action_scale也同步重排。当前发布权重CPU检查为identity，不应推断任意自定义模型也一样。
 
@@ -430,7 +432,7 @@ metadata读取与配置优先级有两个重要边界：
 - action_scale可为scalar或29维；KP/KD可读kp/kd或joint_stiffness/damping，但robot preset显式KP/KD优先。
 - `default_joint_pos`虽写在ONNX metadata里，当前部署policy没有自动采纳；观测减、命令加的默认角都来自robot preset。当前发布权重逐项相等，换自定义训练姿态时必须一起对齐preset。
 
-源码：[depth_distillation.py:256–340](thirdparty/holosoma/src/holosoma_inference/holosoma_inference/policies/depth_distillation.py#L256)；`.../policies/base.py:70–79,458–498,587,743–746`。可选joint_offsets_deg只在命令侧转rad后相加，默认未设；它不是自动标定程序。
+源码：[depth_distillation.py:256–340](https://github.com/amazon-far/holosoma/blob/4a0bf04cde5930af5ed59da797568d32be972525/src/holosoma_inference/holosoma_inference/policies/depth_distillation.py#L256)；`.../policies/base.py:70–79,458–498,587,743–746`。可选joint_offsets_deg只在命令侧转rad后相加，默认未设；它不是自动标定程序。
 
 每个50Hz策略tick执行：读state → 构造140维输入 → 两个CPU ONNX → actions clip[-100,100] → joint映射与scale → `q_target=action_scaled+default_angles+joint_offsets` → DDS lowcmd。cmd_dq和cmd_tau默认零，网络输出的是关节位置增量，不是29个直接扭矩。
 
@@ -442,11 +444,11 @@ tau = clip(tau_ff + Kp * (q_target - q) + Kd * (dq_target - dq), ±torque_limit)
 
 KP/KD由preset公式 `Kp=armature*ω²`、`Kd=2*ζ*armature*ω`给定，ω约62.83rad/s、ζ=2。Isaac训练使用implicit position actuator；MuJoCo用bridge显式PD。配置一致不意味着物理驱动器频响、实际力矩或两模拟器动态完全相同。
 
-源码：[robot_config.py:118–131](wbt_training/config_values/robot_config.py#L118)；[robot.py:237–260](thirdparty/holosoma/src/holosoma_inference/holosoma_inference/config/config_values/robot.py#L237)；[basic_sdk2py_bridge.py:104–108](thirdparty/holosoma/src/holosoma/holosoma/bridge/base/basic_sdk2py_bridge.py#L104)。
+源码：[robot_config.py:118–131](wbt_training/config_values/robot_config.py#L118)；[robot.py:237–260](https://github.com/amazon-far/holosoma/blob/4a0bf04cde5930af5ed59da797568d32be972525/src/holosoma_inference/holosoma_inference/config/config_values/robot.py#L237)；[basic_sdk2py_bridge.py:104–108](https://github.com/amazon-far/holosoma/blob/4a0bf04cde5930af5ed59da797568d32be972525/src/holosoma/holosoma/bridge/base/basic_sdk2py_bridge.py#L104)。
 
 DDS接口为G1/HG/PR路径。早期`far-unitree-sdk==0.1.6`只读wheel审计确认`unitree_hg::msg::dds_::LowCmd_`、`LowState_`及`rt/lowcmd`、`rt/lowstate`字面量；preset配置29个活动motor，不是HG wire类型全部槽都参与策略。当前主Docker约束与新统一镜像使用0.1.8，train/inference两份实际原生扩展SHA已核对，五配置native闭环正常退出；旧wheel审计保留原版本语义，不冒充新wheel逐字节审计。当前网卡为lo，物理网络与固件执行周期没有本次实测。[新SDK与原生证据](usage_assets/reports/sdk018-native-pilot/summary.md)、[新统一镜像](usage_assets/reports/sdk018-canonical-offline/summary.md)。
 
-源码：[unitree_interface.py:26–39,66–103](thirdparty/holosoma/src/holosoma_inference/holosoma_inference/sdk/unitree/unitree_interface.py#L26)。task默认domain0，但Pythoncreate_robot实际只传网卡、robot type和message type；不能把任意domain_id变更说成已验。
+源码：[unitree_interface.py:26–39,66–103](https://github.com/amazon-far/holosoma/blob/4a0bf04cde5930af5ed59da797568d32be972525/src/holosoma_inference/holosoma_inference/sdk/unitree/unitree_interface.py#L26)。task默认domain0，但Pythoncreate_robot实际只传网卡、robot type和message type；不能把任意domain_id变更说成已验。
 
 自动场景测试现在还支持`--reference-motion`，批量入口对应`--reference-commands`。[输入读取器](scripts/research/reference_commands.py)读取生成NPZ中的50Hz、`vel_cmd:[T,15]`，原样送入上述观测的93:108槽位；标签来自场景生成器，不由策略预测。每帧以整数物理step锚定，每10个500Hz物理步调用一次50Hz原生策略；输入前后都核对完整one-hot及策略启用状态，深度超时转入站立保护不能计为完成帧。`--reference-spawn`仅在初始化时对齐参考首帧根XY/yaw，保留部署站姿，随后由物理动力学决定根轨迹和关节运动；它不读取参考关节角来驱动物理机器人。释放吊架的step与首个策略step分别记录，不能认为两者恰好同时。
 
@@ -466,7 +468,7 @@ DDS接口为G1/HG/PR路径。早期`far-unitree-sdk==0.1.6`只读wheel审计确�
 
 官方preset使用`g1/main_mesh_arm_collision_halfspherehand.urdf`，IsaacLab运行时转换为USD；MuJoCo使用独立`g1/g1_29dof_halfspherehand.xml`。CPU静态XML检查确认两者活动关节都是29、名称集合一致；声明质量总和约33.249142022kg与33.591142kg。URDF固定head/logo合并影响逐link比较，wrist_yaw质量也有不同声明。这不是转换后USD或真实机器人质量测量，不能称两模拟器完全相同动力学。
 
-源码：[experiment.py:100–117](wbt_training/config_values/experiment.py#L100)；[isaacsim.py:346–379](thirdparty/holosoma/src/holosoma/holosoma/simulator/isaacsim/isaacsim.py#L346)；[run_php_sim.sh:32–39](run_php_sim.sh#L32)。静态明细：[URDF/MJCF 静态明细](usage_assets/reports/technical-audit/asset-description-inspection.json)。
+源码：[experiment.py:100–117](wbt_training/config_values/experiment.py#L100)；[isaacsim.py:346–379](https://github.com/amazon-far/holosoma/blob/4a0bf04cde5930af5ed59da797568d32be972525/src/holosoma/holosoma/simulator/isaacsim/isaacsim.py#L346)；[run_php_sim.sh:32–39](run_php_sim.sh#L32)。静态明细：[URDF/MJCF 静态明细](usage_assets/reports/technical-audit/asset-description-inspection.json)。
 
 | 边界 | 约定 |
 | --- | --- |
@@ -476,13 +478,13 @@ DDS接口为G1/HG/PR路径。早期`far-unitree-sdk==0.1.6`只读wheel审计确�
 | SDK IMU | wxyz quaternion与body-frame gyro |
 | c键交互录制 | wxyz+XYZ+29 joints，与native qpos不同 |
 
-源码：[motion_convert.py:87–108](wbt_training/training_runs/motion_convert.py#L87)；[mujoco.py:1102–1125](thirdparty/holosoma/src/holosoma/holosoma/simulator/mujoco/mujoco.py#L1102)；`.../bridge/base/basic_sdk2py_bridge.py:286–315`。
+源码：[motion_convert.py:87–108](wbt_training/training_runs/motion_convert.py#L87)；[mujoco.py:1102–1125](https://github.com/amazon-far/holosoma/blob/4a0bf04cde5930af5ed59da797568d32be972525/src/holosoma/holosoma/simulator/mujoco/mujoco.py#L1102)；`.../bridge/base/basic_sdk2py_bridge.py:286–315`。
 
 SDK adapter的root XYZ和linear velocity是零占位。当前学生不消费这两项，但c键录制不含可用的世界根轨迹，不能直接当native训练bundle；研究MuJoCo trajectory CSV另从simulator读真实world root。可选odometry默认关闭，也未自动替换这两个字段。
 
 IMU frame尚有实机待核对处：policy注释说硬件IMU在torso、模拟floating base在pelvis，实际_get_anchor_quat总是再乘waist yaw/roll/pitch。若物理SDK已给torso quat则可能重复chaining；若给pelvis则合理。本次模拟root/bridge为pelvis，不能据此确定物理消息frame。需要真实消息和腰部静态动作校准，本文不将条件性疑点写成已确认故障。
 
-源码：[unitree_interface.py:45–64](thirdparty/holosoma/src/holosoma_inference/holosoma_inference/sdk/unitree/unitree_interface.py#L45)；`.../policies/depth_distillation.py:342–379,434–470`。
+源码：[unitree_interface.py:45–64](https://github.com/amazon-far/holosoma/blob/4a0bf04cde5930af5ed59da797568d32be972525/src/holosoma_inference/holosoma_inference/sdk/unitree/unitree_interface.py#L45)；`.../policies/depth_distillation.py:342–379,434–470`。
 
 ### 深度的模型、传输与时钟
 
@@ -490,13 +492,13 @@ IMU frame尚有实机待核对处：policy注释说硬件IMU在torso、模拟flo
 
 基本预处理为：metric clip[.3,3]m → crop top2、left/right4得58×98 → bicubic antialias resize58×87 →只clamp far、<.15m视作empty设far → `(depth−.3)/2.7−.5`。near侧bicubic undershoot可能保留，训练噪声也可越出名义[-.5,.5]。MuJoCo camera frustum near=.1m保留近处几何，之后metric clamp；不能用frustum near=.3替代它。
 
-源码：[d435i_depth_config.py:16–59](thirdparty/holosoma/src/holosoma/holosoma/sensors/warp/camera_config/d435i_depth_config.py#L16)；`.../config_values/wbt/g1/sensor.py:139–168`；`.../managers/observation/terms/depth.py:272–297,364–366`；`.../simulator/plugins/depth_shm_plugin.py:332–364`。
+源码：[d435i_depth_config.py:16–59](https://github.com/amazon-far/holosoma/blob/4a0bf04cde5930af5ed59da797568d32be972525/src/holosoma/holosoma/sensors/warp/camera_config/d435i_depth_config.py#L16)；`.../config_values/wbt/g1/sensor.py:139–168`；`.../managers/observation/terms/depth.py:272–297,364–366`；`.../simulator/plugins/depth_shm_plugin.py:332–364`。
 
 MuJoCo depth插件独立线程默认10Hz渲染，写`depth_img_shm`：float32 `(1,1,58,87)`，**20184 bytes**。50Hz策略反复读最近一帧；消费者只校验尺寸并copy，不再预处理或采集硬件。实际发布backbone rank3表示单帧，不能因config depth history=3就称模型使用三帧输入。
 
 心跳为独立ZMQ `ipc:///tmp/depth_img_shm.heartbeat`，只有seq/state等liveness信息，没有图像capture timestamp。收到心跳后，seq停滞.25s警告、.5s或FAILED进入stiff hold；producer重启seq倒退会重新attach。首次心跳从未到达时仅警告、保持unchecked。它不是端到端延迟测量，也没有图像seqlock原子快照协议。
 
-源码：[plugin.py:402–477](thirdparty/holosoma/src/holosoma/holosoma/config_types/plugin.py#L402)；[depth_shm.py:88–160](thirdparty/holosoma/src/holosoma_inference/holosoma_inference/sensors/depth_shm.py#L88)；`.../sensors/depth_heartbeat.py:158–168`；`.../policies/depth_distillation.py:604–641`。
+源码：[plugin.py:402–477](https://github.com/amazon-far/holosoma/blob/4a0bf04cde5930af5ed59da797568d32be972525/src/holosoma/holosoma/config_types/plugin.py#L402)；[depth_shm.py:88–160](https://github.com/amazon-far/holosoma/blob/4a0bf04cde5930af5ed59da797568d32be972525/src/holosoma_inference/holosoma_inference/sensors/depth_shm.py#L88)；`.../sensors/depth_heartbeat.py:158–168`；`.../policies/depth_distillation.py:604–641`。
 
 时钟需要分别看：
 
@@ -504,7 +506,7 @@ MuJoCo depth插件独立线程默认10Hz渲染，写`depth_img_shm`：float32 `(
 - MuJoCo启动器physics500Hz、policy目标50Hz；交互policy按wall-clock Rate.sleep。研究headless矩阵用sim-clock/ACK每.02sim秒控制并分别记录wall/sim duration。
 - 训练depth延迟随机3或4控制帧，名义60/80ms；模拟plugin latency_frames默认0，若设1代表10Hz渲染帧的100ms，二者不是同一个计数单位。
 
-源码：[simulator.py:36–55](thirdparty/holosoma/src/holosoma/holosoma/config_values/simulator.py#L36)；`.../managers/command/terms/wbt.py:90,1000–1014`；[sim2sim.py:200–215](scripts/research/sim2sim.py#L200)；[depth_distillation.py:124–146](wbt_training/config_values/depth_distillation.py#L124)。
+源码：[simulator.py:36–55](https://github.com/amazon-far/holosoma/blob/4a0bf04cde5930af5ed59da797568d32be972525/src/holosoma/holosoma/config_values/simulator.py#L36)；`.../managers/command/terms/wbt.py:90,1000–1014`；[sim2sim.py:200–215](scripts/research/sim2sim.py#L200)；[depth_distillation.py:124–146](wbt_training/config_values/depth_distillation.py#L124)。
 
 ### 哪些随机化已实现，哪些未标定
 
@@ -521,11 +523,11 @@ MuJoCo depth插件独立线程默认10Hz渲染，写`depth_img_shm`：float32 `(
 
 startup default pose bias同时修改qtarget中心与观测`q−default`基准，不改simulator raw encoder读数。部署joint_offsets则只改命令侧。二者都不代表本次发现或校准了实体编码器误差。
 
-源码：[terrain.py:200–284](wbt_training/config_values/terrain.py#L200)；[locomotion.py:299–352](thirdparty/holosoma/src/holosoma/holosoma/managers/randomization/terms/locomotion.py#L299)；`.../managers/action/terms/joint_control.py:96`；`.../managers/observation/terms/wbt.py:94`；`.../managers/observation/terms/depth.py:103–120,299–354`。
+源码：[terrain.py:200–284](wbt_training/config_values/terrain.py#L200)；[locomotion.py:299–352](https://github.com/amazon-far/holosoma/blob/4a0bf04cde5930af5ed59da797568d32be972525/src/holosoma/holosoma/managers/randomization/terms/locomotion.py#L299)；`.../managers/action/terms/joint_control.py:96`；`.../managers/observation/terms/wbt.py:94`；`.../managers/observation/terms/depth.py:103–120,299–354`。
 
 原生eval不会自动关闭actor的外层uniform noise；实测official pilot eval保存配置也仍True。teacher_obs/critic/depth group本来False，但depth内部augmentation没有group gate。研究eval固定training seed42和obstacle_seed42；它仍逐tick抽样，且torch_deterministic默认False，不能称无噪声或跨硬件bitwise确定性。
 
-源码：[experiment.py:213–246](thirdparty/holosoma/src/holosoma/holosoma/config_types/experiment.py#L213)；`.../managers/observation/manager.py:140`；`.../utils/common.py:93–112`；[eval_quality.sh:24–25](scripts/research/eval_quality.sh#L24)；证据 [actual-eval-config.yaml:247](usage_assets/reports/official-pilot-quality/actual-eval-config.yaml#L247)。
+源码：[experiment.py:213–246](https://github.com/amazon-far/holosoma/blob/4a0bf04cde5930af5ed59da797568d32be972525/src/holosoma/holosoma/config_types/experiment.py#L213)；`.../managers/observation/manager.py:140`；`.../utils/common.py:93–112`；[eval_quality.sh:24–25](scripts/research/eval_quality.sh#L24)；证据 [actual-eval-config.yaml:247](usage_assets/reports/official-pilot-quality/actual-eval-config.yaml#L247)。
 
 ### 本次到达的边界
 
@@ -535,7 +537,7 @@ startup default pose bias同时修改qtarget中心与观测`q−default`基准�
 
 真机仍需实际网卡、外部D435i producer/DepthSensor注入、外参/IMU frame与控制参数核对。PHP启动器使用lo与MuJoCo深度插件；仓库没有本次已验的真实D435i采集/标定流水线。未测物理mass/inertia、电机动态、地面摩擦与完整sensor-to-actuator时延。上游普通G1 WBT真机workflow存在，不替代本PHP depth student实机验证。
 
-证据：`usage_assets/reports/sim2sim-scene-matrix.json`、`usage_assets/sim2sim/scenarios/`、`usage_assets/reports/official-pilot-quality/summary.json`、`usage_assets/reports/official-pilot-local-quality/summary.json`。真机接口源码：[run_php_sim.sh:32–39](run_php_sim.sh#L32)、[run_php_inference.sh:59–63](run_php_inference.sh#L59)、[depth_distillation.py:158–186](thirdparty/holosoma/src/holosoma_inference/holosoma_inference/policies/depth_distillation.py#L158)。
+证据：`usage_assets/reports/sim2sim-scene-matrix.json`、`usage_assets/sim2sim/scenarios/`、`usage_assets/reports/official-pilot-quality/summary.json`、`usage_assets/reports/official-pilot-local-quality/summary.json`。真机接口源码：[run_php_sim.sh:32–39](run_php_sim.sh#L32)、[run_php_inference.sh:59–63](run_php_inference.sh#L59)、[depth_distillation.py:158–186](https://github.com/amazon-far/holosoma/blob/4a0bf04cde5930af5ed59da797568d32be972525/src/holosoma_inference/holosoma_inference/policies/depth_distillation.py#L158)。
 
 ## 8. 目前实现到了哪里，怎样判断复现完成
 
@@ -572,12 +574,12 @@ startup default pose bias同时修改qtarget中心与观测`q−default`基准�
 
 | 项目 | 已执行的范围 | 当前结论 |
 | --- | --- | --- |
-| 统一容器与云端同步 | 一个镜像、本地/云端相同 Config/RootFS 指纹、完整镜像离线传输、内容校验源码快照、SSH 密钥登录 | 环境与传输已验证；主机和服务器未安装项目依赖 |
+| 统一容器与云端同步 | 一个镜像、本地/云端相同 Config/RootFS 指纹、完整镜像离线传输、内容校验源码快照、SSH 密钥登录 | 首版环境与传输已验证；SDK0.1.8已在本地接入，云端默认切换仍待888终态；主机和服务器未安装项目依赖 |
 | 动作生成 | 17 场景、629 配置，28 个独立 traversal executor；公开资产 296 对 native 数据 | 运动学生成与格式通路通过，不等于策略学会全部技能 |
 | 原生训练接口 | 既有22/22有界阶段、13次权重检查；另6次真实teacher/pure/finetune baseline与resume | 加载、优化器连续更新、TensorBoard、ONNX、skip通过；smoke不代表官方日程或收敛完成 |
-| 正式训练 | 五教师各 20000 轮、纯学生 10000、混合学生 30000 的原顺序日程 | 五教师5/5均完成20000轮及最终CPU验收；纯学生在训，混合学生未完成，16阶段日程、官方物理评估与最终模型闭环未完成 |
+| 正式训练 | 五教师各 20000 轮、纯学生 10000、混合学生 30000 的原顺序日程 | 五教师各20000、纯学生10000、混合学生30000轮均完成；16阶段manifest均passed/returncode0；七项有界评估191段视频完整核验，最终模型逐源/闭环后验正在继续 |
 | 云端 PT 回传本地 | iteration 19 pilot 与正式 iteration 500 都真实加载，在 16GiB 卡运行 64env×250step | 模型传输与 Isaac 推理通路通过；两次均 `quality_verified=false` |
-| 逐原始源片段验收 | 296 对输入逐项校验、后续116项目标CPU回归；原3次Isaac尝试加新RO资产合同1次实测 | teacher500为158策略步，两种student smoke各21步后失败；0片段完成，尚未跑完296源×三策略 |
+| 逐原始源片段验收 | 296 对输入逐项校验、七个最终 PT 与三套 296 源 CPU 预检均通过；888 次正式首次尝试正在运行 | 历史 pilot 的未完成记录保留；最终教师新增一例平地 488 策略步和一例低台阶 503 策略步到达原生边界，[平地原片](usage_assets/reports/reproduction-20261015/source888-first-boundary-preview/README.md)与[低台阶原片](usage_assets/reports/reproduction-20261015/source888-first-lowstep-boundary-preview/README.md)均不代表完整障碍课程成功 |
 | 发布学生的固定指令 sim2sim | 原生 ONNX、DDS、深度 SHM、PD；12个有效command及17场景全部629配置的恒定前进扫描 | 新SDK12command的24worker/12视频通过；恒定前进全629原始rollout、1258worker及629全片解码也通过，[完整结果](usage_assets/reports/sim2sim-full629-sdk018-recovered/index.md)保留全部阈值事件，未确认技能成功 |
 | 全部生成几何的恒定前进扫描 | 原629全部完成，另四例独立补跑，共633次attempt／629唯一配置 | 原宿主会话143与8个观察缺口保留；1250原host映射加8个独立新映射分别保存；139例高度/倾斜事件，490例未触发，不解释为通关率 |
 | 发布学生的参考指令逐帧扫描 | 17场景、629配置，342,651帧；50Hz参考指令时长6,853.02秒 | [完整结果](usage_assets/reports/reference629-full/playback.html)通过1258正常worker、1258宿主映射及629全片解码；321例高度/倾斜事件、308例未触发，quality/course均false，不是自训学生验收 |
@@ -588,19 +590,19 @@ startup default pose bias同时修改qtarget中心与观测`q−default`基准�
 
 独立的 [逐源片段工具](scripts/research/eval_source_coverage.py) 将原始 `source_clip_id`、原训练 expert 和 singleton native expert 分开记录：每个源复制为一个本地 bundle，生成一份地形变体，保留实际 native NPZ/OBJ/YAML、逐步参考帧、失败标志、动作、误差、录像和 TensorBoard。原始296个NPZ都没有存储 `motion_idxs` / `motion_ends`；合并时才补上本地 expert0 和最后一帧边界。`plan/preflight` 只做 CPU 检查，`run` 逐片段运行，首次失败/超时/边界即停。原生两次零动作 warmup 与策略控制分列，真正策略参考帧为 `1..T-2`，frame0与最后的边界标记不伪称被策略控制。
 
-正式模型后的 [自动衔接](scripts/research/posttrain_coverage.py) 等待全部官方训练、质量评估和导出结束，核验七个PT的迭代、环境数、variant、seed和算法；学生内嵌五专家的完整MLP和观测normalizer还须逐tensor等于对应最终教师。随后才准备三套296源计划，并在固定GPU空闲时执行888个首次尝试。61项CPU调度回归及实际smoke模型的专家格式核验已通过；七个正式模型尚未齐备，不能把这项准备工作记作888次完成。[检查证据](usage_assets/reports/posttrain-monitor/summary.md)。
+正式模型后的 [自动衔接](scripts/research/posttrain_coverage.py) 等待全部官方训练、质量评估和导出结束，核验七个PT的迭代、环境数、variant、seed和算法；学生内嵌五专家的完整MLP和观测normalizer还须逐tensor等于对应最终教师。随后才准备三套296源计划，并在固定GPU空闲时执行888个首次尝试。61项CPU调度回归及实际smoke模型的专家格式核验已通过；七个正式模型已训练完毕，2026-10-15真实七PT与三套296源CPU预检均已通过，原CPU容器自然退出0；固定GPU容器已启动，尚无完整888次终态，准确状态见[本次记录](usage_assets/reports/reproduction-20261015/index.md)。[检查证据](usage_assets/reports/posttrain-monitor/summary.md)。
 
-等待进程现已实际升级至独立的02bc源码快照，使用新的RO资产合同和coverage输出目录，PID4074213；只停止身份核验过的旧waiting进程，正式训练的容器/镜像/源码挂载及训练进程出生身份前后均未变。它仍等待原五教师/两学生driver完成，没有额外云GPU任务。[本次升级回执](usage_assets/reports/posttrain-monitor-ro-assets-v2/summary.md)与[最初部署历史](usage_assets/reports/posttrain-monitor-deployment/summary.md)分别保留，代码准备、启动成功与策略质量分别验收。
+历史等待进程于2026-10-10升级至独立的02bc源码快照，使用新的RO资产合同和coverage输出目录，PID4074213；只停止身份核验过的旧waiting进程，正式训练的容器/镜像/源码挂载及训练进程出生身份前后均未变。该旧进程于2026-10-15因Docker缺失容器诊断的大小写差异退出。本次独立host恢复控制器已启动，沿用原冻结科学源码、selection和输出目录；旧失败原件保留，实际CPU准备和后续GPU首次尝试见[当前恢复记录](usage_assets/reports/reproduction-20261015/index.md)。[本次升级回执](usage_assets/reports/posttrain-monitor-ro-assets-v2/summary.md)与[最初部署历史](usage_assets/reports/posttrain-monitor-deployment/summary.md)分别保留，代码准备、启动成功与策略质量分别验收。
 
-正式部署模型还有独立的[选择性回传入口](scripts/research/pull_final_students.py)：输入是16阶段manifest、七个最终PT身份、有序专家证明与已成功CPU容器的回执，输出为两组学生ONNX及原始来源JSON。它不传教师图或PT，也不更新模型参数；只允许字节/SHA一致的显式文件集合。原57项CPU检查和真实waiting检查保留为[历史证据](usage_assets/reports/final-student-transfer/summary.md)。后续入口已对准02bc源码和`coverage-official-final-ro-assets-v2`，新增目录、来源和schema2共享资产合同检查；77/77 Docker CPU测试通过，10:19 UTC真实SSH检查仍为waiting、16阶段阻塞、未开始回传。[新版本和真实响应](usage_assets/reports/final-student-transfer-ro-assets-integration/summary.md)。最终模型不存在时不创建目的目录。最终两学生还需分别实际执行CPU ORT、本地12个有效指令及17个代表地形；公开ONNX的扫描不能作为自训策略验证。
+正式部署模型还有独立的[选择性回传入口](scripts/research/pull_final_students.py)：输入是16阶段manifest、七个最终PT身份、有序专家证明与已成功CPU容器的回执，输出为两组学生ONNX及原始来源JSON。它不传教师图或PT，也不更新模型参数；只允许字节/SHA一致的显式文件集合。原57项CPU检查和真实waiting检查保留为[历史证据](usage_assets/reports/final-student-transfer/summary.md)。后续入口已对准02bc源码和`coverage-official-final-ro-assets-v2`，新增目录、来源和schema2共享资产合同检查；77/77 Docker CPU测试及2026-10-10 10:19 UTC的waiting属于[当时记录](usage_assets/reports/final-student-transfer-ro-assets-integration/summary.md)。本次七个最终PT后验已通过，32文件实际回传完成，两学生共60项ORT与默认姿态检查通过；[原件与四个模型恢复包](usage_assets/reports/reproduction-20261015/student-transfer-cpu-actual-02/README.md)保留旧等待器的跨boot失败。原生58例及各629配置仍须实际完成，公开ONNX扫描不能替代。
 
-首次真实尝试发现 WBT 的 `reset_all → init_buffers` 清零 relative body target，下一步却先 termination/reward/log、后 `command.step` 刷新目标；这使三个片段在策略开始前误终止。独立工具仅在 warmup 前提取原生 `MotionCommand.step` 的同一对齐公式，刷新两个缓存，保留公式/文件 SHA 和缓存前后值，并核对时间、采样 ID、边界及 RNG 不变。没有推进后回写时钟或放宽失败条件，也没有更换云端训练源码。修复后相同PT和完整源进入158/21/21个实际策略步，随后真正跟踪失败，尚无片段完成。[前后真实结果与原生公式推导](usage_assets/reports/source-coverage-pilot/summary.md)。旧64env报告统计的是策略阶段，不含这些warmup误终止；其原始数值保留。
+首次真实尝试发现 WBT 的 `reset_all → init_buffers` 清零 relative body target，下一步却先 termination/reward/log、后 `command.step` 刷新目标；这使三个片段在策略开始前误终止。独立工具仅在 warmup 前提取原生 `MotionCommand.step` 的同一对齐公式，刷新两个缓存，保留公式/文件 SHA 和缓存前后值，并核对时间、采样 ID、边界及 RNG 不变。没有推进后回写时钟或放宽失败条件，也没有更换云端训练源码。修复后相同PT和完整源进入158/21/21个实际策略步，随后真正跟踪失败；这是旧iter500/smoke pilot的0片段完成记录，当前最终教师的单源边界完成另见本文开头。[前后真实结果与原生公式推导](usage_assets/reports/source-coverage-pilot/summary.md)。旧64env报告统计的是策略阶段，不含这些warmup误终止；其原始数值保留。
 
-CPU 测试也保留实际边界：根目录/训练 289 项通过；motion matching 213 项通过、12 个历史 raw-hash 比较失败，未跳过或重写 golden。基线比较中 36 个语义数组逐字节一致，九项不变量通过；仍不能将该 legacy suite 写成全绿。详细原始测试与基线差异见 [usage 的测试记录](usage.md#8-全量测试同步与结果来源)。
+CPU 测试也保留实际边界：本次根目录/训练863项、inference键盘23项通过，motion matching217项通过、12个历史raw-hash比较失败，未跳过或重写golden。历史首版289/213计数与本次结果分别记录。基线比较中 36 个语义数组逐字节一致，九项不变量通过；仍不能将该 legacy suite 写成全绿。详细原始测试与基线差异见 [usage 的测试记录](usage.md#8-全量测试同步与结果来源)。
 
 用户已答复“没有”原始 motion_matching/mm_hs/FAR-pi 环境或历史参考输出。12项历史 raw-hash 失败继续保留，未刷新 golden 或跳过用例；现有原版/研究版数组对照不能替代缺失的历史基线。
 
-后续需要等七个正式模型实际训练结束，核验最终 PT/ONNX 与配置/专家来源，再检查长 rollout 和逐源 clip / 场景覆盖。顶层 `motion_id=0` 与学生的 expert ID 都不足以证明 296 源片或正式自训策略的场景覆盖；公开ONNX的两批629扫描不能替代这项验收。真实硬件还需独立完成相机 producer、IMU/外参/默认角核对及实机验收，之后才能宣称此次 real2sim2real 的最后一段已经完成。
+七个正式模型现已实际训练结束，最终PT/ONNX与配置/专家来源的CPU后验也已通过；本次继续逐源clip和最终两学生场景覆盖。顶层 `motion_id=0` 与学生的 expert ID 都不足以证明 296 源片或正式自训策略的场景覆盖；公开ONNX的两批629扫描不能替代这项验收。真实硬件还需独立完成相机 producer、IMU/外参/默认角核对及实机验收，之后才能宣称此次 real2sim2real 的最后一段已经完成。
 
 旧629配置扫描使用发布学生ONNX和各配置的实际OBJ，原计划选定的340份依赖、模型和1887个输入文件绑定SHA。两例预检各500策略ticks，其中一例有高度/倾斜阈值事件，原片完整解码通过；旧扫描现已停止。[启动时逐例快照](usage_assets/reports/sim2sim-all-configs-start/summary.md)保留历史状态，不能将运动学生成629组或后台启动回执当作629例物理完成。
 
@@ -627,7 +629,7 @@ low-step配置41的首次attempt仍记为执行失败：推理完成JSON后约53
 
 隔离快照的实际启动又暴露依赖集合边界：旧340份没有覆盖metadata动态选择的Unitree bridge和部分父包初始化文件，不能称完整Python导入闭包。两次失败分别是只读挂载点缺失和`holosoma.bridge.unitree`缺失，均未验证SDK/DDS正常退出。376份集合保守加入所有bridge Python和父包初始化副作用，新增两项回归后矩阵78项CPU测试通过；随后实际CPU预检确认train150/inference49个仓库模块与所选metadata入口都在冻结SHA集合内，再完成五个历史失败配置的native闭环。全部10worker终态0且进程组为空；一个高速攀爬配置仍跌倒。该五例既不统计排除间歇性竞态，也不代替完整629。[失败原字节、修复和范围](usage_assets/reports/sdk018-native-setup/summary.md)、[新五例的实际入口、收据与视频](usage_assets/reports/sdk018-native-pilot/summary.md)。
 
-当前四模块联合CPU回归为172项测试加19个子用例全部通过；[精确源码、命令与原始JUnit](usage_assets/reports/worker-exit-integrated/review.json)绑定本轮修复版本。该结果不包含原生SDK/DDS、Isaac重载或fresh629物理运行。
+该次四模块联合CPU回归为172项测试加19个子用例全部通过；[精确源码、命令与原始JUnit](usage_assets/reports/worker-exit-integrated/review.json)绑定本轮修复版本。该结果不包含原生SDK/DDS、Isaac重载或fresh629物理运行。
 
 IsaacLab的URDF converter会在asset_root下生成USD缓存。五个非默认教师首次重载因只读源码下的converted_rank*写入失败，原生eval捕获异常返回0但没有任何rollout报告；本轮将原始URDF/mesh按SHA复制至独立RW数据目录，再用公有asset_root参数重试，源Python仍RO。当前`eval_quality.py`在checkpoint SHA不变、正整数实际步数/环境数、finite actions/root等检查满足且生成全新quality报告后才正常退出，不能再凭父进程0认定已经仿真。[首次失败原字节](usage_assets/reports/teacher-presets-reload-ro-failure/summary.md)、[报告门卫14项CPU验证](usage_assets/reports/eval-quality-exit-guard/summary.md)。这些运行约束不改变PPO奖励、DAgger动作标签或网络输入输出。
 

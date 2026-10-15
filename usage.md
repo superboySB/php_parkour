@@ -4,6 +4,53 @@
 
 学习流程、输入输出、数据/label 来源与 real2sim2real 实现细节见独立的 [technical_pipeline.md](technical_pipeline.md)。
 
+## 当前状态与复现路线
+
+**2026-10-15 更新：五教师、两学生的正式训练以及评估/导出共 16 阶段均已完成。** 混合学生最终为 `model_29999.pt`；本次已核验其完整 30,000 轮曲线及七项正式 Isaac 评估的 191 段原视频。逐源 monitor 的 Docker 诊断错误已修复，正在继续后续验收。[本次完整记录与原始收据](usage_assets/reports/reproduction-20261015/index.md)。
+
+| 按顺序复现 | 入口 | 当前范围 |
+| --- | --- | --- |
+| 环境与资产 | [note §1–3](note.md#1-机器目录与环境)、[公开资产](#2-公开资产) | 统一镜像；七组资产全部 SHA 通过 |
+| 动作匹配与数据转换 | [全部场景与技能](#3-全部动作场景与技能)、[数据和交互](#4-数据库浏览器与键盘交互) | 17 场景、629 配置、28 独立 traversal 技能；参考运动属于运动学回放 |
+| 教师和两种学生 | [训练、评估与导出](#5-训练isaac-sim-评估与导出) | 五教师各 20,000、纯学生 10,000、混合学生 30,000 轮；16 阶段记录均返回 0 |
+| 训练曲线与物理评估 | [纯学生曲线](usage_assets/reports/official-student-pure-training-curves/index.md)、[混合学生曲线](usage_assets/reports/official-student-finetune-training-curves/index.md)、[七项 Isaac 原视频](usage_assets/reports/official-evaluations-seven/index.md) | 曲线完整、评估执行完成；技能和课程成功尚未成立 |
+| 最终模型后验 | [本次续做记录](usage_assets/reports/reproduction-20261015/index.md)、[最终学生58例画廊](usage_assets/reports/final-student-native58-resource-wait-04/playback.html) | 32 文件已回传；58 例及独立 CPU 后验、恢复、浏览器播放通过；两学生各629的CPU计划和独立合同审查通过，1258次物理测试及云端888次逐源验证运行中 |
+| 测试与历史限制 | [测试记录](#8-全量测试同步与结果来源) | 根目录/训练 863 通过、键盘 23 通过；motion 217 通过及 12 项历史 raw-hash 失败 |
+
+## 仿真视频：看实际行为
+
+[集中播放 25 类实验视频](usage_assets/reproduction-20261015/media/playback.html) 支持筛选、暂停和拖动；[来源清单](usage_assets/reproduction-20261015/media/manifest.json)记录每段原片 SHA、截取区间和对应指标。下面 GIF 是原视频的短预览，可点击查看完整视频和实验说明。
+
+| 实验 | 原片预览 | 观察到的结果 |
+| --- | --- | --- |
+| 最终纯DAgger学生，MuJoCo平地前进 | [![纯学生开始前进后跌倒并留在地面](usage_assets/reproduction-20261015/native58-resource-wait-media-05/pure-forward-fall.gif)](usage_assets/reproduction-20261015/native58-resource-wait-media-05/playback.html) | 新完整58批次的实际失败对照；原片3.90–11.90秒，保留跌倒后画面 |
+| 最终DAgger+PPO学生，MuJoCo平地前进 | [![混合学生持续直立向前行走](usage_assets/reproduction-20261015/native58-resource-wait-media-05/finetune-forward.gif)](usage_assets/reproduction-20261015/native58-resource-wait-media-05/playback.html) | 同批次另一最终模型；原片3.90–11.90秒，可见持续直立行走 |
+| 最终DAgger+PPO学生，低梁场景 | [![混合学生靠近梁端跳起、落地后继续跑动](usage_assets/reproduction-20261015/native58-resource-wait-media-05/finetune-low-beam.gif)](usage_assets/reproduction-20261015/native58-resource-wait-media-05/playback.html) | 原片4.00–12.00秒；梁端附近的局部跳跃，不认定为正面跨整梁或完整路线通过 |
+| 正式 locomotion 教师，完整平地源片段 | [![教师先前进转向、最后站稳，完整源片段到达边界](usage_assets/reports/reproduction-20261015/source888-first-boundary-preview/preview.gif)](usage_assets/reports/reproduction-20261015/source888-first-boundary-preview/playback.html) | 490 源帧、488 策略步、0 failed/timeout，首次尝试到达原生片段边界；单 seed、单变体，画面无障碍 |
+| 正式 low-step 教师，完整单源片段 | [![低台阶教师抬腿经过黑色台阶、继续行走并停稳](usage_assets/reports/reproduction-20261015/source888-first-lowstep-boundary-preview/preview.gif)](usage_assets/reports/reproduction-20261015/source888-first-lowstep-boundary-preview/playback.html) | 505 源帧、503 连续策略步、0 failed/timeout，到达源边界；单 seed、单变体，跟随视角与遮挡限制接触和课程判断 |
+| 平地高速前进，SDK0.1.8 | [![平地高速前进8秒的真实闭环](usage_assets/reproduction-20261015/media/sdk018-high-forward.gif)](usage_assets/reproduction-20261015/media/playback.html) | 400控制步、约8秒；两个原生worker正常退出且进程组为空，画面可见持续跑动 |
+| 原始逐帧、多方向指令 | [![多方向指令的真实闭环](usage_assets/reproduction-20261015/media/random_locomotion-94.gif)](usage_assets/reproduction-20261015/media/playback.html) | 公开 ONNX 的物理控制；完整指令与参考运动分别记录 |
+| 高攀爬，cfg0000 | [![高攀爬倾斜后继续](usage_assets/reproduction-20261015/media/high_speed_climb_76-0.gif)](usage_assets/reproduction-20261015/media/playback.html) | 实际触发倾斜阈值，保留后续行为 |
+| 高攀爬，cfg0031 | [![未触发阈值但从大方块侧面经过](usage_assets/reproduction-20261015/media/high_speed_climb_76-31.gif)](usage_assets/reproduction-20261015/media/playback.html) | 未触发阈值，画面显示从障碍侧面经过；未证明攀爬成功 |
+| 低台阶，cfg0043 | [![未触发阈值但绕行台阶](usage_assets/reproduction-20261015/media/low_speed_step-43.gif)](usage_assets/reproduction-20261015/media/playback.html) | 未触发阈值，画面显示绕过障碍；不能算越障成功 |
+| 自定义窄台阶 | [![自定义窄台阶的真实跌倒](usage_assets/reproduction-20261015/media/custom-low-step.gif)](usage_assets/reproduction-20261015/media/playback.html) | 真实跌倒对照 |
+| 正式纯 DAgger 学生，Isaac | [![正式纯学生真实评估](usage_assets/reproduction-20261015/media/official-pure.gif)](usage_assets/reports/official-evaluations-seven/playback.html) | 最终 checkpoint 有界评估原片；完整七项指标与视频另页保存 |
+| 正式 DAgger+PPO 学生，Isaac | [![正式混合学生真实评估](usage_assets/reports/official-evaluations-seven/student-finetune-preview.gif)](usage_assets/reports/official-evaluations-seven/playback.html) | checkpoint 29999 最长质量绑定原片的1.16–9.16秒；主要行走/转向，未证明越障成功 |
+| 本次重录参考动作：攀爬 76 cm | [![本次重录攀爬参考轨迹，运动学回放](usage_assets/reproduction-20261015/reference-rerun/high_speed_climb_76.gif)](usage_assets/reproduction-20261015/reference-rerun/playback.html) | 17类参考之一；`KINEMATIC / NO POLICY`，不作为策略成功证据 |
+
+**目前没有经过核验的障碍课程成功率。** 公开策略完整逐帧 629 例中，321 例触发高度/倾斜阈值、308 例未触发；未触发项中也有绕行。Isaac 的 clip 结束事件和正常退出同样不能代替越障成功。[完整逐配置原片与轨迹](usage_assets/reports/reference629-full/playback.html)。
+
+最终两学生的[全部58原片](usage_assets/reports/final-student-native58-resource-wait-04/playback.html)已通过独立CPU后验、1611原件无损恢复和逐段浏览器播放/拖动检查。上方三段新预览均为480×270、8 FPS、64帧；主审实际查看原片接触图和派生GIF抽样，并保留攀爬场景停滞、绕行及跌倒对照。[来源、截取区间、模型与实际媒体收据](usage_assets/reproduction-20261015/native58-resource-wait-media-05/README.md)可复核。视频时间与策略时钟没有逐帧映射，不把截取区间当作精确策略时段。
+
+新增教师样例已按完整轨迹核对片段完成，三段原 MP4 均完整解码、实际 HTTP 播放和拖动通过；GIF 截取最长原片的 1.76–9.76 秒。主审看到前进、转向后停稳，原画面 `Commands: Not available` 叠字保留。它证明这个平地源片段完成，完整 888 队列比例仍待终态。[原片、轨迹与无损恢复](usage_assets/reports/reproduction-20261015/source888-first-boundary-preview/README.md)。
+
+低台阶教师新增样例也实际到达源边界，连续 503 策略步且无 failed/timeout；三原片共 506 视频帧完整解码，8 秒 GIF 取最长原片的 2.06–10.06 秒。主审查看全程、台阶区间 16 帧与 GIF，可见抬腿经过黑色台阶、继续行走并停稳；遮挡使接触和完整越障仍无法单独确认。原叠字保留，完成依据原轨迹。[视频与全部原件](usage_assets/reports/reproduction-20261015/source888-first-lowstep-boundary-preview/README.md)、[主审恢复和观察](usage_assets/reports/reproduction-20261015/lowstep-publication-root-review-01/review.json)及[31 原件模拟 Git 权限恢复](usage_assets/reports/reproduction-20261015/source888-first-lowstep-boundary-final-git-restore/execution.json)均已完成；不作为完整 888 队列比例。
+
+本地播放：在仓库根目录运行 `python3 scripts/research/serve_evidence.py`，打开 `http://127.0.0.1:8088/usage_assets/reproduction-20261015/media/playback.html`。该标准库服务支持视频字节范围请求，可正常拖动定位。
+
+<details>
+<summary>展开历史验收与进度记录（2026-10-10 至 14 日；当前状态见上表）</summary>
+
 新增[TensorBoard原始日志完整性实测与正式学生曲线工具](usage_assets/reports/student-training-curves-integrity/index.md)：独立CPU Docker正常退出0，20个正常/损坏协议案例、3个CRC标准向量，以及真实教师事件的1,040,001条记录全部符合预期。
 
 纯DAgger的[完整10,000轮曲线与原件归档](usage_assets/reports/official-student-pure-training-curves/index.md)现已实际通过CPU提取、绘图、公开包校验和全新目录恢复。原事件30,454,498 B含430,001条完整CRC记录；43个tag共430,000条有限标量，均完整覆盖step0..9999。两项核心loss、奖励和回合长度没有缺步或重复；原始值与25样本后向均值分别显示，未删除后期loss上升或奖励下降的实际数据。混合学生30,000轮的最终曲线仍待原生终态；记录完整不等于收敛或技能质量。
@@ -12,7 +59,7 @@
 
 [从公开包完整重放](usage_assets/reports/official-student-pure-training-curves-replay/index.md)已实际恢复原输入和四份代码，在新CPU容器中重新提取、绘图，两个阶段及容器均正常退出0。43个tag的全部430,000行、coverage、原生身份与事件元数据和原结果逐项相等；新时间戳、来源SHA及完整新标量压缩另存，原包未改写。
 
-**当前进度（2026-10-14，北京时间）：五类官方教师均已完成20,000轮，最终checkpoint为19999；五份最终产物均已完成独立CPU验收。** 第四个low-climb-76于10月12日16:22:35、第五个high-climb-76于10月13日07:14:48完成原生训练；两份[低攀爬](usage_assets/reports/official-low-climb-76-final/index.md)/[高攀爬](usage_assets/reports/official-high-climb-76-final/index.md)公开包已生成。纯DAgger学生已于10月13日17:34:35完成10,000轮、最终checkpoint9999，混合学生正在运行30,000轮训练，10月14日23:12的原生日志记录为24,354轮；五类教师与纯学生的六项官方有界Isaac评估已完成，原始记录和160段视频已通过独立CPU核验；混合学生、16阶段全日程、云端888逐源尝试、最终自训学生58例和两学生各629配置仍待完成。CPU有限性、训练记录完整或公开包恢复通过，不表示策略收敛、技能成功或真机验收。
+**历史进度（2026-10-14，北京时间）：五类官方教师均已完成20,000轮，最终checkpoint为19999；五份最终产物均已完成独立CPU验收。** 第四个low-climb-76于10月12日16:22:35、第五个high-climb-76于10月13日07:14:48完成原生训练；两份[低攀爬](usage_assets/reports/official-low-climb-76-final/index.md)/[高攀爬](usage_assets/reports/official-high-climb-76-final/index.md)公开包已生成。纯DAgger学生已于10月13日17:34:35完成10,000轮、最终checkpoint9999，混合学生正在运行30,000轮训练，10月14日23:12的原生日志记录为24,354轮；五类教师与纯学生的六项官方有界Isaac评估已完成，原始记录和160段视频已通过独立CPU核验；混合学生、16阶段全日程、云端888逐源尝试、最终自训学生58例和两学生各629配置仍待完成。CPU有限性、训练记录完整或公开包恢复通过，不表示策略收敛、技能成功或真机验收。
 
 [六项官方有界Isaac评估](usage_assets/reports/official-evaluations-six/index.md)均原生返回0；每项64环境、3000步、0.02秒控制周期，每环境60秒。独立CPU容器正常退出0，核对全部196份原件、六份事件的完整CRC/EOF、102个TensorBoard指标与160段原片的完整解码。原生manifest列出160段视频，其中148段进入较晚开始的quality时间筛选，另外12段较早视频也完整保留。
 
@@ -90,14 +137,14 @@ failed reset来自terminated标记；clip结束事件排除同一步failed/timeo
 
 教师、纯DAgger和DAgger+PPO的[真实断点续训](usage_assets/reports/native-resume-acceptance/index.md)已完成：6次原生训练，历史3步加新15步完成原18步；优化器、权重更新、冻结专家、TensorBoard、最终ONNX与skip均通过。保存iter1后原生resume会重做index1，target4最终为iter3；这不是仅新增两轮或完整随机状态恢复。首次过严日志检查失败和一次GPU占用门卫拒绝均原样保留。
 
-历史记录：后台交接于14:37 UTC[替换为恢复生命周期版本](usage_assets/reports/final-student-delivery-waiter-recovered/index.md)，首次真实SSH仍为waiting，未fetch/prepare/native。当时官方五教师及后续任务仍待原任务完成；当前五教师和纯学生训练已完成，混合学生仍在训练；六项已完成的有界评估见本文开头，整套复现尚未结束。
+历史记录：后台交接于14:37 UTC[替换为恢复生命周期版本](usage_assets/reports/final-student-delivery-waiter-recovered/index.md)，首次真实SSH仍为waiting，未fetch/prepare/native。当时官方五教师及后续任务仍待原任务完成；截至2026-10-15，五教师和两学生训练及全部16阶段已完成，七项有界评估见本文开头；逐源和正式模型仿真后验正在继续。
 
 先看真实结果：[新SDK全部12指令的正常退出复测与逐段视频](usage_assets/reports/sdk018-directions/summary.md)、[新SDK五个历史失败配置的视频与跌倒结果](usage_assets/reports/sdk018-native-pilot/summary.md)、[17 场景参考动作播放页](usage_assets/motion_matching/playback.html)、[旧17场景物理轨迹播放页](usage_assets/sim2sim/scenarios/playback.html)、[逐项原始报告](usage_assets/reports/)。参考动作来自生成数组，闭环录像来自公开 ONNX 策略驱动的 MuJoCo，训练录像来自实际 Isaac checkpoint；旧17场景页不证明完整正常退出。
 
-在本地仓库运行下面的标准库服务后，可打开 `http://127.0.0.1:8088/sim2sim/scenarios/playback.html` 或 `http://127.0.0.1:8088/motion_matching/playback.html` 交互查看；不需要安装包。
+在本地仓库运行下面的标准库服务后，可打开 `http://127.0.0.1:8088/usage_assets/sim2sim/scenarios/playback.html` 或 `http://127.0.0.1:8088/usage_assets/motion_matching/playback.html` 交互查看；不需要安装包。
 
 ```bash
-python3 -m http.server 8088 --bind 127.0.0.1 --directory usage_assets
+python3 scripts/research/serve_evidence.py
 ```
 
 [![17场景参考动作离线播放页，点击打开](usage_assets/motion-gallery.png)](usage_assets/motion_matching/playback.html)
@@ -107,6 +154,9 @@ python3 -m http.server 8088 --bind 127.0.0.1 --directory usage_assets
 ![公开深度策略的12种指令，逐项独立重置、移除吊架后录像](usage_assets/sim2sim/directions.png)
 
 [播放这段同步视频](usage_assets/sim2sim/directions.mp4)。每项均为 8 秒仿真时间，50 Hz 原生策略控制。完整路径与转角见后文，不能把转弯绕圈时的小净位移当作没有行走。
+
+
+</details>
 
 ## 1. 证据与功能边界
 
@@ -171,6 +221,8 @@ bash scripts/research/docker.sh motion scripts/research/render_motion_evidence.p
 | Cat vault | ![Cat vault参考轨迹](usage_assets/motion_matching/high_speed_cat_vault.gif) | [MP4](usage_assets/motion_matching/high_speed_cat_vault.mp4) |
 
 这些画面标注 `KINEMATIC / NO POLICY`；[离线播放页](usage_assets/motion_matching/playback.html) 包含全部 17 场景，支持播放、暂停与拖动。
+
+2026-10-15又在空目录完整复跑629配置/28独立技能，逐字段数组与保留结果完全相等；CPU OSMesa重录17类参考视频、4,194帧，渲染及发布实际退出0。[本次新参考视频](usage_assets/reproduction-20261015/reference-rerun/playback.html)、[新矩阵与数值对照](usage_assets/reports/reproduction-20261015/index.md)均保留，仍不作为策略越障成功证据。
 
 ## 4. 数据库、浏览器与键盘交互
 
@@ -245,7 +297,7 @@ smoke 采用显式缩小的并行环境、布局和迭代数，检查实际梯�
 
 两种学生也已按官方并行量和完整学生预处理各运行 **2048 环境、20 迭代容量 pilot**。纯 DAgger / DAgger+PPO 的显存峰值为 11399 / 9063 MiB，去首两轮的核心耗时中位数为 3.4255 / 3.9320 秒；两者实际配置均为 3 variants、96 minibatches、2 epochs、24 steps/env、save interval 500。权重更新、各 30 组双 ONNX 推理和 TensorBoard 0–19 全部通过。[容量实测报告](usage_assets/reports/training-cloud-student-capacity.md)注明旧镜像、未收敛专家与唯一的 20 轮日程缩短；这些数据不证明正式训练质量或已训练专家下的最终吞吐。
 
-**正式完整日程已于北京时间 2026-10-10 12:20 启动，尚未完成。** 使用最终镜像和上述冻结源码，在物理 GPU 1 上依次训练五教师各 20000 轮、纯学生 10000 轮、混合学生 30000 轮，再执行质量评估及导出；保存间隔仍为 500。首教师的实际保存配置确认 4096 环境、64 variants、seed/obstacle_seed 42。12:29 的离线 TensorBoard 已记录 step 0–114，所检查的 loss/reward 全部有限；这只是运行中的证据。[启动、配置与进度快照](usage_assets/reports/official-full-start/summary.md)。本机已建立 SSH 转发，打开 `http://127.0.0.1:6007/` 可看实时曲线；远端事件目录是 `/outputs/official-full`，无需登录。完整训练预计需要多天，最终模型与质量结论需等实际完成后补验。
+**历史启动记录：正式完整日程于北京时间 2026-10-10 12:20 启动，当时尚未完成。** 使用最终镜像和上述冻结源码，在物理 GPU 1 上依次训练五教师各 20000 轮、纯学生 10000 轮、混合学生 30000 轮，再执行质量评估及导出；保存间隔仍为 500。首教师的实际保存配置确认 4096 环境、64 variants、seed/obstacle_seed 42。12:29 的离线 TensorBoard 已记录 step 0–114，所检查的 loss/reward 全部有限；这只是运行中的证据。[启动、配置与进度快照](usage_assets/reports/official-full-start/summary.md)。本机已建立 SSH 转发，打开 `http://127.0.0.1:6007/` 可看实时曲线；远端事件目录是 `/outputs/official-full`，无需登录。完整训练预计需要多天，最终模型与质量结论需等实际完成后补验。
 
 独立质量入口还真实复跑本地未收敛教师：16 环境 × 100 control steps，共 32 env-seconds，49 次失败 reset、0 次超时；四项跟踪误差各记录 1600 个有限样本。它在 reset 清除状态前采样，关联 checkpoint SHA、实际录像和 17 个 `Evaluation/*` TensorBoard 标量。[质量 JSON](usage_assets/reports/isaac-local-quality.json)、[测试记录](usage_assets/reports/research-quality-training.xml)、[真实失败短片](usage_assets/isaac/local-teacher-quality.mp4)。报告的 motion ID 0 指顶层合并 NPZ，未记录原始动作片段的覆盖范围，不能据此声称覆盖全部 locomotion 数据。
 
@@ -341,7 +393,7 @@ bash scripts/research/docker.sh sim scripts/research/sim2sim.py \
 
 现已进一步启动**全部629配置**的真实物理扫描：2026-10-10北京时间14:19快照逐项核验16例完成、1例运行中，尚未完成全部扫描。固定计划保存340项运行依赖和1887个输入文件SHA；每例seed42、500策略ticks、10仿真秒、恒定forward command，不回放参考动作。两例预检执行通过，其中一例出现高度/倾斜阈值；原始视频均CPU完整解码通过。首次CPU fixture测试与真实仿真并行被进程门卫拒绝、空闲重跑28/28通过，两轮原始JUnit均保留。[固定计划、运行快照、两例视频与失败记录](usage_assets/reports/sim2sim-all-configs-start/summary.md)。这扩展几何覆盖，不构成629配置技能成功的结论。
 
-完整结果页的独立发布工具已通过24项CPU检查及两例真实PREVIEW的浏览器媒体/筛选/轨迹检查；当前完整发布被实际门卫拒绝，没有发布629完成页。[发布工具与两例截图](usage_assets/reports/full-scene-publisher/summary.md)。2026-10-10北京时间15:12快照为177例完成、1例执行失败、1例运行中、450例待运行；失败low-step index41虽有完整500ticks/10.002s轨迹，父进程检测到worker非零退出，不能补造result记为通过。内核`command_writer`段错误发生在推理完成JSON后约53ms，模拟器在parent失败后才完成收尾；旧记录没有足够PID映射确定具体worker和C++根因。[14个原文件、内核日志与准确时间线](usage_assets/reports/sim2sim-worker-failure/report.md)。待扫描结束后再处理该项，冻结代码未改。
+完整结果页的独立发布工具已通过24项CPU检查及两例真实PREVIEW的浏览器媒体/筛选/轨迹检查；2026-10-10 当时完整发布被实际门卫拒绝，尚无629完成页；后续完整结果见本文开头。[发布工具与两例截图](usage_assets/reports/full-scene-publisher/summary.md)。2026-10-10北京时间15:12快照为177例完成、1例执行失败、1例运行中、450例待运行；失败low-step index41虽有完整500ticks/10.002s轨迹，父进程检测到worker非零退出，不能补造result记为通过。内核`command_writer`段错误发生在推理完成JSON后约53ms，模拟器在parent失败后才完成收尾；旧记录没有足够PID映射确定具体worker和C++根因。[14个原文件、内核日志与准确时间线](usage_assets/reports/sim2sim-worker-failure/report.md)。该旧批次之后已停止，SDK修复及恢复验收另有记录；此历史错误与冻结源码保留。
 
 629是配置数；其中有580个不同OBJ文件SHA，50个平地配置使用同一OBJ。不同文件SHA也不自动等于不同几何形状，本次没有几何等价性判定。[基于冻结计划的计数](usage_assets/reports/sim2sim-configuration-vs-mesh.json)只核输入身份，没有新增物理运行。
 
@@ -367,7 +419,9 @@ python3 scripts/research/cloud.py sync
 python3 scripts/research/cloud.py pull
 ```
 
-CPU 测试统一在 Docker 中运行，分别保留根目录/训练和 motion matching 的 JUnit、日志、计数及日志 SHA-256。`PHP_DOCKER=0` 只用于隔离原生安装路径的 subprocess double 测试，解释器仍在容器内；真实容器路径由 doctor、训练和闭环运行验证。
+CPU 测试统一在 Docker 的三个隔离解释器中运行：根目录/训练使用 `train-python`，原生键盘入口使用 `inference-python`，动作匹配使用 `motion-python`；分别保留 JUnit、日志、计数及日志 SHA-256。本次修复了键盘用例误放训练环境导致的 collection 错误，并禁止测试向只读源码写 pytest cache。`PHP_DOCKER=0` 只用于隔离原生安装路径的 subprocess double 测试，解释器仍在容器内；真实容器路径由 doctor、训练和闭环运行验证。
+
+2026-10-15 最新实际结果：根目录/训练 **863 passed**、键盘 **23 passed**；动作匹配 **217 passed、12 failed**，12项仍是下面记录的历史raw-hash。此前的collection失败和Docker fixture级联失败均保留在[本次测试原件](usage_assets/reports/reproduction-20261015/local-checks/summary.json)，没有与最终计数相加。
 
 首版冻结镜像 `88254ac0…`、源码 `64ebc5f` 上完整复跑：根目录及训练 **289 passed、0 failed、0 skipped**；动作匹配 **213 passed、12 failed、0 skipped**。[本次汇总](usage_assets/reports/cpu-tests-final.json)与[原始 JUnit/日志](usage_assets/reports/cpu-final/)包含全部结果。
 
@@ -397,7 +451,7 @@ CPU 测试统一在 Docker 中运行，分别保留根目录/训练和 motion ma
 
 候选SDK018的两次隔离启动原始失败均已保留：首次Docker只读挂载点错误，第二次首例加载`holosoma.bridge.unitree`失败，这两次本身没有策略rollout或SDK析构通过证据。该错误证明旧340项冻结依赖集合遗漏metadata动态入口与部分父包初始化；历史文件不改，新集合376项、矩阵78项CPU测试通过后，已实际CPU导入train150/inference49个仓库模块及所选metadata入口，并完成新五例native闭环。[两次启动日志、进程收据、源码和新增测试](usage_assets/reports/sdk018-native-setup/summary.md)。
 
-补齐动态入口后的当前四模块联合CPU回归为172项测试加19个子用例全部通过，未跳过；[本轮命令、精确源码与原始JUnit](usage_assets/reports/worker-exit-integrated/review.json)独立于较早的全仓CPU测试统计。
+补齐动态入口后的该次四模块联合CPU回归为172项测试加19个子用例全部通过，未跳过；[本轮命令、精确源码与原始JUnit](usage_assets/reports/worker-exit-integrated/review.json)独立于较早的全仓CPU测试统计。
 
 主Dockerfile及约束现已升级为SDK0.1.8。干净源码`6cb2ae2`重新构建的统一镜像`2be18521…`，实际以`--network none`、私有PID/IPC、只读资产、独立空缓存且**没有宿主源码挂载**运行：三个环境doctor、265版本、真实Isaac16环境×两轮×24步、非零有限权重更新、12组教师ONNX推理全部通过；52个TensorBoard scalar tag的两步样本均有限。train的原三条上游pip元数据冲突如实保留。[新镜像完整日志、版本和模型SHA](usage_assets/reports/sdk018-canonical-offline/summary.md)。旧0.1.6镜像的历史证明没有改写。
 
@@ -437,7 +491,7 @@ CPU 测试统一在 Docker 中运行，分别保留根目录/训练和 motion ma
 
 ![新RO源码单源Isaac实际画面；技能跟踪失败，未完成整段source](usage_assets/isaac/source-coverage-ro-assets-pilot/teacher-iter500-source000.png)
 
-正式训练后的逐源watch已于北京时间18:09实际升级为PID4074213，使用同步核验的02bc源码与新的`coverage-official-final-ro-assets-v2`目录，waiting、gpu_started=false。只通过pidfd停止精确身份的旧waiting进程；原status/log/launch字节保留，正式训练容器/镜像/源码挂载/训练PID出生身份与全部Docker IDs前后完全一致。[两阶段真实升级、25项CPU门卫与旧原始归档](usage_assets/reports/posttrain-monitor-ro-assets-v2/summary.md)。
+历史部署：正式训练后的逐源watch曾于北京时间2026-10-10 18:09升级为PID4074213，使用同步核验的02bc源码与新的`coverage-official-final-ro-assets-v2`目录，waiting、gpu_started=false。只通过pidfd停止精确身份的旧waiting进程；原status/log/launch字节保留，正式训练容器/镜像/源码挂载/训练PID出生身份与全部Docker IDs前后完全一致。[两阶段真实升级、25项CPU门卫与旧原始归档](usage_assets/reports/posttrain-monitor-ro-assets-v2/summary.md)。 该旧watch已于2026-10-15退出；本次实际恢复控制器与当前状态见[续做记录](usage_assets/reports/reproduction-20261015/index.md)。
 
 ### 原生GUI、键盘与录制的实际验收
 
@@ -464,19 +518,19 @@ CPU 测试统一在 Docker 中运行，分别保留根目录/训练和 motion ma
 
 这是发布ONNX对的几何扫描，quality/course均false；首两例不是629全量验收。初次CPU checker错误假设轨迹起点为0的失败原件也已保留，改为依据实际ACK偏移检查首末10秒跨度后通过，没有改动原生轨迹。
 
-学生回传入口同步绑定新watch的02bc源码、`coverage-official-final-ro-assets-v2`和schema2共享资产合同，77/77 Docker CPU检查通过。10:19 UTC root真实SSH status为waiting，16阶段阻塞，没有cpu-ready、GPU验收或模型回传；四ONNX加28JSON白名单保持。[最小补丁、原JUnit与真实等待响应](usage_assets/reports/final-student-transfer-ro-assets-integration/summary.md)。旧57项与15:26状态只作历史记录，不与新测试相加。
+学生回传入口同步绑定新watch的02bc源码、`coverage-official-final-ro-assets-v2`和schema2共享资产合同，77/77 Docker CPU检查通过。2026-10-10 10:19 UTC历史SSH status为waiting，16阶段阻塞，没有cpu-ready、GPU验收或模型回传；四ONNX加28JSON白名单保持。[最小补丁、原JUnit与真实等待响应](usage_assets/reports/final-student-transfer-ro-assets-integration/summary.md)。旧57项与15:26状态只作历史记录，不与新测试相加。
 
 ### 最终两学生的58项验收与实际后台交接
 
-本地适配入口已冻结并通过47项Docker CPU控制面测试，真实缺fetch时只返回waiting、不建cohort；初轮33pass/1fail及中间41pass原件保留。真正模型到达后，每学生先CPU ORT30，再执行12方向和17代表场景，共58例；终态必须同时满足116正常worker/空组、116精确hostwriter出生映射和58原MP4全片解码。8/10仿真秒、默认wall373/413、seed42均保持，原core/helper按SHA复用；质量与课程成功仍false。[冻结源码、完整设计索引、恢复前提及独立审查](usage_assets/reports/final-student-native58-preparation/summary.md)。当前实际最终模型prepare、60项ORT和58次native均未执行。
+本地适配入口已冻结并通过47项Docker CPU控制面测试，真实缺fetch时只返回waiting、不建cohort；初轮33pass/1fail及中间41pass原件保留。真正模型到达后，每学生先CPU ORT30，再执行12方向和17代表场景，共58例；终态必须同时满足116正常worker/空组、116精确hostwriter出生映射和58原MP4全片解码。8/10仿真秒、默认wall373/413、seed42均保持，原core/helper按SHA复用；质量与课程成功仍false。[冻结源码、完整设计索引、恢复前提及独立审查](usage_assets/reports/final-student-native58-preparation/summary.md)。该版准备记录当时尚无最终模型。2026-10-15 的实际 prepare 与 60 项 ORT 已通过；首次原生批次完成41例后被资源门卫拒绝；之后新独立完整58例与只读CPU后验已通过，原失败单独保留；[新控制及当前原始证据](usage_assets/reports/reproduction-20261015/index.md)单独保存。
 
 交接程序另经55项Docker CPU检查，含真实普通CPU父孙进程取消/回收，独立审查无剩余必须修正项。root于11:03:25 UTC（北京时间19:03）实际启动PID1121672，封存PGID/SID/出生ticks/boot_id及准确argv。首轮真实SSH helper exit0且session为空，waiting/16阶段阻塞，fetch/prepare/run均false，两个交付目录未建，本地Docker ID集合不变。[原始测试、预审、实际启动与首轮收据](usage_assets/reports/final-student-delivery-waiter/summary.md)。它每600秒等待，真正ready后仅一次回传、待现629/GPU正常释放再调用冻结入口；错误和partial保留，不自动重试。这是11:03历史启动；旧进程已受控取消，当前恢复版交接见本文开头，勿并发手动fetch或final58。
 
 11:00 UTC另一次实际Docker inspect/top确认云端原official driver/train与本地629 wrapper/simulator均存活；固定快照158completed/1running/470planned。同期首教师TensorBoard为step10315，所选四tag全部历史样本有限。[实际活进程和scalar快照](usage_assets/reports/final-student-delivery-waiter/active-jobs/summary.json)。这是进度证据，正式训练、629全量后验与最终模型58项验收仍未完成。
 
-### 当前629发布合同与云端默认镜像的剩余步骤
+### 历史公开ONNX 629发布合同与云端镜像接入计划
 
-独立审查确认旧发布器不能直接读取当前隔离批次：其`/outputs`与`/workspace`映射、driver格式和模块ROOT不同，而且尚未绑定新批次的5206输入冻结、1258份hostwriter映射与629次完整解码后验。[原始兼容性审查、15个固定依赖及恢复边界](usage_assets/reports/fresh629-publisher-compatibility-review/index.md)已保存；该审查仅检查兼容性，未产生完整结果页，也未把运行中的动态摘要补造成历史原件。
+历史独立审查确认旧发布器不能直接读取当时的公开ONNX隔离批次：其`/outputs`与`/workspace`映射、driver格式和模块ROOT不同，而且尚未绑定新批次的5206输入冻结、1258份hostwriter映射与629次完整解码后验。[原始兼容性审查、15个固定依赖及恢复边界](usage_assets/reports/fresh629-publisher-compatibility-review/index.md)已保存；该审查仅检查兼容性，未产生完整结果页，也未把运行中的动态摘要补造成历史原件。
 
 新统一镜像已在云端加载，当前默认仍保留SDK0.1.6官方训练环境。[训练完成后接入方案及原始证据](usage_assets/reports/cloud-sdk018-postcompletion-adoption-plan/index.md)已冻结，需等official16、原生checkpoint CPU就绪、888终态及watch退出/锁释放后才保留旧容器并切换。该项目前是方案，未执行云端默认SDK0.1.8接入或其运行时验收。
 
@@ -490,7 +544,7 @@ CPU 测试统一在 Docker 中运行，分别保留根目录/训练和 motion ma
 
 [29项要求与证据对应清单](usage_assets/reports/final-function-coverage-ledger/index.md)保留了`b5095ba`版本的六份声明文档，核对8个preset、17场景、29技能入口及五组有序数据。该版本复查当时找到两组缺少实际验收的功能：`s/a/d/q/e/z`完整命名键派发与窗口Backspace重置，以及teacher/pure/finetune原生断点继续训练。此前真实w低/高速、12项API方向和45项恢复控制测试的范围保持原样，不能替代这两组实测。
 
-这两组补验的历史准备合同如下，实际全键盘/重置和6次原生续训现均已完成，结果见本文开头。续训需证明原PT/固定专家SHA不变、优化器步数被恢复、之后权重有限且确实更新，并产生新的TensorBoard样本；重置需真实窗口按键、仿真time/状态变化及后续推进、双方原生正常退出。当时这些均未记录为通过，之后补验和629全量后验已完成。完整官方训练、888逐源尝试、最终学生58项闭环和云端默认镜像接入仍分别等待原任务及真实产物；高层自主长程越障质量也尚未成立。
+这两组补验的历史准备合同如下，实际全键盘/重置和6次原生续训现均已完成，结果见本文开头。续训需证明原PT/固定专家SHA不变、优化器步数被恢复、之后权重有限且确实更新，并产生新的TensorBoard样本；重置需真实窗口按键、仿真time/状态变化及后续推进、双方原生正常退出。当时这些均未记录为通过，之后补验和公开模型的629全量后验已完成。正式训练及评估/导出共16阶段现已完成；888逐源尝试正在运行，最终学生新完整58例和独立CPU后验、无损恢复及浏览器检查已通过。两学生各629计划和独立合同审查也已通过，1258次物理测试实际运行中；云端默认镜像接入待真实前置终态。高层自主长程越障质量尚未成立。
 
 [全键盘/重置准备原件](usage_assets/reports/native-keyboard-reset-allkeys-preparation/index.md)含最终46项CPU fixture、独立只读审查、root真实prepare计划和真实Docker双角色import/config parse；3313项冻结前后相同，未构造原生对象。历史canonical3297项与预先存在的1个bytecode分别记录，没有改动原冻结清单。该准备包本身不包含实际执行；之后真实按键、Backspace、录制与退出验收已完成。
 
