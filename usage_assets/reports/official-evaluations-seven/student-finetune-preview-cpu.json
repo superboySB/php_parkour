@@ -1,0 +1,27 @@
+{
+  "container_id": "de1e93b0113f76b6939c0be4825836e5e1cdc56cddd89a6c94b2e18164912b66",
+  "image_id": "sha256:2be18521015b2a84ef7a4442af9a94ef041a19feb9ce385ae15424b1dc158d8f",
+  "state": {
+    "Status": "exited",
+    "Running": false,
+    "Paused": false,
+    "Restarting": false,
+    "OOMKilled": false,
+    "Dead": false,
+    "Pid": 0,
+    "ExitCode": 0,
+    "Error": "",
+    "StartedAt": "2026-10-15T03:02:41.075472859Z",
+    "FinishedAt": "2026-10-15T03:02:41.849368506Z"
+  },
+  "runtime": "runc",
+  "network_mode": "none",
+  "device_requests": null,
+  "devices": [],
+  "nano_cpus": 2000000000,
+  "memory_bytes": 2147483648,
+  "command": [
+    "-lc",
+    "python3 - <<'PY'\nimport json,pathlib,subprocess,hashlib\np=pathlib.Path('/out');s=json.loads((p/'summary.json').read_text());stage=s['stages'][-1];r=stage['representative'];source=p/r['path'];out=p/'student-finetune-preview.gif'\nassert hashlib.sha256(source.read_bytes()).hexdigest()==r['sha256']\nstart=r['duration_seconds']-8\nfilters='fps=8,scale=480:270:flags=lanczos,split[a][b];[a]palettegen=stats_mode=full[p];[b][p]paletteuse=dither=sierra2_4a'\ncommand=['ffmpeg','-nostdin','-v','error','-xerror','-threads','1','-ss',str(start),'-t','8','-i',str(source),'-filter_complex_threads','1','-filter_complex',filters,'-loop','0','-n',str(out)]\nproc=subprocess.run(command,capture_output=True,text=True);assert proc.returncode==0,proc.stderr\nprobe_command=['ffprobe','-v','error','-count_frames','-show_entries','format=duration:stream=width,height,nb_read_frames','-of','json',str(out)];metadata=json.loads(subprocess.check_output(probe_command));assert int(metadata['streams'][0]['nb_read_frames'])==64\nfull_command=['ffmpeg','-nostdin','-v','error','-xerror','-threads','1','-i',str(out),'-f','null','-'];decode=subprocess.run(full_command,capture_output=True,text=True);assert decode.returncode==0\nsheet=p/'student-finetune-contact.png';subprocess.run(['ffmpeg','-nostdin','-v','error','-threads','1','-i',str(source),'-vf','fps='+str(8/r['duration_seconds'])+',scale=320:-1,tile=4x2','-filter_threads','1','-frames:v','1','-n',str(sheet)],check=True)\nreceipt={'schema_version':1,'source_video':r,'case':'eval-student-finetune','selection':'Longest quality-bound original by duration; not selected for success or typicality.','source_video_interval_seconds':[start,r['duration_seconds']],'gif':{'path':out.name,'sha256':hashlib.sha256(out.read_bytes()).hexdigest(),'bytes':out.stat().st_size,'metadata':metadata,'returncode':proc.returncode,'full_decode_returncode':decode.returncode},'command':command,'probe_command':probe_command,'full_decode_command':full_command,'scope':'Derived CPU GIF at 8FPS/480x270/original speed; no new policy rollout. Metrics describe all64 env x3000 steps, not only the selected original.','checkpoint_iteration':stage['checkpoint_iteration'],'checkpoint_sha256':stage['checkpoint_sha256'],'failed_resets':stage['failed_resets'],'timeout_resets':stage['timeout_resets'],'clip_completions_excluding_failed_timeout_steps':stage['clip_completions_excluding_failed_timeout_steps'],'quality_verified':False,'obstacle_course_completion_verified':False}\n(p/'student-finetune-preview.json').write_text(json.dumps(receipt,ensure_ascii=False,indent=2)+'\\n');print(json.dumps({'gif_bytes':out.stat().st_size,'frames':64,'duration':metadata['format']['duration']}))\nPY"
+  ]
+}

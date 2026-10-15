@@ -322,9 +322,19 @@ def docker_command(args, source, role, input_identity):
 
 
 def container_state(args, source, role, name, input_identity):
-    result = subprocess.run(["docker", "inspect", name], text=True, capture_output=True)
+    result = subprocess.run(["docker", "container", "inspect", name], text=True, capture_output=True)
     if result.returncode:
-        require("No such" in result.stderr, f"Cannot inspect own container: {result.stderr}")
+        # Docker versions use different capitalization and daemon/CLI prefixes
+        # for a missing name. Admit only that exact absence; a socket, context,
+        # permission or daemon failure must never authorize a fresh launch.
+        missing = {
+            f"error: no such object: {name}".casefold(),
+            f"error: no such container: {name}".casefold(),
+            f"error response from daemon: no such container: {name}".casefold(),
+        }
+        require(result.returncode == 1 and result.stdout.strip() in ("", "[]")
+                and result.stderr.strip().casefold() in missing,
+                f"Cannot inspect own container: {result.stderr}")
         return None
     info = json.loads(result.stdout)[0]
     config, host = info["Config"], info["HostConfig"]

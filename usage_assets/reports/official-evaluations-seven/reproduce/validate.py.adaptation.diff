@@ -1,0 +1,84 @@
+--- usage_assets/reports/official-evaluations-six/reproduce/validate.py	2026-10-14 23:45:41.838657193 +0800
++++ usage_assets/reports/official-evaluations-seven/reproduce/validate.py	2026-10-15 10:57:53.367463186 +0800
+@@ -15,14 +15,14 @@
+ import time
+ 
+ SKILLS = ["locomotion", "low-step", "high-step", "low-climb-76", "high-climb-76"]
+-LABELS = ["eval-teacher-" + x for x in SKILLS] + ["eval-student-pure"]
++LABELS = ["eval-teacher-" + x for x in SKILLS] + ["eval-student-pure", "eval-student-finetune"]
+ REGISTRIES = ["file:///data/assets/motions-" + x for x in SKILLS]
+ METRICS = {"motion/error_ref_pos": "m", "motion/error_ref_rot": "rad",
+            "motion/error_body_pos": "m", "motion/error_joint_pos": "rad (joint-vector L2)"}
+ CONTRACT = Path("/control/input-contract.json")
+ RESULTS = Path("/results")
+-SCOPE = ("CPU audit of six existing official 64-environment, 3000-control-step "
+-         "native evaluations and all 160 preserved clips; no new rollout, model "
++SCOPE = ("CPU audit of seven existing official 64-environment, 3000-control-step "
++         "native evaluations and all 191 preserved clips; no new rollout, model "
+          "loading, training, convergence, course-completion or source-coverage claim.")
+ 
+ 
+@@ -197,7 +197,7 @@
+     stages = contract["stages"]
+     require([s["label"] for s in stages] == LABELS, "stage labels/order changed")
+     flat = [fp for stage in stages for fp in records(stage)]
+-    require(len(flat) == 196 and len({x["path"] for x in flat}) == 196, "expected 196 distinct inputs")
++    require(len(flat) == 233 and len({x["path"] for x in flat}) == 233, "expected 233 distinct inputs")
+     for fp in flat:
+         native = Path(fp["native_path"])
+         require(native.is_absolute() and ".." not in native.parts
+@@ -207,13 +207,13 @@
+                 "artifact path mapping/symlink changed: " + str(expected))
+         require(integer(fp["bytes"], 1) and re.fullmatch("[0-9a-f]{64}", fp["sha256"]), "invalid fingerprint")
+     videos = [fp for stage in stages for fp in stage["videos"]]
+-    require(len(videos) == 160 and sum(x["quality_bound"] is True for x in videos) == 148,
+-            "expected 160 clips, exactly 148 quality-bound")
++    require(len(videos) == 191 and sum(x["quality_bound"] is True for x in videos) == 177,
++            "expected 191 clips, exactly 177 quality-bound")
+     for fp in videos:
+         require(type(fp["quality_bound"]) is bool and fp["native_described"] is True
+                 and finite(fp["declared_duration_seconds"]) and fp["declared_duration_seconds"] > 0,
+                 "invalid video descriptor")
+-    require(sum(len(s["events"]) for s in stages) == 6, "expected six event files")
++    require(sum(len(s["events"]) for s in stages) == 7, "expected seven event files")
+     return flat
+ 
+ 
+@@ -254,8 +254,9 @@
+         label = stage["label"].removeprefix("eval-")
+         value = read_json(stage["training_manifest"]["path"])
+         passed_manifest(value, label)
+-        student = label == "student-pure"
+-        target, envs = (10000, 2048) if student else (20000, 4096)
++        student = label in ("student-pure", "student-finetune")
++        finetune = label == "student-finetune"
++        target, envs = ((30000 if finetune else 10000), 2048) if student else (20000, 4096)
+         s, env = value["settings"], value["environment"]
+         require(s["skills"] == SKILLS and s["iterations_target"] == target
+                 and s["num_envs"] in (None, envs) and value["checkpoint_iteration"] == target - 1
+@@ -265,13 +266,13 @@
+                 and flag(value["command"], "--training.seed") == "42", "final training schedule changed")
+         checkpoint = {"path": value["checkpoint"], "sha256": value["checkpoint_sha256"]}
+         require(Path(checkpoint["path"]).is_relative_to("/outputs/official-full/official/" + label)
+-                and Path(checkpoint["path"]).name == ("model_09999.pt" if student else "model_19999.pt")
++                and Path(checkpoint["path"]).name == f"model_{target - 1:05d}.pt"
+                 and re.fullmatch("[0-9a-f]{64}", checkpoint["sha256"]), "non-final checkpoint identity")
+         registries = REGISTRIES if student else [REGISTRIES[SKILLS.index(label.removeprefix("teacher-"))]]
+         require(s["registries"] == env["REGISTRY"] == ",".join(registries), "training registry order changed")
+         if student:
+-            require(s["source_checkpoints"] == teachers and s["finetune"] == env["FINETUNE"] == "0"
+-                    and env["TEACHER_CHECKPOINT"] == ",".join(x["path"] for x in teachers), "pure student provenance changed")
++            require(s["source_checkpoints"] == teachers and s["finetune"] == env["FINETUNE"] == str(int(finetune))
++                    and env["TEACHER_CHECKPOINT"] == ",".join(x["path"] for x in teachers), "student finetune/provenance changed")
+         else:
+             require(s["source_checkpoints"] == [] and s["finetune"] is None, "teacher provenance changed")
+             teachers.append(checkpoint)
+@@ -556,7 +557,7 @@
+                     report["errors"].append(name + " changed during audit")
+             except Exception as exc:
+                 report["errors"].append(name + " after hash failed: " + str(exc))
+-        if not report["errors"] and len(report["stages"]) == 6 and all(x["status"] == "passed" for x in report["stages"]):
++        if not report["errors"] and len(report["stages"]) == 7 and all(x["status"] == "passed" for x in report["stages"]):
+             report["status"] = "passed"
+         report["counts"] = {"stages": len(report["stages"]), "videos_attempted": sum(len(x["videos"]) for x in report["stages"]),
+                             "videos_passed": sum(v["status"] == "passed" for x in report["stages"] for v in x["videos"])}

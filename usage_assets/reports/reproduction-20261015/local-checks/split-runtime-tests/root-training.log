@@ -1,0 +1,1104 @@
+/isaac-sim/exts/omni.pip.cloud/pip_prebundle/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.5.0) or chardet (7.6.0)/charset_normalizer (3.3.2) doesn't match a supported version!
+  warnings.warn(
+........................................................................ [  8%]
+........................................................................ [ 17%]
+.............................F...................FFFFF....FFFFFFFFFFFFFF [ 26%]
+FF.FF.........F.........F........F...................................... [ 35%]
+........................................................................ [ 43%]
+........................................................................ [ 52%]
+........................................................................ [ 61%]
+........................................................................ [ 70%]
+........................................................................ [ 79%]
+........................................................................ [ 87%]
+........................................................................ [ 96%]
+...........................                                              [100%]
+=================================== FAILURES ===================================
+______ test_complete_gate_selects_exact_four_models_and_small_bound_json _______
+
+ready = namespace(args=namespace(root=PosixPath('/tmp/pytest-of-root/pytest-1/test_complete_gate_selects_exa0'), official_outp...s-v2', output_root=PosixPath('/tmp/pytest-of-root/pytest-1/test_complete_gate_selects_exa0/local'), attempt='initial'))
+
+    def test_complete_gate_selects_exact_four_models_and_small_bound_json(ready):
+>       receipt = probe(ready)
+                  ^^^^^^^^^^^^
+
+tests/test_pull_final_students.py:90: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_pull_final_students.py:82: in probe
+    return pf.remote_probe(fixture.args.root,fixture.args.source_tree,pc,fixture.transfer.coverage_output)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/research/pull_final_students.py:178: in remote_probe
+    state = pc.container_state(args, source, "cpu", name, selection["input_identity"])
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/research/posttrain_coverage.py:325: in container_state
+    result = subprocess.run(["docker", "container", "inspect", name], text=True, capture_output=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+argv = ['docker', 'container', 'inspect', 'php-parkour-posttrain-cpu-5218f9ff3c0d']
+kwargs = {'capture_output': True, 'text': True}
+@py_assert2 = ['docker', 'inspect', 'php-parkour-posttrain-cpu-5218f9ff3c0d']
+@py_assert1 = False
+@py_format4 = "['docker', 'c...5218f9ff3c0d'] == ['docker', 'i...5218f9ff3c0d']\n~\n~At index 1 diff: 'container' != 'inspect'\n~Left contains one more item: 'php-parkour-posttrain-cpu-5218f9ff3c0d'\n~Use -v to get more diff"
+@py_format6 = "assert ['docker', 'c...5218f9ff3c0d'] == ['docker', 'i...5218f9ff3c0d']\n~\n~At index 1 diff: 'container' != 'inspect'\n~Left contains one more item: 'php-parkour-posttrain-cpu-5218f9ff3c0d'\n~Use -v to get more diff"
+
+    def inspect(argv, **kwargs):
+>       assert argv == ["docker","inspect",name]
+E       AssertionError: assert ['docker', 'c...5218f9ff3c0d'] == ['docker', 'i...5218f9ff3c0d']
+E         
+E         At index 1 diff: 'container' != 'inspect'
+E         Left contains one more item: 'php-parkour-posttrain-cpu-5218f9ff3c0d'
+E         Use -v to get more diff
+
+tests/test_pull_final_students.py:73: AssertionError
+___ test_actual_cpu_container_must_be_successful_isolated_identity[running] ____
+
+ready = namespace(args=namespace(root=PosixPath('/tmp/pytest-of-root/pytest-1/test_actual_cpu_container_must0'), official_outp...s-v2', output_root=PosixPath('/tmp/pytest-of-root/pytest-1/test_actual_cpu_container_must0/local'), attempt='initial'))
+change = 'running'
+
+    @pytest.mark.parametrize("change",["running","exit","gpu","extra_mount"])
+    def test_actual_cpu_container_must_be_successful_isolated_identity(ready,change):
+        if change == "running": ready.info["State"]["Running"] = True
+        elif change == "exit": ready.info["State"]["ExitCode"] = 1
+        elif change == "gpu": ready.info["HostConfig"]["DeviceRequests"] = [{"DeviceIDs":["GPU-other"]}]
+        else: ready.info["Mounts"].append({"Destination":pc.OFFICIAL+"/override","Source":"/other","RW":True})
+>       with pytest.raises(ValueError): probe(ready)
+                                        ^^^^^^^^^^^^
+
+tests/test_pull_final_students.py:153: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_pull_final_students.py:82: in probe
+    return pf.remote_probe(fixture.args.root,fixture.args.source_tree,pc,fixture.transfer.coverage_output)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/research/pull_final_students.py:178: in remote_probe
+    state = pc.container_state(args, source, "cpu", name, selection["input_identity"])
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/research/posttrain_coverage.py:325: in container_state
+    result = subprocess.run(["docker", "container", "inspect", name], text=True, capture_output=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+argv = ['docker', 'container', 'inspect', 'php-parkour-posttrain-cpu-18ef60f3bd69']
+kwargs = {'capture_output': True, 'text': True}
+@py_assert2 = ['docker', 'inspect', 'php-parkour-posttrain-cpu-18ef60f3bd69']
+@py_assert1 = False
+@py_format4 = "['docker', 'c...18ef60f3bd69'] == ['docker', 'i...18ef60f3bd69']\n~\n~At index 1 diff: 'container' != 'inspect'\n~Left contains one more item: 'php-parkour-posttrain-cpu-18ef60f3bd69'\n~Use -v to get more diff"
+@py_format6 = "assert ['docker', 'c...18ef60f3bd69'] == ['docker', 'i...18ef60f3bd69']\n~\n~At index 1 diff: 'container' != 'inspect'\n~Left contains one more item: 'php-parkour-posttrain-cpu-18ef60f3bd69'\n~Use -v to get more diff"
+
+    def inspect(argv, **kwargs):
+>       assert argv == ["docker","inspect",name]
+E       AssertionError: assert ['docker', 'c...18ef60f3bd69'] == ['docker', 'i...18ef60f3bd69']
+E         
+E         At index 1 diff: 'container' != 'inspect'
+E         Left contains one more item: 'php-parkour-posttrain-cpu-18ef60f3bd69'
+E         Use -v to get more diff
+
+tests/test_pull_final_students.py:73: AssertionError
+_____ test_actual_cpu_container_must_be_successful_isolated_identity[exit] _____
+
+ready = namespace(args=namespace(root=PosixPath('/tmp/pytest-of-root/pytest-1/test_actual_cpu_container_must1'), official_outp...s-v2', output_root=PosixPath('/tmp/pytest-of-root/pytest-1/test_actual_cpu_container_must1/local'), attempt='initial'))
+change = 'exit'
+
+    @pytest.mark.parametrize("change",["running","exit","gpu","extra_mount"])
+    def test_actual_cpu_container_must_be_successful_isolated_identity(ready,change):
+        if change == "running": ready.info["State"]["Running"] = True
+        elif change == "exit": ready.info["State"]["ExitCode"] = 1
+        elif change == "gpu": ready.info["HostConfig"]["DeviceRequests"] = [{"DeviceIDs":["GPU-other"]}]
+        else: ready.info["Mounts"].append({"Destination":pc.OFFICIAL+"/override","Source":"/other","RW":True})
+>       with pytest.raises(ValueError): probe(ready)
+                                        ^^^^^^^^^^^^
+
+tests/test_pull_final_students.py:153: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_pull_final_students.py:82: in probe
+    return pf.remote_probe(fixture.args.root,fixture.args.source_tree,pc,fixture.transfer.coverage_output)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/research/pull_final_students.py:178: in remote_probe
+    state = pc.container_state(args, source, "cpu", name, selection["input_identity"])
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/research/posttrain_coverage.py:325: in container_state
+    result = subprocess.run(["docker", "container", "inspect", name], text=True, capture_output=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+argv = ['docker', 'container', 'inspect', 'php-parkour-posttrain-cpu-2e03b1bead13']
+kwargs = {'capture_output': True, 'text': True}
+@py_assert2 = ['docker', 'inspect', 'php-parkour-posttrain-cpu-2e03b1bead13']
+@py_assert1 = False
+@py_format4 = "['docker', 'c...2e03b1bead13'] == ['docker', 'i...2e03b1bead13']\n~\n~At index 1 diff: 'container' != 'inspect'\n~Left contains one more item: 'php-parkour-posttrain-cpu-2e03b1bead13'\n~Use -v to get more diff"
+@py_format6 = "assert ['docker', 'c...2e03b1bead13'] == ['docker', 'i...2e03b1bead13']\n~\n~At index 1 diff: 'container' != 'inspect'\n~Left contains one more item: 'php-parkour-posttrain-cpu-2e03b1bead13'\n~Use -v to get more diff"
+
+    def inspect(argv, **kwargs):
+>       assert argv == ["docker","inspect",name]
+E       AssertionError: assert ['docker', 'c...2e03b1bead13'] == ['docker', 'i...2e03b1bead13']
+E         
+E         At index 1 diff: 'container' != 'inspect'
+E         Left contains one more item: 'php-parkour-posttrain-cpu-2e03b1bead13'
+E         Use -v to get more diff
+
+tests/test_pull_final_students.py:73: AssertionError
+_____ test_actual_cpu_container_must_be_successful_isolated_identity[gpu] ______
+
+ready = namespace(args=namespace(root=PosixPath('/tmp/pytest-of-root/pytest-1/test_actual_cpu_container_must2'), official_outp...s-v2', output_root=PosixPath('/tmp/pytest-of-root/pytest-1/test_actual_cpu_container_must2/local'), attempt='initial'))
+change = 'gpu'
+
+    @pytest.mark.parametrize("change",["running","exit","gpu","extra_mount"])
+    def test_actual_cpu_container_must_be_successful_isolated_identity(ready,change):
+        if change == "running": ready.info["State"]["Running"] = True
+        elif change == "exit": ready.info["State"]["ExitCode"] = 1
+        elif change == "gpu": ready.info["HostConfig"]["DeviceRequests"] = [{"DeviceIDs":["GPU-other"]}]
+        else: ready.info["Mounts"].append({"Destination":pc.OFFICIAL+"/override","Source":"/other","RW":True})
+>       with pytest.raises(ValueError): probe(ready)
+                                        ^^^^^^^^^^^^
+
+tests/test_pull_final_students.py:153: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_pull_final_students.py:82: in probe
+    return pf.remote_probe(fixture.args.root,fixture.args.source_tree,pc,fixture.transfer.coverage_output)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/research/pull_final_students.py:178: in remote_probe
+    state = pc.container_state(args, source, "cpu", name, selection["input_identity"])
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/research/posttrain_coverage.py:325: in container_state
+    result = subprocess.run(["docker", "container", "inspect", name], text=True, capture_output=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+argv = ['docker', 'container', 'inspect', 'php-parkour-posttrain-cpu-1c515b82ddba']
+kwargs = {'capture_output': True, 'text': True}
+@py_assert2 = ['docker', 'inspect', 'php-parkour-posttrain-cpu-1c515b82ddba']
+@py_assert1 = False
+@py_format4 = "['docker', 'c...1c515b82ddba'] == ['docker', 'i...1c515b82ddba']\n~\n~At index 1 diff: 'container' != 'inspect'\n~Left contains one more item: 'php-parkour-posttrain-cpu-1c515b82ddba'\n~Use -v to get more diff"
+@py_format6 = "assert ['docker', 'c...1c515b82ddba'] == ['docker', 'i...1c515b82ddba']\n~\n~At index 1 diff: 'container' != 'inspect'\n~Left contains one more item: 'php-parkour-posttrain-cpu-1c515b82ddba'\n~Use -v to get more diff"
+
+    def inspect(argv, **kwargs):
+>       assert argv == ["docker","inspect",name]
+E       AssertionError: assert ['docker', 'c...1c515b82ddba'] == ['docker', 'i...1c515b82ddba']
+E         
+E         At index 1 diff: 'container' != 'inspect'
+E         Left contains one more item: 'php-parkour-posttrain-cpu-1c515b82ddba'
+E         Use -v to get more diff
+
+tests/test_pull_final_students.py:73: AssertionError
+_ test_actual_cpu_container_must_be_successful_isolated_identity[extra_mount] __
+
+ready = namespace(args=namespace(root=PosixPath('/tmp/pytest-of-root/pytest-1/test_actual_cpu_container_must3'), official_outp...s-v2', output_root=PosixPath('/tmp/pytest-of-root/pytest-1/test_actual_cpu_container_must3/local'), attempt='initial'))
+change = 'extra_mount'
+
+    @pytest.mark.parametrize("change",["running","exit","gpu","extra_mount"])
+    def test_actual_cpu_container_must_be_successful_isolated_identity(ready,change):
+        if change == "running": ready.info["State"]["Running"] = True
+        elif change == "exit": ready.info["State"]["ExitCode"] = 1
+        elif change == "gpu": ready.info["HostConfig"]["DeviceRequests"] = [{"DeviceIDs":["GPU-other"]}]
+        else: ready.info["Mounts"].append({"Destination":pc.OFFICIAL+"/override","Source":"/other","RW":True})
+>       with pytest.raises(ValueError): probe(ready)
+                                        ^^^^^^^^^^^^
+
+tests/test_pull_final_students.py:153: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_pull_final_students.py:82: in probe
+    return pf.remote_probe(fixture.args.root,fixture.args.source_tree,pc,fixture.transfer.coverage_output)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/research/pull_final_students.py:178: in remote_probe
+    state = pc.container_state(args, source, "cpu", name, selection["input_identity"])
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/research/posttrain_coverage.py:325: in container_state
+    result = subprocess.run(["docker", "container", "inspect", name], text=True, capture_output=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+argv = ['docker', 'container', 'inspect', 'php-parkour-posttrain-cpu-aebdddc1eace']
+kwargs = {'capture_output': True, 'text': True}
+@py_assert2 = ['docker', 'inspect', 'php-parkour-posttrain-cpu-aebdddc1eace']
+@py_assert1 = False
+@py_format4 = "['docker', 'c...aebdddc1eace'] == ['docker', 'i...aebdddc1eace']\n~\n~At index 1 diff: 'container' != 'inspect'\n~Left contains one more item: 'php-parkour-posttrain-cpu-aebdddc1eace'\n~Use -v to get more diff"
+@py_format6 = "assert ['docker', 'c...aebdddc1eace'] == ['docker', 'i...aebdddc1eace']\n~\n~At index 1 diff: 'container' != 'inspect'\n~Left contains one more item: 'php-parkour-posttrain-cpu-aebdddc1eace'\n~Use -v to get more diff"
+
+    def inspect(argv, **kwargs):
+>       assert argv == ["docker","inspect",name]
+E       AssertionError: assert ['docker', 'c...aebdddc1eace'] == ['docker', 'i...aebdddc1eace']
+E         
+E         At index 1 diff: 'container' != 'inspect'
+E         Left contains one more item: 'php-parkour-posttrain-cpu-aebdddc1eace'
+E         Use -v to get more diff
+
+tests/test_pull_final_students.py:73: AssertionError
+______________________ test_cpu_plan_hash_tamper_rejected ______________________
+
+ready = namespace(args=namespace(root=PosixPath('/tmp/pytest-of-root/pytest-1/test_cpu_plan_hash_tamper_reje0'), official_outp...s-v2', output_root=PosixPath('/tmp/pytest-of-root/pytest-1/test_cpu_plan_hash_tamper_reje0/local'), attempt='initial'))
+
+    def test_cpu_plan_hash_tamper_rejected(ready):
+        (ready.args.coverage_output/"teacher/plan.json").write_text("{}")
+>       with pytest.raises(ValueError): probe(ready)
+                                        ^^^^^^^^^^^^
+
+tests/test_pull_final_students.py:158: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_pull_final_students.py:82: in probe
+    return pf.remote_probe(fixture.args.root,fixture.args.source_tree,pc,fixture.transfer.coverage_output)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/research/pull_final_students.py:178: in remote_probe
+    state = pc.container_state(args, source, "cpu", name, selection["input_identity"])
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/research/posttrain_coverage.py:325: in container_state
+    result = subprocess.run(["docker", "container", "inspect", name], text=True, capture_output=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+argv = ['docker', 'container', 'inspect', 'php-parkour-posttrain-cpu-71f02e1a2c5f']
+kwargs = {'capture_output': True, 'text': True}
+@py_assert2 = ['docker', 'inspect', 'php-parkour-posttrain-cpu-71f02e1a2c5f']
+@py_assert1 = False
+@py_format4 = "['docker', 'c...71f02e1a2c5f'] == ['docker', 'i...71f02e1a2c5f']\n~\n~At index 1 diff: 'container' != 'inspect'\n~Left contains one more item: 'php-parkour-posttrain-cpu-71f02e1a2c5f'\n~Use -v to get more diff"
+@py_format6 = "assert ['docker', 'c...71f02e1a2c5f'] == ['docker', 'i...71f02e1a2c5f']\n~\n~At index 1 diff: 'container' != 'inspect'\n~Left contains one more item: 'php-parkour-posttrain-cpu-71f02e1a2c5f'\n~Use -v to get more diff"
+
+    def inspect(argv, **kwargs):
+>       assert argv == ["docker","inspect",name]
+E       AssertionError: assert ['docker', 'c...71f02e1a2c5f'] == ['docker', 'i...71f02e1a2c5f']
+E         
+E         At index 1 diff: 'container' != 'inspect'
+E         Left contains one more item: 'php-parkour-posttrain-cpu-71f02e1a2c5f'
+E         Use -v to get more diff
+
+tests/test_pull_final_students.py:73: AssertionError
+______ test_host_receipt_whitelist_and_pt_binding_reject_bad_payloads[pt] ______
+
+ready = namespace(args=namespace(root=PosixPath('/tmp/pytest-of-root/pytest-1/test_host_receipt_whitelist_an0'), official_outp...s-v2', output_root=PosixPath('/tmp/pytest-of-root/pytest-1/test_host_receipt_whitelist_an0/local'), attempt='initial'))
+change = 'pt'
+
+    @pytest.mark.parametrize("change",["pt","teacher_onnx","path_escape","missing_json","missing_model","wrong_pt","report_escape","cohort","bundle","teacher_iteration"])
+    def test_host_receipt_whitelist_and_pt_binding_reject_bad_payloads(ready,change):
+>       receipt = probe(ready);payload=receipt["payload"]
+                  ^^^^^^^^^^^^
+
+tests/test_pull_final_students.py:183: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_pull_final_students.py:82: in probe
+    return pf.remote_probe(fixture.args.root,fixture.args.source_tree,pc,fixture.transfer.coverage_output)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/research/pull_final_students.py:178: in remote_probe
+    state = pc.container_state(args, source, "cpu", name, selection["input_identity"])
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/research/posttrain_coverage.py:325: in container_state
+    result = subprocess.run(["docker", "container", "inspect", name], text=True, capture_output=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+argv = ['docker', 'container', 'inspect', 'php-parkour-posttrain-cpu-46adb1592aac']
+kwargs = {'capture_output': True, 'text': True}
+@py_assert2 = ['docker', 'inspect', 'php-parkour-posttrain-cpu-46adb1592aac']
+@py_assert1 = False
+@py_format4 = "['docker', 'c...46adb1592aac'] == ['docker', 'i...46adb1592aac']\n~\n~At index 1 diff: 'container' != 'inspect'\n~Left contains one more item: 'php-parkour-posttrain-cpu-46adb1592aac'\n~Use -v to get more diff"
+@py_format6 = "assert ['docker', 'c...46adb1592aac'] == ['docker', 'i...46adb1592aac']\n~\n~At index 1 diff: 'container' != 'inspect'\n~Left contains one more item: 'php-parkour-posttrain-cpu-46adb1592aac'\n~Use -v to get more diff"
+
+    def inspect(argv, **kwargs):
+>       assert argv == ["docker","inspect",name]
+E       AssertionError: assert ['docker', 'c...46adb1592aac'] == ['docker', 'i...46adb1592aac']
+E         
+E         At index 1 diff: 'container' != 'inspect'
+E         Left contains one more item: 'php-parkour-posttrain-cpu-46adb1592aac'
+E         Use -v to get more diff
+
+tests/test_pull_final_students.py:73: AssertionError
+_ test_host_receipt_whitelist_and_pt_binding_reject_bad_payloads[teacher_onnx] _
+
+ready = namespace(args=namespace(root=PosixPath('/tmp/pytest-of-root/pytest-1/test_host_receipt_whitelist_an1'), official_outp...s-v2', output_root=PosixPath('/tmp/pytest-of-root/pytest-1/test_host_receipt_whitelist_an1/local'), attempt='initial'))
+change = 'teacher_onnx'
+
+    @pytest.mark.parametrize("change",["pt","teacher_onnx","path_escape","missing_json","missing_model","wrong_pt","report_escape","cohort","bundle","teacher_iteration"])
+    def test_host_receipt_whitelist_and_pt_binding_reject_bad_payloads(ready,change):
+>       receipt = probe(ready);payload=receipt["payload"]
+                  ^^^^^^^^^^^^
+
+tests/test_pull_final_students.py:183: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_pull_final_students.py:82: in probe
+    return pf.remote_probe(fixture.args.root,fixture.args.source_tree,pc,fixture.transfer.coverage_output)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/research/pull_final_students.py:178: in remote_probe
+    state = pc.container_state(args, source, "cpu", name, selection["input_identity"])
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/research/posttrain_coverage.py:325: in container_state
+    result = subprocess.run(["docker", "container", "inspect", name], text=True, capture_output=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+argv = ['docker', 'container', 'inspect', 'php-parkour-posttrain-cpu-376a58c2b5dd']
+kwargs = {'capture_output': True, 'text': True}
+@py_assert2 = ['docker', 'inspect', 'php-parkour-posttrain-cpu-376a58c2b5dd']
+@py_assert1 = False
+@py_format4 = "['docker', 'c...376a58c2b5dd'] == ['docker', 'i...376a58c2b5dd']\n~\n~At index 1 diff: 'container' != 'inspect'\n~Left contains one more item: 'php-parkour-posttrain-cpu-376a58c2b5dd'\n~Use -v to get more diff"
+@py_format6 = "assert ['docker', 'c...376a58c2b5dd'] == ['docker', 'i...376a58c2b5dd']\n~\n~At index 1 diff: 'container' != 'inspect'\n~Left contains one more item: 'php-parkour-posttrain-cpu-376a58c2b5dd'\n~Use -v to get more diff"
+
+    def inspect(argv, **kwargs):
+>       assert argv == ["docker","inspect",name]
+E       AssertionError: assert ['docker', 'c...376a58c2b5dd'] == ['docker', 'i...376a58c2b5dd']
+E         
+E         At index 1 diff: 'container' != 'inspect'
+E         Left contains one more item: 'php-parkour-posttrain-cpu-376a58c2b5dd'
+E         Use -v to get more diff
+
+tests/test_pull_final_students.py:73: AssertionError
+_ test_host_receipt_whitelist_and_pt_binding_reject_bad_payloads[path_escape] __
+
+ready = namespace(args=namespace(root=PosixPath('/tmp/pytest-of-root/pytest-1/test_host_receipt_whitelist_an2'), official_outp...s-v2', output_root=PosixPath('/tmp/pytest-of-root/pytest-1/test_host_receipt_whitelist_an2/local'), attempt='initial'))
+change = 'path_escape'
+
+    @pytest.mark.parametrize("change",["pt","teacher_onnx","path_escape","missing_json","missing_model","wrong_pt","report_escape","cohort","bundle","teacher_iteration"])
+    def test_host_receipt_whitelist_and_pt_binding_reject_bad_payloads(ready,change):
+>       receipt = probe(ready);payload=receipt["payload"]
+                  ^^^^^^^^^^^^
+
+tests/test_pull_final_students.py:183: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_pull_final_students.py:82: in probe
+    return pf.remote_probe(fixture.args.root,fixture.args.source_tree,pc,fixture.transfer.coverage_output)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/research/pull_final_students.py:178: in remote_probe
+    state = pc.container_state(args, source, "cpu", name, selection["input_identity"])
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/research/posttrain_coverage.py:325: in container_state
+    result = subprocess.run(["docker", "container", "inspect", name], text=True, capture_output=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+argv = ['docker', 'container', 'inspect', 'php-parkour-posttrain-cpu-54c899f43ca9']
+kwargs = {'capture_output': True, 'text': True}
+@py_assert2 = ['docker', 'inspect', 'php-parkour-posttrain-cpu-54c899f43ca9']
+@py_assert1 = False
+@py_format4 = "['docker', 'c...54c899f43ca9'] == ['docker', 'i...54c899f43ca9']\n~\n~At index 1 diff: 'container' != 'inspect'\n~Left contains one more item: 'php-parkour-posttrain-cpu-54c899f43ca9'\n~Use -v to get more diff"
+@py_format6 = "assert ['docker', 'c...54c899f43ca9'] == ['docker', 'i...54c899f43ca9']\n~\n~At index 1 diff: 'container' != 'inspect'\n~Left contains one more item: 'php-parkour-posttrain-cpu-54c899f43ca9'\n~Use -v to get more diff"
+
+    def inspect(argv, **kwargs):
+>       assert argv == ["docker","inspect",name]
+E       AssertionError: assert ['docker', 'c...54c899f43ca9'] == ['docker', 'i...54c899f43ca9']
+E         
+E         At index 1 diff: 'container' != 'inspect'
+E         Left contains one more item: 'php-parkour-posttrain-cpu-54c899f43ca9'
+E         Use -v to get more diff
+
+tests/test_pull_final_students.py:73: AssertionError
+_ test_host_receipt_whitelist_and_pt_binding_reject_bad_payloads[missing_json] _
+
+ready = namespace(args=namespace(root=PosixPath('/tmp/pytest-of-root/pytest-1/test_host_receipt_whitelist_an3'), official_outp...s-v2', output_root=PosixPath('/tmp/pytest-of-root/pytest-1/test_host_receipt_whitelist_an3/local'), attempt='initial'))
+change = 'missing_json'
+
+    @pytest.mark.parametrize("change",["pt","teacher_onnx","path_escape","missing_json","missing_model","wrong_pt","report_escape","cohort","bundle","teacher_iteration"])
+    def test_host_receipt_whitelist_and_pt_binding_reject_bad_payloads(ready,change):
+>       receipt = probe(ready);payload=receipt["payload"]
+                  ^^^^^^^^^^^^
+
+tests/test_pull_final_students.py:183: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_pull_final_students.py:82: in probe
+    return pf.remote_probe(fixture.args.root,fixture.args.source_tree,pc,fixture.transfer.coverage_output)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/research/pull_final_students.py:178: in remote_probe
+    state = pc.container_state(args, source, "cpu", name, selection["input_identity"])
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/research/posttrain_coverage.py:325: in container_state
+    result = subprocess.run(["docker", "container", "inspect", name], text=True, capture_output=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+argv = ['docker', 'container', 'inspect', 'php-parkour-posttrain-cpu-81025b3c242c']
+kwargs = {'capture_output': True, 'text': True}
+@py_assert2 = ['docker', 'inspect', 'php-parkour-posttrain-cpu-81025b3c242c']
+@py_assert1 = False
+@py_format4 = "['docker', 'c...81025b3c242c'] == ['docker', 'i...81025b3c242c']\n~\n~At index 1 diff: 'container' != 'inspect'\n~Left contains one more item: 'php-parkour-posttrain-cpu-81025b3c242c'\n~Use -v to get more diff"
+@py_format6 = "assert ['docker', 'c...81025b3c242c'] == ['docker', 'i...81025b3c242c']\n~\n~At index 1 diff: 'container' != 'inspect'\n~Left contains one more item: 'php-parkour-posttrain-cpu-81025b3c242c'\n~Use -v to get more diff"
+
+    def inspect(argv, **kwargs):
+>       assert argv == ["docker","inspect",name]
+E       AssertionError: assert ['docker', 'c...81025b3c242c'] == ['docker', 'i...81025b3c242c']
+E         
+E         At index 1 diff: 'container' != 'inspect'
+E         Left contains one more item: 'php-parkour-posttrain-cpu-81025b3c242c'
+E         Use -v to get more diff
+
+tests/test_pull_final_students.py:73: AssertionError
+_ test_host_receipt_whitelist_and_pt_binding_reject_bad_payloads[missing_model] _
+
+ready = namespace(args=namespace(root=PosixPath('/tmp/pytest-of-root/pytest-1/test_host_receipt_whitelist_an4'), official_outp...s-v2', output_root=PosixPath('/tmp/pytest-of-root/pytest-1/test_host_receipt_whitelist_an4/local'), attempt='initial'))
+change = 'missing_model'
+
+    @pytest.mark.parametrize("change",["pt","teacher_onnx","path_escape","missing_json","missing_model","wrong_pt","report_escape","cohort","bundle","teacher_iteration"])
+    def test_host_receipt_whitelist_and_pt_binding_reject_bad_payloads(ready,change):
+>       receipt = probe(ready);payload=receipt["payload"]
+                  ^^^^^^^^^^^^
+
+tests/test_pull_final_students.py:183: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_pull_final_students.py:82: in probe
+    return pf.remote_probe(fixture.args.root,fixture.args.source_tree,pc,fixture.transfer.coverage_output)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/research/pull_final_students.py:178: in remote_probe
+    state = pc.container_state(args, source, "cpu", name, selection["input_identity"])
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/research/posttrain_coverage.py:325: in container_state
+    result = subprocess.run(["docker", "container", "inspect", name], text=True, capture_output=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+argv = ['docker', 'container', 'inspect', 'php-parkour-posttrain-cpu-8e8fbe87a42a']
+kwargs = {'capture_output': True, 'text': True}
+@py_assert2 = ['docker', 'inspect', 'php-parkour-posttrain-cpu-8e8fbe87a42a']
+@py_assert1 = False
+@py_format4 = "['docker', 'c...8e8fbe87a42a'] == ['docker', 'i...8e8fbe87a42a']\n~\n~At index 1 diff: 'container' != 'inspect'\n~Left contains one more item: 'php-parkour-posttrain-cpu-8e8fbe87a42a'\n~Use -v to get more diff"
+@py_format6 = "assert ['docker', 'c...8e8fbe87a42a'] == ['docker', 'i...8e8fbe87a42a']\n~\n~At index 1 diff: 'container' != 'inspect'\n~Left contains one more item: 'php-parkour-posttrain-cpu-8e8fbe87a42a'\n~Use -v to get more diff"
+
+    def inspect(argv, **kwargs):
+>       assert argv == ["docker","inspect",name]
+E       AssertionError: assert ['docker', 'c...8e8fbe87a42a'] == ['docker', 'i...8e8fbe87a42a']
+E         
+E         At index 1 diff: 'container' != 'inspect'
+E         Left contains one more item: 'php-parkour-posttrain-cpu-8e8fbe87a42a'
+E         Use -v to get more diff
+
+tests/test_pull_final_students.py:73: AssertionError
+___ test_host_receipt_whitelist_and_pt_binding_reject_bad_payloads[wrong_pt] ___
+
+ready = namespace(args=namespace(root=PosixPath('/tmp/pytest-of-root/pytest-1/test_host_receipt_whitelist_an5'), official_outp...s-v2', output_root=PosixPath('/tmp/pytest-of-root/pytest-1/test_host_receipt_whitelist_an5/local'), attempt='initial'))
+change = 'wrong_pt'
+
+    @pytest.mark.parametrize("change",["pt","teacher_onnx","path_escape","missing_json","missing_model","wrong_pt","report_escape","cohort","bundle","teacher_iteration"])
+    def test_host_receipt_whitelist_and_pt_binding_reject_bad_payloads(ready,change):
+>       receipt = probe(ready);payload=receipt["payload"]
+                  ^^^^^^^^^^^^
+
+tests/test_pull_final_students.py:183: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_pull_final_students.py:82: in probe
+    return pf.remote_probe(fixture.args.root,fixture.args.source_tree,pc,fixture.transfer.coverage_output)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/research/pull_final_students.py:178: in remote_probe
+    state = pc.container_state(args, source, "cpu", name, selection["input_identity"])
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/research/posttrain_coverage.py:325: in container_state
+    result = subprocess.run(["docker", "container", "inspect", name], text=True, capture_output=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+argv = ['docker', 'container', 'inspect', 'php-parkour-posttrain-cpu-2e2fb17fbe5c']
+kwargs = {'capture_output': True, 'text': True}
+@py_assert2 = ['docker', 'inspect', 'php-parkour-posttrain-cpu-2e2fb17fbe5c']
+@py_assert1 = False
+@py_format4 = "['docker', 'c...2e2fb17fbe5c'] == ['docker', 'i...2e2fb17fbe5c']\n~\n~At index 1 diff: 'container' != 'inspect'\n~Left contains one more item: 'php-parkour-posttrain-cpu-2e2fb17fbe5c'\n~Use -v to get more diff"
+@py_format6 = "assert ['docker', 'c...2e2fb17fbe5c'] == ['docker', 'i...2e2fb17fbe5c']\n~\n~At index 1 diff: 'container' != 'inspect'\n~Left contains one more item: 'php-parkour-posttrain-cpu-2e2fb17fbe5c'\n~Use -v to get more diff"
+
+    def inspect(argv, **kwargs):
+>       assert argv == ["docker","inspect",name]
+E       AssertionError: assert ['docker', 'c...2e2fb17fbe5c'] == ['docker', 'i...2e2fb17fbe5c']
+E         
+E         At index 1 diff: 'container' != 'inspect'
+E         Left contains one more item: 'php-parkour-posttrain-cpu-2e2fb17fbe5c'
+E         Use -v to get more diff
+
+tests/test_pull_final_students.py:73: AssertionError
+_ test_host_receipt_whitelist_and_pt_binding_reject_bad_payloads[report_escape] _
+
+ready = namespace(args=namespace(root=PosixPath('/tmp/pytest-of-root/pytest-1/test_host_receipt_whitelist_an6'), official_outp...s-v2', output_root=PosixPath('/tmp/pytest-of-root/pytest-1/test_host_receipt_whitelist_an6/local'), attempt='initial'))
+change = 'report_escape'
+
+    @pytest.mark.parametrize("change",["pt","teacher_onnx","path_escape","missing_json","missing_model","wrong_pt","report_escape","cohort","bundle","teacher_iteration"])
+    def test_host_receipt_whitelist_and_pt_binding_reject_bad_payloads(ready,change):
+>       receipt = probe(ready);payload=receipt["payload"]
+                  ^^^^^^^^^^^^
+
+tests/test_pull_final_students.py:183: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_pull_final_students.py:82: in probe
+    return pf.remote_probe(fixture.args.root,fixture.args.source_tree,pc,fixture.transfer.coverage_output)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/research/pull_final_students.py:178: in remote_probe
+    state = pc.container_state(args, source, "cpu", name, selection["input_identity"])
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/research/posttrain_coverage.py:325: in container_state
+    result = subprocess.run(["docker", "container", "inspect", name], text=True, capture_output=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+argv = ['docker', 'container', 'inspect', 'php-parkour-posttrain-cpu-2eed8a308240']
+kwargs = {'capture_output': True, 'text': True}
+@py_assert2 = ['docker', 'inspect', 'php-parkour-posttrain-cpu-2eed8a308240']
+@py_assert1 = False
+@py_format4 = "['docker', 'c...2eed8a308240'] == ['docker', 'i...2eed8a308240']\n~\n~At index 1 diff: 'container' != 'inspect'\n~Left contains one more item: 'php-parkour-posttrain-cpu-2eed8a308240'\n~Use -v to get more diff"
+@py_format6 = "assert ['docker', 'c...2eed8a308240'] == ['docker', 'i...2eed8a308240']\n~\n~At index 1 diff: 'container' != 'inspect'\n~Left contains one more item: 'php-parkour-posttrain-cpu-2eed8a308240'\n~Use -v to get more diff"
+
+    def inspect(argv, **kwargs):
+>       assert argv == ["docker","inspect",name]
+E       AssertionError: assert ['docker', 'c...2eed8a308240'] == ['docker', 'i...2eed8a308240']
+E         
+E         At index 1 diff: 'container' != 'inspect'
+E         Left contains one more item: 'php-parkour-posttrain-cpu-2eed8a308240'
+E         Use -v to get more diff
+
+tests/test_pull_final_students.py:73: AssertionError
+____ test_host_receipt_whitelist_and_pt_binding_reject_bad_payloads[cohort] ____
+
+ready = namespace(args=namespace(root=PosixPath('/tmp/pytest-of-root/pytest-1/test_host_receipt_whitelist_an7'), official_outp...s-v2', output_root=PosixPath('/tmp/pytest-of-root/pytest-1/test_host_receipt_whitelist_an7/local'), attempt='initial'))
+change = 'cohort'
+
+    @pytest.mark.parametrize("change",["pt","teacher_onnx","path_escape","missing_json","missing_model","wrong_pt","report_escape","cohort","bundle","teacher_iteration"])
+    def test_host_receipt_whitelist_and_pt_binding_reject_bad_payloads(ready,change):
+>       receipt = probe(ready);payload=receipt["payload"]
+                  ^^^^^^^^^^^^
+
+tests/test_pull_final_students.py:183: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_pull_final_students.py:82: in probe
+    return pf.remote_probe(fixture.args.root,fixture.args.source_tree,pc,fixture.transfer.coverage_output)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/research/pull_final_students.py:178: in remote_probe
+    state = pc.container_state(args, source, "cpu", name, selection["input_identity"])
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/research/posttrain_coverage.py:325: in container_state
+    result = subprocess.run(["docker", "container", "inspect", name], text=True, capture_output=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+argv = ['docker', 'container', 'inspect', 'php-parkour-posttrain-cpu-e0de42fcd251']
+kwargs = {'capture_output': True, 'text': True}
+@py_assert2 = ['docker', 'inspect', 'php-parkour-posttrain-cpu-e0de42fcd251']
+@py_assert1 = False
+@py_format4 = "['docker', 'c...e0de42fcd251'] == ['docker', 'i...e0de42fcd251']\n~\n~At index 1 diff: 'container' != 'inspect'\n~Left contains one more item: 'php-parkour-posttrain-cpu-e0de42fcd251'\n~Use -v to get more diff"
+@py_format6 = "assert ['docker', 'c...e0de42fcd251'] == ['docker', 'i...e0de42fcd251']\n~\n~At index 1 diff: 'container' != 'inspect'\n~Left contains one more item: 'php-parkour-posttrain-cpu-e0de42fcd251'\n~Use -v to get more diff"
+
+    def inspect(argv, **kwargs):
+>       assert argv == ["docker","inspect",name]
+E       AssertionError: assert ['docker', 'c...e0de42fcd251'] == ['docker', 'i...e0de42fcd251']
+E         
+E         At index 1 diff: 'container' != 'inspect'
+E         Left contains one more item: 'php-parkour-posttrain-cpu-e0de42fcd251'
+E         Use -v to get more diff
+
+tests/test_pull_final_students.py:73: AssertionError
+____ test_host_receipt_whitelist_and_pt_binding_reject_bad_payloads[bundle] ____
+
+ready = namespace(args=namespace(root=PosixPath('/tmp/pytest-of-root/pytest-1/test_host_receipt_whitelist_an8'), official_outp...s-v2', output_root=PosixPath('/tmp/pytest-of-root/pytest-1/test_host_receipt_whitelist_an8/local'), attempt='initial'))
+change = 'bundle'
+
+    @pytest.mark.parametrize("change",["pt","teacher_onnx","path_escape","missing_json","missing_model","wrong_pt","report_escape","cohort","bundle","teacher_iteration"])
+    def test_host_receipt_whitelist_and_pt_binding_reject_bad_payloads(ready,change):
+>       receipt = probe(ready);payload=receipt["payload"]
+                  ^^^^^^^^^^^^
+
+tests/test_pull_final_students.py:183: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_pull_final_students.py:82: in probe
+    return pf.remote_probe(fixture.args.root,fixture.args.source_tree,pc,fixture.transfer.coverage_output)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/research/pull_final_students.py:178: in remote_probe
+    state = pc.container_state(args, source, "cpu", name, selection["input_identity"])
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/research/posttrain_coverage.py:325: in container_state
+    result = subprocess.run(["docker", "container", "inspect", name], text=True, capture_output=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+argv = ['docker', 'container', 'inspect', 'php-parkour-posttrain-cpu-753942491b34']
+kwargs = {'capture_output': True, 'text': True}
+@py_assert2 = ['docker', 'inspect', 'php-parkour-posttrain-cpu-753942491b34']
+@py_assert1 = False
+@py_format4 = "['docker', 'c...753942491b34'] == ['docker', 'i...753942491b34']\n~\n~At index 1 diff: 'container' != 'inspect'\n~Left contains one more item: 'php-parkour-posttrain-cpu-753942491b34'\n~Use -v to get more diff"
+@py_format6 = "assert ['docker', 'c...753942491b34'] == ['docker', 'i...753942491b34']\n~\n~At index 1 diff: 'container' != 'inspect'\n~Left contains one more item: 'php-parkour-posttrain-cpu-753942491b34'\n~Use -v to get more diff"
+
+    def inspect(argv, **kwargs):
+>       assert argv == ["docker","inspect",name]
+E       AssertionError: assert ['docker', 'c...753942491b34'] == ['docker', 'i...753942491b34']
+E         
+E         At index 1 diff: 'container' != 'inspect'
+E         Left contains one more item: 'php-parkour-posttrain-cpu-753942491b34'
+E         Use -v to get more diff
+
+tests/test_pull_final_students.py:73: AssertionError
+_ test_host_receipt_whitelist_and_pt_binding_reject_bad_payloads[teacher_iteration] _
+
+ready = namespace(args=namespace(root=PosixPath('/tmp/pytest-of-root/pytest-1/test_host_receipt_whitelist_an9'), official_outp...s-v2', output_root=PosixPath('/tmp/pytest-of-root/pytest-1/test_host_receipt_whitelist_an9/local'), attempt='initial'))
+change = 'teacher_iteration'
+
+    @pytest.mark.parametrize("change",["pt","teacher_onnx","path_escape","missing_json","missing_model","wrong_pt","report_escape","cohort","bundle","teacher_iteration"])
+    def test_host_receipt_whitelist_and_pt_binding_reject_bad_payloads(ready,change):
+>       receipt = probe(ready);payload=receipt["payload"]
+                  ^^^^^^^^^^^^
+
+tests/test_pull_final_students.py:183: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_pull_final_students.py:82: in probe
+    return pf.remote_probe(fixture.args.root,fixture.args.source_tree,pc,fixture.transfer.coverage_output)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/research/pull_final_students.py:178: in remote_probe
+    state = pc.container_state(args, source, "cpu", name, selection["input_identity"])
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/research/posttrain_coverage.py:325: in container_state
+    result = subprocess.run(["docker", "container", "inspect", name], text=True, capture_output=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+argv = ['docker', 'container', 'inspect', 'php-parkour-posttrain-cpu-3773c99b232c']
+kwargs = {'capture_output': True, 'text': True}
+@py_assert2 = ['docker', 'inspect', 'php-parkour-posttrain-cpu-3773c99b232c']
+@py_assert1 = False
+@py_format4 = "['docker', 'c...3773c99b232c'] == ['docker', 'i...3773c99b232c']\n~\n~At index 1 diff: 'container' != 'inspect'\n~Left contains one more item: 'php-parkour-posttrain-cpu-3773c99b232c'\n~Use -v to get more diff"
+@py_format6 = "assert ['docker', 'c...3773c99b232c'] == ['docker', 'i...3773c99b232c']\n~\n~At index 1 diff: 'container' != 'inspect'\n~Left contains one more item: 'php-parkour-posttrain-cpu-3773c99b232c'\n~Use -v to get more diff"
+
+    def inspect(argv, **kwargs):
+>       assert argv == ["docker","inspect",name]
+E       AssertionError: assert ['docker', 'c...3773c99b232c'] == ['docker', 'i...3773c99b232c']
+E         
+E         At index 1 diff: 'container' != 'inspect'
+E         Left contains one more item: 'php-parkour-posttrain-cpu-3773c99b232c'
+E         Use -v to get more diff
+
+tests/test_pull_final_students.py:73: AssertionError
+____ test_explicit_fetch_materializes_only_four_models_and_keeps_raw_bytes _____
+
+ready = namespace(args=namespace(root=PosixPath('/tmp/pytest-of-root/pytest-1/test_explicit_fetch_materializ0'), official_outp...s-v2', output_root=PosixPath('/tmp/pytest-of-root/pytest-1/test_explicit_fetch_materializ0/local'), attempt='initial'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7ee260dceb90>
+
+    def test_explicit_fetch_materializes_only_four_models_and_keeps_raw_bytes(ready,monkeypatch):
+>       receipt=install_rsync(ready,monkeypatch)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_pull_final_students.py:219: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_pull_final_students.py:199: in install_rsync
+    receipt = probe(ready)
+              ^^^^^^^^^^^^
+tests/test_pull_final_students.py:82: in probe
+    return pf.remote_probe(fixture.args.root,fixture.args.source_tree,pc,fixture.transfer.coverage_output)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/research/pull_final_students.py:178: in remote_probe
+    state = pc.container_state(args, source, "cpu", name, selection["input_identity"])
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/research/posttrain_coverage.py:325: in container_state
+    result = subprocess.run(["docker", "container", "inspect", name], text=True, capture_output=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+argv = ['docker', 'container', 'inspect', 'php-parkour-posttrain-cpu-cd5132cc908f']
+kwargs = {'capture_output': True, 'text': True}
+@py_assert2 = ['docker', 'inspect', 'php-parkour-posttrain-cpu-cd5132cc908f']
+@py_assert1 = False
+@py_format4 = "['docker', 'c...cd5132cc908f'] == ['docker', 'i...cd5132cc908f']\n~\n~At index 1 diff: 'container' != 'inspect'\n~Left contains one more item: 'php-parkour-posttrain-cpu-cd5132cc908f'\n~Use -v to get more diff"
+@py_format6 = "assert ['docker', 'c...cd5132cc908f'] == ['docker', 'i...cd5132cc908f']\n~\n~At index 1 diff: 'container' != 'inspect'\n~Left contains one more item: 'php-parkour-posttrain-cpu-cd5132cc908f'\n~Use -v to get more diff"
+
+    def inspect(argv, **kwargs):
+>       assert argv == ["docker","inspect",name]
+E       AssertionError: assert ['docker', 'c...cd5132cc908f'] == ['docker', 'i...cd5132cc908f']
+E         
+E         At index 1 diff: 'container' != 'inspect'
+E         Left contains one more item: 'php-parkour-posttrain-cpu-cd5132cc908f'
+E         Use -v to get more diff
+
+tests/test_pull_final_students.py:73: AssertionError
+_____ test_failed_or_changed_transfer_keeps_fresh_partial_evidence[rsync] ______
+
+ready = namespace(args=namespace(root=PosixPath('/tmp/pytest-of-root/pytest-1/test_failed_or_changed_transfe0'), official_outp...s-v2', output_root=PosixPath('/tmp/pytest-of-root/pytest-1/test_failed_or_changed_transfe0/local'), attempt='initial'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7ee260c70e10>
+fault = 'rsync'
+
+    @pytest.mark.parametrize("fault",["rsync","tamper","symlink","remote_changed","remote_waiting"])
+    def test_failed_or_changed_transfer_keeps_fresh_partial_evidence(ready,monkeypatch,fault):
+>       after=probe(ready)
+              ^^^^^^^^^^^^
+
+tests/test_pull_final_students.py:232: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_pull_final_students.py:82: in probe
+    return pf.remote_probe(fixture.args.root,fixture.args.source_tree,pc,fixture.transfer.coverage_output)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/research/pull_final_students.py:178: in remote_probe
+    state = pc.container_state(args, source, "cpu", name, selection["input_identity"])
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/research/posttrain_coverage.py:325: in container_state
+    result = subprocess.run(["docker", "container", "inspect", name], text=True, capture_output=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+argv = ['docker', 'container', 'inspect', 'php-parkour-posttrain-cpu-1210f00263a0']
+kwargs = {'capture_output': True, 'text': True}
+@py_assert2 = ['docker', 'inspect', 'php-parkour-posttrain-cpu-1210f00263a0']
+@py_assert1 = False
+@py_format4 = "['docker', 'c...1210f00263a0'] == ['docker', 'i...1210f00263a0']\n~\n~At index 1 diff: 'container' != 'inspect'\n~Left contains one more item: 'php-parkour-posttrain-cpu-1210f00263a0'\n~Use -v to get more diff"
+@py_format6 = "assert ['docker', 'c...1210f00263a0'] == ['docker', 'i...1210f00263a0']\n~\n~At index 1 diff: 'container' != 'inspect'\n~Left contains one more item: 'php-parkour-posttrain-cpu-1210f00263a0'\n~Use -v to get more diff"
+
+    def inspect(argv, **kwargs):
+>       assert argv == ["docker","inspect",name]
+E       AssertionError: assert ['docker', 'c...1210f00263a0'] == ['docker', 'i...1210f00263a0']
+E         
+E         At index 1 diff: 'container' != 'inspect'
+E         Left contains one more item: 'php-parkour-posttrain-cpu-1210f00263a0'
+E         Use -v to get more diff
+
+tests/test_pull_final_students.py:73: AssertionError
+_____ test_failed_or_changed_transfer_keeps_fresh_partial_evidence[tamper] _____
+
+ready = namespace(args=namespace(root=PosixPath('/tmp/pytest-of-root/pytest-1/test_failed_or_changed_transfe1'), official_outp...s-v2', output_root=PosixPath('/tmp/pytest-of-root/pytest-1/test_failed_or_changed_transfe1/local'), attempt='initial'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7ee260d10290>
+fault = 'tamper'
+
+    @pytest.mark.parametrize("fault",["rsync","tamper","symlink","remote_changed","remote_waiting"])
+    def test_failed_or_changed_transfer_keeps_fresh_partial_evidence(ready,monkeypatch,fault):
+>       after=probe(ready)
+              ^^^^^^^^^^^^
+
+tests/test_pull_final_students.py:232: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_pull_final_students.py:82: in probe
+    return pf.remote_probe(fixture.args.root,fixture.args.source_tree,pc,fixture.transfer.coverage_output)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/research/pull_final_students.py:178: in remote_probe
+    state = pc.container_state(args, source, "cpu", name, selection["input_identity"])
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/research/posttrain_coverage.py:325: in container_state
+    result = subprocess.run(["docker", "container", "inspect", name], text=True, capture_output=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+argv = ['docker', 'container', 'inspect', 'php-parkour-posttrain-cpu-e3ab345cbd87']
+kwargs = {'capture_output': True, 'text': True}
+@py_assert2 = ['docker', 'inspect', 'php-parkour-posttrain-cpu-e3ab345cbd87']
+@py_assert1 = False
+@py_format4 = "['docker', 'c...e3ab345cbd87'] == ['docker', 'i...e3ab345cbd87']\n~\n~At index 1 diff: 'container' != 'inspect'\n~Left contains one more item: 'php-parkour-posttrain-cpu-e3ab345cbd87'\n~Use -v to get more diff"
+@py_format6 = "assert ['docker', 'c...e3ab345cbd87'] == ['docker', 'i...e3ab345cbd87']\n~\n~At index 1 diff: 'container' != 'inspect'\n~Left contains one more item: 'php-parkour-posttrain-cpu-e3ab345cbd87'\n~Use -v to get more diff"
+
+    def inspect(argv, **kwargs):
+>       assert argv == ["docker","inspect",name]
+E       AssertionError: assert ['docker', 'c...e3ab345cbd87'] == ['docker', 'i...e3ab345cbd87']
+E         
+E         At index 1 diff: 'container' != 'inspect'
+E         Left contains one more item: 'php-parkour-posttrain-cpu-e3ab345cbd87'
+E         Use -v to get more diff
+
+tests/test_pull_final_students.py:73: AssertionError
+____ test_failed_or_changed_transfer_keeps_fresh_partial_evidence[symlink] _____
+
+ready = namespace(args=namespace(root=PosixPath('/tmp/pytest-of-root/pytest-1/test_failed_or_changed_transfe2'), official_outp...s-v2', output_root=PosixPath('/tmp/pytest-of-root/pytest-1/test_failed_or_changed_transfe2/local'), attempt='initial'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7ee260b09650>
+fault = 'symlink'
+
+    @pytest.mark.parametrize("fault",["rsync","tamper","symlink","remote_changed","remote_waiting"])
+    def test_failed_or_changed_transfer_keeps_fresh_partial_evidence(ready,monkeypatch,fault):
+>       after=probe(ready)
+              ^^^^^^^^^^^^
+
+tests/test_pull_final_students.py:232: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_pull_final_students.py:82: in probe
+    return pf.remote_probe(fixture.args.root,fixture.args.source_tree,pc,fixture.transfer.coverage_output)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/research/pull_final_students.py:178: in remote_probe
+    state = pc.container_state(args, source, "cpu", name, selection["input_identity"])
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/research/posttrain_coverage.py:325: in container_state
+    result = subprocess.run(["docker", "container", "inspect", name], text=True, capture_output=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+argv = ['docker', 'container', 'inspect', 'php-parkour-posttrain-cpu-30a6bd08c80a']
+kwargs = {'capture_output': True, 'text': True}
+@py_assert2 = ['docker', 'inspect', 'php-parkour-posttrain-cpu-30a6bd08c80a']
+@py_assert1 = False
+@py_format4 = "['docker', 'c...30a6bd08c80a'] == ['docker', 'i...30a6bd08c80a']\n~\n~At index 1 diff: 'container' != 'inspect'\n~Left contains one more item: 'php-parkour-posttrain-cpu-30a6bd08c80a'\n~Use -v to get more diff"
+@py_format6 = "assert ['docker', 'c...30a6bd08c80a'] == ['docker', 'i...30a6bd08c80a']\n~\n~At index 1 diff: 'container' != 'inspect'\n~Left contains one more item: 'php-parkour-posttrain-cpu-30a6bd08c80a'\n~Use -v to get more diff"
+
+    def inspect(argv, **kwargs):
+>       assert argv == ["docker","inspect",name]
+E       AssertionError: assert ['docker', 'c...30a6bd08c80a'] == ['docker', 'i...30a6bd08c80a']
+E         
+E         At index 1 diff: 'container' != 'inspect'
+E         Left contains one more item: 'php-parkour-posttrain-cpu-30a6bd08c80a'
+E         Use -v to get more diff
+
+tests/test_pull_final_students.py:73: AssertionError
+_ test_failed_or_changed_transfer_keeps_fresh_partial_evidence[remote_changed] _
+
+ready = namespace(args=namespace(root=PosixPath('/tmp/pytest-of-root/pytest-1/test_failed_or_changed_transfe3'), official_outp...s-v2', output_root=PosixPath('/tmp/pytest-of-root/pytest-1/test_failed_or_changed_transfe3/local'), attempt='initial'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7ee260a6aa10>
+fault = 'remote_changed'
+
+    @pytest.mark.parametrize("fault",["rsync","tamper","symlink","remote_changed","remote_waiting"])
+    def test_failed_or_changed_transfer_keeps_fresh_partial_evidence(ready,monkeypatch,fault):
+>       after=probe(ready)
+              ^^^^^^^^^^^^
+
+tests/test_pull_final_students.py:232: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_pull_final_students.py:82: in probe
+    return pf.remote_probe(fixture.args.root,fixture.args.source_tree,pc,fixture.transfer.coverage_output)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/research/pull_final_students.py:178: in remote_probe
+    state = pc.container_state(args, source, "cpu", name, selection["input_identity"])
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/research/posttrain_coverage.py:325: in container_state
+    result = subprocess.run(["docker", "container", "inspect", name], text=True, capture_output=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+argv = ['docker', 'container', 'inspect', 'php-parkour-posttrain-cpu-88bb3697ead2']
+kwargs = {'capture_output': True, 'text': True}
+@py_assert2 = ['docker', 'inspect', 'php-parkour-posttrain-cpu-88bb3697ead2']
+@py_assert1 = False
+@py_format4 = "['docker', 'c...88bb3697ead2'] == ['docker', 'i...88bb3697ead2']\n~\n~At index 1 diff: 'container' != 'inspect'\n~Left contains one more item: 'php-parkour-posttrain-cpu-88bb3697ead2'\n~Use -v to get more diff"
+@py_format6 = "assert ['docker', 'c...88bb3697ead2'] == ['docker', 'i...88bb3697ead2']\n~\n~At index 1 diff: 'container' != 'inspect'\n~Left contains one more item: 'php-parkour-posttrain-cpu-88bb3697ead2'\n~Use -v to get more diff"
+
+    def inspect(argv, **kwargs):
+>       assert argv == ["docker","inspect",name]
+E       AssertionError: assert ['docker', 'c...88bb3697ead2'] == ['docker', 'i...88bb3697ead2']
+E         
+E         At index 1 diff: 'container' != 'inspect'
+E         Left contains one more item: 'php-parkour-posttrain-cpu-88bb3697ead2'
+E         Use -v to get more diff
+
+tests/test_pull_final_students.py:73: AssertionError
+_ test_failed_or_changed_transfer_keeps_fresh_partial_evidence[remote_waiting] _
+
+ready = namespace(args=namespace(root=PosixPath('/tmp/pytest-of-root/pytest-1/test_failed_or_changed_transfe4'), official_outp...s-v2', output_root=PosixPath('/tmp/pytest-of-root/pytest-1/test_failed_or_changed_transfe4/local'), attempt='initial'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7ee260ab68d0>
+fault = 'remote_waiting'
+
+    @pytest.mark.parametrize("fault",["rsync","tamper","symlink","remote_changed","remote_waiting"])
+    def test_failed_or_changed_transfer_keeps_fresh_partial_evidence(ready,monkeypatch,fault):
+>       after=probe(ready)
+              ^^^^^^^^^^^^
+
+tests/test_pull_final_students.py:232: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_pull_final_students.py:82: in probe
+    return pf.remote_probe(fixture.args.root,fixture.args.source_tree,pc,fixture.transfer.coverage_output)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/research/pull_final_students.py:178: in remote_probe
+    state = pc.container_state(args, source, "cpu", name, selection["input_identity"])
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/research/posttrain_coverage.py:325: in container_state
+    result = subprocess.run(["docker", "container", "inspect", name], text=True, capture_output=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+argv = ['docker', 'container', 'inspect', 'php-parkour-posttrain-cpu-e5aa6b25bf24']
+kwargs = {'capture_output': True, 'text': True}
+@py_assert2 = ['docker', 'inspect', 'php-parkour-posttrain-cpu-e5aa6b25bf24']
+@py_assert1 = False
+@py_format4 = "['docker', 'c...e5aa6b25bf24'] == ['docker', 'i...e5aa6b25bf24']\n~\n~At index 1 diff: 'container' != 'inspect'\n~Left contains one more item: 'php-parkour-posttrain-cpu-e5aa6b25bf24'\n~Use -v to get more diff"
+@py_format6 = "assert ['docker', 'c...e5aa6b25bf24'] == ['docker', 'i...e5aa6b25bf24']\n~\n~At index 1 diff: 'container' != 'inspect'\n~Left contains one more item: 'php-parkour-posttrain-cpu-e5aa6b25bf24'\n~Use -v to get more diff"
+
+    def inspect(argv, **kwargs):
+>       assert argv == ["docker","inspect",name]
+E       AssertionError: assert ['docker', 'c...e5aa6b25bf24'] == ['docker', 'i...e5aa6b25bf24']
+E         
+E         At index 1 diff: 'container' != 'inspect'
+E         Left contains one more item: 'php-parkour-posttrain-cpu-e5aa6b25bf24'
+E         Use -v to get more diff
+
+tests/test_pull_final_students.py:73: AssertionError
+______________ test_symlink_destination_rejected_before_mutation _______________
+
+ready = namespace(args=namespace(root=PosixPath('/tmp/pytest-of-root/pytest-1/test_symlink_destination_rejec0'), official_outp...s-v2', output_root=PosixPath('/tmp/pytest-of-root/pytest-1/test_symlink_destination_rejec0/local'), attempt='initial'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7ee260b20650>
+
+    def test_symlink_destination_rejected_before_mutation(ready,monkeypatch):
+>       receipt=install_rsync(ready,monkeypatch)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_pull_final_students.py:250: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_pull_final_students.py:199: in install_rsync
+    receipt = probe(ready)
+              ^^^^^^^^^^^^
+tests/test_pull_final_students.py:82: in probe
+    return pf.remote_probe(fixture.args.root,fixture.args.source_tree,pc,fixture.transfer.coverage_output)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/research/pull_final_students.py:178: in remote_probe
+    state = pc.container_state(args, source, "cpu", name, selection["input_identity"])
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/research/posttrain_coverage.py:325: in container_state
+    result = subprocess.run(["docker", "container", "inspect", name], text=True, capture_output=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+argv = ['docker', 'container', 'inspect', 'php-parkour-posttrain-cpu-805298ef8102']
+kwargs = {'capture_output': True, 'text': True}
+@py_assert2 = ['docker', 'inspect', 'php-parkour-posttrain-cpu-805298ef8102']
+@py_assert1 = False
+@py_format4 = "['docker', 'c...805298ef8102'] == ['docker', 'i...805298ef8102']\n~\n~At index 1 diff: 'container' != 'inspect'\n~Left contains one more item: 'php-parkour-posttrain-cpu-805298ef8102'\n~Use -v to get more diff"
+@py_format6 = "assert ['docker', 'c...805298ef8102'] == ['docker', 'i...805298ef8102']\n~\n~At index 1 diff: 'container' != 'inspect'\n~Left contains one more item: 'php-parkour-posttrain-cpu-805298ef8102'\n~Use -v to get more diff"
+
+    def inspect(argv, **kwargs):
+>       assert argv == ["docker","inspect",name]
+E       AssertionError: assert ['docker', 'c...805298ef8102'] == ['docker', 'i...805298ef8102']
+E         
+E         At index 1 diff: 'container' != 'inspect'
+E         Left contains one more item: 'php-parkour-posttrain-cpu-805298ef8102'
+E         Use -v to get more diff
+
+tests/test_pull_final_students.py:73: AssertionError
+_____________ test_transfer_helper_must_stay_frozen_while_copying ______________
+
+ready = namespace(args=namespace(root=PosixPath('/tmp/pytest-of-root/pytest-1/test_transfer_helper_must_stay0'), official_outp...s-v2', output_root=PosixPath('/tmp/pytest-of-root/pytest-1/test_transfer_helper_must_stay0/local'), attempt='initial'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7ee260bce690>
+
+    def test_transfer_helper_must_stay_frozen_while_copying(ready,monkeypatch):
+>       receipt=install_rsync(ready,monkeypatch)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_pull_final_students.py:258: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_pull_final_students.py:199: in install_rsync
+    receipt = probe(ready)
+              ^^^^^^^^^^^^
+tests/test_pull_final_students.py:82: in probe
+    return pf.remote_probe(fixture.args.root,fixture.args.source_tree,pc,fixture.transfer.coverage_output)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/research/pull_final_students.py:178: in remote_probe
+    state = pc.container_state(args, source, "cpu", name, selection["input_identity"])
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/research/posttrain_coverage.py:325: in container_state
+    result = subprocess.run(["docker", "container", "inspect", name], text=True, capture_output=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+argv = ['docker', 'container', 'inspect', 'php-parkour-posttrain-cpu-fa3c13f12624']
+kwargs = {'capture_output': True, 'text': True}
+@py_assert2 = ['docker', 'inspect', 'php-parkour-posttrain-cpu-fa3c13f12624']
+@py_assert1 = False
+@py_format4 = "['docker', 'c...fa3c13f12624'] == ['docker', 'i...fa3c13f12624']\n~\n~At index 1 diff: 'container' != 'inspect'\n~Left contains one more item: 'php-parkour-posttrain-cpu-fa3c13f12624'\n~Use -v to get more diff"
+@py_format6 = "assert ['docker', 'c...fa3c13f12624'] == ['docker', 'i...fa3c13f12624']\n~\n~At index 1 diff: 'container' != 'inspect'\n~Left contains one more item: 'php-parkour-posttrain-cpu-fa3c13f12624'\n~Use -v to get more diff"
+
+    def inspect(argv, **kwargs):
+>       assert argv == ["docker","inspect",name]
+E       AssertionError: assert ['docker', 'c...fa3c13f12624'] == ['docker', 'i...fa3c13f12624']
+E         
+E         At index 1 diff: 'container' != 'inspect'
+E         Left contains one more item: 'php-parkour-posttrain-cpu-fa3c13f12624'
+E         Use -v to get more diff
+
+tests/test_pull_final_students.py:73: AssertionError
+_________ test_defaults_match_new_reviewed_watcher_source_and_coverage _________
+
+    def test_defaults_match_new_reviewed_watcher_source_and_coverage():
+        assert pf.TREE == "02bc110026d8402cd6046afecb039ee40fbd918c760554ad86f7effa678f9f3c"
+>       assert pf.MONITOR_SHA == pf.sha(pc.__file__)
+E       AssertionError: assert '58b8978cb24d...bcc3b75ed5dfc' == '6ebaa376b56e...eb915e3d98cb1'
+E         
+E         - 6ebaa376b56ef92e2763ce23c0e4c2cbda34efcdc7c07cc697aeb915e3d98cb1
+E         + 58b8978cb24d8a194133e6344c1fa415632413d83c92b18a21ebcc3b75ed5dfc
+
+tests/test_pull_final_students.py:305: AssertionError
+_ test_explicit_coverage_directory_controls_both_probe_and_exact_whitelist[coverage-another-reviewed-cohort] _
+
+ready = namespace(args=namespace(root=PosixPath('/tmp/pytest-of-root/pytest-1/test_explicit_coverage_directo0'), official_outp...hort', output_root=PosixPath('/tmp/pytest-of-root/pytest-1/test_explicit_coverage_directo0/local'), attempt='initial'))
+
+    @pytest.mark.parametrize("ready", ["coverage-another-reviewed-cohort"], indirect=True)
+    def test_explicit_coverage_directory_controls_both_probe_and_exact_whitelist(ready):
+>       receipt = probe(ready)
+                  ^^^^^^^^^^^^
+
+tests/test_pull_final_students.py:318: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_pull_final_students.py:82: in probe
+    return pf.remote_probe(fixture.args.root,fixture.args.source_tree,pc,fixture.transfer.coverage_output)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/research/pull_final_students.py:178: in remote_probe
+    state = pc.container_state(args, source, "cpu", name, selection["input_identity"])
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/research/posttrain_coverage.py:325: in container_state
+    result = subprocess.run(["docker", "container", "inspect", name], text=True, capture_output=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+argv = ['docker', 'container', 'inspect', 'php-parkour-posttrain-cpu-d49a09d17e40']
+kwargs = {'capture_output': True, 'text': True}
+@py_assert2 = ['docker', 'inspect', 'php-parkour-posttrain-cpu-d49a09d17e40']
+@py_assert1 = False
+@py_format4 = "['docker', 'c...d49a09d17e40'] == ['docker', 'i...d49a09d17e40']\n~\n~At index 1 diff: 'container' != 'inspect'\n~Left contains one more item: 'php-parkour-posttrain-cpu-d49a09d17e40'\n~Use -v to get more diff"
+@py_format6 = "assert ['docker', 'c...d49a09d17e40'] == ['docker', 'i...d49a09d17e40']\n~\n~At index 1 diff: 'container' != 'inspect'\n~Left contains one more item: 'php-parkour-posttrain-cpu-d49a09d17e40'\n~Use -v to get more diff"
+
+    def inspect(argv, **kwargs):
+>       assert argv == ["docker","inspect",name]
+E       AssertionError: assert ['docker', 'c...d49a09d17e40'] == ['docker', 'i...d49a09d17e40']
+E         
+E         At index 1 diff: 'container' != 'inspect'
+E         Left contains one more item: 'php-parkour-posttrain-cpu-d49a09d17e40'
+E         Use -v to get more diff
+
+tests/test_pull_final_students.py:73: AssertionError
+____________ test_fetch_cannot_start_from_another_coverage_receipt _____________
+
+ready = namespace(args=namespace(root=PosixPath('/tmp/pytest-of-root/pytest-1/test_fetch_cannot_start_from_a0'), official_outp...s-v2', output_root=PosixPath('/tmp/pytest-of-root/pytest-1/test_fetch_cannot_start_from_a0/local'), attempt='initial'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7ee260ab1990>
+
+    def test_fetch_cannot_start_from_another_coverage_receipt(ready, monkeypatch):
+>       receipt = probe(ready)
+                  ^^^^^^^^^^^^
+
+tests/test_pull_final_students.py:368: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_pull_final_students.py:82: in probe
+    return pf.remote_probe(fixture.args.root,fixture.args.source_tree,pc,fixture.transfer.coverage_output)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/research/pull_final_students.py:178: in remote_probe
+    state = pc.container_state(args, source, "cpu", name, selection["input_identity"])
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/research/posttrain_coverage.py:325: in container_state
+    result = subprocess.run(["docker", "container", "inspect", name], text=True, capture_output=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+argv = ['docker', 'container', 'inspect', 'php-parkour-posttrain-cpu-c9b31efe1f2b']
+kwargs = {'capture_output': True, 'text': True}
+@py_assert2 = ['docker', 'inspect', 'php-parkour-posttrain-cpu-c9b31efe1f2b']
+@py_assert1 = False
+@py_format4 = "['docker', 'c...c9b31efe1f2b'] == ['docker', 'i...c9b31efe1f2b']\n~\n~At index 1 diff: 'container' != 'inspect'\n~Left contains one more item: 'php-parkour-posttrain-cpu-c9b31efe1f2b'\n~Use -v to get more diff"
+@py_format6 = "assert ['docker', 'c...c9b31efe1f2b'] == ['docker', 'i...c9b31efe1f2b']\n~\n~At index 1 diff: 'container' != 'inspect'\n~Left contains one more item: 'php-parkour-posttrain-cpu-c9b31efe1f2b'\n~Use -v to get more diff"
+
+    def inspect(argv, **kwargs):
+>       assert argv == ["docker","inspect",name]
+E       AssertionError: assert ['docker', 'c...c9b31efe1f2b'] == ['docker', 'i...c9b31efe1f2b']
+E         
+E         At index 1 diff: 'container' != 'inspect'
+E         Left contains one more item: 'php-parkour-posttrain-cpu-c9b31efe1f2b'
+E         Use -v to get more diff
+
+tests/test_pull_final_students.py:73: AssertionError
+=============================== warnings summary ===============================
+wbt_training/tests/test_depth_export.py::test_depth_bundle_contract_metadata_and_onnx_numerics
+wbt_training/tests/test_depth_export.py::test_depth_bundle_contract_metadata_and_onnx_numerics
+  /isaac-sim/exts/omni.isaac.ml_archive/pip_prebundle/torch/onnx/utils.py:185: DeprecationWarning: The feature will be removed. Please remove usage of this function
+    setup_onnx_logging(verbose) as log_ctx,
+
+wbt_training/tests/test_depth_export.py::test_depth_bundle_contract_metadata_and_onnx_numerics
+  /workspace/php_parkour/thirdparty/holosoma/src/holosoma/holosoma/agents/modules/depth_backbone.py:14: TracerWarning: Converting a tensor to a Python boolean might cause the trace to be incorrect. We can't record the data flow of Python values, so this value will be treated as a constant in the future. This means that the trace might not generalize to other inputs!
+    if images.ndim != 4 or images.shape[1] != num_frames:
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: /workspace/php_parkour/outputs/research/reproduction-20261015/local-checks/split-runtime-tests/root-training.xml -
+=========================== short test summary info ============================
+FAILED tests/test_pull_final_students.py::test_complete_gate_selects_exact_four_models_and_small_bound_json
+FAILED tests/test_pull_final_students.py::test_actual_cpu_container_must_be_successful_isolated_identity[running]
+FAILED tests/test_pull_final_students.py::test_actual_cpu_container_must_be_successful_isolated_identity[exit]
+FAILED tests/test_pull_final_students.py::test_actual_cpu_container_must_be_successful_isolated_identity[gpu]
+FAILED tests/test_pull_final_students.py::test_actual_cpu_container_must_be_successful_isolated_identity[extra_mount]
+FAILED tests/test_pull_final_students.py::test_cpu_plan_hash_tamper_rejected
+FAILED tests/test_pull_final_students.py::test_host_receipt_whitelist_and_pt_binding_reject_bad_payloads[pt]
+FAILED tests/test_pull_final_students.py::test_host_receipt_whitelist_and_pt_binding_reject_bad_payloads[teacher_onnx]
+FAILED tests/test_pull_final_students.py::test_host_receipt_whitelist_and_pt_binding_reject_bad_payloads[path_escape]
+FAILED tests/test_pull_final_students.py::test_host_receipt_whitelist_and_pt_binding_reject_bad_payloads[missing_json]
+FAILED tests/test_pull_final_students.py::test_host_receipt_whitelist_and_pt_binding_reject_bad_payloads[missing_model]
+FAILED tests/test_pull_final_students.py::test_host_receipt_whitelist_and_pt_binding_reject_bad_payloads[wrong_pt]
+FAILED tests/test_pull_final_students.py::test_host_receipt_whitelist_and_pt_binding_reject_bad_payloads[report_escape]
+FAILED tests/test_pull_final_students.py::test_host_receipt_whitelist_and_pt_binding_reject_bad_payloads[cohort]
+FAILED tests/test_pull_final_students.py::test_host_receipt_whitelist_and_pt_binding_reject_bad_payloads[bundle]
+FAILED tests/test_pull_final_students.py::test_host_receipt_whitelist_and_pt_binding_reject_bad_payloads[teacher_iteration]
+FAILED tests/test_pull_final_students.py::test_explicit_fetch_materializes_only_four_models_and_keeps_raw_bytes
+FAILED tests/test_pull_final_students.py::test_failed_or_changed_transfer_keeps_fresh_partial_evidence[rsync]
+FAILED tests/test_pull_final_students.py::test_failed_or_changed_transfer_keeps_fresh_partial_evidence[tamper]
+FAILED tests/test_pull_final_students.py::test_failed_or_changed_transfer_keeps_fresh_partial_evidence[symlink]
+FAILED tests/test_pull_final_students.py::test_failed_or_changed_transfer_keeps_fresh_partial_evidence[remote_changed]
+FAILED tests/test_pull_final_students.py::test_failed_or_changed_transfer_keeps_fresh_partial_evidence[remote_waiting]
+FAILED tests/test_pull_final_students.py::test_symlink_destination_rejected_before_mutation
+FAILED tests/test_pull_final_students.py::test_transfer_helper_must_stay_frozen_while_copying
+FAILED tests/test_pull_final_students.py::test_defaults_match_new_reviewed_watcher_source_and_coverage
+FAILED tests/test_pull_final_students.py::test_explicit_coverage_directory_controls_both_probe_and_exact_whitelist[coverage-another-reviewed-cohort]
+FAILED tests/test_pull_final_students.py::test_fetch_cannot_start_from_another_coverage_receipt
+27 failed, 792 passed, 3 warnings in 112.55s (0:01:52)
+There was an error running python

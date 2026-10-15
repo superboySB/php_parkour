@@ -358,6 +358,73 @@ def test_existing_cpu_container_must_have_no_device_requests(canonical, monkeypa
     with pytest.raises(ValueError): pc.container_state(args, source, "cpu", "own-container", key)
 
 
+@pytest.mark.parametrize("stderr", [
+    "Error: no such object: own-container\n",
+    "Error: No such object: own-container\n",
+    "Error: No such container: own-container\n",
+    "Error response from daemon: No such container: own-container\n",
+])
+@pytest.mark.parametrize("stdout", ["", "[]\n"])
+def test_exact_missing_container_is_absent_across_docker_versions(canonical, monkeypatch, stderr, stdout):
+    args, _ = canonical
+    calls = []
+    def inspect(argv, **kwargs):
+        calls.append((argv, kwargs))
+        return SimpleNamespace(returncode=1, stdout=stdout, stderr=stderr)
+    monkeypatch.setattr(pc.subprocess, "run", inspect)
+    assert pc.container_state(args, args.root / "source" / args.source_tree, "cpu", "own-container", "f" * 64) is None
+    assert calls == [(["docker", "container", "inspect", "own-container"], {"text": True, "capture_output": True})]
+
+
+@pytest.mark.parametrize("returncode,stdout,stderr", [
+    (1, "", "Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?\n"),
+    (1, "", "permission denied while trying to connect to the Docker daemon socket at unix:///var/run/docker.sock\n"),
+    (1, "[]\n", "Error: no such object: another-container\n"),
+    (1, "[]\n", "Error response from daemon: No such container: own-container\nCannot connect to the Docker daemon\n"),
+    (1, '[{"Id":"unexpected"}]', "Error: no such object: own-container\n"),
+    (125, "[]\n", "Error: no such object: own-container\n"),
+])
+def test_failed_container_inspection_cannot_authorize_a_launch(canonical, monkeypatch, returncode, stdout, stderr):
+    args, _ = canonical
+    monkeypatch.setattr(pc.subprocess, "run", lambda *_a, **_k: SimpleNamespace(returncode=returncode, stdout=stdout, stderr=stderr))
+    with pytest.raises(ValueError, match="Cannot inspect own container"):
+        pc.container_state(args, args.root / "source" / args.source_tree, "cpu", "own-container", "f" * 64)
+
+
+def test_actual_missing_name_diagnostic_launches_only_cpu_phase(canonical, monkeypatch):
+    args, _ = canonical
+    args.coverage_output.mkdir()
+    key = "f" * 64
+    source = args.root / "source" / args.source_tree
+    observation = {"selection": {"input_identity": key}, "source": str(source)}
+    name, expected = pc.docker_command(args, source, "cpu", key)
+    def inspect(argv, **_):
+        assert argv == ["docker", "container", "inspect", name]
+        return SimpleNamespace(returncode=1, stdout="[]\n", stderr=f"Error: no such object: {name}\n")
+    monkeypatch.setattr(pc.subprocess, "run", inspect)
+    monkeypatch.setattr(pc, "idle_gpu", lambda *_: pytest.fail("Fresh CPU preparation reached GPU selection"))
+    launched = []
+    monkeypatch.setattr(pc, "capture", lambda argv: launched.append(argv) or "synthetic-cpu-container-id")
+    result = pc.advance(args, observation)
+    assert launched == [expected]
+    assert result["container"] == name and result["blockers"] == ["Started isolated cpu coverage container"]
+    assert not (args.coverage_output / "cpu-ready.json").exists()
+
+
+def test_socket_failure_stops_before_any_coverage_launch(canonical, monkeypatch):
+    args, _ = canonical
+    args.coverage_output.mkdir()
+    observation = {"selection": {"input_identity": "f" * 64}, "source": str(args.root / "source" / args.source_tree)}
+    monkeypatch.setattr(pc.subprocess, "run", lambda *_a, **_k: SimpleNamespace(
+        returncode=1, stdout="", stderr="Cannot connect to the Docker daemon at unix:///var/run/docker.sock\n"))
+    monkeypatch.setattr(pc, "capture", lambda *_: pytest.fail("Socket failure launched a container"))
+    monkeypatch.setattr(pc, "idle_gpu", lambda *_: pytest.fail("Socket failure reached GPU selection"))
+    with pytest.raises(ValueError, match="Cannot inspect own container"):
+        pc.advance(args, observation)
+    assert (args.coverage_output / "selection.json").is_file()
+    assert not (args.coverage_output / "cpu-ready.json").exists()
+
+
 def test_cpu_failure_blocks_gpu_phase(canonical, monkeypatch):
     args, _ = canonical
     args.coverage_output.mkdir()

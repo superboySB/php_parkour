@@ -30,14 +30,17 @@ def main() -> None:
     output.mkdir(parents=True, exist_ok=True)
     container_output = Path("/workspace/php_parkour") / relative
     groups = [
-        ("root-training", "/workspace/php_parkour", "train-python", ["tests", "wbt_training/tests"]),
+        ("root-training", "/workspace/php_parkour", "train-python",
+         ["tests", "wbt_training/tests", "--ignore=tests/test_native_keyboard_bootstrap.py"]),
+        ("native-keyboard", "/workspace/php_parkour", "inference-python",
+         ["tests/test_native_keyboard_bootstrap.py"]),
         ("motion-matching", "/workspace/php_parkour/motion_matching", "motion-python", ["tests"]),
     ]
     report = {"schema_version": 1, "container": args.container, "groups": []}
     for name, cwd, python, tests in groups:
         xml = output / (name + ".xml")
         command = ["docker", "exec", "-e", "CUDA_VISIBLE_DEVICES=", "-e", "PHP_DOCKER=0", "-w", cwd, args.container,
-                   "/opt/php/bin/" + python, "-m", "pytest", "-q", *tests,
+                   "/opt/php/bin/" + python, "-m", "pytest", "-q", "-p", "no:cacheprovider", *tests,
                    "--junitxml=" + str(container_output / xml.name)]
         started = time.monotonic()
         row = {"name": name, "status": "failed", "command": command}
@@ -62,7 +65,9 @@ def main() -> None:
         report["groups"].append(row)
         report["failed_groups"] = sum(item["status"] != "passed" for item in report["groups"])
         (output / "results.json").write_text(json.dumps(report, indent=2) + "\n")
-        print(f"{name}: {row['status']}; {row.get('passed', 0)} passed, {row.get('failures', 0)} failed, {row.get('skipped', 0)} skipped", flush=True)
+        print(f"{name}: {row['status']}; {row.get('passed', 0)} passed, "
+              f"{row.get('failures', 0)} failed, {row.get('errors', 0)} errors, "
+              f"{row.get('skipped', 0)} skipped", flush=True)
     if report["failed_groups"]:
         raise SystemExit(1)
 

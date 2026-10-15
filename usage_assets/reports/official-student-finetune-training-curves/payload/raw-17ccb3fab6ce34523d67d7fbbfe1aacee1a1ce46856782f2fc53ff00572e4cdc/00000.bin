@@ -1,0 +1,250 @@
+{
+  "schema_version": 1,
+  "status": "passed_student_learning_curves_CPU",
+  "kind": "finetune",
+  "image": "sha256:2be18521015b2a84ef7a4442af9a94ef041a19feb9ce385ae15424b1dc158d8f",
+  "started_utc": "2026-10-15T02:48:03.250371+00:00",
+  "ownership_token": "bf74f26599fb451b90bbbb6d4e6f6bdd",
+  "container_id": "995964725b5cf76c76c4f772895ebae6ce0b208440e6fc84caefa7869ecbdd5c",
+  "commands": [
+    {
+      "label": "create",
+      "argv": [
+        "docker",
+        "create",
+        "--name",
+        "php-student-curves-bf74f26599fb",
+        "--label",
+        "php.curves.owner=bf74f26599fb451b90bbbb6d4e6f6bdd",
+        "--runtime",
+        "runc",
+        "--network",
+        "none",
+        "--cpus",
+        "2",
+        "--memory",
+        "12g",
+        "--pids-limit",
+        "256",
+        "--env",
+        "CUDA_VISIBLE_DEVICES=",
+        "--env",
+        "NVIDIA_VISIBLE_DEVICES=void",
+        "--env",
+        "PYTHONDONTWRITEBYTECODE=1",
+        "--env",
+        "HOME=/tmp",
+        "--mount",
+        "type=bind,src=/home/dzp/projects/php_parkour/usage_assets/reports/student-training-curves-integrity/cpu-executor,dst=/code,readonly",
+        "--mount",
+        "type=bind,src=/home/dzp/projects/php_parkour/outputs/research/reproduction-20261015/finetune-curves-input/control,dst=/control,readonly",
+        "--mount",
+        "type=bind,src=/home/dzp/projects/php_parkour/outputs/research/reproduction-20261015/finetune-curves-input/artifacts,dst=/artifacts,readonly",
+        "--mount",
+        "type=bind,src=/home/dzp/projects/php_parkour/outputs/research/reproduction-20261015/finetune-curves-cpu/validation,dst=/validation",
+        "--entrypoint",
+        "/opt/php/bin/train-python",
+        "sha256:2be18521015b2a84ef7a4442af9a94ef041a19feb9ce385ae15424b1dc158d8f",
+        "-B",
+        "/code/run_phases.py",
+        "--contract-sha256",
+        "7e058427c1288078703c50df7951ef28fa07dd53416313d9d5e19fcba06c81a3"
+      ],
+      "actual_wait_returncode": 0,
+      "stdout": {
+        "path": "/home/dzp/projects/php_parkour/outputs/research/reproduction-20261015/finetune-curves-cpu/host/create.stdout",
+        "bytes": 65,
+        "sha256": "e1581a61d6b8cfb2a948329c6fb8900dc43f30fcd837e3584d6f84e2338eaf90"
+      },
+      "stderr": {
+        "path": "/home/dzp/projects/php_parkour/outputs/research/reproduction-20261015/finetune-curves-cpu/host/create.stderr",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "inspect-created",
+      "argv": [
+        "docker",
+        "inspect",
+        "995964725b5cf76c76c4f772895ebae6ce0b208440e6fc84caefa7869ecbdd5c"
+      ],
+      "actual_wait_returncode": 0,
+      "stdout": {
+        "path": "/home/dzp/projects/php_parkour/outputs/research/reproduction-20261015/finetune-curves-cpu/host/inspect-created.stdout",
+        "bytes": 15228,
+        "sha256": "e00590da001d9a2508a9fd95e398755b5ade26a1566bf852913c769e44a9fea6"
+      },
+      "stderr": {
+        "path": "/home/dzp/projects/php_parkour/outputs/research/reproduction-20261015/finetune-curves-cpu/host/inspect-created.stderr",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "inspect-live-0",
+      "argv": [
+        "docker",
+        "inspect",
+        "995964725b5cf76c76c4f772895ebae6ce0b208440e6fc84caefa7869ecbdd5c"
+      ],
+      "actual_wait_returncode": 0,
+      "stdout": {
+        "path": "/home/dzp/projects/php_parkour/outputs/research/reproduction-20261015/finetune-curves-cpu/host/inspect-live-0.stdout",
+        "bytes": 15228,
+        "sha256": "6ccb9c6614d5302db12a58a6af289fa6ee726af754cd7d5f64f19138f9cbb545"
+      },
+      "stderr": {
+        "path": "/home/dzp/projects/php_parkour/outputs/research/reproduction-20261015/finetune-curves-cpu/host/inspect-live-0.stderr",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "inspect-live-1",
+      "argv": [
+        "docker",
+        "inspect",
+        "995964725b5cf76c76c4f772895ebae6ce0b208440e6fc84caefa7869ecbdd5c"
+      ],
+      "actual_wait_returncode": 0,
+      "stdout": {
+        "path": "/home/dzp/projects/php_parkour/outputs/research/reproduction-20261015/finetune-curves-cpu/host/inspect-live-1.stdout",
+        "bytes": 15946,
+        "sha256": "6b64d720b1e25b36a319e6035172ebb321115021c43cc52ace0c8b51b62ee4da"
+      },
+      "stderr": {
+        "path": "/home/dzp/projects/php_parkour/outputs/research/reproduction-20261015/finetune-curves-cpu/host/inspect-live-1.stderr",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "attached",
+      "argv": [
+        "docker",
+        "start",
+        "-a",
+        "995964725b5cf76c76c4f772895ebae6ce0b208440e6fc84caefa7869ecbdd5c"
+      ],
+      "actual_wait_returncode": 0,
+      "stdout": {
+        "path": "/home/dzp/projects/php_parkour/outputs/research/reproduction-20261015/finetune-curves-cpu/host/attached.stdout",
+        "bytes": 71,
+        "sha256": "0a565f3d51608831cd25c10b468010d3e2e4a7c107290a906e573a5b828f4c7c"
+      },
+      "stderr": {
+        "path": "/home/dzp/projects/php_parkour/outputs/research/reproduction-20261015/finetune-curves-cpu/host/attached.stderr",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "inspect-final",
+      "argv": [
+        "docker",
+        "inspect",
+        "995964725b5cf76c76c4f772895ebae6ce0b208440e6fc84caefa7869ecbdd5c"
+      ],
+      "actual_wait_returncode": 0,
+      "stdout": {
+        "path": "/home/dzp/projects/php_parkour/outputs/research/reproduction-20261015/finetune-curves-cpu/host/inspect-final.stdout",
+        "bytes": 15789,
+        "sha256": "0ac95aab9eff90eefa758eb037a52c2cda4c9cc25b6bc0037610672a9329445e"
+      },
+      "stderr": {
+        "path": "/home/dzp/projects/php_parkour/outputs/research/reproduction-20261015/finetune-curves-cpu/host/inspect-final.stderr",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  ],
+  "cpu_raw_logs": {
+    "create_stdout": {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/reproduction-20261015/finetune-curves-cpu/host/create.stdout",
+      "bytes": 65,
+      "sha256": "e1581a61d6b8cfb2a948329c6fb8900dc43f30fcd837e3584d6f84e2338eaf90"
+    },
+    "create_stderr": {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/reproduction-20261015/finetune-curves-cpu/host/create.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "attached_stdout": {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/reproduction-20261015/finetune-curves-cpu/host/attached.stdout",
+      "bytes": 71,
+      "sha256": "0a565f3d51608831cd25c10b468010d3e2e4a7c107290a906e573a5b828f4c7c"
+    },
+    "attached_stderr": {
+      "path": "/home/dzp/projects/php_parkour/outputs/research/reproduction-20261015/finetune-curves-cpu/host/attached.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "source_before": [
+    {
+      "path": "/home/dzp/projects/php_parkour/usage_assets/reports/student-training-curves-integrity/cpu-executor/extract_student_scalars.py",
+      "bytes": 19320,
+      "sha256": "e8bf7156013e7c31200ab39c9511020ed17c2e6726d79bc368939b44b5507b12"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/usage_assets/reports/student-training-curves-integrity/cpu-executor/plot_student_learning_curves.py",
+      "bytes": 12268,
+      "sha256": "6a14cfa86df96199e575384c48466d44046b1a2fad8ce76c1427b7d5add7abd0"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/usage_assets/reports/student-training-curves-integrity/cpu-executor/run_phases.py",
+      "bytes": 13162,
+      "sha256": "aeaf2431cc102e933c103478c5d0e7a8dedbbf6498a43c205f47439f215b4b6f"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/usage_assets/reports/student-training-curves-integrity/cpu-executor/run_cpu.py",
+      "bytes": 10485,
+      "sha256": "69400c06064febed4f121730a702ea3785dea1d56c1dfd4e8c657913236a090a"
+    }
+  ],
+  "source_after": [
+    {
+      "path": "/home/dzp/projects/php_parkour/usage_assets/reports/student-training-curves-integrity/cpu-executor/extract_student_scalars.py",
+      "bytes": 19320,
+      "sha256": "e8bf7156013e7c31200ab39c9511020ed17c2e6726d79bc368939b44b5507b12"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/usage_assets/reports/student-training-curves-integrity/cpu-executor/plot_student_learning_curves.py",
+      "bytes": 12268,
+      "sha256": "6a14cfa86df96199e575384c48466d44046b1a2fad8ce76c1427b7d5add7abd0"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/usage_assets/reports/student-training-curves-integrity/cpu-executor/run_phases.py",
+      "bytes": 13162,
+      "sha256": "aeaf2431cc102e933c103478c5d0e7a8dedbbf6498a43c205f47439f215b4b6f"
+    },
+    {
+      "path": "/home/dzp/projects/php_parkour/usage_assets/reports/student-training-curves-integrity/cpu-executor/run_cpu.py",
+      "bytes": 10485,
+      "sha256": "69400c06064febed4f121730a702ea3785dea1d56c1dfd4e8c657913236a090a"
+    }
+  ],
+  "source_unchanged": true,
+  "input_contract": {
+    "path": "/home/dzp/projects/php_parkour/outputs/research/reproduction-20261015/finetune-curves-input/control/input-contract.json",
+    "bytes": 1200,
+    "sha256": "7e058427c1288078703c50df7951ef28fa07dd53416313d9d5e19fcba06c81a3"
+  },
+  "create_actual_returncode": 0,
+  "actual_start_attached_wait_returncode": 0,
+  "actual_container_exit_code": 0,
+  "container_running": false,
+  "student_training_scalars_verified": true,
+  "official_schedule_complete": false,
+  "quality_verified": false,
+  "convergence_verified": false,
+  "attached_pid": 150543,
+  "running_inspect_label": "inspect-live-1",
+  "phases_report": {
+    "path": "/home/dzp/projects/php_parkour/outputs/research/reproduction-20261015/finetune-curves-cpu/validation/phases.json",
+    "bytes": 6143,
+    "sha256": "b8ad4518c477c71724ac14fc3017e22b7122633f8acf79185fe19ff507c7cda6"
+  },
+  "finished_utc": "2026-10-15T02:49:26.734640+00:00"
+}

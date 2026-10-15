@@ -1,0 +1,70 @@
+{
+  "groups": [
+    {
+      "name": "root-training",
+      "command": [
+        "docker",
+        "exec",
+        "-e",
+        "CUDA_VISIBLE_DEVICES=",
+        "-e",
+        "PHP_DOCKER=0",
+        "-e",
+        "PYTHONDONTWRITEBYTECODE=1",
+        "-w",
+        "/workspace/php_parkour",
+        "php-repro-cpu-20261015-agent",
+        "/opt/php/bin/train-python",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "tests",
+        "wbt_training/tests",
+        "--ignore=tests/test_native_keyboard_bootstrap.py",
+        "--junitxml=/workspace/php_parkour/outputs/research/reproduction-20261015/local-checks/split-runtime-tests/root-training.xml"
+      ],
+      "exit_code": 1,
+      "wall_seconds": 120.496,
+      "log_sha256": "c1793da67b0f86e8e31ca658788c8dc22b1a9e72eb12f0435d2039aa0d1a117f",
+      "tests": 819,
+      "failures": 27,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 792
+    },
+    {
+      "name": "native-keyboard",
+      "command": [
+        "docker",
+        "exec",
+        "-e",
+        "CUDA_VISIBLE_DEVICES=",
+        "-e",
+        "PHP_DOCKER=0",
+        "-e",
+        "PYTHONDONTWRITEBYTECODE=1",
+        "-w",
+        "/workspace/php_parkour",
+        "php-repro-cpu-20261015-agent",
+        "/opt/php/bin/inference-python",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "tests/test_native_keyboard_bootstrap.py",
+        "--junitxml=/workspace/php_parkour/outputs/research/reproduction-20261015/local-checks/split-runtime-tests/native-keyboard.xml"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 1.317,
+      "log_sha256": "57c368fbf8b1e826a5f71165fee062631201cc2a6823f2af0dc1f73992012096",
+      "tests": 23,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 23
+    }
+  ]
+}

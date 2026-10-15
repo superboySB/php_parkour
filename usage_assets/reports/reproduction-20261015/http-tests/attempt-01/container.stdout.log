@@ -1,0 +1,18 @@
+................F.........                                               [100%]
+=================================== FAILURES ===================================
+____________ test_duplicate_range_headers_are_not_silently_accepted ____________
+
+evidence = (PosixPath('/tmp/pytest-of-root/pytest-0/test_duplicate_range_headers_a0/root'), 'http://127.0.0.1:40653', b'\x9dy\xb1...\x91\x8aG3$\xc9\x8a\x84w\x0f\xef\x03\xeb&\xa7\xbc\x03\x91 \xb4\x15\xe5\x90\x1186O\xeb\x03\x1c\x15\x17\xa2\x1a\xb2\x8c')
+
+    def test_duplicate_range_headers_are_not_silently_accepted(evidence):
+        _, base, _ = evidence
+        host, port = base.removeprefix("http://").split(":")
+>       with http.client.HTTPConnection(host, int(port), timeout=5) as connection:
+E       TypeError: 'HTTPConnection' object does not support the context manager protocol
+
+tests/test_serve_evidence.py:101: TypeError
+------------------- generated xml file: /tmp/http-tests.xml --------------------
+=========================== short test summary info ============================
+FAILED tests/test_serve_evidence.py::test_duplicate_range_headers_are_not_silently_accepted
+1 failed, 25 passed in 13.09s
+There was an error running python

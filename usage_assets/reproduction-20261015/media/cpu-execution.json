@@ -1,0 +1,81 @@
+{
+  "container_id": "1872956ac4a55004658780e878b802ff5aa33c046acc66646b2f4eac5f9d6414",
+  "image_id": "sha256:2be18521015b2a84ef7a4442af9a94ef041a19feb9ce385ae15424b1dc158d8f",
+  "state": {
+    "Status": "exited",
+    "Running": false,
+    "Paused": false,
+    "Restarting": false,
+    "OOMKilled": false,
+    "Dead": false,
+    "Pid": 0,
+    "ExitCode": 0,
+    "Error": "",
+    "StartedAt": "2026-10-15T02:51:59.976733768Z",
+    "FinishedAt": "2026-10-15T02:52:13.520412922Z"
+  },
+  "runtime": "runc",
+  "network_mode": "none",
+  "device_requests": null,
+  "devices": [],
+  "nano_cpus": 2000000000,
+  "memory_bytes": 2147483648,
+  "env": [
+    "NO_PROXY=localhost,127.0.0.1,::1,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16",
+    "no_proxy=localhost,127.0.0.1,::1,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16",
+    "HTTP_PROXY=http://172.17.0.1:7897",
+    "http_proxy=http://172.17.0.1:7897",
+    "HTTPS_PROXY=http://172.17.0.1:7897",
+    "https_proxy=http://172.17.0.1:7897",
+    "NVIDIA_VISIBLE_DEVICES=void",
+    "PATH=/opt/php/runtimes/train/bin:/opt/php/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+    "NVIDIA_DRIVER_CAPABILITIES=compute,utility,graphics",
+    "VK_DRIVER_FILES=/etc/vulkan/icd.d/nvidia_icd.json",
+    "OMNI_SERVER=https://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/5.1",
+    "MIN_DRIVER_VERSION=570.169",
+    "ISAACSIM_VERSION=",
+    "ISAACSIM_ROOT_PATH=/isaac-sim",
+    "ISAACLAB_PATH=/workspace/isaaclab",
+    "DOCKER_USER_HOME=/root",
+    "LANG=C.UTF-8",
+    "DEBIAN_FRONTEND=noninteractive",
+    "ACCEPT_EULA=Y",
+    "PRIVACY_CONSENT=Y",
+    "OMNI_KIT_ACCEPT_EULA=YES",
+    "OMNI_KIT_ALLOW_ROOT=1",
+    "PHP_DOCKER=1",
+    "HSSIM_PYTHON=/opt/php/bin/train-python",
+    "LOGGER=tensorboard",
+    "WANDB_MODE=disabled",
+    "PHP_MOTION_DATABASE_DIR=/data/assets/databases",
+    "XDG_CACHE_HOME=/data/cache",
+    "PYTHONUNBUFFERED=1",
+    "PIP_DEFAULT_TIMEOUT=120",
+    "PIP_RETRIES=8",
+    "PIP_CACHE_DIR=/root/.cache/pip"
+  ],
+  "mounts": [
+    {
+      "Type": "bind",
+      "Source": "/home/dzp/projects/php_parkour/usage_assets/reproduction-20261015/media",
+      "Destination": "/out",
+      "Mode": "",
+      "RW": true,
+      "Propagation": "rprivate"
+    },
+    {
+      "Type": "bind",
+      "Source": "/home/dzp/projects/php_parkour",
+      "Destination": "/repo",
+      "Mode": "ro",
+      "RW": false,
+      "Propagation": "rprivate"
+    }
+  ],
+  "command": [
+    "/repo/usage_assets/reproduction-20261015/media/build_media.py",
+    "--output",
+    "/out"
+  ],
+  "scope": "CPU-only derivation and full decoding of existing media; no new physics or policy rollout."
+}

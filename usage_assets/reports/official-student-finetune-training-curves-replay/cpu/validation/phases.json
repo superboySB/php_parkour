@@ -1,0 +1,192 @@
+{
+  "schema_version": 1,
+  "status": "passed",
+  "started_utc": "2026-10-15T02:54:51.106456+00:00",
+  "phases": [
+    {
+      "phase": "extract",
+      "argv": [
+        "/opt/php/bin/train-python",
+        "-B",
+        "/code/extract_student_scalars.py",
+        "--contract",
+        "/control/input-contract.json",
+        "--contract-sha256",
+        "7e058427c1288078703c50df7951ef28fa07dd53416313d9d5e19fcba06c81a3",
+        "--output",
+        "/validation/scalars.json"
+      ],
+      "started_utc": "2026-10-15T02:54:51.209413+00:00",
+      "actual_wait_returncode": 0,
+      "finished_utc": "2026-10-15T02:55:29.985560+00:00",
+      "stdout": {
+        "path": "/validation/extract.stdout",
+        "bytes": 78,
+        "sha256": "75e1bc7de226b82c05e4c6a1297e047c7da68ea691a1a68cfad473d775a7bca7"
+      },
+      "stderr": {
+        "path": "/validation/extract.stderr",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "phase": "plot",
+      "argv": [
+        "/opt/php/bin/train-python",
+        "-B",
+        "/code/plot_student_learning_curves.py",
+        "--input",
+        "/validation/scalars.json",
+        "--input-sha256",
+        "ce5224a03e37e83240d27858d252d3b8b3020005dcc3a7fc3f7c955d946f0d20",
+        "--output",
+        "/validation/plots"
+      ],
+      "started_utc": "2026-10-15T02:55:32.436397+00:00",
+      "actual_wait_returncode": 0,
+      "finished_utc": "2026-10-15T02:55:42.313372+00:00",
+      "stdout": {
+        "path": "/validation/plot.stdout",
+        "bytes": 383,
+        "sha256": "c8fed6488e382e75b1969b9c81db161dd5eae60f86679853b3089774f8da6dd3"
+      },
+      "stderr": {
+        "path": "/validation/plot.stderr",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  ],
+  "inputs_before": [
+    {
+      "path": "/control/input-contract.json",
+      "bytes": 1200,
+      "sha256": "7e058427c1288078703c50df7951ef28fa07dd53416313d9d5e19fcba06c81a3"
+    },
+    {
+      "path": "/artifacts/student-finetune.json",
+      "bytes": 12167,
+      "sha256": "c3a807a021b01e4f66ef32a270d9e7146bf0c66d41b440ba653df0b04276b8e1"
+    },
+    {
+      "path": "/artifacts/events.out.tfevents.1791884514.pro5000-6.189005.0",
+      "bytes": 117422276,
+      "sha256": "2f735148ff4a96f39161b7fb4f9280e8492f99128ee69982ab8476fd881f48ab"
+    },
+    {
+      "path": "/artifacts/holosoma_config.yaml",
+      "bytes": 33056,
+      "sha256": "969a5017b6830fe95979634f0539915993d553ead06b7f93e2c240514223706b"
+    }
+  ],
+  "inputs_after": [
+    {
+      "path": "/control/input-contract.json",
+      "bytes": 1200,
+      "sha256": "7e058427c1288078703c50df7951ef28fa07dd53416313d9d5e19fcba06c81a3"
+    },
+    {
+      "path": "/artifacts/student-finetune.json",
+      "bytes": 12167,
+      "sha256": "c3a807a021b01e4f66ef32a270d9e7146bf0c66d41b440ba653df0b04276b8e1"
+    },
+    {
+      "path": "/artifacts/events.out.tfevents.1791884514.pro5000-6.189005.0",
+      "bytes": 117422276,
+      "sha256": "2f735148ff4a96f39161b7fb4f9280e8492f99128ee69982ab8476fd881f48ab"
+    },
+    {
+      "path": "/artifacts/holosoma_config.yaml",
+      "bytes": 33056,
+      "sha256": "969a5017b6830fe95979634f0539915993d553ead06b7f93e2c240514223706b"
+    }
+  ],
+  "inputs_unchanged": true,
+  "source_before": [
+    {
+      "path": "/code/run_phases.py",
+      "bytes": 13162,
+      "sha256": "aeaf2431cc102e933c103478c5d0e7a8dedbbf6498a43c205f47439f215b4b6f"
+    },
+    {
+      "path": "/code/extract_student_scalars.py",
+      "bytes": 19320,
+      "sha256": "e8bf7156013e7c31200ab39c9511020ed17c2e6726d79bc368939b44b5507b12"
+    },
+    {
+      "path": "/code/plot_student_learning_curves.py",
+      "bytes": 12268,
+      "sha256": "6a14cfa86df96199e575384c48466d44046b1a2fad8ce76c1427b7d5add7abd0"
+    }
+  ],
+  "source_after": [
+    {
+      "path": "/code/run_phases.py",
+      "bytes": 13162,
+      "sha256": "aeaf2431cc102e933c103478c5d0e7a8dedbbf6498a43c205f47439f215b4b6f"
+    },
+    {
+      "path": "/code/extract_student_scalars.py",
+      "bytes": 19320,
+      "sha256": "e8bf7156013e7c31200ab39c9511020ed17c2e6726d79bc368939b44b5507b12"
+    },
+    {
+      "path": "/code/plot_student_learning_curves.py",
+      "bytes": 12268,
+      "sha256": "6a14cfa86df96199e575384c48466d44046b1a2fad8ce76c1427b7d5add7abd0"
+    }
+  ],
+  "sources_unchanged": true,
+  "runtime_source_copies": [
+    {
+      "original": {
+        "path": "/isaac-sim/kit/python/lib/python3.11/site-packages/tensorboard/compat/tensorflow_stub/pywrap_tensorflow.py",
+        "bytes": 10124,
+        "sha256": "b2c5d359d35a37388a0dedcc347913a50c80f0ccfe514dc83870bb9761b157de"
+      },
+      "retained": {
+        "path": "/validation/runtime-sources/pywrap_tensorflow.py",
+        "bytes": 10124,
+        "sha256": "b2c5d359d35a37388a0dedcc347913a50c80f0ccfe514dc83870bb9761b157de"
+      }
+    }
+  ],
+  "mount_access": {
+    "/code": "ro",
+    "/control": "ro",
+    "/artifacts": "ro",
+    "/validation": "rw"
+  },
+  "errors": [],
+  "scope": "Two actual CPU scalar extraction and plotting subprocesses only; no training, PT parsing or rollout.",
+  "quality_verified": false,
+  "convergence_verified": false,
+  "official_schedule_complete": false,
+  "seven_PT_acceptance_verified": false,
+  "pt_onnx_numerical_parity_verified": false,
+  "kind": "finetune",
+  "outputs": [
+    {
+      "path": "/validation/scalars.json",
+      "bytes": 416852025,
+      "sha256": "ce5224a03e37e83240d27858d252d3b8b3020005dcc3a7fc3f7c955d946f0d20"
+    },
+    {
+      "path": "/validation/plots/plot-report.json",
+      "bytes": 12296,
+      "sha256": "a42c15089ab436c36a54eca98d8ad75ae284d8659396f851caa266c2e5bd25f6"
+    },
+    {
+      "path": "/validation/plots/learning-curves.png",
+      "bytes": 659459,
+      "sha256": "ce59f9a111498e9afcf6698876143054121eaaefceacfb3ab3aa7873b0f131bf"
+    },
+    {
+      "path": "/validation/plots/learning-curves.svg",
+      "bytes": 53810999,
+      "sha256": "69823c91e0d163b441c5f0520115f957375851d9c7ba2abc730289018b1ce89e"
+    }
+  ],
+  "finished_utc": "2026-10-15T02:55:42.599080+00:00"
+}

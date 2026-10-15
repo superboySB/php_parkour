@@ -1,0 +1,96 @@
+{
+  "schema_version": 1,
+  "source_video": {
+    "path": "artifacts/official-full/official/eval-student-finetune/PHP-research/20261014_215839-student-finetune-wholebodytrackingmanager/renderings_training/episode_7_1792015196.mp4",
+    "bytes": 534341,
+    "sha256": "e15951ff325c37e1bf08968d88fe93fc8c9fa250e932cdf68c32555fdd794317",
+    "duration_seconds": 9.16,
+    "width": 640,
+    "height": 360,
+    "probed_frames": 458,
+    "decoded_frames": 458
+  },
+  "case": "eval-student-finetune",
+  "selection": "Longest quality-bound original by duration; not selected for success or typicality.",
+  "source_video_interval_seconds": [
+    1.1600000000000001,
+    9.16
+  ],
+  "gif": {
+    "path": "student-finetune-preview.gif",
+    "sha256": "6903f9445fde8d3c9f565a1d47b490cd24317759d24056cc34d4105187a6984e",
+    "bytes": 2065796,
+    "metadata": {
+      "programs": [],
+      "streams": [
+        {
+          "width": 480,
+          "height": 270,
+          "nb_read_frames": "64"
+        }
+      ],
+      "format": {
+        "duration": "8.010000"
+      }
+    },
+    "returncode": 0,
+    "full_decode_returncode": 0
+  },
+  "command": [
+    "ffmpeg",
+    "-nostdin",
+    "-v",
+    "error",
+    "-xerror",
+    "-threads",
+    "1",
+    "-ss",
+    "1.1600000000000001",
+    "-t",
+    "8",
+    "-i",
+    "/out/artifacts/official-full/official/eval-student-finetune/PHP-research/20261014_215839-student-finetune-wholebodytrackingmanager/renderings_training/episode_7_1792015196.mp4",
+    "-filter_complex_threads",
+    "1",
+    "-filter_complex",
+    "fps=8,scale=480:270:flags=lanczos,split[a][b];[a]palettegen=stats_mode=full[p];[b][p]paletteuse=dither=sierra2_4a",
+    "-loop",
+    "0",
+    "-n",
+    "/out/student-finetune-preview.gif"
+  ],
+  "probe_command": [
+    "ffprobe",
+    "-v",
+    "error",
+    "-count_frames",
+    "-show_entries",
+    "format=duration:stream=width,height,nb_read_frames",
+    "-of",
+    "json",
+    "/out/student-finetune-preview.gif"
+  ],
+  "full_decode_command": [
+    "ffmpeg",
+    "-nostdin",
+    "-v",
+    "error",
+    "-xerror",
+    "-threads",
+    "1",
+    "-i",
+    "/out/student-finetune-preview.gif",
+    "-f",
+    "null",
+    "-"
+  ],
+  "scope": "Derived CPU GIF at 8FPS/480x270/original speed; no new policy rollout. Metrics describe all64 env x3000 steps, not only the selected original.",
+  "checkpoint_iteration": 29999,
+  "checkpoint_sha256": "276f9e7f44a674ba42f651867b9aab242cf0fb28b1ee1b4acc2cb9f09472549f",
+  "failed_resets": 1641,
+  "timeout_resets": 0,
+  "clip_completions_excluding_failed_timeout_steps": 635,
+  "quality_verified": false,
+  "obstacle_course_completion_verified": false,
+  "visual_observation": "抽查原片8个等距时点，主要可见行走/转向，部分时刻机器人离开近景；不能由此确认障碍课程完成。"
+}

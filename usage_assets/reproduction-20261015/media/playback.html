@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PHP Parkour 仿真实验视频与参考动作</title>
+<style>
+:root{font:16px/1.65 system-ui;color:#203047;background:#f3f6fa}body{max-width:1280px;margin:auto;padding:28px 20px}h1{font-size:30px;line-height:1.3}h2{font-size:21px;margin:10px 0}a{color:#175e9f}header{max-width:1000px}nav{display:flex;gap:8px;flex-wrap:wrap;margin:22px 0}button{font:inherit;border:1px solid #b8c6d7;border-radius:6px;background:white;padding:8px 12px;cursor:pointer}button[aria-pressed=true]{background:#173d68;color:white}main{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,360px),1fr));gap:20px}article{background:white;border:1px solid #ccd8e5;border-radius:10px;padding:18px;min-width:0}article[hidden]{display:none}video,img{width:100%;height:auto;display:block;background:#12253b;border-radius:5px}video{aspect-ratio:16/9}.tag{font-size:13px;border-radius:4px;padding:4px 8px;background:#e6edf7}.observation{border-left:3px solid #c48b36;padding-left:12px}details{margin-top:12px}summary{cursor:pointer;font-weight:600}table{border-collapse:collapse;width:100%;margin:12px 0}th,td{text-align:left;border-bottom:1px solid #e2e7ee;padding:5px;font-size:14px}th{font-weight:500}code{overflow-wrap:anywhere}footer{margin-top:25px;font-size:14px}
+</style></head><body><header>
+<h1>仿真实验视频与参考动作</h1>
+<p>并列观看正常跑动、从障碍旁经过、接触后恢复、真实跌倒，以及正式自训学生的Isaac原片。8个新增GIF由已有原视频抽取，另复用17类参考运动；本页没有重新运行策略。</p>
+<p>全629逐帧指令试验中，321例触发高度/倾斜阈值、308例未触发；这些计数不是越障成功率。未触发的样例也可能绕开障碍。参考动作画面标有 <strong>KINEMATIC / NO POLICY</strong>，表示通过设置参考姿态播放。</p>
+<p><a href="manifest.json">全部源SHA、抽帧参数和解码结果</a> · <a href="../../../usage.md">回到usage.md</a> · <a href="../../reports/reference629-full/playback.html">全部629逐帧原片</a> · <a href="../../reports/official-evaluations-six/playback.html">六项正式Isaac评估160段原片</a></p>
+</header><nav aria-label="视频分类">
+<button data-filter="all" aria-pressed="true">全部25项</button><button data-filter="flat">平地1项</button><button data-filter="reference-commands">逐帧指令4项</button><button data-filter="legacy">接触/失败2项</button><button data-filter="isaac">正式Isaac 1项</button><button data-filter="kinematic">参考运动17项</button>
+</nav><p id="count" aria-live="polite">显示25项</p><main><article data-category="flat">
+<span class="tag">平地策略</span><h2>平地：高速前进8秒</h2>
+<p>官方公开student ONNX；不是本轮自训模型。</p>
+<video controls preload="none" playsinline poster="../../../usage_assets/sim2sim/sdk018-directions/command-06/video/episode_0_1791624582.png" src="../../../usage_assets/sim2sim/sdk018-directions/command-06/video/episode_0_1791624582.mp4"></video>
+<p><a href="../../../usage_assets/sim2sim/sdk018-directions/command-06/video/episode_0_1791624582.mp4">完整原始MP4</a> · <a href="sdk018-high-forward.gif">GIF预览</a> · <a href="../../../usage_assets/reports/sdk018-directions/independent/report.json">原始指标/来源</a></p>
+<p class="observation">抽查8个等距时点可见持续跑步；本例不包含障碍。</p>
+<details><summary>查看GIF与抽取区间</summary><p>GIF为原片4.08–12.08秒，8 FPS、原速；指标属于完整试验。</p><img loading="lazy" src="sdk018-high-forward.gif" alt="平地：高速前进8秒：原视频抽帧预览"></details>
+<details><summary>完整试验指标与选取理由</summary><table><tr><th>策略tick</th><td>400</td></tr><tr><th>完整仿真秒</th><td>8.0060</td></tr><tr><th>完整XY路径m</th><td>16.1732</td></tr><tr><th>累计转角°</th><td>22.9609</td></tr><tr><th>存活启发式通过</th><td>是</td></tr></table><p>用已完成SDK0.1.8退出核验的平地高速前进展示正常跑动。</p><p>两个worker正常退出、空进程组及精确host birth映射已独立核验。</p></details>
+</article>
+<article data-category="reference-commands">
+<span class="tag">逐帧指令策略</span><h2>逐帧多方向：自由跑动</h2>
+<p>官方公开student ONNX；不是本轮自训模型。</p>
+<video controls preload="none" playsinline poster="../../../usage_assets/reports/reference629-full/cases/random_locomotion/config-0094/attempt-0001/video/episode_0_1791649518.png" src="../../../usage_assets/reports/reference629-full/cases/random_locomotion/config-0094/attempt-0001/video/episode_0_1791649518.mp4"></video>
+<p><a href="../../../usage_assets/reports/reference629-full/cases/random_locomotion/config-0094/attempt-0001/video/episode_0_1791649518.mp4">完整原始MP4</a> · <a href="random_locomotion-94.gif">GIF预览</a> · <a href="../../../usage_assets/reports/reference629-full/cases/random_locomotion/config-0094/attempt-0001/result.json">原始指标/来源</a></p>
+<p class="observation">抽查8个等距时点可见方向变化与持续跑动；这不是障碍课程。</p>
+<details><summary>查看GIF与抽取区间</summary><p>GIF为原片5.00–13.00秒，8 FPS、原速；指标属于完整试验。</p><img loading="lazy" src="random_locomotion-94.gif" alt="逐帧多方向：自由跑动：原视频抽帧预览"></details>
+<details><summary>完整试验指标与选取理由</summary><table><tr><th>策略tick</th><td>1214</td></tr><tr><th>完整参考秒</th><td>24.2800</td></tr><tr><th>完整XY路径m</th><td>40.9422</td></tr><tr><th>最低骨盆m</th><td>0.6281</td></tr><tr><th>最低朝上余弦</th><td>0.8841</td></tr><tr><th>末态朝上余弦</th><td>0.9919</td></tr><tr><th>高度/倾斜阈值事件</th><td>否</td></tr></table><p>在未触发阈值的自由移动配置中选取路径最长的一例，展示原始50Hz多方向指令。</p><p>两个worker正常退出及host birth映射已由原包独立CPU核验。</p></details>
+</article>
+<article data-category="reference-commands">
+<span class="tag">逐帧指令策略</span><h2>低台阶：未触发阈值，但从旁经过</h2>
+<p>官方公开student ONNX；不是本轮自训模型。</p>
+<video controls preload="none" playsinline poster="../../../usage_assets/reports/reference629-full/cases/low_speed_step/config-0043/attempt-0001/video/episode_0_1791650750.png" src="../../../usage_assets/reports/reference629-full/cases/low_speed_step/config-0043/attempt-0001/video/episode_0_1791650750.mp4"></video>
+<p><a href="../../../usage_assets/reports/reference629-full/cases/low_speed_step/config-0043/attempt-0001/video/episode_0_1791650750.mp4">完整原始MP4</a> · <a href="low_speed_step-43.gif">GIF预览</a> · <a href="../../../usage_assets/reports/reference629-full/cases/low_speed_step/config-0043/attempt-0001/result.json">原始指标/来源</a></p>
+<p class="observation">抽查8个等距时点显示机器人从窄台阶旁经过；不能判为完成参考台阶动作。</p>
+<details><summary>查看GIF与抽取区间</summary><p>GIF为原片4.10–12.10秒，8 FPS、原速；指标属于完整试验。</p><img loading="lazy" src="low_speed_step-43.gif" alt="低台阶：未触发阈值，但从旁经过：原视频抽帧预览"></details>
+<details><summary>完整试验指标与选取理由</summary><table><tr><th>策略tick</th><td>537</td></tr><tr><th>完整参考秒</th><td>10.7400</td></tr><tr><th>完整XY路径m</th><td>6.3133</td></tr><tr><th>最低骨盆m</th><td>0.7286</td></tr><tr><th>最低朝上余弦</th><td>0.9791</td></tr><tr><th>末态朝上余弦</th><td>0.9941</td></tr><tr><th>高度/倾斜阈值事件</th><td>否</td></tr></table><p>在未触发阈值的低台阶配置中选取路径最长的一例，检查未触发是否等于成功。</p><p>两个worker正常退出及host birth映射已由原包独立CPU核验。</p></details>
+</article>
+<article data-category="reference-commands">
+<span class="tag">逐帧指令策略</span><h2>76 cm几何：未触发阈值，但绕行</h2>
+<p>官方公开student ONNX；不是本轮自训模型。</p>
+<video controls preload="none" playsinline poster="../../../usage_assets/reports/reference629-full/cases/high_speed_climb_76/config-0031/attempt-0001/video/episode_0_1791656959.png" src="../../../usage_assets/reports/reference629-full/cases/high_speed_climb_76/config-0031/attempt-0001/video/episode_0_1791656959.mp4"></video>
+<p><a href="../../../usage_assets/reports/reference629-full/cases/high_speed_climb_76/config-0031/attempt-0001/video/episode_0_1791656959.mp4">完整原始MP4</a> · <a href="high_speed_climb_76-31.gif">GIF预览</a> · <a href="../../../usage_assets/reports/reference629-full/cases/high_speed_climb_76/config-0031/attempt-0001/result.json">原始指标/来源</a></p>
+<p class="observation">抽查8个等距时点显示机器人绕向障碍侧面后继续行走；不能判为攀上76cm。</p>
+<details><summary>查看GIF与抽取区间</summary><p>GIF为原片4.10–12.10秒，8 FPS、原速；指标属于完整试验。</p><img loading="lazy" src="high_speed_climb_76-31.gif" alt="76 cm几何：未触发阈值，但绕行：原视频抽帧预览"></details>
+<details><summary>完整试验指标与选取理由</summary><table><tr><th>策略tick</th><td>678</td></tr><tr><th>完整参考秒</th><td>13.5600</td></tr><tr><th>完整XY路径m</th><td>22.0026</td></tr><tr><th>最低骨盆m</th><td>0.6302</td></tr><tr><th>最低朝上余弦</th><td>0.8799</td></tr><tr><th>末态朝上余弦</th><td>0.9919</td></tr><tr><th>高度/倾斜阈值事件</th><td>否</td></tr></table><p>在未触发阈值的高速76cm配置中选取路径最长的一例，保留反例。</p><p>两个worker正常退出及host birth映射已由原包独立CPU核验。</p></details>
+</article>
+<article data-category="reference-commands">
+<span class="tag">逐帧指令策略</span><h2>76 cm几何：倾斜事件与后续恢复</h2>
+<p>官方公开student ONNX；不是本轮自训模型。</p>
+<video controls preload="none" playsinline poster="../../../usage_assets/reports/reference629-full/cases/high_speed_climb_76/config-0000/attempt-0001/video/episode_0_1791656068.png" src="../../../usage_assets/reports/reference629-full/cases/high_speed_climb_76/config-0000/attempt-0001/video/episode_0_1791656068.mp4"></video>
+<p><a href="../../../usage_assets/reports/reference629-full/cases/high_speed_climb_76/config-0000/attempt-0001/video/episode_0_1791656068.mp4">完整原始MP4</a> · <a href="high_speed_climb_76-0.gif">GIF预览</a> · <a href="../../../usage_assets/reports/reference629-full/cases/high_speed_climb_76/config-0000/attempt-0001/result.json">原始指标/来源</a></p>
+<p class="observation">抽查8个等距时点可见接近障碍后躯干前倾并继续移动；阈值事件不等同最终倒地。</p>
+<details><summary>查看GIF与抽取区间</summary><p>GIF为原片4.10–12.10秒，8 FPS、原速；指标属于完整试验。</p><img loading="lazy" src="high_speed_climb_76-0.gif" alt="76 cm几何：倾斜事件与后续恢复：原视频抽帧预览"></details>
+<details><summary>完整试验指标与选取理由</summary><table><tr><th>策略tick</th><td>570</td></tr><tr><th>完整参考秒</th><td>11.4000</td></tr><tr><th>完整XY路径m</th><td>7.4650</td></tr><tr><th>最低骨盆m</th><td>0.6255</td></tr><tr><th>最低朝上余弦</th><td>0.2052</td></tr><tr><th>末态朝上余弦</th><td>0.9927</td></tr><tr><th>高度/倾斜阈值事件</th><td>是</td></tr></table><p>选场景原始首配置作为阈值事件对照，避免只展示未触发结果。</p><p>两个worker正常退出及host birth映射已由原包独立CPU核验。</p></details>
+</article>
+<article data-category="legacy">
+<span class="tag">历史接触/失败对照</span><h2>官方阶梯：末段攀到0.76 m块</h2>
+<p>官方公开student ONNX；不是本轮自训模型。</p>
+<video controls preload="none" playsinline poster="../../../usage_assets/sim2sim/step-76cm-climb.png" src="../../../usage_assets/sim2sim/step-forward.mp4"></video>
+<p><a href="../../../usage_assets/sim2sim/step-forward.mp4">完整原始MP4</a> · <a href="step-forward.gif">GIF预览</a> · <a href="../../../usage_assets/reports/deployment-summary.json">原始指标/来源</a></p>
+<p class="observation">原末态骨盆高度1.4997m，前倾时minimum_up=0.2702；只说明本次末态在块上，不证明完整课程成功。</p>
+<details><summary>查看GIF与抽取区间</summary><p>GIF为原片16.30–24.30秒，8 FPS、原速；指标属于完整试验。</p><img loading="lazy" src="step-forward.gif" alt="官方阶梯：末段攀到0.76 m块：原视频抽帧预览"></details>
+<details><summary>完整试验指标与选取理由</summary><table><tr><th>策略tick</th><td>1000</td></tr><tr><th>完整仿真秒</th><td>20.0020</td></tr><tr><th>完整XY路径m</th><td>36.2532</td></tr><tr><th>最低骨盆m</th><td>0.6243</td></tr><tr><th>最低朝上余弦</th><td>0.2702</td></tr><tr><th>末态朝上余弦</th><td>0.9271</td></tr><tr><th>高度/倾斜阈值事件</th><td>是</td></tr><tr><th>低骨盆事件</th><td>否</td></tr></table><p>原20秒恒定高速前进试验的最后8秒，展示实际接触及攀爬，与绕行反例区分。</p><p>历史旧SDK视频：原监督未核验最终worker退出码，不并入SDK0.1.8正常退出统计。</p></details>
+</article>
+<article data-category="legacy">
+<span class="tag">历史接触/失败对照</span><h2>自定义窄台阶：真实跌倒对照</h2>
+<p>官方公开student ONNX；不是本轮自训模型。</p>
+<video controls preload="none" playsinline poster="../../../usage_assets/sim2sim/custom-low-step-failure.png" src="../../../usage_assets/sim2sim/custom-low-step.mp4"></video>
+<p><a href="../../../usage_assets/sim2sim/custom-low-step.mp4">完整原始MP4</a> · <a href="custom-low-step.gif">GIF预览</a> · <a href="../../../usage_assets/reports/deployment-summary.json">原始指标/来源</a></p>
+<p class="observation">等距抽帧可见身体倒地；minimum_pelvis=0.06065m，原报告判据同时触发低骨盆和倾斜。</p>
+<details><summary>查看GIF与抽取区间</summary><p>GIF为原片8.30–16.30秒，8 FPS、原速；指标属于完整试验。</p><img loading="lazy" src="custom-low-step.gif" alt="自定义窄台阶：真实跌倒对照：原视频抽帧预览"></details>
+<details><summary>完整试验指标与选取理由</summary><table><tr><th>策略tick</th><td>600</td></tr><tr><th>完整仿真秒</th><td>12.0040</td></tr><tr><th>完整XY路径m</th><td>5.3347</td></tr><tr><th>最低骨盆m</th><td>0.0607</td></tr><tr><th>最低朝上余弦</th><td>-0.6515</td></tr><tr><th>末态朝上余弦</th><td>-0.2008</td></tr><tr><th>高度/倾斜阈值事件</th><td>是</td></tr><tr><th>低骨盆事件</th><td>是</td></tr></table><p>保留与正常跑动并列的真实失败，截取原片后8秒。</p><p>历史旧SDK视频：原监督未核验最终worker退出码，不并入SDK0.1.8正常退出统计。</p></details>
+</article>
+<article data-category="isaac">
+<span class="tag">正式Isaac评估</span><h2>正式纯DAgger：Isaac最长原片</h2>
+<p>本轮自训纯DAgger学生，checkpoint9999。</p>
+<video controls preload="none" playsinline poster="../../../usage_assets/reports/official-evaluations-six/cpu-02/results/eval-student-pure/representative.png" src="../../../usage_assets/reports/official-evaluations-six/artifacts/official-full/official/eval-student-pure/PHP-research/20261013_093506-student-pure-wholebodytrackingmanager/renderings_training/episode_42_1791884401.mp4"></video>
+<p><a href="../../../usage_assets/reports/official-evaluations-six/artifacts/official-full/official/eval-student-pure/PHP-research/20261013_093506-student-pure-wholebodytrackingmanager/renderings_training/episode_42_1791884401.mp4">完整原始MP4</a> · <a href="official-pure.gif">GIF预览</a> · <a href="../../../usage_assets/reports/official-evaluations-six/artifacts/official-full/official/eval-student-pure/quality.json">原始指标/来源</a></p>
+<p class="observation">抽查8个等距时点显示机器人接近障碍后身体下滑/悬垂；全64环境的569次clip结束事件不是此视频或课程成功数。</p>
+<details><summary>查看GIF与抽取区间</summary><p>GIF为原片0.00–6.46秒，8 FPS、原速；指标属于完整试验。</p><img loading="lazy" src="official-pure.gif" alt="正式纯DAgger：Isaac最长原片：原视频抽帧预览"></details>
+<details><summary>完整试验指标与选取理由</summary><table><tr><th>checkpoint迭代</th><td>9999</td></tr><tr><th>评估环境数</th><td>64</td></tr><tr><th>每环境控制步</th><td>3000</td></tr><tr><th>整项失败reset</th><td>2547</td></tr><tr><th>整项clip结束事件</th><td>569</td></tr></table><p>沿用原CPU报告的确定性选择：最长quality绑定片段，不按最佳表现选择。</p><p>原生评估返回0；原包独立CPU核验所有160段原片完整解码。</p></details>
+</article>
+<article data-category="kinematic">
+<span class="tag">参考运动 · 没有策略</span><h2>high_speed_climb_94</h2>
+<p>动作匹配参考序列；没有策略模型。</p>
+<video controls preload="none" playsinline poster="../../../usage_assets/motion_matching/high_speed_climb_94.png" src="../../../usage_assets/motion_matching/high_speed_climb_94.mp4"></video>
+<p><a href="../../../usage_assets/motion_matching/high_speed_climb_94.mp4">完整原始MP4</a> · <a href="../../../usage_assets/motion_matching/high_speed_climb_94.gif">GIF预览</a> · <a href="../../../usage_assets/motion_matching/manifest.json">原始指标/来源</a></p>
+<p class="observation">KINEMATIC / NO POLICY：通过设置参考位姿播放，未执行策略控制。</p>
+<details><summary>查看GIF与抽取区间</summary><p>复用原完整参考GIF；KINEMATIC / NO POLICY。</p><img loading="lazy" src="../../../usage_assets/motion_matching/high_speed_climb_94.gif" alt="high_speed_climb_94：原视频抽帧预览"></details>
+<details><summary>完整试验指标与选取理由</summary><table><tr><th>完整参考帧</th><td>527</td></tr><tr><th>参考FPS</th><td>50.0000</td></tr></table><p>复用原17场景代表配置的完整参考可视化。</p><p>参考位姿播放，不涉及策略worker退出验收。</p></details>
+</article>
+<article data-category="kinematic">
+<span class="tag">参考运动 · 没有策略</span><h2>high_speed_cat_vault</h2>
+<p>动作匹配参考序列；没有策略模型。</p>
+<video controls preload="none" playsinline poster="../../../usage_assets/motion_matching/high_speed_cat_vault.png" src="../../../usage_assets/motion_matching/high_speed_cat_vault.mp4"></video>
+<p><a href="../../../usage_assets/motion_matching/high_speed_cat_vault.mp4">完整原始MP4</a> · <a href="../../../usage_assets/motion_matching/high_speed_cat_vault.gif">GIF预览</a> · <a href="../../../usage_assets/motion_matching/manifest.json">原始指标/来源</a></p>
+<p class="observation">KINEMATIC / NO POLICY：通过设置参考位姿播放，未执行策略控制。</p>
+<details><summary>查看GIF与抽取区间</summary><p>复用原完整参考GIF；KINEMATIC / NO POLICY。</p><img loading="lazy" src="../../../usage_assets/motion_matching/high_speed_cat_vault.gif" alt="high_speed_cat_vault：原视频抽帧预览"></details>
+<details><summary>完整试验指标与选取理由</summary><table><tr><th>完整参考帧</th><td>302</td></tr><tr><th>参考FPS</th><td>50.0000</td></tr></table><p>复用原17场景代表配置的完整参考可视化。</p><p>参考位姿播放，不涉及策略worker退出验收。</p></details>
+</article>
+<article data-category="kinematic">
+<span class="tag">参考运动 · 没有策略</span><h2>high_speed_climb_58</h2>
+<p>动作匹配参考序列；没有策略模型。</p>
+<video controls preload="none" playsinline poster="../../../usage_assets/motion_matching/high_speed_climb_58.png" src="../../../usage_assets/motion_matching/high_speed_climb_58.mp4"></video>
+<p><a href="../../../usage_assets/motion_matching/high_speed_climb_58.mp4">完整原始MP4</a> · <a href="../../../usage_assets/motion_matching/high_speed_climb_58.gif">GIF预览</a> · <a href="../../../usage_assets/motion_matching/manifest.json">原始指标/来源</a></p>
+<p class="observation">KINEMATIC / NO POLICY：通过设置参考位姿播放，未执行策略控制。</p>
+<details><summary>查看GIF与抽取区间</summary><p>复用原完整参考GIF；KINEMATIC / NO POLICY。</p><img loading="lazy" src="../../../usage_assets/motion_matching/high_speed_climb_58.gif" alt="high_speed_climb_58：原视频抽帧预览"></details>
+<details><summary>完整试验指标与选取理由</summary><table><tr><th>完整参考帧</th><td>567</td></tr><tr><th>参考FPS</th><td>50.0000</td></tr></table><p>复用原17场景代表配置的完整参考可视化。</p><p>参考位姿播放，不涉及策略worker退出验收。</p></details>
+</article>
+<article data-category="kinematic">
+<span class="tag">参考运动 · 没有策略</span><h2>high_speed_jump_35</h2>
+<p>动作匹配参考序列；没有策略模型。</p>
+<video controls preload="none" playsinline poster="../../../usage_assets/motion_matching/high_speed_jump_35.png" src="../../../usage_assets/motion_matching/high_speed_jump_35.mp4"></video>
+<p><a href="../../../usage_assets/motion_matching/high_speed_jump_35.mp4">完整原始MP4</a> · <a href="../../../usage_assets/motion_matching/high_speed_jump_35.gif">GIF预览</a> · <a href="../../../usage_assets/motion_matching/manifest.json">原始指标/来源</a></p>
+<p class="observation">KINEMATIC / NO POLICY：通过设置参考位姿播放，未执行策略控制。</p>
+<details><summary>查看GIF与抽取区间</summary><p>复用原完整参考GIF；KINEMATIC / NO POLICY。</p><img loading="lazy" src="../../../usage_assets/motion_matching/high_speed_jump_35.gif" alt="high_speed_jump_35：原视频抽帧预览"></details>
+<details><summary>完整试验指标与选取理由</summary><table><tr><th>完整参考帧</th><td>390</td></tr><tr><th>参考FPS</th><td>50.0000</td></tr></table><p>复用原17场景代表配置的完整参考可视化。</p><p>参考位姿播放，不涉及策略worker退出验收。</p></details>
+</article>
+<article data-category="kinematic">
+<span class="tag">参考运动 · 没有策略</span><h2>high_speed_climb_76</h2>
+<p>动作匹配参考序列；没有策略模型。</p>
+<video controls preload="none" playsinline poster="../../../usage_assets/motion_matching/high_speed_climb_76.png" src="../../../usage_assets/motion_matching/high_speed_climb_76.mp4"></video>
+<p><a href="../../../usage_assets/motion_matching/high_speed_climb_76.mp4">完整原始MP4</a> · <a href="../../../usage_assets/motion_matching/high_speed_climb_76.gif">GIF预览</a> · <a href="../../../usage_assets/motion_matching/manifest.json">原始指标/来源</a></p>
+<p class="observation">KINEMATIC / NO POLICY：通过设置参考位姿播放，未执行策略控制。</p>
+<details><summary>查看GIF与抽取区间</summary><p>复用原完整参考GIF；KINEMATIC / NO POLICY。</p><img loading="lazy" src="../../../usage_assets/motion_matching/high_speed_climb_76.gif" alt="high_speed_climb_76：原视频抽帧预览"></details>
+<details><summary>完整试验指标与选取理由</summary><table><tr><th>完整参考帧</th><td>570</td></tr><tr><th>参考FPS</th><td>50.0000</td></tr></table><p>复用原17场景代表配置的完整参考可视化。</p><p>参考位姿播放，不涉及策略worker退出验收。</p></details>
+</article>
+<article data-category="kinematic">
+<span class="tag">参考运动 · 没有策略</span><h2>high_speed_dash_vault</h2>
+<p>动作匹配参考序列；没有策略模型。</p>
+<video controls preload="none" playsinline poster="../../../usage_assets/motion_matching/high_speed_dash_vault.png" src="../../../usage_assets/motion_matching/high_speed_dash_vault.mp4"></video>
+<p><a href="../../../usage_assets/motion_matching/high_speed_dash_vault.mp4">完整原始MP4</a> · <a href="../../../usage_assets/motion_matching/high_speed_dash_vault.gif">GIF预览</a> · <a href="../../../usage_assets/motion_matching/manifest.json">原始指标/来源</a></p>
+<p class="observation">KINEMATIC / NO POLICY：通过设置参考位姿播放，未执行策略控制。</p>
+<details><summary>查看GIF与抽取区间</summary><p>复用原完整参考GIF；KINEMATIC / NO POLICY。</p><img loading="lazy" src="../../../usage_assets/motion_matching/high_speed_dash_vault.gif" alt="high_speed_dash_vault：原视频抽帧预览"></details>
+<details><summary>完整试验指标与选取理由</summary><table><tr><th>完整参考帧</th><td>318</td></tr><tr><th>参考FPS</th><td>50.0000</td></tr></table><p>复用原17场景代表配置的完整参考可视化。</p><p>参考位姿播放，不涉及策略worker退出验收。</p></details>
+</article>
+<article data-category="kinematic">
+<span class="tag">参考运动 · 没有策略</span><h2>high_speed_speed_vault</h2>
+<p>动作匹配参考序列；没有策略模型。</p>
+<video controls preload="none" playsinline poster="../../../usage_assets/motion_matching/high_speed_speed_vault.png" src="../../../usage_assets/motion_matching/high_speed_speed_vault.mp4"></video>
+<p><a href="../../../usage_assets/motion_matching/high_speed_speed_vault.mp4">完整原始MP4</a> · <a href="../../../usage_assets/motion_matching/high_speed_speed_vault.gif">GIF预览</a> · <a href="../../../usage_assets/motion_matching/manifest.json">原始指标/来源</a></p>
+<p class="observation">KINEMATIC / NO POLICY：通过设置参考位姿播放，未执行策略控制。</p>
+<details><summary>查看GIF与抽取区间</summary><p>复用原完整参考GIF；KINEMATIC / NO POLICY。</p><img loading="lazy" src="../../../usage_assets/motion_matching/high_speed_speed_vault.gif" alt="high_speed_speed_vault：原视频抽帧预览"></details>
+<details><summary>完整试验指标与选取理由</summary><table><tr><th>完整参考帧</th><td>335</td></tr><tr><th>参考FPS</th><td>50.0000</td></tr></table><p>复用原17场景代表配置的完整参考可视化。</p><p>参考位姿播放，不涉及策略worker退出验收。</p></details>
+</article>
+<article data-category="kinematic">
+<span class="tag">参考运动 · 没有策略</span><h2>high_speed_hurdle</h2>
+<p>动作匹配参考序列；没有策略模型。</p>
+<video controls preload="none" playsinline poster="../../../usage_assets/motion_matching/high_speed_hurdle.png" src="../../../usage_assets/motion_matching/high_speed_hurdle.mp4"></video>
+<p><a href="../../../usage_assets/motion_matching/high_speed_hurdle.mp4">完整原始MP4</a> · <a href="../../../usage_assets/motion_matching/high_speed_hurdle.gif">GIF预览</a> · <a href="../../../usage_assets/motion_matching/manifest.json">原始指标/来源</a></p>
+<p class="observation">KINEMATIC / NO POLICY：通过设置参考位姿播放，未执行策略控制。</p>
+<details><summary>查看GIF与抽取区间</summary><p>复用原完整参考GIF；KINEMATIC / NO POLICY。</p><img loading="lazy" src="../../../usage_assets/motion_matching/high_speed_hurdle.gif" alt="high_speed_hurdle：原视频抽帧预览"></details>
+<details><summary>完整试验指标与选取理由</summary><table><tr><th>完整参考帧</th><td>327</td></tr><tr><th>参考FPS</th><td>50.0000</td></tr></table><p>复用原17场景代表配置的完整参考可视化。</p><p>参考位姿播放，不涉及策略worker退出验收。</p></details>
+</article>
+<article data-category="kinematic">
+<span class="tag">参考运动 · 没有策略</span><h2>high_speed_roll_134</h2>
+<p>动作匹配参考序列；没有策略模型。</p>
+<video controls preload="none" playsinline poster="../../../usage_assets/motion_matching/high_speed_roll_134.png" src="../../../usage_assets/motion_matching/high_speed_roll_134.mp4"></video>
+<p><a href="../../../usage_assets/motion_matching/high_speed_roll_134.mp4">完整原始MP4</a> · <a href="../../../usage_assets/motion_matching/high_speed_roll_134.gif">GIF预览</a> · <a href="../../../usage_assets/motion_matching/manifest.json">原始指标/来源</a></p>
+<p class="observation">KINEMATIC / NO POLICY：通过设置参考位姿播放，未执行策略控制。</p>
+<details><summary>查看GIF与抽取区间</summary><p>复用原完整参考GIF；KINEMATIC / NO POLICY。</p><img loading="lazy" src="../../../usage_assets/motion_matching/high_speed_roll_134.gif" alt="high_speed_roll_134：原视频抽帧预览"></details>
+<details><summary>完整试验指标与选取理由</summary><table><tr><th>完整参考帧</th><td>621</td></tr><tr><th>参考FPS</th><td>50.0000</td></tr></table><p>复用原17场景代表配置的完整参考可视化。</p><p>参考位姿播放，不涉及策略worker退出验收。</p></details>
+</article>
+<article data-category="kinematic">
+<span class="tag">参考运动 · 没有策略</span><h2>high_speed_step</h2>
+<p>动作匹配参考序列；没有策略模型。</p>
+<video controls preload="none" playsinline poster="../../../usage_assets/motion_matching/high_speed_step.png" src="../../../usage_assets/motion_matching/high_speed_step.mp4"></video>
+<p><a href="../../../usage_assets/motion_matching/high_speed_step.mp4">完整原始MP4</a> · <a href="../../../usage_assets/motion_matching/high_speed_step.gif">GIF预览</a> · <a href="../../../usage_assets/motion_matching/manifest.json">原始指标/来源</a></p>
+<p class="observation">KINEMATIC / NO POLICY：通过设置参考位姿播放，未执行策略控制。</p>
+<details><summary>查看GIF与抽取区间</summary><p>复用原完整参考GIF；KINEMATIC / NO POLICY。</p><img loading="lazy" src="../../../usage_assets/motion_matching/high_speed_step.gif" alt="high_speed_step：原视频抽帧预览"></details>
+<details><summary>完整试验指标与选取理由</summary><table><tr><th>完整参考帧</th><td>386</td></tr><tr><th>参考FPS</th><td>50.0000</td></tr></table><p>复用原17场景代表配置的完整参考可视化。</p><p>参考位姿播放，不涉及策略worker退出验收。</p></details>
+</article>
+<article data-category="kinematic">
+<span class="tag">参考运动 · 没有策略</span><h2>low_speed_roll_78</h2>
+<p>动作匹配参考序列；没有策略模型。</p>
+<video controls preload="none" playsinline poster="../../../usage_assets/motion_matching/low_speed_roll_78.png" src="../../../usage_assets/motion_matching/low_speed_roll_78.mp4"></video>
+<p><a href="../../../usage_assets/motion_matching/low_speed_roll_78.mp4">完整原始MP4</a> · <a href="../../../usage_assets/motion_matching/low_speed_roll_78.gif">GIF预览</a> · <a href="../../../usage_assets/motion_matching/manifest.json">原始指标/来源</a></p>
+<p class="observation">KINEMATIC / NO POLICY：通过设置参考位姿播放，未执行策略控制。</p>
+<details><summary>查看GIF与抽取区间</summary><p>复用原完整参考GIF；KINEMATIC / NO POLICY。</p><img loading="lazy" src="../../../usage_assets/motion_matching/low_speed_roll_78.gif" alt="low_speed_roll_78：原视频抽帧预览"></details>
+<details><summary>完整试验指标与选取理由</summary><table><tr><th>完整参考帧</th><td>702</td></tr><tr><th>参考FPS</th><td>50.0000</td></tr></table><p>复用原17场景代表配置的完整参考可视化。</p><p>参考位姿播放，不涉及策略worker退出验收。</p></details>
+</article>
+<article data-category="kinematic">
+<span class="tag">参考运动 · 没有策略</span><h2>low_speed_climb_58</h2>
+<p>动作匹配参考序列；没有策略模型。</p>
+<video controls preload="none" playsinline poster="../../../usage_assets/motion_matching/low_speed_climb_58.png" src="../../../usage_assets/motion_matching/low_speed_climb_58.mp4"></video>
+<p><a href="../../../usage_assets/motion_matching/low_speed_climb_58.mp4">完整原始MP4</a> · <a href="../../../usage_assets/motion_matching/low_speed_climb_58.gif">GIF预览</a> · <a href="../../../usage_assets/motion_matching/manifest.json">原始指标/来源</a></p>
+<p class="observation">KINEMATIC / NO POLICY：通过设置参考位姿播放，未执行策略控制。</p>
+<details><summary>查看GIF与抽取区间</summary><p>复用原完整参考GIF；KINEMATIC / NO POLICY。</p><img loading="lazy" src="../../../usage_assets/motion_matching/low_speed_climb_58.gif" alt="low_speed_climb_58：原视频抽帧预览"></details>
+<details><summary>完整试验指标与选取理由</summary><table><tr><th>完整参考帧</th><td>570</td></tr><tr><th>参考FPS</th><td>50.0000</td></tr></table><p>复用原17场景代表配置的完整参考可视化。</p><p>参考位姿播放，不涉及策略worker退出验收。</p></details>
+</article>
+<article data-category="kinematic">
+<span class="tag">参考运动 · 没有策略</span><h2>low_speed_roll_90</h2>
+<p>动作匹配参考序列；没有策略模型。</p>
+<video controls preload="none" playsinline poster="../../../usage_assets/motion_matching/low_speed_roll_90.png" src="../../../usage_assets/motion_matching/low_speed_roll_90.mp4"></video>
+<p><a href="../../../usage_assets/motion_matching/low_speed_roll_90.mp4">完整原始MP4</a> · <a href="../../../usage_assets/motion_matching/low_speed_roll_90.gif">GIF预览</a> · <a href="../../../usage_assets/motion_matching/manifest.json">原始指标/来源</a></p>
+<p class="observation">KINEMATIC / NO POLICY：通过设置参考位姿播放，未执行策略控制。</p>
+<details><summary>查看GIF与抽取区间</summary><p>复用原完整参考GIF；KINEMATIC / NO POLICY。</p><img loading="lazy" src="../../../usage_assets/motion_matching/low_speed_roll_90.gif" alt="low_speed_roll_90：原视频抽帧预览"></details>
+<details><summary>完整试验指标与选取理由</summary><table><tr><th>完整参考帧</th><td>647</td></tr><tr><th>参考FPS</th><td>50.0000</td></tr></table><p>复用原17场景代表配置的完整参考可视化。</p><p>参考位姿播放，不涉及策略worker退出验收。</p></details>
+</article>
+<article data-category="kinematic">
+<span class="tag">参考运动 · 没有策略</span><h2>low_speed_climb_94</h2>
+<p>动作匹配参考序列；没有策略模型。</p>
+<video controls preload="none" playsinline poster="../../../usage_assets/motion_matching/low_speed_climb_94.png" src="../../../usage_assets/motion_matching/low_speed_climb_94.mp4"></video>
+<p><a href="../../../usage_assets/motion_matching/low_speed_climb_94.mp4">完整原始MP4</a> · <a href="../../../usage_assets/motion_matching/low_speed_climb_94.gif">GIF预览</a> · <a href="../../../usage_assets/motion_matching/manifest.json">原始指标/来源</a></p>
+<p class="observation">KINEMATIC / NO POLICY：通过设置参考位姿播放，未执行策略控制。</p>
+<details><summary>查看GIF与抽取区间</summary><p>复用原完整参考GIF；KINEMATIC / NO POLICY。</p><img loading="lazy" src="../../../usage_assets/motion_matching/low_speed_climb_94.gif" alt="low_speed_climb_94：原视频抽帧预览"></details>
+<details><summary>完整试验指标与选取理由</summary><table><tr><th>完整参考帧</th><td>690</td></tr><tr><th>参考FPS</th><td>50.0000</td></tr></table><p>复用原17场景代表配置的完整参考可视化。</p><p>参考位姿播放，不涉及策略worker退出验收。</p></details>
+</article>
+<article data-category="kinematic">
+<span class="tag">参考运动 · 没有策略</span><h2>low_speed_climb_76</h2>
+<p>动作匹配参考序列；没有策略模型。</p>
+<video controls preload="none" playsinline poster="../../../usage_assets/motion_matching/low_speed_climb_76.png" src="../../../usage_assets/motion_matching/low_speed_climb_76.mp4"></video>
+<p><a href="../../../usage_assets/motion_matching/low_speed_climb_76.mp4">完整原始MP4</a> · <a href="../../../usage_assets/motion_matching/low_speed_climb_76.gif">GIF预览</a> · <a href="../../../usage_assets/motion_matching/manifest.json">原始指标/来源</a></p>
+<p class="observation">KINEMATIC / NO POLICY：通过设置参考位姿播放，未执行策略控制。</p>
+<details><summary>查看GIF与抽取区间</summary><p>复用原完整参考GIF；KINEMATIC / NO POLICY。</p><img loading="lazy" src="../../../usage_assets/motion_matching/low_speed_climb_76.gif" alt="low_speed_climb_76：原视频抽帧预览"></details>
+<details><summary>完整试验指标与选取理由</summary><table><tr><th>完整参考帧</th><td>765</td></tr><tr><th>参考FPS</th><td>50.0000</td></tr></table><p>复用原17场景代表配置的完整参考可视化。</p><p>参考位姿播放，不涉及策略worker退出验收。</p></details>
+</article>
+<article data-category="kinematic">
+<span class="tag">参考运动 · 没有策略</span><h2>low_speed_step</h2>
+<p>动作匹配参考序列；没有策略模型。</p>
+<video controls preload="none" playsinline poster="../../../usage_assets/motion_matching/low_speed_step.png" src="../../../usage_assets/motion_matching/low_speed_step.mp4"></video>
+<p><a href="../../../usage_assets/motion_matching/low_speed_step.mp4">完整原始MP4</a> · <a href="../../../usage_assets/motion_matching/low_speed_step.gif">GIF预览</a> · <a href="../../../usage_assets/motion_matching/manifest.json">原始指标/来源</a></p>
+<p class="observation">KINEMATIC / NO POLICY：通过设置参考位姿播放，未执行策略控制。</p>
+<details><summary>查看GIF与抽取区间</summary><p>复用原完整参考GIF；KINEMATIC / NO POLICY。</p><img loading="lazy" src="../../../usage_assets/motion_matching/low_speed_step.gif" alt="low_speed_step：原视频抽帧预览"></details>
+<details><summary>完整试验指标与选取理由</summary><table><tr><th>完整参考帧</th><td>364</td></tr><tr><th>参考FPS</th><td>50.0000</td></tr></table><p>复用原17场景代表配置的完整参考可视化。</p><p>参考位姿播放，不涉及策略worker退出验收。</p></details>
+</article>
+<article data-category="kinematic">
+<span class="tag">参考运动 · 没有策略</span><h2>random_locomotion</h2>
+<p>动作匹配参考序列；没有策略模型。</p>
+<video controls preload="none" playsinline poster="../../../usage_assets/motion_matching/random_locomotion.png" src="../../../usage_assets/motion_matching/random_locomotion.mp4"></video>
+<p><a href="../../../usage_assets/motion_matching/random_locomotion.mp4">完整原始MP4</a> · <a href="../../../usage_assets/motion_matching/random_locomotion.gif">GIF预览</a> · <a href="../../../usage_assets/motion_matching/manifest.json">原始指标/来源</a></p>
+<p class="observation">KINEMATIC / NO POLICY：通过设置参考位姿播放，未执行策略控制。</p>
+<details><summary>查看GIF与抽取区间</summary><p>复用原完整参考GIF；KINEMATIC / NO POLICY。</p><img loading="lazy" src="../../../usage_assets/motion_matching/random_locomotion.gif" alt="random_locomotion：原视频抽帧预览"></details>
+<details><summary>完整试验指标与选取理由</summary><table><tr><th>完整参考帧</th><td>300</td></tr><tr><th>参考FPS</th><td>50.0000</td></tr></table><p>复用原17场景代表配置的完整参考可视化。</p><p>参考位姿播放，不涉及策略worker退出验收。</p></details>
+</article></main>
+<footer>GIF只降低分辨率和帧率，原速播放，没有重排、轨迹平滑或补帧。完整原片、失败记录、原始指标均保留。选样与目检不能替代完整课程完成判据。</footer>
+<script>
+const buttons=[...document.querySelectorAll('button[data-filter]')];
+buttons.forEach(button=>button.addEventListener('click',()=>{let count=0;document.querySelectorAll('article').forEach(card=>{card.hidden=button.dataset.filter!=='all'&&card.dataset.category!==button.dataset.filter;if(!card.hidden)count++;});buttons.forEach(item=>item.setAttribute('aria-pressed',String(item===button)));document.getElementById('count').textContent='显示'+count+'项';}));
+</script></body></html>

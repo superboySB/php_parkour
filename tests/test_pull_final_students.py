@@ -70,7 +70,7 @@ def ready(canonical, monkeypatch, request):
             ("/workspace/php_parkour",source,False),(pc.OFFICIAL,args.official_output,False),
             ("/data/assets",args.root/"assets",False),(pc.COVERAGE,args.coverage_output,True))]}
     def inspect(argv, **kwargs):
-        assert argv == ["docker","inspect",name]
+        assert argv == ["docker","container","inspect",name]
         return subprocess.CompletedProcess(argv,0,json.dumps([info]),"")
     monkeypatch.setattr(pc.subprocess,"run",inspect)
     transfer = SimpleNamespace(host="tencent-231", remote_root=str(args.root),source_tree=args.source_tree,
@@ -302,7 +302,10 @@ def test_relative_paths_reject_ambiguous_or_escaping_names(path):
 
 def test_defaults_match_new_reviewed_watcher_source_and_coverage():
     assert pf.TREE == "02bc110026d8402cd6046afecb039ee40fbd918c760554ad86f7effa678f9f3c"
-    assert pf.MONITOR_SHA == pf.sha(pc.__file__)
+    # Transfer stays bound to the original frozen runner even when the current
+    # host controller is fixed. Use the retained source, not the mutable checkout.
+    frozen = Path(__file__).resolve().parents[1] / "usage_assets/reports/runtime-robot-assets/source-after/scripts/research/posttrain_coverage.py"
+    assert pf.MONITOR_SHA == pf.sha(frozen)
     assert pf.COVERAGE_DIRECTORY == "coverage-official-final-ro-assets-v2"
 
 
