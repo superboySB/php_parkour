@@ -71,6 +71,8 @@ python3 scripts/research/serve_evidence.py
 
 当前正式629使用的[85文件准备与206文件发布源码](../final-student-reference629-resource-wait-preparation/README.md)也已独立封存；其861个原件在Git普通权限归一化后[实际完整恢复](../final-student-reference629-resource-wait-source-restore/README.md)，文件集合、字节、SHA及目标完整权限一致。该包保留18+10+16项普通CPU协议与真实帮助/状态收据，只证明源码和控制协议，不宣称未来1258例完成。
 
+完整结果页另有[双学生1258项与云端888项浏览器检查源码包](full-cohort-browser-source-preparation-01/README.md)，包括分页、筛选、每案例播放、原片去重、Range及原始结果绑定的独立审查。两套最终源码分别通过22/20项普通CPU控制；旧候选及审查指出的缺口均保留。393个发布文件模拟Git权限后，[286个原件实际恢复](full-cohort-browser-source-git-restore-01/README.md)的集合、字节、SHA及完整权限一致。此项只证明源码和控制协议；完整888/1258结果的实际浏览器验收仍须等待各自真实终态。
+
 后续两学生各 629 配置的新[宿主版本源码与恢复入口](../final-student-reference629-crossboot-preparation/README.md)也已封存；新准备的 48 文件和发布工具的 106 文件均经过独立审查，模拟 Git 权限后全部 268 个原件[实际恢复通过](../final-student-reference629-crossboot-source-restore/execution.json)。原仿真与科学验收逻辑不变；源码准备不表示未来 1258 例或合同验收已经完成。
 
 ## 结果解释
